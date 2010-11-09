@@ -5,5 +5,9 @@
 ZROUTER_ROOT=${.CURDIR}
 .endif
 
+# Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
+
+# Set SoC defaults based on SOC_VENDOR/SOC_CHIP
+.include "socs/socs.mk"
 

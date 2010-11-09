@@ -1,6 +1,6 @@
 TARGET_DEVICE?="NONE"
 
-.if exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
+.if exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) && exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
 TARGET_DEVICEDIR= ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}
 .include "${TARGET_DEVICEDIR}/board.mk"
 .endif
