@@ -6,3 +6,4 @@ BINDIR?=/usr/bin/
 NO_MAN=MAN
 
 .include <bsd.prog.mk>
+
