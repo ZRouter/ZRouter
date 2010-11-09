@@ -257,10 +257,12 @@ include(const char *fname, int ateof)
 	char *fnamebuf;
 
 	fnamebuf = NULL;
+	/* Try to open in pwd */
 	fp = fopen(fname, "r");
 	if (fp == NULL && fname[0] != '.' && fname[0] != '/') {
-		asprintf(&fnamebuf, "../../conf/%s", fname);
+		asprintf(&fnamebuf, "%s/conf/%s", srcdir, fname);
 		if (fnamebuf != NULL) {
+			/* Try to open in src/conf */
 			fp = fopen(fnamebuf, "r");
 			free(fnamebuf);
 		}
@@ -269,6 +271,7 @@ include(const char *fname, int ateof)
 		yyerror("cannot open included file");
 		return (-1);
 	}
+	/* This file should be included from pwd */
 	cfgfile_add(fnamebuf == NULL ? fname : fnamebuf);
 	in = malloc(sizeof(*in));
 	assert(in != NULL);

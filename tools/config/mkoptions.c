@@ -411,9 +411,11 @@ read_options(void)
 	char fname[MAXPATHLEN];
 
 	SLIST_INIT(&otab);
-	read_option_file("../../conf/options", 0);
-	(void)snprintf(fname, sizeof fname, "../../conf/options.%s",
-	    machinename);
+	(void)snprintf(fname, sizeof fname, "%s/conf/options",
+	    srcdir);
+	read_option_file(fname, 0);
+	(void)snprintf(fname, sizeof fname, "%s/conf/options.%s",
+	    srcdir, machinename);
 	if (!read_option_file(fname, 0)) {
 		(void)snprintf(fname, sizeof fname, "options.%s", machinename);
 		read_option_file(fname, 0);
