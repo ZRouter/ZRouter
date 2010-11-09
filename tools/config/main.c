@@ -113,7 +113,7 @@ main(int argc, char **argv)
 
 	printmachine = 0;
 	kernfile = NULL;
-	while ((ch = getopt(argc, argv, "Cd:gmpVx:")) != -1)
+	while ((ch = getopt(argc, argv, "Cd:gk:mpVx:")) != -1)
 		switch (ch) {
 		case 'C':
 			filebased = 1;
@@ -129,6 +129,13 @@ main(int argc, char **argv)
 			break;
 		case 'g':
 			debugging++;
+			break;
+		case 'k':
+			if (*srcdir == '\0')
+				strlcpy(srcdir, optarg, sizeof(srcdir));
+			else
+				errx(EXIT_FAILURE, 
+				    "kernel source directory already set");
 			break;
 		case 'p':
 			profiling++;
@@ -241,6 +248,8 @@ get_srcdir(void)
 	char *p, *pwd;
 	int i;
 
+	if (srcdir[0] != '\0')
+		return;
 	if (realpath("../..", srcdir) == NULL)
 		err(EXIT_FAILURE, "Unable to find root of source tree");
 	if ((pwd = getenv("PWD")) != NULL && *pwd == '/' &&
