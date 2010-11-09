@@ -11,3 +11,7 @@ ZROUTER_ROOT=${.CURDIR}
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
 .include "socs/socs.mk"
 
+# Profiles - set of SUBDIRS that need to build
+.include "profiles/profiles.mk"
+
+
