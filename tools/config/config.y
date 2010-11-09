@@ -317,8 +317,9 @@ int
 yywrap(void)
 {
 	if (found_defaults) {
+	/* Must be reached from pwd */
 		if (freopen(PREFIX, "r", stdin) == NULL)
-			err(2, "%s", PREFIX);		
+			err(2, "%s", PREFIX);
 		yyfile = PREFIX;
 		yyline = 0;
 		found_defaults = 0;

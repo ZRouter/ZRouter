@@ -73,6 +73,7 @@ static const char rcsid[] =
 char *	PREFIX;
 char 	destdir[MAXPATHLEN];
 char 	srcdir[MAXPATHLEN];
+char 	pathbuf[MAXPATHLEN];
 
 int	debugging;
 int	profiling;
@@ -113,13 +114,11 @@ main(int argc, char **argv)
 
 	printmachine = 0;
 	kernfile = NULL;
-	while ((ch = getopt(argc, argv, "Cd:gk:mpVx:")) != -1)
+	*srcdir = '\0';
+	while ((ch = getopt(argc, argv, "Cd:gmps:Vx:")) != -1)
 		switch (ch) {
 		case 'C':
 			filebased = 1;
-			break;
-		case 'm':
-			printmachine = 1;
 			break;
 		case 'd':
 			if (*destdir == '\0')
@@ -130,15 +129,18 @@ main(int argc, char **argv)
 		case 'g':
 			debugging++;
 			break;
-		case 'k':
+		case 'm':
+			printmachine = 1;
+			break;
+		case 'p':
+			profiling++;
+			break;
+		case 's':
 			if (*srcdir == '\0')
 				strlcpy(srcdir, optarg, sizeof(srcdir));
 			else
 				errx(EXIT_FAILURE, 
 				    "kernel source directory already set");
-			break;
-		case 'p':
-			profiling++;
 			break;
 		case 'V':
 			printf("%d\n", CONFIGVERS);
@@ -164,10 +166,15 @@ main(int argc, char **argv)
 	PREFIX = *argv;
 	if (stat(PREFIX, &buf) != 0 || !S_ISREG(buf.st_mode))
 		err(2, "%s", PREFIX);
+
+	get_srcdir();
+
+	/* XXX: Should use sys/${target}/conf, leave it to pwd now */
 	if (freopen("DEFAULTS", "r", stdin) != NULL) {
 		found_defaults = 1;
 		yyfile = "DEFAULTS";
 	} else {
+		/* pwd, full or relative */
 		if (freopen(PREFIX, "r", stdin) == NULL)
 			err(2, "%s", PREFIX);
 		yyfile = PREFIX;
@@ -176,7 +183,6 @@ main(int argc, char **argv)
 		len = strlen(destdir);
 		while (len > 1 && destdir[len - 1] == '/')
 			destdir[--len] = '\0';
-		get_srcdir();
 	} else {
 		strlcpy(destdir, CDIR, sizeof(destdir));
 		strlcat(destdir, PREFIX, sizeof(destdir));
@@ -273,7 +279,7 @@ static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: config [-CgmpV] [-d destdir] sysname\n");
+	fprintf(stderr, "usage: config [-CgmpV] [-s /usr/src/sys] [-d destdir] sysname\n");
 	fprintf(stderr, "       config -x kernel\n");
 	exit(EX_USAGE);
 }

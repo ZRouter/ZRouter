@@ -113,7 +113,8 @@ open_makefile_template(void)
 	FILE *ifp;
 	char line[BUFSIZ];
 
-	snprintf(line, sizeof(line), "../../conf/Makefile.%s", machinename);
+	snprintf(line, sizeof(line), "%s/conf/Makefile.%s", srcdir, machinename);
+
 	ifp = fopen(line, "r");
 	if (ifp == 0) {
 		snprintf(line, sizeof(line), "Makefile.%s", machinename);
@@ -546,10 +547,10 @@ read_files(void)
 	char fname[MAXPATHLEN];
 	struct files_name *nl, *tnl;
 	
-	(void) snprintf(fname, sizeof(fname), "../../conf/files");
+	(void) snprintf(fname, sizeof(fname), "%s/conf/files", srcdir);
 	read_file(fname);
 	(void) snprintf(fname, sizeof(fname),
-		       	"../../conf/files.%s", machinename);
+		       	"%s/conf/files.%s", srcdir, machinename);
 	read_file(fname);
 	for (nl = STAILQ_FIRST(&fntab); nl != NULL; nl = tnl) {
 		read_file(nl->f_name);
