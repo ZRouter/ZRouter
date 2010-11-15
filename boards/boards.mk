@@ -1,11 +1,11 @@
 TARGET_DEVICE?="NONE"
 
 .if exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) && exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
-TARGET_DEVICEDIR= ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}
-.include "${TARGET_DEVICEDIR}/board.mk"
+TARGET_BOARDDIR= ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}
+.include "${TARGET_BOARDDIR}/board.mk"
 .endif
 
-.if !defined(TARGET_DEVICEDIR)
+.if !defined(TARGET_BOARDDIR)
 PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
 
 .warning "No board configuration for pair TARGET_VENDOR/TARGET_DEVICE `${TARGET_VENDOR}/${TARGET_DEVICE}`"
