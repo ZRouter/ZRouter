@@ -9,6 +9,9 @@ KERNEL_PATH=/usr/obj/kernel
 #SOC_KERNCONF=BCM5354
 #SOC_KERNHINTS=BCM5354.hints
 
+TARGET=			mips
+TARGET_ARCH=		mips
+
 KERNCONF_MACHINE=	mips
 KERNCONF_IDENT?=	BCM5354
 KERNCONF_CPU=		CPU_MIPS4KC
@@ -64,7 +67,7 @@ KERNCONF_OPTIONS+=		NO_SWAPPING
 #KERNCONF_OPTIONS+= 	BOOTP_WIRED_TO=bfe0
 #KERNCONF_OPTIONS+= 	BOOTP_COMPAT
 #KERNCONF_OPTIONS+=		ROOTDEVNAME=\"nfs:192.168.0.90:/usr/home/ray/Projects/MIPS/FreeBSD/rootfs-mips\"
-KERNCONF_OPTIONS+=		ROOTDEVNAME=\"cd9660:/dev/map/rootfs.ulzma\"
+KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.ulzma\\\"
 
 
 # Board definitions
@@ -101,6 +104,7 @@ KERNCONF_DEVICES+=		siba_cc			# Sonics SiliconBackplane ChipCommon core
 KERNCONF_DEVICES+=		siba_mips		# Sonics SiliconBackplane MIPS core
 KERNCONF_DEVICES+=		siba_sdram		# Sonics SiliconBackplane SDRAM core
 KERNCONF_DEVICES+=		bfe			# FastEthernet 44xx core
+
 KERNCONF_OPTIONS+= 	BFE_PACKET_LIST_CNT=32
 #KERNCONF_DEVICES+=		miibus			# attachments
 KERNCONF_DEVICES+=		mii			# Only bfeswitch

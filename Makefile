@@ -2,7 +2,9 @@
 .include <bsd.own.mk>
 
 DEBUG?=@echo ""
-FREEBSD_SRC_TREE?=/usr/src
+#FREEBSD_SRC_TREE?=/usr/src
+FREEBSD_SRC_TREE?=/usr/home/ray/work/@HG/http_my_ddteam_net_hg_BASE_/head/
+CONFIG_TOOL?=config
 
 #.CURDIR!=pwd
 
@@ -29,41 +31,49 @@ KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 .include "profiles/profiles.mk"
 #.endif
 
+.if !defined(TARGET) || !defined(TARGET_ARCH)
+.warning "${TARGET}.${TARGET_ARCH}"
+.error "soc.mk must define both TARGET and TARGET_ARCH"
+.endif
+
+FBSD_OBJ=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}
+
+
 buildimage:		${BUILD_IMAGE_DEPEND}
 
 basic-tools:
-	${MAKE} -f Makefile.tools
+	ZROUTER_ROOT=${ZROUTER_ROOT} MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -f ${ZROUTER_ROOT}/Makefile.tools
 
 basic-tools-clean:
-	${MAKE} -f Makefile.tools clean
+	ZROUTER_ROOT=${ZROUTER_ROOT} MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -f ${ZROUTER_ROOT}/Makefile.tools clean
 
 ${KERNELCONFDIR}:
 	mkdir -p ${KERNELCONFDIR}
 
-KERNEL_CONFIG_DEFSTR=
-.for def in ${KERNEL_CONFIG_DEFS}
-KERNEL_CONFIG_DEFSTR+=-D${def}
-.endfor
 
 # Generate kernel config file
 KERNEL_HINTS_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}.hints
 KERNEL_CONFIG_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}
 
 kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
-	@echo -n "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
+	@echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
 	@echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
 	@echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
 	@echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
 	@echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
-.for file in ${KERNCONF_FILES}
-	@echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
-.endfor
-.for option in ${KERNCONF_OPTIONS}
-	@echo "options	\"${option}\"" >> ${KERNEL_CONFIG_FILE}
-.endfor
+	@echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
 .for makeoption in ${KERNCONF_MAKEOPTIONS}
 	@echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
 .endfor
+	@echo "# files section" >> ${KERNEL_CONFIG_FILE}
+.for file in ${KERNCONF_FILES}
+	@echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
+.endfor
+	@echo "# options section" >> ${KERNEL_CONFIG_FILE}
+.for option in ${KERNCONF_OPTIONS}
+	@echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
+.endfor
+	@echo "# devices section" >> ${KERNEL_CONFIG_FILE}
 .for device in ${KERNCONF_DEVICES}
 	@echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
 .endfor
@@ -74,30 +84,44 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 .if exists(${TARGET_SOCDIR}/soc.hints)
 _SOC_HINTS=${TARGET_SOCDIR}/soc.hints
 .endif
-.if exists(${TARGET_DEVICEDIR}/board.hints)
-_DEVICE_HINTS=${TARGET_DEVICEDIR}/board.hints
+.if exists(${TARGET_BOARDDIR}/board.hints)
+_DEVICE_HINTS=${TARGET_BOARDDIR}/board.hints
 .endif
 
 kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
-	cat ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
+	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
 
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
 
 
 
-.if target(tools/config/config)
-SUBDIR=tools/config
-.endif
+#.if target(tools/config/config)
+#MAKEOBJDIRPREFIX=/usr/obj/${ZROUTER_ROOT}/tmp/ ${MAKE} -C ${ZROUTER_ROOT}/tools/config
+#.endif
 
-kernel:		kernelconfig kernelhints tools/config/config
-	tools/config/config -s ${FREEBSD_SRC_TREE} -d "${KERNELBUILDDIR}" ${KERNEL_CONFIG_FILE}
+kernel-config:		kernelconfig kernelhints
+	cd ${FREEBSD_SRC_TREE}/sys/${KERNCONF_MACHINE}/conf ; ${CONFIG_TOOL} -d ${KERNELBUILDDIR} ${KERNEL_CONFIG_FILE}
 
+kernel-build:		kernel-config
+	echo "------------ Before PATH=${PATH}"
+	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR} cleandepend
+	echo "------------ After PATH=${PATH}"
+	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR} depend
+	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR}
+
+
+${FBSD_OBJ}/tmp/usr/bin/cc:	kernel-toolchain
+
+${FBSD_OBJ}/tmp/legacy/usr/sbin/config:	kernel-toolchain
+
+kernel-toolchain:
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -DNO_CLEAN -C ${FREEBSD_SRC_TREE} kernel-toolchain
 
 .if defined(KERNEL_COMPRESSION)
 kernel_image:	kernel_deflate kernel
 .else
-kernel_image:	kernel
+kernel_image:	kernel-build
 .endif
 
 
@@ -122,7 +146,7 @@ image: firmware_image
 
 
 
-all:	kernel
+all:	kernel-build
 
 
 
