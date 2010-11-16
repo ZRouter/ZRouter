@@ -3,7 +3,8 @@
 
 DEBUG?=@echo ""
 #FREEBSD_SRC_TREE?=/usr/src
-FREEBSD_SRC_TREE?=/usr/home/ray/work/@HG/http_my_ddteam_net_hg_BASE_/head/
+#FREEBSD_SRC_TREE?=/usr/home/ray/work/@HG/http_my_ddteam_net_hg_BASE_/head/
+FREEBSD_SRC_TREE?=/usr/1/MIPS_FreeBSD/HEAD/head
 CONFIG_TOOL?=config
 
 #.CURDIR!=pwd
@@ -94,21 +95,24 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
 
+kernel-config:		kernelconfig kernelhints ${FBSD_OBJ}/tmp/legacy/usr/sbin/config
+	cd ${FREEBSD_SRC_TREE}/sys/${TARGET}/conf ; ${CONFIG_TOOL} -d ${KERNELBUILDDIR} ${KERNEL_CONFIG_FILE}
+
+_KERNEL_BUILD_ENV= \
+	MACHINE=${TARGET} \
+	MACHINE_ARCH=${TARGET_ARCH} \
+	MACHINE_CPUARCH=${TARGET} \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET}
+
+_KERNEL_BUILD_PATH=${FBSD_OBJ}/tmp/legacy/usr/sbin/:${FBSD_OBJ}/tmp/legacy/usr/bin/:${FBSD_OBJ}/tmp/legacy/usr/games/:${FBSD_OBJ}/tmp/usr/sbin/:${FBSD_OBJ}/tmp/usr/bin/:${FBSD_OBJ}/tmp/usr/games/:${PATH}
 
 
-#.if target(tools/config/config)
-#MAKEOBJDIRPREFIX=/usr/obj/${ZROUTER_ROOT}/tmp/ ${MAKE} -C ${ZROUTER_ROOT}/tools/config
-#.endif
-
-kernel-config:		kernelconfig kernelhints
-	cd ${FREEBSD_SRC_TREE}/sys/${KERNCONF_MACHINE}/conf ; ${CONFIG_TOOL} -d ${KERNELBUILDDIR} ${KERNEL_CONFIG_FILE}
-
-kernel-build:		kernel-config
-	echo "------------ Before PATH=${PATH}"
-	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR} cleandepend
-	echo "------------ After PATH=${PATH}"
-	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR} depend
-	PATH=${FBSD_OBJ}/tmp/usr/bin/:${PATH} ${MAKE} -C ${KERNELBUILDDIR}
+kernel-build:		kernel-config ${FBSD_OBJ}/tmp/usr/bin/cc
+	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} cleandepend
+	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} depend
+	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR}
 
 
 ${FBSD_OBJ}/tmp/usr/bin/cc:	kernel-toolchain
