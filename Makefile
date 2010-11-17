@@ -1,11 +1,7 @@
 
 .include <bsd.own.mk>
 
-DEBUG?=@echo ""
 FREEBSD_SRC_TREE?=/usr/src
-CONFIG_TOOL?=config
-
-#.CURDIR!=pwd
 
 # ZROUTER_ROOT can be set in environment
 .if !defined(ZROUTER_ROOT)
@@ -18,6 +14,7 @@ ZROUTER_OBJ?=/usr/obj/${ZROUTER_ROOT}
 MAKEOBJDIRPREFIX?=/usr/obj/${ZROUTER_ROOT}/
 KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
+KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 
 #.if ${.TARGET:C/build//:C/install//} == "world"
 # Board configyration must define used SoC/CPU
@@ -34,10 +31,6 @@ KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 .error "soc.mk must define both TARGET and TARGET_ARCH"
 .endif
 
-FBSD_OBJ=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}
-
-
-buildimage:		${BUILD_IMAGE_DEPEND}
 
 basic-tools:
 	ZROUTER_ROOT=${ZROUTER_ROOT} MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -f ${ZROUTER_ROOT}/Makefile.tools
@@ -76,7 +69,6 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	@echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
-
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
 .if exists(${TARGET_SOCDIR}/soc.hints)
@@ -89,48 +81,45 @@ _DEVICE_HINTS=${TARGET_BOARDDIR}/board.hints
 kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
 
-# Generate .hints file
-# TODO: generate hints on MAP partiotion list, GPIO usege list 
+# TODO: make dtd file for FDT
 
-# ${FBSD_OBJ}/tmp/legacy/usr/sbin/config
-kernel-config:		kernelconfig kernelhints
-	cd ${FREEBSD_SRC_TREE}/sys/${TARGET}/conf ; ${CONFIG_TOOL} -d ${KERNELBUILDDIR} ${KERNEL_CONFIG_FILE}
 
 _KERNEL_BUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
 	TARGET_CPUARCH=${TARGET} \
-	ZROUTER_ROOT=${ZROUTER_ROOT}
+	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	-DNO_CLEAN
 
-#	MACHINE=${TARGET} \
-#	MACHINE_ARCH=${TARGET_ARCH} \
-#	MACHINE_CPUARCH=${TARGET} \
-
-_KERNEL_BUILD_PATH=${FBSD_OBJ}/tmp/legacy/usr/sbin/:${FBSD_OBJ}/tmp/legacy/usr/bin/:${FBSD_OBJ}/tmp/legacy/usr/games/:${FBSD_OBJ}/tmp/usr/sbin/:${FBSD_OBJ}/tmp/usr/bin/:${FBSD_OBJ}/tmp/usr/games/:${PATH}
-
-# ${FBSD_OBJ}/tmp/usr/bin/cc
-kernel-build:		kernel-config
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
-
-#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} cleandepend
-#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} depend
-#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR}
-
-
-${FBSD_OBJ}/tmp/usr/bin/cc:	kernel-toolchain
-
-${FBSD_OBJ}/tmp/legacy/usr/sbin/config:	kernel-toolchain
 
 kernel-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -DNO_CLEAN -C ${FREEBSD_SRC_TREE} kernel-toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+
+kernel-build:	kernelconfig kernelhints
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
+
+#XXX_BEGIN Only for testing
+KMODOWN!=id -u -n
+KMODGRP!=id -g -n
+_KERNEL_BUILD_ENV+="KMODOWN=${KMODOWN}"
+_KERNEL_BUILD_ENV+="KMODGRP=${KMODGRP}"
+#XXX_END Only for testing
+
+kernel-install:
+.if !empty(KERNELDESTDIR)
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
+.else
+.error "KERNELDESTDIR must be set for kernel-install, since we always do cross-build"
+.endif
+
+kernel:	kernel-toolchain kernel-build kernel-install
+.ORDER:	kernel-toolchain kernel-build kernel-install
 
 .if defined(KERNEL_COMPRESSION)
 kernel_image:	kernel_deflate kernel
 .else
 kernel_image:	kernel-build
 .endif
-
-
 
 
 .if target(bootloader_image)
@@ -150,9 +139,12 @@ firmware_image: ${FIRMWARE_IMAGE_DEPEND}
 
 image: firmware_image
 
+buildimage:	${BUILD_IMAGE_DEPEND}
 
 
-all:	kernel-build
+
+
+all:	kernel
 
 
 
