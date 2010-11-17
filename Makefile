@@ -31,7 +31,6 @@ KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 #.endif
 
 .if !defined(TARGET) || !defined(TARGET_ARCH)
-.warning "${TARGET}.${TARGET_ARCH}"
 .error "soc.mk must define both TARGET and TARGET_ARCH"
 .endif
 
@@ -93,22 +92,25 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
 
-kernel-config:		kernelconfig kernelhints ${FBSD_OBJ}/tmp/legacy/usr/sbin/config
+# ${FBSD_OBJ}/tmp/legacy/usr/sbin/config
+kernel-config:		kernelconfig kernelhints
 	cd ${FREEBSD_SRC_TREE}/sys/${TARGET}/conf ; ${CONFIG_TOOL} -d ${KERNELBUILDDIR} ${KERNEL_CONFIG_FILE}
 
 _KERNEL_BUILD_ENV= \
-	MACHINE=${TARGET} \
-	MACHINE_ARCH=${TARGET_ARCH} \
-	MACHINE_CPUARCH=${TARGET} \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET}
+	TARGET_CPUARCH=${TARGET} \
+	ZROUTER_ROOT=${ZROUTER_ROOT}
+
+#	MACHINE=${TARGET} \
+#	MACHINE_ARCH=${TARGET_ARCH} \
+#	MACHINE_CPUARCH=${TARGET} \
 
 _KERNEL_BUILD_PATH=${FBSD_OBJ}/tmp/legacy/usr/sbin/:${FBSD_OBJ}/tmp/legacy/usr/bin/:${FBSD_OBJ}/tmp/legacy/usr/games/:${FBSD_OBJ}/tmp/usr/sbin/:${FBSD_OBJ}/tmp/usr/bin/:${FBSD_OBJ}/tmp/usr/games/:${PATH}
 
-
-kernel-build:		kernel-config ${FBSD_OBJ}/tmp/usr/bin/cc
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildkernel
+# ${FBSD_OBJ}/tmp/usr/bin/cc
+kernel-build:		kernel-config
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
 
 #	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} cleandepend
 #	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} depend
