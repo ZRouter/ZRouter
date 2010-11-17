@@ -115,6 +115,31 @@ kernel-install:
 kernel:	kernel-toolchain kernel-build kernel-install
 .ORDER:	kernel-toolchain kernel-build kernel-install
 
+
+
+_WORLD_BUILD_ENV= \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET} \
+	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	-DNO_CLEAN
+
+world-toolchain:
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
+
+#WORLD_SUBDIRS+=lib/libc
+WORLD_SUBDIRS+=bin/sh
+
+world-build:
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR=${WORLD_SUBDIRS} -C ${FREEBSD_SRC_TREE} buildworld
+
+world-install:
+
+world: world-toolchain world-build world-install
+.ORDER: world-toolchain world-build world-install
+
+
+
 .if defined(KERNEL_COMPRESSION)
 kernel_image:	kernel_deflate kernel
 .else
@@ -145,6 +170,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 
 all:	kernel
+#all:	world
 
 
 
