@@ -2,9 +2,7 @@
 .include <bsd.own.mk>
 
 DEBUG?=@echo ""
-#FREEBSD_SRC_TREE?=/usr/src
-#FREEBSD_SRC_TREE?=/usr/home/ray/work/@HG/http_my_ddteam_net_hg_BASE_/head/
-FREEBSD_SRC_TREE?=/usr/1/MIPS_FreeBSD/HEAD/head
+FREEBSD_SRC_TREE?=/usr/src
 CONFIG_TOOL?=config
 
 #.CURDIR!=pwd
@@ -110,9 +108,11 @@ _KERNEL_BUILD_PATH=${FBSD_OBJ}/tmp/legacy/usr/sbin/:${FBSD_OBJ}/tmp/legacy/usr/b
 
 
 kernel-build:		kernel-config ${FBSD_OBJ}/tmp/usr/bin/cc
-	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} cleandepend
-	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} depend
-	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR}
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildkernel
+
+#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} cleandepend
+#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR} depend
+#	PATH=${_KERNEL_BUILD_PATH} ${MAKE} ${_KERNEL_BUILD_ENV} -C ${KERNELBUILDDIR}
 
 
 ${FBSD_OBJ}/tmp/usr/bin/cc:	kernel-toolchain
