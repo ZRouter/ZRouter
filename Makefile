@@ -15,6 +15,8 @@ MAKEOBJDIRPREFIX?=/usr/obj/${ZROUTER_ROOT}/
 KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
+WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
+BLACKHOLEDIR=/../${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/
 
 #.if ${.TARGET:C/build//:C/install//} == "world"
 # Board configyration must define used SoC/CPU
@@ -124,18 +126,59 @@ _WORLD_BUILD_ENV= \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	-DNO_CLEAN
 
+.ifmake world-install
+_WORLD_BUILD_ENV+="NO_STATIC_LIB=yes"
+
+.if !defined(INSTALL_MAN)
+_WORLD_BUILD_ENV+= MANDIR=${BLACKHOLEDIR}
+.endif
+.if !defined(INSTALL_DOC)
+_WORLD_BUILD_ENV+= DOCDIR=${BLACKHOLEDIR}
+.endif
+.if !defined(INSTALL_INFO)
+_WORLD_BUILD_ENV+= INFODIR=${BLACKHOLEDIR}
+.endif
+.if !defined(INSTALL_NLS)
+_WORLD_BUILD_ENV+= NLSDIR=${BLACKHOLEDIR}
+.endif
+.if !defined(INSTALL_INCLUDE)
+_WORLD_BUILD_ENV+= INCLUDEDIR=${BLACKHOLEDIR}
+.endif
+
+
+#XXX_BEGIN Only for testing
+OWN!=id -u -n
+GRP!=id -g -n
+_WORLD_BUILD_ENV+="BINOWN=${OWN}"
+_WORLD_BUILD_ENV+="BINGRP=${GRP}"
+_WORLD_BUILD_ENV+="LIBOWN=${OWN}"
+_WORLD_BUILD_ENV+="LIBGRP=${GRP}"
+_WORLD_BUILD_ENV+="MANOWN=${OWN}"
+_WORLD_BUILD_ENV+="MANGRP=${GRP}"
+#XXX_END Only for testing
+
+.endif
+
+blackhole:
+.for n in 1 2 3 4 5 6 7 8 9
+	mkdir -p ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/${n}
+.endfor
+
 world-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
-#WORLD_SUBDIRS+=lib/libc
+WORLD_SUBDIRS+=lib/libc
+WORLD_SUBDIRS+=lib/libedit
 WORLD_SUBDIRS+=bin/sh
 
 world-build:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR=${WORLD_SUBDIRS} -C ${FREEBSD_SRC_TREE} buildworld
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
-world-install:
+world-install:		blackhole
+	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
+		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
-world: world-toolchain world-build world-install
+world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
 
 
@@ -169,8 +212,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 
 
-all:	kernel
-#all:	world
+all:	kernel	world
 
 
 
