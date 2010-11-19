@@ -7,7 +7,6 @@ FREEBSD_SRC_TREE?=/usr/src
 .if !defined(ZROUTER_ROOT)
 ZROUTER_ROOT=${.CURDIR}
 .endif
-#.warning ${ZROUTER_ROOT}
 
 # ZROUTER_OBJ can be set in environment
 ZROUTER_OBJ?=/usr/obj/${ZROUTER_ROOT}
@@ -18,7 +17,6 @@ KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 BLACKHOLEDIR=/../${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/
 
-#.if ${.TARGET:C/build//:C/install//} == "world"
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
 
@@ -84,7 +82,7 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
 
 # TODO: make dtd file for FDT
-
+#
 
 _KERNEL_BUILD_ENV= \
 	TARGET=${TARGET} \
@@ -124,58 +122,78 @@ _WORLD_BUILD_ENV= \
 	TARGET_ARCH=${TARGET_ARCH} \
 	TARGET_CPUARCH=${TARGET} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	WITHOUT_INFO=yes \
+	WITHOUT_LOCALES=yes \
+	WITHOUT_MAN=yes \
+	WITHOUT_NLS=yes \
+	WITHOUT_PROFILE=yes \
+	WITHOUT_RESCUE=yes \
 	-DNO_CLEAN
 
-.ifmake world-install
-_WORLD_BUILD_ENV+="NO_STATIC_LIB=yes"
-
 .if !defined(INSTALL_MAN)
-_WORLD_BUILD_ENV+= MANDIR=${BLACKHOLEDIR}
-.endif
-.if !defined(INSTALL_DOC)
-_WORLD_BUILD_ENV+= DOCDIR=${BLACKHOLEDIR}
+_WORLD_BUILD_ENV+= WITHOUT_MAN=yes
 .endif
 .if !defined(INSTALL_INFO)
-_WORLD_BUILD_ENV+= INFODIR=${BLACKHOLEDIR}
+_WORLD_BUILD_ENV+= WITHOUT_INFO=yes
 .endif
 .if !defined(INSTALL_NLS)
-_WORLD_BUILD_ENV+= NLSDIR=${BLACKHOLEDIR}
+_WORLD_BUILD_ENV+= WITHOUT_NLS=yes
 .endif
-.if !defined(INSTALL_INCLUDE)
-_WORLD_BUILD_ENV+= INCLUDEDIR=${BLACKHOLEDIR}
+
+_WORLD_INSTALL_ENV+="NO_STATIC_LIB=yes"
+_WORLD_INSTALL_ENV+="WITHOUT_TOOLCHAIN=yes"
+
+.if !defined(INSTALL_DOC)
+_WORLD_INSTALL_ENV+= DOCDIR=${BLACKHOLEDIR}
 .endif
 
 
 #XXX_BEGIN Only for testing
 OWN!=id -u -n
 GRP!=id -g -n
-_WORLD_BUILD_ENV+="BINOWN=${OWN}"
-_WORLD_BUILD_ENV+="BINGRP=${GRP}"
-_WORLD_BUILD_ENV+="LIBOWN=${OWN}"
-_WORLD_BUILD_ENV+="LIBGRP=${GRP}"
-_WORLD_BUILD_ENV+="MANOWN=${OWN}"
-_WORLD_BUILD_ENV+="MANGRP=${GRP}"
+_WORLD_INSTALL_ENV+="BINOWN=${OWN}"
+_WORLD_INSTALL_ENV+="BINGRP=${GRP}"
+_WORLD_INSTALL_ENV+="LIBOWN=${OWN}"
+_WORLD_INSTALL_ENV+="LIBGRP=${GRP}"
+_WORLD_INSTALL_ENV+="MANOWN=${OWN}"
+_WORLD_INSTALL_ENV+="MANGRP=${GRP}"
 #XXX_END Only for testing
 
-.endif
-
-blackhole:
-.for n in 1 2 3 4 5 6 7 8 9
-	mkdir -p ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/${n}
+.for dir in ${WORLD_SUBDIRS_BIN}
+WORLD_SUBDIRS+=bin/${dir}
 .endfor
 
-world-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
+.for dir in ${WORLD_SUBDIRS_SBIN}
+WORLD_SUBDIRS+=sbin/${dir}
+.endfor
 
-WORLD_SUBDIRS+=lib/libc
-WORLD_SUBDIRS+=lib/libedit
-WORLD_SUBDIRS+=bin/sh
+.for lib in ${WORLD_SUBDIRS_LIB}
+WORLD_SUBDIRS+=lib/${lib}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_USRBIN}
+WORLD_SUBDIRS+=usr.bin/${dir}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_USRSBIN}
+WORLD_SUBDIRS+=usr.sbin/${dir}
+.endfor
+
+
+
+blackhole:
+	mkdir -p ${WORLDDESTDIR}${BLACKHOLEDIR}
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} DESTDIR=${WORLDDESTDIR}${BLACKHOLEDIR} -C ${FREEBSD_SRC_TREE} hierarchy
+
+world-toolchain:
+#	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
+
 world-install:		blackhole
-	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
+	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
 world:  world-toolchain world-build world-install

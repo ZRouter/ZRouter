@@ -8,3 +8,6 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
 WITH_USB=yes
 KERNCONF_MAKEOPTIONS+=	"MODULES_OVERRIDE=\"ipfw usb/umass usb/uplcom usb/u3g\""
+
+WORLD_SUBDIRS+=../../../../../${ZROUTER_ROOT}/target/sbin/upgrade
+
