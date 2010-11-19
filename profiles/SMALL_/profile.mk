@@ -60,7 +60,7 @@ umount
 
 
 
-WORLD_SUBDIRS+=../../../../../${ZROUTER_ROOT}/target/sbin/cdevd
+WORLD_SUBDIRS_ZROUTER+=target/sbin/cdevd
 
 
 .warning "SMALL_ profile used"
