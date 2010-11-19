@@ -16,7 +16,8 @@ KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 BLACKHOLEDIR=/../${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/
-
+SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
+.warning ${SRCROOTUP} ${FREEBSD_SRC_TREE}
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
 
@@ -179,6 +180,12 @@ WORLD_SUBDIRS+=usr.bin/${dir}
 WORLD_SUBDIRS+=usr.sbin/${dir}
 .endfor
 
+# Project local tools
+.for dir in ${WORLD_SUBDIRS_ZROUTER}
+# Prepend reverse path, then buildworld can go out of source tree
+WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
+.endfor
+
 
 
 blackhole:
@@ -186,7 +193,7 @@ blackhole:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} DESTDIR=${WORLDDESTDIR}${BLACKHOLEDIR} -C ${FREEBSD_SRC_TREE} hierarchy
 
 world-toolchain:
-#	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
