@@ -188,6 +188,8 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 
 
 
+FREEBSD_BUILD_ENV_VARS!=MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars
+
 blackhole:
 	mkdir -p ${WORLDDESTDIR}${BLACKHOLEDIR}
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} DESTDIR=${WORLDDESTDIR}${BLACKHOLEDIR} -C ${FREEBSD_SRC_TREE} hierarchy
@@ -198,10 +200,39 @@ world-toolchain:
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
+PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8 --host=mipsel-portbld-freebsd81
+
+
+# Ports
+port-build:
+.warning ------------------------------------------------
+.for var in ${FREEBSD_BUILD_ENV_VARS}
+	@echo ${var}
+.endfor
+.error ------------------------------------------------
+.for dir in ${WORLD_SUBDIRS_PORTS}
+	@echo "<PORTS> Run fetch/extract/patch/configure in ${dir}"
+	cd ${dir} ; \
+		PATH=/usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/tmp/mips.mipsel/usr/1/MIPS_FreeBSD/HEAD/head/tmp/legacy/usr/bin/:/usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/tmp/mips.mipsel/usr/1/MIPS_FreeBSD/HEAD/head/tmp/usr/bin/:${PATH} \
+		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
+		LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
+		GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
+		ALWAYS_BUILD_DEPENDS=yes \
+		WITHOUT_CHECK=yes \
+		NO_PKG_REGISTER=yes \
+		    ${MAKE} install clean
+#CONFIGURE_TARGET=mipsel-portbld-freebsd81
+#		${MAKE} PREFIX=${WORLDDESTDIR} all-depends-list
+.endfor
+
 
 world-install:		blackhole
 	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
+## Ports
+#.for dir in ${WORLD_SUBDIRS_PORTS}
+#WORLD_SUBDIRS+=${SRCROOTUP}/${dir}
+#.endfor
 
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
