@@ -17,7 +17,7 @@ KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 BLACKHOLEDIR=/../${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/
 SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
-.warning ${SRCROOTUP} ${FREEBSD_SRC_TREE}
+
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
 
@@ -188,7 +188,6 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 
 
 
-FREEBSD_BUILD_ENV_VARS!=MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars
 
 blackhole:
 	mkdir -p ${WORLDDESTDIR}${BLACKHOLEDIR}
@@ -200,20 +199,26 @@ world-toolchain:
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
+FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
 PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8 --host=mipsel-portbld-freebsd81
+
+# Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
+.for var in ${FREEBSD_BUILD_ENV_VARS}
+FREEBSD_BUILD_ENV_${var}
+.endfor
 
 
 # Ports
 port-build:
-.warning ------------------------------------------------
-.for var in ${FREEBSD_BUILD_ENV_VARS}
-	@echo ${var}
-.endfor
-.error ------------------------------------------------
 .for dir in ${WORLD_SUBDIRS_PORTS}
-	@echo "<PORTS> Run fetch/extract/patch/configure in ${dir}"
+	@echo "----> <PORTS> Making port ${dir}"
+PORT_ALLDEP!=(cd ${dir} ; ${MAKE} all-depends-list)
+PORT_RUNDEP!=(cd ${dir} ; ${MAKE} run-depends-list)
+__PORT_RUNDEPF!=(echo ${PORT_RUNDEP} | sed 's/\s+/\|/g')
+PORT_BUILDDEP!=(echo ${PORT_ALLDEP} | perl -pe 's/\b(${__PORT_RUNDEPF})\b//g')
+.error ALL=${PORT_ALLDEP} BUILD=${PORT_BUILDDEP} RUN=${PORT_RUNDEP} "(echo ${PORT_ALLDEP} | perl -pe 's|\b(${__PORT_RUNDEPF})\b||g')"
 	cd ${dir} ; \
-		PATH=/usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/tmp/mips.mipsel/usr/1/MIPS_FreeBSD/HEAD/head/tmp/legacy/usr/bin/:/usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/tmp/mips.mipsel/usr/1/MIPS_FreeBSD/HEAD/head/tmp/usr/bin/:${PATH} \
+		PATH=${FREEBSD_BUILD_ENV_PATH} \
 		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
 		LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
 		GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
@@ -221,8 +226,6 @@ port-build:
 		WITHOUT_CHECK=yes \
 		NO_PKG_REGISTER=yes \
 		    ${MAKE} install clean
-#CONFIGURE_TARGET=mipsel-portbld-freebsd81
-#		${MAKE} PREFIX=${WORLDDESTDIR} all-depends-list
 .endfor
 
 
