@@ -251,21 +251,35 @@ port-build-depend-cross:
 	@for dep in FETCH EXTRACT PATCH BUILD ; do \
 		_DEPENDS=$$(cd ${dir} ; ${MAKE} -V$${dep}_DEPENDS) ; \
 		for _DEP in $${_DEPENDS} ; do \
-			_DEPTEST=$$(echo $${_DEP} | cut -d: -f1) ; \
+			_DEPTEST=$${_DEP%%:*} ; \
 			echo "Test if $${_DEPTEST} present" ; \
-			_DEPPATH=$$(echo $${_DEP} | cut -d: -f2) ; \
+			_DEPPATH=$${_DEP#*:} ; \
 			echo "cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_HOST=$${_DEPPATH} port-build-depend-host" ; \
 		done; \
 	done
-	@echo "------------> Test LIB RUN dependency for ${dir}..."
-	@for dep in LIB RUN ; do \
-		_DEPENDS=$$(cd ${dir} ; ${MAKE} -V$${dep}_DEPENDS) ; \
-		for _DEP in $${_DEPENDS} ; do \
-			_DEPTEST=$$(echo $${_DEP} | cut -d: -f1) ; \
-			echo "Test if $${_DEPTEST} present" ; \
-			_DEPPATH=$$(echo $${_DEP} | cut -d: -f2) ; \
+	@echo "------------> Test LIB dependency for ${dir}..."
+	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VLIB_DEPENDS) ; \
+	for _DEP in $${_DEPENDS} ; do \
+		_DEPTEST=$${_DEP%%:*} ; \
+		echo "Test if $${_DEPTEST} present" ; \
+		LIBNAME=$${_DEPTEST%.*} ; \
+		LIBVER=$${_DEPTEST#*.} ; \
+		if [ "$${LIBNAME}" = "$${LIBVER}" ] ; then LIBVER="" ; else LIBVER=".$${LIBVER}" ; fi ; \
+		SONAME=lib$${LIBNAME}.so$${LIBVER} ; \
+		echo Search for $${SONAME} ; \
+		MATCHED_LIBS=$$(find ${WORLDDESTDIR}/lib ${WORLDDESTDIR}/usr/lib -name $${SONAME}) ; \
+		_DEPPATH=$${_DEP#*:} ; \
+		if [ -z $${MATCHED_LIBS} ] ; then \
 			cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
-		done; \
+		fi ; \
+	done
+	@echo "------------> Test RUN dependency for ${dir}..."
+	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VRUN_DEPENDS) ; \
+	for _DEP in $${_DEPENDS} ; do \
+		_DEPTEST=$${_DEP%%:*} ; \
+		echo "Test if $${_DEPTEST} present" ; \
+		_DEPPATH=$${_DEP#*:} ; \
+		cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
 	done
 	@echo "------------> Build ${dir}..."
 # Map include to blackhole
