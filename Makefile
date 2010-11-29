@@ -200,6 +200,8 @@ world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
+# that maybe used for any platform
+# we need only say cross-build to configure
 PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8 --host=mipsel-portbld-freebsd81
 
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
@@ -210,13 +212,32 @@ FREEBSD_BUILD_ENV_${var}
 
 # Ports
 port-build:
+	@echo "Start PORTNAME port building..."
+.for dir in ${WORLD_SUBDIRS_PORTS}
+.for dep in EXTRACT PATCH FETCH BUILD
+# Run build with hostenv
+${dir}_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
+.warning "${dir}_${dep}_DEPENDS = ${${dir}_${dep}_DEPENDS}"
+.endfor
+.for dep in LIB RUN
+# Run build with crossenv
+${dir}_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
+_DEP=${${dir}_${dep}_DEPENDS}
+.warning ${dir}_${dep}_DEPENDS test if not ${_DEP:C,^([^:]*):.*$,\1,} then build ${_DEP:C,^[^:]*:([^:]*).*$,\1,}
+.endfor
+.endfor
+
+
+
+
+oldport-build:
 .for dir in ${WORLD_SUBDIRS_PORTS}
 	@echo "----> <PORTS> Making port ${dir}"
-PORT_ALLDEP!=(cd ${dir} ; ${MAKE} all-depends-list)
-PORT_RUNDEP!=(cd ${dir} ; ${MAKE} run-depends-list)
-__PORT_RUNDEPF!=(echo ${PORT_RUNDEP} | sed 's/\s+/\|/g')
-PORT_BUILDDEP!=(echo ${PORT_ALLDEP} | perl -pe 's/\b(${__PORT_RUNDEPF})\b//g')
-.error ALL=${PORT_ALLDEP} BUILD=${PORT_BUILDDEP} RUN=${PORT_RUNDEP} "(echo ${PORT_ALLDEP} | perl -pe 's|\b(${__PORT_RUNDEPF})\b||g')"
+#PORT_ALLDEP!=(cd ${dir} ; ${MAKE} all-depends-list)
+#PORT_RUNDEP!=(cd ${dir} ; ${MAKE} run-depends-list)
+#__PORT_RUNDEPF!=(echo ${PORT_RUNDEP} | sed 's/\s+/\|/g')
+#PORT_BUILDDEP!=(echo ${PORT_ALLDEP} | perl -pe 's/\b(${__PORT_RUNDEPF})\b//g')
+#.error ALL=${PORT_ALLDEP} BUILD=${PORT_BUILDDEP} RUN=${PORT_RUNDEP} "(echo ${PORT_ALLDEP} | perl -pe 's|\b(${__PORT_RUNDEPF})\b||g')"
 	cd ${dir} ; \
 		PATH=${FREEBSD_BUILD_ENV_PATH} \
 		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
