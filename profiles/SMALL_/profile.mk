@@ -63,4 +63,3 @@ umount
 WORLD_SUBDIRS_ZROUTER+=target/sbin/cdevd
 
 
-.warning "SMALL_ profile used"

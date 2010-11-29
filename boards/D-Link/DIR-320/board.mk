@@ -88,5 +88,5 @@ KERNEL_SIZE_MAX=3145728
 # (splited by --PaCkImGs-- key)
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX!= expr ${GEOM_MAP_P2_END} - ${GEOM_MAP_P2_START}
+FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
