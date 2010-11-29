@@ -199,6 +199,9 @@ world-toolchain:
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
+
+
+
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
 # that maybe used for any platform
 # we need only say cross-build to configure
@@ -211,43 +214,121 @@ FREEBSD_BUILD_ENV_${var}
 
 
 # Ports
+
+_TARGET_DEFS = \
+	TARGET_VENDOR=${TARGET_VENDOR} \
+	TARGET_DEVICE=${TARGET_DEVICE} \
+	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} \
+	TARGET_PROFILES="${TARGET_PROFILES}"
+
+_TARGET_CROSS_DEFS = \
+	PATH=${FREEBSD_BUILD_ENV_PATH} \
+	PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
+	LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
+	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
+	NO_INSTALL_MANPAGES=yes \
+	WITHOUT_CHECK=yes \
+	NO_PKG_REGISTER=yes
+
+
 port-build:
+	@echo "----> Start building ports dependencies ..."
+.for dir in ${WORLD_SUBDIRS_PORTS}
+	@echo "Start ${dir} port building..."
+	cd ${ZROUTER_ROOT} ;${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=${dir} port-build-depend-cross
+.endfor
+	@echo "----> Ports dependencies build done ..."
+
+
+# Cross-compilation of dependency, build dependency must be built with host env
+# LIB and RUN dependency should be builded with cross environment
+# Else (FETCH, EXTRACT, PATCH, BUILD dependency) with host env
+
+port-build-depend-cross:
+.for dir in ${PORT_BUILD_DEPEND_CROSS}
+	@echo "--------> Start ${dir} port building ..."
+	@echo "------------> Test FETCH EXTRACT PATCH BUILD dependency for ${dir}..."
+	@for dep in FETCH EXTRACT PATCH BUILD ; do \
+		_DEPENDS=$$(cd ${dir} ; ${MAKE} -V$${dep}_DEPENDS) ; \
+		for _DEP in $${_DEPENDS} ; do \
+			_DEPTEST=$$(echo $${_DEP} | cut -d: -f1) ; \
+			echo "Test if $${_DEPTEST} present" ; \
+			_DEPPATH=$$(echo $${_DEP} | cut -d: -f2) ; \
+			echo "cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_HOST=$${_DEPPATH} port-build-depend-host" ; \
+		done; \
+	done
+	@echo "------------> Test LIB RUN dependency for ${dir}..."
+	@for dep in LIB RUN ; do \
+		_DEPENDS=$$(cd ${dir} ; ${MAKE} -V$${dep}_DEPENDS) ; \
+		for _DEP in $${_DEPENDS} ; do \
+			_DEPTEST=$$(echo $${_DEP} | cut -d: -f1) ; \
+			echo "Test if $${_DEPTEST} present" ; \
+			_DEPPATH=$$(echo $${_DEP} | cut -d: -f2) ; \
+			cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
+		done; \
+	done
+	@echo "------------> Build ${dir}..."
+# Map include to blackhole
+# Map install, share and libs dirs to rootfs
+	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS}
+.endfor
+	@echo "--------> Done building ${dir} port ..."
+
+
+#.for dep in FETCH EXTRACT PATCH BUILD
+#PORT_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
+#.for _DEP in ${PORT_${dep}_DEPENDS}
+#.warning ${dir} PORT_${dep}_DEPENDS "${PORT_${dep}_DEPENDS}" ${_DEP}
+#	cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_HOST=${_DEP:C,^[^:]*:([^:]*).*$,\1,} port-build-depend-host
+#.endfor
+#.endfor
+#.for dep in LIB RUN
+#PORT_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
+#.for _DEP in ${PORT_${dep}_DEPENDS}
+#.warning ${dir} PORT_${dep}_DEPENDS "${PORT_${dep}_DEPENDS}" ${_DEP}
+#	cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=${_DEP:C,^[^:]*:([^:]*).*$,\1,} port-build-depend-cross
+#.endfor
+#.endfor
+## Map include to blackhole
+## Map install, share and libs dirs to rootfs
+#	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS}
+#.endfor
+#	@echo "--------> Done building ${dir} port ..."
+
+
+# Host tools required for extract, patch, configure, build etc.
+# All dependency should be builded and installed with host environment
+# so now we don`t care about dependency type.
+
+port-build-depend-host:
 	@echo "Start PORTNAME port building..."
-.for dir in ${WORLD_SUBDIRS_PORTS}
-.for dep in EXTRACT PATCH FETCH BUILD
-# Run build with hostenv
-${dir}_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
-.warning "${dir}_${dep}_DEPENDS = ${${dir}_${dep}_DEPENDS}"
-.endfor
-.for dep in LIB RUN
-# Run build with crossenv
-${dir}_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
-_DEP=${${dir}_${dep}_DEPENDS}
-.warning ${dir}_${dep}_DEPENDS test if not ${_DEP:C,^([^:]*):.*$,\1,} then build ${_DEP:C,^[^:]*:([^:]*).*$,\1,}
-.endfor
+.for dir in ${PORT_BUILD_DEPEND_HOST}
+	@echo "---------> build/install/clean for port ${dir} as dependency with host environment"
+	cd ${dir} ; ${MAKE} install clean
+	@echo "---------> port ${dir} done (dependency)"
 .endfor
 
 
 
 
-oldport-build:
-.for dir in ${WORLD_SUBDIRS_PORTS}
-	@echo "----> <PORTS> Making port ${dir}"
+#oldport-build:
+#.for dir in ${WORLD_SUBDIRS_PORTS}
+#	@echo "----> <PORTS> Making port ${dir}"
 #PORT_ALLDEP!=(cd ${dir} ; ${MAKE} all-depends-list)
 #PORT_RUNDEP!=(cd ${dir} ; ${MAKE} run-depends-list)
 #__PORT_RUNDEPF!=(echo ${PORT_RUNDEP} | sed 's/\s+/\|/g')
 #PORT_BUILDDEP!=(echo ${PORT_ALLDEP} | perl -pe 's/\b(${__PORT_RUNDEPF})\b//g')
 #.error ALL=${PORT_ALLDEP} BUILD=${PORT_BUILDDEP} RUN=${PORT_RUNDEP} "(echo ${PORT_ALLDEP} | perl -pe 's|\b(${__PORT_RUNDEPF})\b||g')"
-	cd ${dir} ; \
-		PATH=${FREEBSD_BUILD_ENV_PATH} \
-		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
-		LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
-		GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
-		ALWAYS_BUILD_DEPENDS=yes \
-		WITHOUT_CHECK=yes \
-		NO_PKG_REGISTER=yes \
-		    ${MAKE} install clean
-.endfor
+#	cd ${dir} ; \
+#		PATH=${FREEBSD_BUILD_ENV_PATH} \
+#		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
+#		LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
+#		GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
+#		ALWAYS_BUILD_DEPENDS=yes \
+#		WITHOUT_CHECK=yes \
+#		NO_PKG_REGISTER=yes \
+#		    ${MAKE} install clean
+#.endfor
 
 
 world-install:		blackhole
@@ -298,7 +379,7 @@ all:	kernel	world
 
 
 .include <bsd.obj.mk>
-.include <bsd.subdir.mk>
+#.include <bsd.subdir.mk>
 
 
 

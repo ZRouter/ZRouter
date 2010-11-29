@@ -1,6 +1,5 @@
 
 
-.warning "Broadcom/BCM5354 SoC"
 #XXX testing
 LZMA=lzma
 KERNEL_PATH=/usr/obj/kernel
