@@ -205,7 +205,7 @@ world-build:
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
 # that maybe used for any platform
 # we need only say cross-build to configure
-PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8 --host=mipsel-portbld-freebsd81
+PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8.2 --host=mipsel-portbld-freebsd8.2
 
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
 .for var in ${FREEBSD_BUILD_ENV_VARS}
@@ -225,6 +225,8 @@ _TARGET_CROSS_DEFS = \
 	PATH=${FREEBSD_BUILD_ENV_PATH} \
 	PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
 	LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
+	WRKDIR=${ZROUTER_OBJ}/ports/ \
+	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
@@ -232,6 +234,7 @@ _TARGET_CROSS_DEFS = \
 
 
 port-build:
+	mkdir -p ${WORLDDESTDIR}/distfiles/
 	@echo "----> Start building ports dependencies ..."
 .for dir in ${WORLD_SUBDIRS_PORTS}
 	@echo "Start ${dir} port building..."
