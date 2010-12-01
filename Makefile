@@ -230,8 +230,14 @@ _TARGET_CROSS_DEFS = \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
-	NO_PKG_REGISTER=yes
+	NO_PKG_REGISTER=yes \
+	NOPORTDOCS=yes \
+	NOPORTEXAMPLES=yes \
+	INSTALL_AS_USER=yes \
+	LIBTOOL=/usr/local/bin/libtool \
+	-ELIBTOOL
 
+#	LIBTOOL=${ZROUTER_OBJ}/ports/lzo-2.04/libtool \
 
 port-build:
 	mkdir -p ${WORLDDESTDIR}/distfiles/
