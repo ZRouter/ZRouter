@@ -293,6 +293,9 @@ port-build-depend-cross:
 	@echo "------------> Build ${dir}..."
 # Map include to blackhole
 # Map install, share and libs dirs to rootfs
+	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} generate-plist
+	PORT_PLIST=$$(cd ${dir} ; ${MAKE} -VTMPPLIST) ; cat $${PORT_PLIST}
+	false
 	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS}
 .endfor
 	@echo "--------> Done building ${dir} port ..."
