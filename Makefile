@@ -15,7 +15,6 @@ KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
-BLACKHOLEDIR=/../${TARGET_VENDOR}_${TARGET_DEVICE}_blackhole/
 SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
 
 # Board configyration must define used SoC/CPU
@@ -144,9 +143,6 @@ _WORLD_BUILD_ENV+= WITHOUT_NLS=yes
 _WORLD_INSTALL_ENV+="NO_STATIC_LIB=yes"
 _WORLD_INSTALL_ENV+="WITHOUT_TOOLCHAIN=yes"
 
-.if !defined(INSTALL_DOC)
-_WORLD_INSTALL_ENV+= DOCDIR=${BLACKHOLEDIR}
-.endif
 
 
 #XXX_BEGIN Only for testing
@@ -189,10 +185,6 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 
 
 
-blackhole:
-	mkdir -p ${WORLDDESTDIR}${BLACKHOLEDIR}
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} DESTDIR=${WORLDDESTDIR}${BLACKHOLEDIR} -C ${FREEBSD_SRC_TREE} hierarchy
-
 world-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
@@ -223,8 +215,8 @@ _TARGET_DEFS = \
 
 _TARGET_CROSS_DEFS = \
 	PATH=${FREEBSD_BUILD_ENV_PATH} \
-	PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
-	LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
+	PREFIX=${WORLDDESTDIR} \
+	LOCALBASE=${WORLDDESTDIR} \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
@@ -291,7 +283,7 @@ port-build-depend-cross:
 	@echo "------------> Build ${dir}..."
 	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} generate-plist
 	PORT_PLIST=$$( cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VTMPPLIST ) ; \
-	    PORT_STATUS=$$( ${ZROUTER_ROOT}/tools/checkdep.pl libs $${PORT_PLIST} ${WORLDDESTDIR}${BLACKHOLEDIR} ) ; \
+	    PORT_STATUS=$$( ${ZROUTER_ROOT}/tools/checkdep.pl libs $${PORT_PLIST} ${WORLDDESTDIR} ) ; \
 	    if [ $${PORT_STATUS} -lt 50 ] ; then \
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
 		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
@@ -312,7 +304,7 @@ port-build-depend-host:
 	@echo "---------> port ${dir} done (dependency)"
 .endfor
 
-world-install:		blackhole
+world-install: port-build
 	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
