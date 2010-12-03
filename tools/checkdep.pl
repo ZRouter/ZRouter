@@ -2,11 +2,13 @@
 
 use strict;
 
-my ($type, $file, $libdir, $bindir, $incdir) = @ARGV;
+my ($type, $file, $dir) = @ARGV;
+#my ($type, $file, $libdir, $bindir, $incdir) = @ARGV;
 
-$libdir = "/usr/local/lib/"	unless ($libdir);
-$bindir = "/usr/local/bin/"	unless ($bindir);
-$incdir = "/usr/local/include/"	unless ($incdir);
+$dir = "/usr/local/"	unless ($dir);
+#$libdir = "/usr/local/lib/"	unless ($libdir);
+#$bindir = "/usr/local/bin/"	unless ($bindir);
+#$incdir = "/usr/local/include/"	unless ($incdir);
 
 my $matched = 0;
 my $total   = 0;
@@ -17,8 +19,7 @@ while ( <FH> )
 	next if (/^share\/(examples|doc)/);
 	chomp;
 	$total++;
-	$matched ++ if (/^lib\/(.*)/ && -e "$libdir/$1" );
-	$matched ++ if (/^include\/(.*)/ && -e "$incdir/$1" );
+	$matched ++ if (-e "$dir/$_");
 #	print "$_\n";
 }
 
@@ -29,4 +30,4 @@ if (!$matched)
 	exit 0;
 }
 
-print ($total * 100 / $matched);
+print int($matched * 100 / $total)."\n";

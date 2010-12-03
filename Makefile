@@ -225,7 +225,6 @@ _TARGET_CROSS_DEFS = \
 	PATH=${FREEBSD_BUILD_ENV_PATH} \
 	PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
 	LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
-	WRKDIR=${ZROUTER_OBJ}/ports/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
@@ -237,7 +236,6 @@ _TARGET_CROSS_DEFS = \
 	LIBTOOL=/usr/local/bin/libtool \
 	-ELIBTOOL
 
-#	LIBTOOL=${ZROUTER_OBJ}/ports/lzo-2.04/libtool \
 
 port-build:
 	mkdir -p ${WORLDDESTDIR}/distfiles/
@@ -291,35 +289,15 @@ port-build-depend-cross:
 		cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
 	done
 	@echo "------------> Build ${dir}..."
-# Map include to blackhole
-# Map install, share and libs dirs to rootfs
-	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} generate-plist
-	PORT_PLIST=$$(cd ${dir} ; ${MAKE} -VTMPPLIST) ; cat $${PORT_PLIST}
-	false
-	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS}
+	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} generate-plist
+	PORT_PLIST=$$( cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VTMPPLIST ) ; \
+	    PORT_STATUS=$$( ${ZROUTER_ROOT}/tools/checkdep.pl libs $${PORT_PLIST} ${WORLDDESTDIR}${BLACKHOLEDIR} ) ; \
+	    if [ $${PORT_STATUS} -lt 50 ] ; then \
+		    echo "$${PORT_STATUS}% of files matched, do install" ; \
+		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
+	    fi
 .endfor
 	@echo "--------> Done building ${dir} port ..."
-
-
-#.for dep in FETCH EXTRACT PATCH BUILD
-#PORT_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
-#.for _DEP in ${PORT_${dep}_DEPENDS}
-#.warning ${dir} PORT_${dep}_DEPENDS "${PORT_${dep}_DEPENDS}" ${_DEP}
-#	cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_HOST=${_DEP:C,^[^:]*:([^:]*).*$,\1,} port-build-depend-host
-#.endfor
-#.endfor
-#.for dep in LIB RUN
-#PORT_${dep}_DEPENDS!=cd ${dir} ; ${MAKE} -V${dep}_DEPENDS
-#.for _DEP in ${PORT_${dep}_DEPENDS}
-#.warning ${dir} PORT_${dep}_DEPENDS "${PORT_${dep}_DEPENDS}" ${_DEP}
-#	cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=${_DEP:C,^[^:]*:([^:]*).*$,\1,} port-build-depend-cross
-#.endfor
-#.endfor
-## Map include to blackhole
-## Map install, share and libs dirs to rootfs
-#	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS}
-#.endfor
-#	@echo "--------> Done building ${dir} port ..."
 
 
 # Host tools required for extract, patch, configure, build etc.
@@ -334,36 +312,10 @@ port-build-depend-host:
 	@echo "---------> port ${dir} done (dependency)"
 .endfor
 
-
-
-
-#oldport-build:
-#.for dir in ${WORLD_SUBDIRS_PORTS}
-#	@echo "----> <PORTS> Making port ${dir}"
-#PORT_ALLDEP!=(cd ${dir} ; ${MAKE} all-depends-list)
-#PORT_RUNDEP!=(cd ${dir} ; ${MAKE} run-depends-list)
-#__PORT_RUNDEPF!=(echo ${PORT_RUNDEP} | sed 's/\s+/\|/g')
-#PORT_BUILDDEP!=(echo ${PORT_ALLDEP} | perl -pe 's/\b(${__PORT_RUNDEPF})\b//g')
-#.error ALL=${PORT_ALLDEP} BUILD=${PORT_BUILDDEP} RUN=${PORT_RUNDEP} "(echo ${PORT_ALLDEP} | perl -pe 's|\b(${__PORT_RUNDEPF})\b||g')"
-#	cd ${dir} ; \
-#		PATH=${FREEBSD_BUILD_ENV_PATH} \
-#		PREFIX=${WORLDDESTDIR}${BLACKHOLEDIR} \
-#		LOCALBASE=${WORLDDESTDIR}${BLACKHOLEDIR} \
-#		GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
-#		ALWAYS_BUILD_DEPENDS=yes \
-#		WITHOUT_CHECK=yes \
-#		NO_PKG_REGISTER=yes \
-#		    ${MAKE} install clean
-#.endfor
-
-
 world-install:		blackhole
 	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
-## Ports
-#.for dir in ${WORLD_SUBDIRS_PORTS}
-#WORLD_SUBDIRS+=${SRCROOTUP}/${dir}
-#.endfor
+
 
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
