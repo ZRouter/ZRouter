@@ -1,0 +1,12 @@
+diff -r 25473df3272b bsd.port.mk
+--- a/Mk/bsd.port.mk	Sat Dec 04 21:06:59 2010 +0200
++++ b/Mk/bsd.port.mk	Sat Dec 04 21:07:38 2010 +0200
+@@ -3789,7 +3789,7 @@
+ 	    INSTALL_LIB="${INSTALL_LIB}" \
+ 	    INSTALL_PROGRAM="${INSTALL_PROGRAM}" \
+ 	    INSTALL_SCRIPT="${INSTALL_SCRIPT}" \
+-	    ${CONFIGURE_ENV} ./${CONFIGURE_SCRIPT} ${CONFIGURE_ARGS}; then \
++	    ${CONFIGURE_ENV} ./${CONFIGURE_SCRIPT} ${CONFIGURE_ARGS} ${GLOBAL_CONFIGURE_ARGS}; then \
+ 			 ${ECHO_MSG} "===>  Script \"${CONFIGURE_SCRIPT}\" failed unexpectedly."; \
+ 			 (${ECHO_CMD} ${CONFIGURE_FAIL_MESSAGE}) | ${FMT} 75 79 ; \
+ 			 ${FALSE}; \
