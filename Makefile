@@ -93,7 +93,7 @@ _KERNEL_BUILD_ENV= \
 
 
 kernel-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+#	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
@@ -257,7 +257,7 @@ port-build-depend-cross:
 		done; \
 	done
 	@echo "------------> Test LIB dependency for ${dir}..."
-	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VLIB_DEPENDS) ; \
+	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VLIB_DEPENDS) ; \
 	for _DEP in $${_DEPENDS} ; do \
 		_DEPTEST=$${_DEP%%:*} ; \
 		echo "Test if $${_DEPTEST} present" ; \
@@ -273,7 +273,7 @@ port-build-depend-cross:
 		fi ; \
 	done
 	@echo "------------> Test RUN dependency for ${dir}..."
-	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VRUN_DEPENDS) ; \
+	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VRUN_DEPENDS) ; \
 	for _DEP in $${_DEPENDS} ; do \
 		_DEPTEST=$${_DEP%%:*} ; \
 		echo "Test if $${_DEPTEST} present" ; \
@@ -281,11 +281,12 @@ port-build-depend-cross:
 		cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
 	done
 	@echo "------------> Build ${dir}..."
-	cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} generate-plist
-	PORT_PLIST=$$( cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VTMPPLIST ) ; \
+	@cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} generate-plist
+	@PORT_PLIST=$$( cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VTMPPLIST ) ; \
 	    PORT_STATUS=$$( ${ZROUTER_ROOT}/tools/checkdep.pl libs $${PORT_PLIST} ${WORLDDESTDIR} ) ; \
 	    if [ $${PORT_STATUS} -lt 50 ] ; then \
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
+		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
 		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
 	    fi
 .endfor
@@ -304,14 +305,15 @@ port-build-depend-host:
 	@echo "---------> port ${dir} done (dependency)"
 .endfor
 
-world-install: port-build
-	sudo -E MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
+world-install:
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
 
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
 
+ports: port-build
 
 
 .if defined(KERNEL_COMPRESSION)
@@ -343,7 +345,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 
 
-all:	kernel	world
+all:	world kernel ports
 
 
 
