@@ -105,7 +105,7 @@ _KERNEL_BUILD_ENV+="KMODOWN=${KMODOWN}"
 _KERNEL_BUILD_ENV+="KMODGRP=${KMODGRP}"
 #XXX_END Only for testing
 
-kernel-install:
+kernel-install: kernel-install-dir
 .if !empty(KERNELDESTDIR)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
 .else
@@ -230,7 +230,7 @@ _TARGET_CROSS_DEFS = \
 
 
 port-build:
-	mkdir -p ${WORLDDESTDIR}/distfiles/
+	mkdir -p ${WORLDDESTDIR}
 	@echo "----> Start building ports dependencies ..."
 .for dir in ${WORLD_SUBDIRS_PORTS}
 	@echo "Start ${dir} port building..."
@@ -305,13 +305,18 @@ port-build-depend-host:
 	@echo "---------> port ${dir} done (dependency)"
 .endfor
 
-world-install:
+world-install: rootfs-dir
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
-
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
+
+rootfs-dir:
+	mkdir -p ${WORLDDESTDIR}
+
+kernel-install-dir:
+	mkdir -p ${KERNELDESTDIR}
 
 ports: port-build
 
