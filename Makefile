@@ -214,14 +214,16 @@ _TARGET_DEFS = \
 	TARGET_PROFILES="${TARGET_PROFILES}"
 
 _TARGET_CROSS_DEFS = \
-	PATH=${FREEBSD_BUILD_ENV_PATH} \
+	PATH=${FREEBSD_BUILD_ENV_PATH}:/usr/local/bin:/usr/local/sbin \
 	PREFIX=${WORLDDESTDIR} \
 	LOCALBASE=${WORLDDESTDIR} \
+	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
 	NO_PKG_REGISTER=yes \
+	NO_DEPENDS=yes \
 	NOPORTDOCS=yes \
 	NOPORTEXAMPLES=yes \
 	INSTALL_AS_USER=yes \
@@ -247,17 +249,14 @@ port-build-depend-cross:
 .for dir in ${PORT_BUILD_DEPEND_CROSS}
 	@echo "--------> Start ${dir} port building ..."
 	@echo "------------> Test FETCH EXTRACT PATCH BUILD dependency for ${dir}..."
-	@for dep in FETCH EXTRACT PATCH BUILD ; do \
-		_DEPENDS=$$(cd ${dir} ; ${MAKE} -V$${dep}_DEPENDS) ; \
-		for _DEP in $${_DEPENDS} ; do \
-			_DEPTEST=$${_DEP%%:*} ; \
-			echo "Test if $${_DEPTEST} present" ; \
-			_DEPPATH=$${_DEP#*:} ; \
-			echo "cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_HOST=$${_DEPPATH} port-build-depend-host" ; \
-		done; \
-	done
+	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VFETCH_DEPENDS -VEXTRACT_DEPENDS -VPATCH_DEPENDS -VBUILD_DEPENDS) ; \
+	if [ "x$${_DEPENDS}" != "x" ] ; then \
+		echo "$${_DEPENDS}" ; \
+		${MAKE} -f /usr/ports/Mk/bsd.port.mk BUILD_DEPENDS="$${_DEPENDS}" depends ; \
+	fi
 	@echo "------------> Test LIB dependency for ${dir}..."
 	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VLIB_DEPENDS) ; \
+	echo "LIB_DEPENDS=$${_DEPENDS}" ; \
 	for _DEP in $${_DEPENDS} ; do \
 		_DEPTEST=$${_DEP%%:*} ; \
 		echo "Test if $${_DEPTEST} present" ; \
@@ -274,8 +273,11 @@ port-build-depend-cross:
 	done
 	@echo "------------> Test RUN dependency for ${dir}..."
 	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VRUN_DEPENDS) ; \
+	echo "RUN_DEPENDS=$${_DEPENDS}" ; \
 	for _DEP in $${_DEPENDS} ; do \
 		_DEPTEST=$${_DEP%%:*} ; \
+		echo "$${_DEPTEST} is pkg-config?" ; \
+		if [ "$${_DEPTEST}" = "pkg-config" ] ; then  continue ; fi ; \
 		echo "Test if $${_DEPTEST} present" ; \
 		_DEPPATH=$${_DEP#*:} ; \
 		cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
@@ -287,6 +289,7 @@ port-build-depend-cross:
 	    if [ $${PORT_STATUS} -lt 50 ] ; then \
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
 		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
+		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
 		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
 	    fi
 .endfor
