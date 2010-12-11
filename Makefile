@@ -219,6 +219,7 @@ _TARGET_CROSS_DEFS = \
 	LOCALBASE=${WORLDDESTDIR} \
 	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
+	GNU_CONFIGURE_PREFIX=${WORLDDESTDIR} \
 	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
@@ -228,8 +229,12 @@ _TARGET_CROSS_DEFS = \
 	NOPORTEXAMPLES=yes \
 	INSTALL_AS_USER=yes \
 	LIBTOOL=/usr/local/bin/libtool \
+	ac_cv_func_malloc_0_nonnull=yes \
+	ac_cv_func_realloc_0_nonnull=yes \
 	-ELIBTOOL
 
+# ac_cv_func_malloc_0_nonnull=yes avoid "undefined reference to `rpl_malloc'"
+# ac_cv_func_realloc_0_nonnull=yes avoid "undefined reference to `rpl_realloc'"
 
 port-build:
 	mkdir -p ${WORLDDESTDIR}
