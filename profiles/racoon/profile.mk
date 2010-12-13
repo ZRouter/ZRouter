@@ -1,5 +1,6 @@
 
 
 
+#WORLD_SUBDIRS_LIB+= libcrypto libssl
+WORLD_SUBDIRS_PORTS+=/usr/ports/security/racoon2
 
-.warning "racoon profile used"
