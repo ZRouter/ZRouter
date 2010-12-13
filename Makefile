@@ -213,6 +213,8 @@ _TARGET_DEFS = \
 	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} \
 	TARGET_PROFILES="${TARGET_PROFILES}"
 
+
+
 _TARGET_CROSS_DEFS = \
 	PATH=${FREEBSD_BUILD_ENV_PATH}:/usr/local/bin:/usr/local/sbin \
 	PREFIX=${WORLDDESTDIR} \
@@ -228,10 +230,12 @@ _TARGET_CROSS_DEFS = \
 	NOPORTDOCS=yes \
 	NOPORTEXAMPLES=yes \
 	INSTALL_AS_USER=yes \
-	LIBTOOL=/usr/local/bin/libtool \
 	ac_cv_func_malloc_0_nonnull=yes \
 	ac_cv_func_realloc_0_nonnull=yes \
-	-ELIBTOOL
+	AUTOTOOLS_LOCALBASE=/usr/local
+
+#	LIBTOOL=/usr/local/bin/libtool \
+#	-ELIBTOOL
 
 # ac_cv_func_malloc_0_nonnull=yes avoid "undefined reference to `rpl_malloc'"
 # ac_cv_func_realloc_0_nonnull=yes avoid "undefined reference to `rpl_realloc'"
