@@ -295,7 +295,17 @@ port-build-depend-cross:
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
 		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
 		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
-		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
+		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install || \
+			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
+			    echo ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
+			    ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
+			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` && \
+			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` && \
+			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` && \
+			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
+			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
+			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install && \
+			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
 	    fi
 .endfor
 	@echo "--------> Done building ${dir} port ..."
