@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+use strict;
+
+=item
+     -b      Back up any existing files 
+     -B suffix     Use suffix as the backup suffix if -b is given.
+     -C      Copy the file.
+     -c      Copy the file.
+     -d      Create directories.
+     -f      chflags(1)
+     -g      Specify a group.
+     -M      Disable all use of mmap(2).
+     -m      Specify an alternate mode.
+     -o      Specify an owner.  A numeric UID is allowed.
+     -p      Preserve the access and modification times.
+     -S      Safe copy.  Normally, install unlinks an existing target before
+             installing the new file.  With the -S flag a temporary file is
+             used and then renamed to be the target.  The reason this is safer
+             is that if the copy or rename fails, the existing target is left
+             untouched.
+     -s      install exec's the command strip(1) to strip binaries
+     -v      Cause install to be verbose
+=cut
+
+# We need skip -f flags and -o/-g and filter -m for s-bits
+
+my $args = join " ",@ARGV;
+$args =~ s/-[fog]\s?\S+//g;
+
+print "install $args\n" if ($args =~ /-v/);
+
+# Get list of files
+
+# check suffixes of files and skip some 
+if ($ARGV[$#ARGV] =~ /\.[h|c|0..9|l|](\.gz)?$/) {
+	print "Skiping install of $ARGV[$#ARGV]\n" if ($args =~ /-v/);
+}
+
+# Call install
+#print `install  $args`;
+
+# or use mkimage to store into ISO
+
