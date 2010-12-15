@@ -25,17 +25,72 @@ use strict;
 
 # We need skip -f flags and -o/-g and filter -m for s-bits
 
-my $args = join " ",@ARGV;
-$args =~ s/-[fog]\s?\S+//g;
+my $install = "install";
+my $installpath = "";
 
-print "install $args\n" if ($args =~ /-v/);
+$install 	= $ENV{'ZROUTER_INSTALL'} 
+	if ($ENV{'ZROUTER_INSTALL'});
+$installpath 	= $ENV{'ZROUTER_WORLD_INSTALL_PATH'} 
+	if ($ENV{'ZROUTER_WORLD_INSTALL_PATH'});
 
-# Get list of files
+die "environment variable ZROUTER_WORLD_INSTALL_PATH required to detect installation onto FS image or image dir" if ($installpath eq "");
 
-# check suffixes of files and skip some 
-if ($ARGV[$#ARGV] =~ /\.[h|c|0..9|l|](\.gz)?$/) {
-	print "Skiping install of $ARGV[$#ARGV]\n" if ($args =~ /-v/);
+my (@keys, @skeys, @srcs, @dirs) = ();
+my ($v, $dirmode, $keylist) = (0, 0, 1);
+for (my $i = 0; $i <= $#ARGV; $i ++ ) {
+	if (!$keylist) {
+		unless ($i == $#ARGV) {
+			push @srcs, $ARGV[$i] ;
+		} else {
+			push @dirs, $ARGV[$i] ;
+		}
+	}
+	if ( $ARGV[$i] =~ /-[bCcMpSsv]/) {
+		$v = 1 if ($ARGV[$i] eq '-v');
+		push @keys, $ARGV[$i];
+	} elsif ($ARGV[$i] eq '-d') {
+		$dirmode = 1;
+		push @keys, $ARGV[$i];
+	} elsif ( $ARGV[$i] =~ /^(-[Bfgmo])(\S+)?$/ ) {
+		my $arg = "";
+		my $key = $1;
+		if ( $2 ne "" ) {
+			$arg = $2;
+		} else {
+			$arg = $ARGV[++$i];
+		}
+		if ($key =~ /-[fog]/) {
+			push @skeys, "$key$arg";
+			next;
+		} elsif ($key eq '-m') {
+			# Drop special flags
+			if ($arg =~ /^\d+$/) {
+				$arg = sprintf("%lo", (oct($arg) & 01777));
+			} else {
+				$arg =~ s/s/x/g;
+			}
+			push @keys, "$key$arg";
+			next;
+		} 
+	} else {
+		$keylist = 0;
+		if ($dirmode) {
+			push @dirs, @ARGV[$i..$#ARGV];
+			last;
+		}
+	}
 }
+
+print "Drop flags ".join(" ", @skeys). "\n" if ($v);
+print "Keys: "     .join(" ", @keys ). "\n" if ($v);
+print "Files: "    .join(" ", @srcs ). "\n" if ($v);
+print "Dirs: "     .join(" ", @dirs ). "\n" if ($v);
+
+my $cmdline = "$install ". join(" ", @keys, @srcs, @dirs);
+print "$cmdline\n" if ($v);
+
+exit 0;
+
 
 # Call install
 #print `install  $args`;
