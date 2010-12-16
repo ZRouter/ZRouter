@@ -10,4 +10,10 @@ fi
 DATE=`date +%Y-%m-%d_%H:%M`
 
 
+__MAKE_CONF=/dev/null
+SRCCONF=/dev/null
+
+export __MAKE_CONF
+export SRCCONF
+
 make TARGET_VENDOR=D-Link TARGET_DEVICE=DIR-320 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ openvpn zhttpd racoon" 2>&1 | tee $0.${DATE}.log

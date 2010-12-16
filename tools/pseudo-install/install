@@ -89,11 +89,10 @@ print "Dirs: "     .join(" ", @dirs ). "\n" if ($v);
 my $cmdline = "$install ". join(" ", @keys, @srcs, @dirs);
 print "$cmdline\n" if ($v);
 
-exit 0;
-
-
 # Call install
-#print `install  $args`;
+print `$cmdline`;
 
 # or use mkimage to store into ISO
+
+exit 0;
 
