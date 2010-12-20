@@ -33,7 +33,7 @@ $install 	= $ENV{'ZROUTER_INSTALL'}
 $installpath 	= $ENV{'ZROUTER_WORLD_INSTALL_PATH'} 
 	if ($ENV{'ZROUTER_WORLD_INSTALL_PATH'});
 
-die "environment variable ZROUTER_WORLD_INSTALL_PATH required to detect installation onto FS image or image dir" if ($installpath eq "");
+#die "environment variable ZROUTER_WORLD_INSTALL_PATH required to detect installation onto FS image or image dir" if ($installpath eq "");
 
 my (@keys, @skeys, @srcs, @dirs) = ();
 my ($v, $dirmode, $keylist) = (0, 0, 1);
@@ -87,7 +87,7 @@ print "Files: "    .join(" ", @srcs ). "\n" if ($v);
 print "Dirs: "     .join(" ", @dirs ). "\n" if ($v);
 
 my $cmdline = "$install ". join(" ", @keys, @srcs, @dirs);
-print "$cmdline\n" if ($v);
+print "$cmdline\n";# if ($v);
 
 # Call install
 print `$cmdline`;
