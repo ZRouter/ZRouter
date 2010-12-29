@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+
+# PROVIDE: hostid
+# BEFORE: fsck
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name="hostid"
+start_cmd="hostid_start"
+stop_cmd=":"
+reset_cmd="hostid_reset"
+extra_commands="reset"
+rcvar="hostid_enable"
+
+hostid_set()
+{
+	uuid=$1
+	# Generate hostid based on hostuuid - take first four bytes from md5(uuid).
+	id=`echo -n $uuid | /sbin/md5`
+	id="0x${id%????????????????????????}"
+
+	# Set both kern.hostuuid and kern.hostid.
+	#
+	check_startmsgs && echo "Setting hostuuid: ${uuid}."
+	${SYSCTL_W} kern.hostuuid="${uuid}" >/dev/null
+	check_startmsgs && echo "Setting hostid: ${id}."
+	${SYSCTL_W} kern.hostid=${id} >/dev/null
+}
+
+hostid_hardware()
+{
+	uuid=`kenv -q smbios.system.uuid`
+	x="[0-9a-f]"
+	y=$x$x$x$x
+	case "${uuid}" in
+	$y$y-$y-$y-$y-$y$y$y)
+		echo "${uuid}"
+		;;
+	esac
+}
+
+hostid_generate()
+{
+	# First look for UUID in hardware.
+	uuid=`hostid_hardware`
+	if [ -z ${uuid} ]; then
+		# If not found, fall back to software-generated UUID.
+		uuid=`uuidgen`
+	fi
+	hostid_set $uuid
+}
+
+hostid_reset()
+{
+	hostid_generate
+	# Store newly generated UUID in ${hostid_file}.
+	echo $uuid > ${hostid_file}
+	if [ $? -ne 0 ]; then
+		warn "could not store hostuuid in ${hostid_file}."
+	fi
+}
+
+hostid_start()
+{
+	# If ${hostid_file} already exists, we take UUID from there.
+	if [ -r ${hostid_file} ]; then
+		hostid_set `cat ${hostid_file}`
+	else
+		# No hostid file, generate UUID.
+		hostid_generate
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"

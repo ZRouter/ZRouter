@@ -229,12 +229,19 @@ _TARGET_CROSS_DEFS = \
 	NO_PKG_REGISTER=yes \
 	NO_DEPENDS=yes \
 	NOPORTDOCS=yes \
+	BINOWN=ray \
+	BINGRP=wheel \
 	NOPORTEXAMPLES=yes \
 	INSTALL_AS_USER=yes \
+	INSTALL="sh ${FREEBSD_SRC_TREE}/tools/install.sh" \
 	ac_cv_func_malloc_0_nonnull=yes \
 	ac_cv_func_realloc_0_nonnull=yes \
-	AUTOTOOLS_LOCALBASE=/usr/local \
-	LDADD="-L${WORLDDESTDIR}/lib"
+	AUTOTOOLS_LOCALBASE=/usr/local
+
+# XXX: fix BINOWN/BINGRP
+
+#	 \
+#	LDADD="-L${WORLDDESTDIR}/lib"
 
 #	LIBTOOL=/usr/local/bin/libtool \
 #	-ELIBTOOL

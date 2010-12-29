@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+
+# PROVIDE: NETWORKING NETWORK
+# REQUIRE: netif netoptions routing ppp ipfw stf faith
+# REQUIRE: defaultroute routed mrouted route6d mroute6d resolv
+
