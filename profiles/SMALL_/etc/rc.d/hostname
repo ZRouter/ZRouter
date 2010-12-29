@@ -1,0 +1,56 @@
+#!/bin/sh
+
+
+# PROVIDE: hostname
+# REQUIRE: FILESYSTEMS
+# BEFORE:  netif
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="hostname"
+start_cmd="hostname_start"
+stop_cmd=":"
+
+hostname_start()
+{
+	# If we are not inside a jail, set the host name if it is not already set.
+	# If we are inside a jail, set the host name even if it is already set,
+	# but first check if it is permitted.
+	#
+	if [ `$SYSCTL_N security.jail.jailed` -eq 1 ]; then
+		if [ `$SYSCTL_N security.jail.set_hostname_allowed` -eq 0 ]; then
+			return
+		fi
+	elif [ -n "`/bin/hostname -s`" ]; then
+		return
+	else
+		# If we're not in a jail and rc.conf doesn't specify a
+		# hostname, see if we can get one from kenv.
+		#
+		if [ -z "${hostname}" -a \
+		    -n "`/bin/kenv dhcp.host-name 2> /dev/null`" ]; then
+			hostname=`/bin/kenv dhcp.host-name`
+		fi
+	fi
+
+	# Have we got a hostname yet?
+	#
+	if [ -z "${hostname}" ]; then
+		# Null hostname is probably OK if DHCP is in use.
+		#
+		if [ -z "`list_net_interfaces dhcp`" ]; then
+			warn "\$hostname is not set -- see ${rcvar_manpage}."
+		fi
+		return
+	fi
+
+	# All right, it is safe to invoke hostname(1) now.
+	#
+	check_startmsgs && echo -n "Setting hostname: ${hostname}"
+	/bin/hostname "${hostname}"
+	check_startmsgs && echo '.'
+}
+
+load_rc_config $name
+run_rc_command "$1"
