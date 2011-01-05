@@ -238,11 +238,7 @@ _TARGET_CROSS_DEFS = \
 	ac_cv_func_realloc_0_nonnull=yes \
 	AUTOTOOLS_LOCALBASE=/usr/local
 
-# XXX: fix BINOWN/BINGRP
-
-#	 \
 #	LDADD="-L${WORLDDESTDIR}/lib"
-
 #	LIBTOOL=/usr/local/bin/libtool \
 #	-ELIBTOOL
 
@@ -318,7 +314,7 @@ port-build-depend-cross:
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
 			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install && \
-			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
+			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
 	    fi
 .endfor
 	@echo "--------> Done building ${dir} port ..."
