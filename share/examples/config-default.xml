@@ -1,17 +1,21 @@
 <?xml version="1.0"?>
 <!-- TBD <!DOCTYPE config SYSTEM "router-config.dtd"> -->
+
+<!ENTITY testit SYSTEM "test.xml">
+
 <config>
  <interfaces>
+  <test>&testit;</test>
   <interface name="wan0" id="0">
    <!-- "default" used if value not set, AND if not TRUE "conflict" rule  -->
-   <accept_default default="1" conflict="ANY(isset,(list(interfaces.interface.*.accept_default) - this.name))" type="BOOL" descriptions="Can get default route if peer (PPP, PPTP, etc) send it">
-   <ipv4_address default="AUTO" type="IPV4CIDR" descriptions="IPv4 interface address with mask, can be multiple">
-   <type default="DHCP"/>
+   <accept_default default="1" conflict="ANY(isset,(list(interfaces.interface.*.accept_default) - this.name))" type="BOOL" descriptions="Can get default route if peer (PPP, PPTP, etc) send it" />
+   <ipv4_address default="AUTO" type="IPV4CIDR" descriptions="IPv4 interface address with mask, can be multiple" />
+   <type default="DHCP" />
   </interface>
   <interface name="lan0" id="1" descriptions="Main LAN interface, serve Ethernet and Wirless ports, bind to bridge between LAN ports and Wireless AP by default">
-   <accept_default default="0" conflict="ANY(isset,(list(interfaces.interface.*.accept_default) - this.name))" type="BOOL" descriptions="Can get default route if peer (PPP, PPTP, etc) send it">
-   <ipv4_address default="192.168.0.1/24" type="IPV4CIDR" descriptions="IPv4 interface address with mask, can be multiple">
-   <type default="DHCP"/>
+   <accept_default default="0" conflict="ANY(isset,(list(interfaces.interface.*.accept_default) - this.name))" type="BOOL" descriptions="Can get default route if peer (PPP, PPTP, etc) send it" />
+   <ipv4_address default="192.168.0.1/24" type="IPV4CIDR" descriptions="IPv4 interface address with mask, can be multiple" />
+   <type default="STATUC"/>
   </interface>
  </interfaces>
 </config>
