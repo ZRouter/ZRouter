@@ -91,6 +91,13 @@ void free_obj(struct json_object *obj)
         }
 }
 
+char * findlast(char * in)
+{
+	char * right = strchr(in+1, '.');
+	if (right) return (findlast(right));
+	*in = '\0';
+	return (in+1);
+}
 
 int main(int argc, char ** argv)
 {
@@ -203,16 +210,19 @@ int main(int argc, char ** argv)
 		}
 
 	} else if (delete && !value) {
-		child = get(obj, key);
+		char *parent = 0, *last = 0;
+		parent = strdup(key);
+		last = findlast(parent);
+		printf("Parent = %s, last = %s\n", parent, last);
+		child = get(obj, parent);
 		if (child) {
-			printf("Deleteing %s, \"%s\"\n",
+			printf("-------------\nDeleteing %s, \"%s\"\n-------------\n",
 			    key, json_object_to_json_string(child));
-			printf("CP\n");
-			free_obj(child);
-			printf("CP\n");
+			if (json_object_object_get(child, last))
+				json_object_object_del(child, last);
 			/* Dump result */
     			//DEBUG_PRINTF
-    			printf("%s\n", json_object_to_json_string(obj));
+    			printf("-------------\nOut: %s\n-------------\n", json_object_to_json_string(child));
 		}
 
 	} else if (search) {
