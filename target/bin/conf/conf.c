@@ -18,9 +18,16 @@
 #endif
 
 
-void bp()
+void usage()
 {
-	DEBUG_PRINTF("bp\n");
+	printf(
+	    "Usage:\n"
+	    "\tconf key.subkey\t\t\t\tget/dump from that point\n"
+	    "\tconf key.subkey=value\t\t\tset\n"
+	    "\tconf \"key.subkey=value with spaces\"\tset \n"
+	    "\tconf -s ubkey\t\t\t\tsearch\n"
+	    "\tconf -D key.subkey\t\t\tdelete\n"
+	    );
 }
 
 json_object * get (json_object *obj, char * key)
@@ -62,12 +69,35 @@ json_object * get (json_object *obj, char * key)
 	return (child);
 }
 
+void free_obj(struct json_object *obj) 
+{
+	int n, l;
+	switch (json_object_get_type(obj)) {
+	case json_type_object:
+		{
+        		json_object_object_foreach(obj, key, val)
+            			free_obj(val);
+                }
+                json_object_put(obj);
+		break;
+        case json_type_array:
+        	l = json_object_array_length(obj);
+                for (n=0; n < l; n++)
+            		free_obj(json_object_array_get_idx(obj, n));
+                json_object_put(obj);
+                break;
+        default:
+                json_object_put(obj);
+        }
+}
+
+
 int main(int argc, char ** argv)
 {
 	json_object *obj, *child;
 	struct stat sb;
-        char *input;
-        int f;
+        char *input, *key, *value, ch, *file = "hash.json";
+        int f, search = 0, delete = 0;
 
 	MC_SET_DEBUG(1);
 
@@ -88,15 +118,37 @@ int main(int argc, char ** argv)
 	// if set {}
 
 
-	if (argc < 2) return 1;
+	while ((ch = getopt(argc, argv, "f:sD")) != -1)
+		switch (ch) {
+		case 'f':
+			file = optarg;
+			break;
+		case 's':
+			search = 1;
+			break;
+		case 'D':
+			delete = 1;
+			break;
+		default:
+			usage();
+		}
+	argv += optind;
+	key = *argv;
+
+	if (!key) {
+		usage();
+		return (1);
+	}
 
 
-	if (stat(argv[1], &sb)) {
+
+
+	if (stat(file, &sb)) {
 		//XXX perror
 		return (1);
 	}
 
-	f = open(argv[1], O_RDONLY);
+	f = open(file, O_RDONLY);
 	if (f < 0) {
 		//XXX perror
 		return (1);
@@ -119,32 +171,55 @@ int main(int argc, char ** argv)
 
         DEBUG_PRINTF("%s\n", json_object_to_json_string(obj));
 
-	if (1) //mode_get
-	{
-		// argv[2] is variable path
-		/* config.interfaces.wan.0.address */
-		if (argc<3) return (1);
+	value = strchr(key, '=');
+	/* Split key and value */
+	if (value) *value++ = '\0';
 
-		child = get(obj, argv[2]);
+	if (key && value && !delete && !search) /* set */
+	{
+		child = get(obj, key);
 		if (child) {
-			printf("%s = %s\n",
-			    argv[2], json_object_to_json_string(child));
+			/* XXX Check for chils 
+			printf("Node \"%s\" has one or more childs, please delete first\n",
+			    key);
+			*/
+			/* Existing child */
+			printf("Set \"%s\" from \"%s\" to \"%s\"\n",
+			    key, json_object_to_json_string(child), value);
+		} else {
+			/* Create child */
+			printf("Create \"%s\" with value %s\n",
+			    key, json_object_to_json_string(child));
 		}
 	}
-	else if (0) // mode_dump
+	else if (key && !delete && !search) /* get, dump */
 	{
-	}
-	else if (0) // mode set
-	{
-	}
-	else if (0) // mode delete
-	{
-	}
-	else if (0) // mode search
-	{
-	}
-	else {
-		// Invalid mode
+		/* config.interfaces.wan.0.address */
+
+		child = get(obj, key);
+		if (child) {
+			printf("%s = %s\n",
+			    key, json_object_to_json_string(child));
+		}
+
+	} else if (delete && !value) {
+		child = get(obj, key);
+		if (child) {
+			printf("Deleteing %s, \"%s\"\n",
+			    key, json_object_to_json_string(child));
+			printf("CP\n");
+			free_obj(child);
+			printf("CP\n");
+			/* Dump result */
+    			//DEBUG_PRINTF
+    			printf("%s\n", json_object_to_json_string(obj));
+		}
+
+	} else if (search) {
+
+	} else {
+		/* Invalid mode */
+		usage();
 	}
 
 	/* Free json_object */
