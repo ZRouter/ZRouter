@@ -18,6 +18,9 @@
 #define DEBUG_PRINTF(x, ...)
 #endif
 
+#define ALLOW_MULTI	(1<<0)	/* Allow more than one key for get/set/dump */
+#define DELETE_MODE	(1<<1)	/* Delete value mode */
+#define SEARCH_MODE	(1<<2)	/* Search mode */
 
 void usage()
 {
@@ -25,6 +28,7 @@ void usage()
 	    "Usage:\n"
 	    "\tconf key.subkey\t\t\t\tget/dump from that point\n"
 	    "\tconf key.subkey=value\t\t\tset\n"
+	    "\tconf key.subkey=value key1.sub\t\tmixed set & get\n"
 	    "\tconf \"key.subkey=value with spaces\"\tset \n"
 	    "\tconf -s ubkey\t\t\t\tsearch\n"
 	    "\tconf -D key.subkey\t\t\tdelete\n"
@@ -70,28 +74,6 @@ json_object * get (json_object *obj, char * key)
 	return (child);
 }
 
-void free_obj(struct json_object *obj) 
-{
-	int n, l;
-	switch (json_object_get_type(obj)) {
-	case json_type_object:
-		{
-        		json_object_object_foreach(obj, key, val)
-            			free_obj(val);
-                }
-                json_object_put(obj);
-		break;
-        case json_type_array:
-        	l = json_object_array_length(obj);
-                for (n=0; n < l; n++)
-            		free_obj(json_object_array_get_idx(obj, n));
-                json_object_put(obj);
-                break;
-        default:
-                json_object_put(obj);
-        }
-}
-
 char * findlast(char * in)
 {
 	char * right = strchr(in+1, '.');
@@ -100,92 +82,18 @@ char * findlast(char * in)
 	return (in+1);
 }
 
-int main(int argc, char ** argv)
+void process(struct json_object *root, char * key, int flags)
 {
-	json_object *obj, *child, *parentobj;
-	struct stat sb;
-        char *input, *key, *value, ch, *file = "hash.json";
-        int f, search = 0, delete = 0;
-
-	MC_SET_DEBUG(1);
-
-	// getopt
-	// check flags
-	// check storage location from ENV ot flags
-	// check storage
-///////////////////////////////////
-	// while storage {
-	// ?? uncompress block
-	// send to JSON parser
-	// ?? maybe ask key existings
-	// }
-// or /////////////////////////////////
-	// read and uncompress storage
-///////////////////////////////////
-	// if (get || dump) { get ((dump)?all) value; cleanup; return; }
-	// if set {}
-
-
-	while ((ch = getopt(argc, argv, "f:sD")) != -1)
-		switch (ch) {
-		case 'f':
-			file = optarg;
-			break;
-		case 's':
-			search = 1;
-			break;
-		case 'D':
-			delete = 1;
-			break;
-		default:
-			usage();
-		}
-	argv += optind;
-	key = *argv;
-
-	if (!key) {
-		usage();
-		return (1);
-	}
-
-
-
-
-	if (stat(file, &sb)) {
-		//XXX perror
-		return (1);
-	}
-
-	f = open(file, O_RDONLY);
-	if (f < 0) {
-		//XXX perror
-		return (1);
-	}
-
-	input = mmap(0, sb.st_size, PROT_READ, 0, f, 0);
-	//XXX Check "input"
-
-        obj = json_tokener_parse(input);
-
-        munmap(input, sb.st_size);
-        close(f);
-
-        if (is_error(obj)) {
-                DEBUG_PRINTF("error parsing json: %s\n",
-		       json_tokener_errors[-(unsigned long)obj]);
-		return (1);
-        }
-
-
-        DEBUG_PRINTF("%s\n", json_object_to_json_string(obj));
+	struct json_object *parentobj, *child;
+	char * value;
 
 	value = strchr(key, '=');
 	/* Split key and value */
 	if (value) *value++ = '\0';
 
-	if (key && value && !delete && !search) /* set */
+	if (key && value && !(flags & (DELETE_MODE|SEARCH_MODE))) /* set */
 	{
-		child = get(obj, key);
+		child = get(root, key);
 		if (child) {
 			/* XXX Check for chils 
 			printf("Node \"%s\" has one or more childs, "
@@ -200,25 +108,25 @@ int main(int argc, char ** argv)
 			    key, json_object_to_json_string(child));
 		}
 	}
-	else if (key && !delete && !search) /* get, dump */
+	else if (key && !(flags & (DELETE_MODE|SEARCH_MODE))) /* get, dump */
 	{
 		/* config.interfaces.wan.0.address */
 
-		child = get(obj, key);
+		child = get(root, key);
 		if (child) {
 			printf("%s = %s\n",
 			    key, json_object_to_json_string(child));
 		}
 
-	} else if (delete && !value) {
+	} else if ((flags & DELETE_MODE) && !value) {
 		char *parent = 0, *last = 0;
 		parent = strdup(key);
 		last = findlast(parent);
 		DEBUG_PRINTF("Parent = %s, last = %s\n", parent, last);
-		parentobj = get(obj, parent);
+		parentobj = get(root, parent);
 		if (parentobj) {
 			DEBUG_PRINTF("Deleteing %s, \n%s\n",
-			    key, json_object_to_json_string(obj));
+			    key, json_object_to_json_string(root));
 
 			if (json_object_get_type(parentobj) == json_type_array) {
 				struct array_list *arr;
@@ -251,15 +159,103 @@ int main(int argc, char ** argv)
 
 			/* Dump result */
 //    			DEBUG_PRINTF
-    			printf("Out: \n%s\n", json_object_to_json_string(obj));
+    			printf("Out: \n%s\n", json_object_to_json_string(root));
 		}
 		free(parent);
 
-	} else if (search) {
+	} else if (flags & SEARCH_MODE) {
 
 	} else {
 		/* Invalid mode */
 		usage();
+	}
+}
+
+int main(int argc, char ** argv)
+{
+	json_object *obj;
+	struct stat sb;
+        char *input, *key, ch, *file = "hash.json";
+        int f, flags = ALLOW_MULTI;
+
+	MC_SET_DEBUG(1);
+
+	// getopt
+	// check flags
+	// check storage location from ENV ot flags
+	// check storage
+///////////////////////////////////
+	// while storage {
+	// ?? uncompress block
+	// send to JSON parser
+	// ?? maybe ask key existings
+	// }
+// or /////////////////////////////////
+	// read and uncompress storage
+///////////////////////////////////
+	// if (get || dump) { get ((dump)?all) value; cleanup; return; }
+	// if set {}
+
+
+	while ((ch = getopt(argc, argv, "f:sD")) != -1)
+		switch (ch) {
+		case 'f':
+			file = optarg;
+			break;
+		case 's':
+			flags &= ~(ALLOW_MULTI);
+			flags |= SEARCH_MODE;
+			break;
+		case 'D':
+			flags &= ~(ALLOW_MULTI);
+			flags |= DELETE_MODE;
+			break;
+		default:
+			usage();
+		}
+	argv += optind;
+	argc -= optind;
+	key = *argv;
+
+	if (!key) {
+		usage();
+		return (1);
+	}
+
+	if (stat(file, &sb)) {
+		//XXX perror
+		return (1);
+	}
+
+	f = open(file, O_RDONLY);
+	if (f < 0) {
+		//XXX perror
+		return (1);
+	}
+
+	input = mmap(0, sb.st_size, PROT_READ, 0, f, 0);
+	//XXX Check "input"
+
+        obj = json_tokener_parse(input);
+
+        munmap(input, sb.st_size);
+        close(f);
+
+        if (is_error(obj)) {
+                DEBUG_PRINTF("error parsing json: %s\n",
+		       json_tokener_errors[-(unsigned long)obj]);
+		return (1);
+        }
+
+
+        DEBUG_PRINTF("%s\n", json_object_to_json_string(obj));
+
+	if (flags & ALLOW_MULTI) {
+		printf("argc=%d\n", argc);
+		for (; argc; argc--)
+			process(obj, *(argv++), flags);
+	} else {
+		process(obj, key, flags);
 	}
 
 	/* Free json_object */
