@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 
 #include <json/json.h>
@@ -101,7 +102,7 @@ char * findlast(char * in)
 
 int main(int argc, char ** argv)
 {
-	json_object *obj, *child;
+	json_object *obj, *child, *parentobj;
 	struct stat sb;
         char *input, *key, *value, ch, *file = "hash.json";
         int f, search = 0, delete = 0;
@@ -187,8 +188,8 @@ int main(int argc, char ** argv)
 		child = get(obj, key);
 		if (child) {
 			/* XXX Check for chils 
-			printf("Node \"%s\" has one or more childs, please delete first\n",
-			    key);
+			printf("Node \"%s\" has one or more childs, "
+			    "please delete first\n", key);
 			*/
 			/* Existing child */
 			printf("Set \"%s\" from \"%s\" to \"%s\"\n",
@@ -213,17 +214,46 @@ int main(int argc, char ** argv)
 		char *parent = 0, *last = 0;
 		parent = strdup(key);
 		last = findlast(parent);
-		printf("Parent = %s, last = %s\n", parent, last);
-		child = get(obj, parent);
-		if (child) {
-			printf("-------------\nDeleteing %s, \"%s\"\n-------------\n",
-			    key, json_object_to_json_string(child));
-			if (json_object_object_get(child, last))
-				json_object_object_del(child, last);
+		DEBUG_PRINTF("Parent = %s, last = %s\n", parent, last);
+		parentobj = get(obj, parent);
+		if (parentobj) {
+			DEBUG_PRINTF("Deleteing %s, \n%s\n",
+			    key, json_object_to_json_string(obj));
+
+			if (json_object_get_type(parentobj) == json_type_array) {
+				struct array_list *arr;
+				char * check;
+				int i, idx = strtoul(last, &check, 0);
+				DEBUG_PRINTF("Parent is ARRAY key=\"%s\"", key);
+
+				if (check == last + strlen(last)) {
+					/* 
+					 * XXX Just workaround for ARRAY delete
+					 */
+					arr = json_object_get_array(parentobj);
+					if (idx < arr->length) {
+						json_object_put(arr->array[idx]);
+
+						for (i = idx; i < arr->length - 1; i++)
+							arr->array[i] = 
+								arr->array[i+1];
+
+						arr->length --;
+					}
+					else
+						printf("Wrong index %s for ARRAY %s\n",
+						    last, parent);
+				} else
+					printf("Wrong index %s for ARRAY %s\n",
+						    last, parent);
+			} else /* Delete from HASH */
+				json_object_object_del(parentobj, last);
+
 			/* Dump result */
-    			//DEBUG_PRINTF
-    			printf("-------------\nOut: %s\n-------------\n", json_object_to_json_string(child));
+//    			DEBUG_PRINTF
+    			printf("Out: \n%s\n", json_object_to_json_string(obj));
 		}
+		free(parent);
 
 	} else if (search) {
 
