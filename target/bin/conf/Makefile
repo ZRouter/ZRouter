@@ -1,6 +1,6 @@
 
 LOCALBASE?=/usr/local
-DEBUG?=-g
+DEBUG?=-g -DDEBUG=1
 PROG=conf
 NO_MAN=MAN
 CFLAGS+= ${DEBUG} -Wall -I${LOCALBASE}/include
