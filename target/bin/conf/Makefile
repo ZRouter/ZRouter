@@ -9,4 +9,13 @@ BINDIR?=/bin/
 LDADD+=-ljson
 DPADD+=${LIBJSON}
 
+.PHONY=test
+
+test: ${PROG}
+	sh test.sh
+
+gdb: ${PROG}
+	gdb ${PROG}
+
+
 .include <bsd.prog.mk>
