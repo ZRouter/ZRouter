@@ -21,6 +21,7 @@
 #define ALLOW_MULTI	(1<<0)	/* Allow more than one key for get/set/dump */
 #define DELETE_MODE	(1<<1)	/* Delete value mode */
 #define SEARCH_MODE	(1<<2)	/* Search mode */
+#define STDOUT_RESULT	(1<<3)	/* Always copy result to stdout*/
 
 void usage()
 {
@@ -32,7 +33,51 @@ void usage()
 	    "\tconf \"key.subkey=value with spaces\"\tset \n"
 	    "\tconf -s ubkey\t\t\t\tsearch\n"
 	    "\tconf -D key.subkey\t\t\tdelete\n"
+	    "\t\t-S copy result to stdout\n"
 	    );
+}
+
+struct path {
+	char 	**part;
+	int 	last;
+};
+
+
+/** Split input string by "." char
+ *
+ * max must have limit of parts count
+ *
+ * @param path the string, parametr path joined by '.'
+ * @returns a json_object of type json_type_string
+ */
+struct path *
+splitpath(char *path, int max)
+{
+	int i;
+	char **parts;
+	struct path * p = (struct path *)malloc(sizeof(struct path));
+	p->part = parts = malloc(sizeof(char *) * max);
+
+	path = strdup(path);
+
+	for (
+	    i = 0, *parts++ = path;
+	    (path = strchr(path, '.'));
+	    *path++ = '\0', *parts++ = path, i++ )
+		if (!*path && (i++ >= max))
+			break;
+	p->last = i+1;
+	return (p);
+
+}
+
+void
+freepath(struct path * p)
+{
+	if (!p || !p->part) return;
+	free(p->part[0]);
+	free(p->part);
+	free(p);
 }
 
 json_object * get (json_object *obj, char * key)
@@ -91,21 +136,75 @@ void process(struct json_object *root, char * key, int flags)
 	/* Split key and value */
 	if (value) *value++ = '\0';
 
+
+	int max=10;
+	struct path * p = splitpath(key, max);
+//	for (max = 0;max < p->last; max ++)
+//	    printf("patharr[%d] %s,   ",max, p->part[max]);
+//	printf("\n");
+
+
 	if (key && value && !(flags & (DELETE_MODE|SEARCH_MODE))) /* set */
 	{
 		child = get(root, key);
 		if (child) {
-			/* XXX Check for chils 
-			printf("Node \"%s\" has one or more childs, "
-			    "please delete first\n", key);
-			*/
 			/* Existing child */
-			printf("Set \"%s\" from \"%s\" to \"%s\"\n",
-			    key, json_object_to_json_string(child), value);
+			if (( json_object_get_type(child) == json_type_array &&
+				json_object_array_length(child) ) ||
+			   ( json_object_get_type(child) == json_type_object &&
+				json_object_get_object(child)->count ))
+				printf("Node \"%s\" has one or more childs, "
+				    "please delete it first.\n", key);
+			else {
+				printf("Set \"%s\" from \"%s\" to \"%s\"\n",
+				    key, 
+				    json_object_to_json_string(child),
+				    value);
+				/* delete node */
+				{
+
+					char *parent = 0, *last = 0;
+					parent = strdup(key);
+					last = findlast(parent);
+					DEBUG_PRINTF("Parent = %s, last = %s\n", parent, last);
+					parentobj = get(root, parent);
+					if (parentobj) {
+						if (json_object_get_type(parentobj) == json_type_array) {
+							char * check;
+							int idx = strtoul(last, &check, 0);
+							DEBUG_PRINTF("Parent is ARRAY key=\"%s\"", key);
+
+							if (check == last + strlen(last)) {
+								if (idx < json_object_array_length(parentobj)) {
+									json_object_put(child);
+									json_object_array_put_idx(parentobj, idx, json_object_new_string(value));
+								}
+								else
+									printf("Wrong index %s for ARRAY %s\n",
+									    last, parent);
+							} else
+								printf("Wrong index %s for ARRAY %s\n",
+									    last, parent);
+						} else { /* Delete from HASH */
+							json_object_object_del(parentobj, last);
+							json_object_object_add(parentobj, last, json_object_new_string(value));
+						}
+
+						/* Dump result */
+    						DEBUG_PRINTF("Out: \n%s\n", json_object_to_json_string(root));
+					}
+					free(parent);
+
+
+				}
+				/* create string with value */
+			}
 		} else {
 			/* Create child */
 			printf("Create \"%s\" with value %s\n",
 			    key, json_object_to_json_string(child));
+			/* Create/Check puth (like mkdir -p) */
+			/* Create last node, type string */
 		}
 	}
 	else if (key && !(flags & (DELETE_MODE|SEARCH_MODE))) /* get, dump */
@@ -169,6 +268,7 @@ void process(struct json_object *root, char * key, int flags)
 		/* Invalid mode */
 		usage();
 	}
+	freepath(p);
 }
 
 int main(int argc, char ** argv)
@@ -197,7 +297,7 @@ int main(int argc, char ** argv)
 	// if set {}
 
 
-	while ((ch = getopt(argc, argv, "f:sD")) != -1)
+	while ((ch = getopt(argc, argv, "f:sDS")) != -1)
 		switch (ch) {
 		case 'f':
 			file = optarg;
@@ -209,6 +309,9 @@ int main(int argc, char ** argv)
 		case 'D':
 			flags &= ~(ALLOW_MULTI);
 			flags |= DELETE_MODE;
+			break;
+		case 'S':
+			flags |= STDOUT_RESULT;
 			break;
 		default:
 			usage();
@@ -250,13 +353,16 @@ int main(int argc, char ** argv)
 
         DEBUG_PRINTF("%s\n", json_object_to_json_string(obj));
 
+
 	if (flags & ALLOW_MULTI) {
-		printf("argc=%d\n", argc);
 		for (; argc; argc--)
 			process(obj, *(argv++), flags);
 	} else {
 		process(obj, key, flags);
 	}
+
+	if (flags & STDOUT_RESULT)
+		printf("%s\n", json_object_to_json_string(obj));
 
 	/* Free json_object */
         json_object_put(obj);
