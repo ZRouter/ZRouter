@@ -1,5 +1,11 @@
 #!/bin/sh
 
+
+echo ------------------------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------------------------------
+
 TEST='./conf -S -f hash.json glossary.title glossary.GlossDiv.GlossList.1 glossary.GlossDiv.GlossList.2=yyy'
 
 echo ${TEST}
@@ -19,6 +25,18 @@ ${TEST}
 
 echo "Delete childs"
 TEST='./conf -S -D -f hash.json glossary.GlossDiv.GlossList.1'
+
+echo ${TEST}
+${TEST}
+
+echo "Delete non existing ARRAY child"
+TEST='./conf -S -D -f hash.json glossary.GlossDiv.GlossList.5'
+
+echo ${TEST}
+${TEST}
+
+echo "Delete non existing HASH child"
+TEST='./conf -S -D -f hash.json glossary.nonexisting'
 
 echo ${TEST}
 ${TEST}

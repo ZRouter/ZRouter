@@ -219,41 +219,50 @@ void process(json_object *root, char * key, int flags)
 		 */
 
 	} else if ((flags & DELETE_MODE) && !value) {
-		if (parentobj) {
-			DEBUG_PRINTF("Deleteing %s, \n%s\n",
-			    key, json_object_to_json_string(root));
-
-			if (json_object_get_type(parentobj) == json_type_array) {
-				struct array_list *arr;
-				idx = strtoul(last, &check, 0);
-				DEBUG_PRINTF("Parent is ARRAY key=\"%s\"", key);
-
-				if (check == last + strlen(last)) {
-					/*
-					 * XXX Just workaround for ARRAY delete
-					 */
-					arr = json_object_get_array(parentobj);
-					if (idx < arr->length) {
-						json_object_put(arr->array[idx]);
-
-						for (i = idx; i < arr->length - 1; i++)
-							arr->array[i] = 
-								arr->array[i+1];
-
-						arr->length --;
-					}
-					else
-						fprintf(stderr, "Wrong index %s for ARRAY %s\n",
-						    last, parent);
-				} else
-					fprintf(stderr, "Wrong index %s for ARRAY %s\n",
-						    last, parent);
-			} else /* Delete from HASH */
-				json_object_object_del(parentobj, last);
-
-			/* Dump result */
-    			DEBUG_PRINTF("Out: \n%s\n", json_object_to_json_string(root));
+		if (!parentobj) {
+			fprintf(stdout, "%s in %s not found\n", parent, key);
+			goto parse_end;
 		}
+		DEBUG_PRINTF("Deleteing %s, \n%s\n",
+		    key, json_object_to_json_string(root));
+
+		if (json_object_get_type(parentobj) == json_type_array) {
+			struct array_list *arr;
+			idx = strtoul(last, &check, 0);
+			DEBUG_PRINTF("Parent is ARRAY key=\"%s\"", key);
+
+			if (check != last + strlen(last)) {
+				fprintf(stderr, "Wrong index %s for ARRAY %s\n",
+				    last, parent);
+				goto parse_end;
+			}
+			/*
+			 * XXX Just workaround for ARRAY delete
+			 */
+			arr = json_object_get_array(parentobj);
+			if (idx >= arr->length) {
+				fprintf(stderr, "Wrong index %s for ARRAY %s\n",
+				    last, parent);
+				goto parse_end;
+			}
+			json_object_put(arr->array[idx]);
+
+			for (i = idx; i < arr->length - 1; i++)
+				arr->array[i] = arr->array[i+1];
+
+			arr->length --;
+
+		} else {
+			/* Delete from HASH */
+			if (!json_object_object_get(parentobj, last)) {
+				fprintf(stdout, "%s in %s not found\n", last, key);
+			        goto parse_end;
+			}
+			json_object_object_del(parentobj, last);
+		}
+
+		/* Dump result */
+    		DEBUG_PRINTF("Out: \n%s\n", json_object_to_json_string(root));
 
 	} else if (flags & SEARCH_MODE) {
 
