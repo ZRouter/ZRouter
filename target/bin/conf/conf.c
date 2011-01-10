@@ -35,7 +35,7 @@ void usage()
 	    "\tconf key.subkey=value\t\t\tset\n"
 	    "\tconf key.subkey=value key1.sub\t\tmixed set & get\n"
 	    "\tconf \"key.subkey=value with spaces\"\tset \n"
-	    "\tconf -s ubkey\t\t\t\tsearch\n"
+	    "\tconf -s ubkey key\t\t\t\tsearch keys \"ubkey\" and \"key\"\n"
 	    "\tconf -D key.subkey\t\t\tdelete\n"
 	    "\t\t-S copy result to stdout\n"
 	    );
@@ -53,7 +53,7 @@ allocate_path(int max)
 {
 	struct path * p = (struct path *)malloc(sizeof(struct path));
 	bzero(p, sizeof(struct path));
-	p->part = parts = malloc(sizeof(char *) * max);
+	p->part = malloc(sizeof(char *) * max);
 	p->obj = malloc(sizeof(json_object *) * max);
 	bzero(p->part, sizeof(char *       ) * max);
 	bzero(p->obj,  sizeof(json_object *) * max);
@@ -71,8 +71,8 @@ struct path *
 splitpath(char *path, int max)
 {
 	int i;
-	char **parts;
 	struct path * p = allocate_path(max);
+	char **parts = p->part;
 
 	path = strdup(path);
 
@@ -90,30 +90,80 @@ splitpath(char *path, int max)
 void
 find(json_object *obj, char *key, struct path * p, int level)
 {
+	int l;
+	json_object *child;
+
 	if (json_object_is_type(obj, json_type_array)) {
 		char * check;
-		unsigned int i = strtoul(key,&check,0);
+		int i = strtoul(key,&check,0);
 		/* if key is numeric */
-		if ( check == (key + strlen(key)) && i < json_object_array_length(obj))
-			child = json_object_array_get_idx(obj, i);
+		if ( check != (key + strlen(key)) )
+			i = -1;
+		for (l = 0; l < json_object_array_length(obj); l ++ ) {
+			child = json_object_array_get_idx(obj, l);
+
+			if (!child) continue;
+
+			if ( l == i ) {
+    				/* Print path */
+    				int x;
+    				for (x = 0; x < level; x ++)
+    					printf("%s.", p->part[x]);
+    				/* Dump value */
+    				printf("%d: %s\n", l, json_object_to_json_string(child));
+    			}
+
+    			p->obj[level] = child;
+    			p->part[level] = (char *)malloc(16);
+    			sprintf(p->part[level], "%d", l);
+    			p->count = level+1;
+
+    			find(child, key, p, level+1);
+
+    			p->count = level;
+    			free(p->part[level]);
+    			p->part[level] = 0;
+    			p->obj[level] = 0;
+		}
 	} else if (json_object_is_type(obj, json_type_object)) {
 		struct lh_entry *ent;
 		struct lh_table* json_object_table = json_object_get_object(obj);
     		lh_foreach(json_object_table, ent) {
     			struct json_object* child = (struct json_object*)ent->v;
-    			if ( strstr((char *)ent->k, key) >= 0 ) {
+
+			if (!child) continue;
+
+    			if ( strstr((char *)ent->k, key) != 0 ) {
     				/* Print path */
-    				//printf
+    				int x;
+    				for (x = 0; x < level; x ++)
+    					printf("%s.", p->part[x]);
     				/* Dump value */
-    				json_object_to_json_string(child);
+    				printf("%s: %s\n", 
+    				    (char *)ent->k,
+    				    json_object_to_json_string(child));
     			}
+
+    			p->obj[level] = child;
+    			p->part[level] = (char *)ent->k;
+    			p->count = level+1;
+
     			find(child, key, p, level+1);
 
+    			p->count = level;
+    			p->part[level] = 0;
+    			p->obj[level] = 0;
     		}
 	}
+}
 
-
-	return (p);
+void
+deallocate_path(struct path * p)
+{
+	if (!p || !p->part) return;
+	free(p->part);
+	free(p->obj);
+	free(p);
 }
 
 void
@@ -121,9 +171,7 @@ freepath(struct path * p)
 {
 	if (!p || !p->part) return;
 	free(p->part[0]);
-	free(p->part);
-	free(p->obj);
-	free(p);
+	deallocate_path(p);
 }
 
 json_object * get (json_object *obj, struct path *p, int idx)
@@ -163,9 +211,9 @@ json_object * get (json_object *obj, struct path *p, int idx)
 
 void process(json_object *root, char * key, int flags)
 {
-	json_object 	*child, *parentobj = 0;
-	struct path 	*p;
-	char 		*value, *check, *last, *parent = 0;
+	json_object 	*child = 0, *parentobj = 0;
+	struct path 	*p = 0;
+	char 		*value = "", *check, *last = "", *parent = 0;
 	int 		i, idx, max = MAX_TREE_PATH;
 
 	key = strdup(key);
@@ -259,7 +307,7 @@ void process(json_object *root, char * key, int flags)
 		 * key.item1=x
 		 */
 
-	} else if ((flags & DELETE_MODE) && !value) {
+	} else if ((flags & DELETE_MODE) && !value && !(flags & SEARCH_MODE)) {
 		if (!parentobj) {
 			fprintf(stdout, "%s in %s not found\n", parent, key);
 			goto parse_end;
@@ -307,8 +355,10 @@ void process(json_object *root, char * key, int flags)
 
 	} else if (flags & SEARCH_MODE) {
 		struct path * p = allocate_path(max);
-		find(root, p, key);
+		find(root, key, p, 0);
+		deallocate_path(p);
 		free(key);
+		return;
 
 	} else {
 		/* Invalid mode */
@@ -353,7 +403,7 @@ main(int argc, char ** argv)
 			file = optarg;
 			break;
 		case 's':
-			flags &= ~(ALLOW_MULTI);
+//			flags &= ~(ALLOW_MULTI);
 			flags |= SEARCH_MODE;
 			break;
 		case 'D':
