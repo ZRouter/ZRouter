@@ -25,7 +25,8 @@
 #define ALLOW_MULTI	(1<<0)	/* Allow more than one key for get/set/dump */
 #define DELETE_MODE	(1<<1)	/* Delete value mode */
 #define SEARCH_MODE	(1<<2)	/* Search mode */
-#define STDOUT_RESULT	(1<<3)	/* Always copy result to stdout*/
+#define IGNORE_CASE	(1<<3)	/* Ignore case when search */
+#define STDOUT_RESULT	(1<<4)	/* Always copy result to stdout */
 
 void usage()
 {
@@ -35,7 +36,7 @@ void usage()
 	    "\tconf key.subkey=value\t\t\tset\n"
 	    "\tconf key.subkey=value key1.sub\t\tmixed set & get\n"
 	    "\tconf \"key.subkey=value with spaces\"\tset \n"
-	    "\tconf -s ubkey key\t\t\t\tsearch keys \"ubkey\" and \"key\"\n"
+	    "\tconf [-i] -s ubkey key\t\t\t\tsearch keys \"ubkey\" and \"key\"\n"
 	    "\tconf -D key.subkey\t\t\tdelete\n"
 	    "\t\t-S copy result to stdout\n"
 	    );
@@ -88,7 +89,7 @@ splitpath(char *path, int max)
 }
 
 void
-find(json_object *obj, char *key, struct path * p, int level)
+find(json_object *obj, char *key, struct path * p, int level, int flags)
 {
 	int l;
 	json_object *child;
@@ -118,7 +119,7 @@ find(json_object *obj, char *key, struct path * p, int level)
     			sprintf(p->part[level], "%d", l);
     			p->count = level+1;
 
-    			find(child, key, p, level+1);
+    			find(child, key, p, level + 1, flags);
 
     			p->count = level;
     			free(p->part[level]);
@@ -133,7 +134,10 @@ find(json_object *obj, char *key, struct path * p, int level)
 
 			if (!child) continue;
 
-    			if ( strstr((char *)ent->k, key) != 0 ) {
+    			if (
+    			    ((flags & IGNORE_CASE)?
+    				strcasestr((char *)ent->k, key):
+    				strstr((char *)ent->k, key)) != 0) {
     				/* Print path */
     				int x;
     				for (x = 0; x < level; x ++)
@@ -148,7 +152,7 @@ find(json_object *obj, char *key, struct path * p, int level)
     			p->part[level] = (char *)ent->k;
     			p->count = level+1;
 
-    			find(child, key, p, level+1);
+    			find(child, key, p, level + 1, flags);
 
     			p->count = level;
     			p->part[level] = 0;
@@ -355,7 +359,7 @@ void process(json_object *root, char * key, int flags)
 
 	} else if (flags & SEARCH_MODE) {
 		struct path * p = allocate_path(max);
-		find(root, key, p, 0);
+		find(root, key, p, 0, flags);
 		deallocate_path(p);
 		free(key);
 		return;
@@ -397,13 +401,15 @@ main(int argc, char ** argv)
 	// if set {}
 
 
-	while ((ch = getopt(argc, argv, "f:sDS")) != -1)
+	while ((ch = getopt(argc, argv, "Df:iSs")) != -1)
 		switch (ch) {
 		case 'f':
 			file = optarg;
 			break;
+		case 'i':
+			flags |= IGNORE_CASE;
+			break;
 		case 's':
-//			flags &= ~(ALLOW_MULTI);
 			flags |= SEARCH_MODE;
 			break;
 		case 'D':
