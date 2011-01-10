@@ -20,6 +20,7 @@
 #define CP(x)
 #endif
 
+#define MAX_TREE_PATH	15
 
 #define ALLOW_MULTI	(1<<0)	/* Allow more than one key for get/set/dump */
 #define DELETE_MODE	(1<<1)	/* Delete value mode */
@@ -47,6 +48,18 @@ struct path {
 };
 
 
+struct path *
+allocate_path(int max)
+{
+	struct path * p = (struct path *)malloc(sizeof(struct path));
+	bzero(p, sizeof(struct path));
+	p->part = parts = malloc(sizeof(char *) * max);
+	p->obj = malloc(sizeof(json_object *) * max);
+	bzero(p->part, sizeof(char *       ) * max);
+	bzero(p->obj,  sizeof(json_object *) * max);
+	return (p);
+}
+
 /** Split input string by "." char
  *
  * max must have limit of parts count
@@ -59,12 +72,7 @@ splitpath(char *path, int max)
 {
 	int i;
 	char **parts;
-	struct path * p = (struct path *)malloc(sizeof(struct path));
-	bzero(p, sizeof(struct path));
-	p->part = parts = malloc(sizeof(char *) * max);
-	p->obj = malloc(sizeof(json_object *) * max);
-	bzero(p->part, sizeof(char *       ) * max);
-	bzero(p->obj,  sizeof(json_object *) * max);
+	struct path * p = allocate_path(max);
 
 	path = strdup(path);
 
@@ -77,6 +85,35 @@ splitpath(char *path, int max)
 	p->count = i+1;
 	return (p);
 
+}
+
+void
+find(json_object *obj, char *key, struct path * p, int level)
+{
+	if (json_object_is_type(obj, json_type_array)) {
+		char * check;
+		unsigned int i = strtoul(key,&check,0);
+		/* if key is numeric */
+		if ( check == (key + strlen(key)) && i < json_object_array_length(obj))
+			child = json_object_array_get_idx(obj, i);
+	} else if (json_object_is_type(obj, json_type_object)) {
+		struct lh_entry *ent;
+		struct lh_table* json_object_table = json_object_get_object(obj);
+    		lh_foreach(json_object_table, ent) {
+    			struct json_object* child = (struct json_object*)ent->v;
+    			if ( strstr((char *)ent->k, key) >= 0 ) {
+    				/* Print path */
+    				//printf
+    				/* Dump value */
+    				json_object_to_json_string(child);
+    			}
+    			find(child, key, p, level+1);
+
+    		}
+	}
+
+
+	return (p);
 }
 
 void
@@ -129,31 +166,35 @@ void process(json_object *root, char * key, int flags)
 	json_object 	*child, *parentobj = 0;
 	struct path 	*p;
 	char 		*value, *check, *last, *parent = 0;
-	int 		i, idx, max = 10;
+	int 		i, idx, max = MAX_TREE_PATH;
 
 	key = strdup(key);
-	value = strchr(key, '=');
-	/* Split key and value */
-	if (value) *value++ = '\0';
 
-	/* Parse path and get nodes */
-	p = splitpath(key, max);
-	child = get(root, p, 0);
+	if (!(flags & SEARCH_MODE)) {
+		/* Don`t do it in SEARCH_MODE */
 
-	if (p->count == 0) {
-		fprintf(stderr, "Error parsing key=%s value=%s\n", key, value);
-		goto parse_end;
+		value = strchr(key, '=');
+		/* Split key and value */
+		if (value) *value++ = '\0';
+
+		/* Parse path and get nodes */
+		p = splitpath(key, max);
+		child = get(root, p, 0);
+
+		if (p->count == 0) {
+			fprintf(stderr, "Error parsing key=%s value=%s\n", key, value);
+			goto parse_end;
+		}
+
+		if (p->count > 1) {
+			parentobj = p->obj[p->count-2];
+			parent = p->part[p->count-2];
+		}
+
+		last = p->part[p->count-1];
+
+		DEBUG_PRINTF("parent = %s, last = %s\n", parent, last);
 	}
-
-	if (p->count > 1) {
-		parentobj = p->obj[p->count-2];
-		parent = p->part[p->count-2];
-	}
-
-	last = p->part[p->count-1];
-
-	DEBUG_PRINTF("parent = %s, last = %s\n", parent, last);
-
 
 	if (key && value && !(flags & (DELETE_MODE|SEARCH_MODE))) /* set */
 	{
@@ -265,6 +306,9 @@ void process(json_object *root, char * key, int flags)
     		DEBUG_PRINTF("Out: \n%s\n", json_object_to_json_string(root));
 
 	} else if (flags & SEARCH_MODE) {
+		struct path * p = allocate_path(max);
+		find(root, p, key);
+		free(key);
 
 	} else {
 		/* Invalid mode */
