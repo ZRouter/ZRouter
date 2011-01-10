@@ -309,6 +309,28 @@ void process(json_object *root, char * key)
 			/* Create child */
 			printf("NOTYET Create \"%s\" with value %s\n",
 			    key, json_object_to_json_string(p->obj[p->count-2]));
+/*			for (i = 0; i < (p->count - 1); i ++) {
+				if (p->obj[i] && !p->obj[i+1]) {
+					if ( json_object_get_type(child) == json_type_array ) {
+					} else if ( json_object_get_type(child) == json_type_object ) {
+					} else {
+						fprintf(stderr, "Can`t attach child to scalar object\n");
+					}
+
+					if ( i == p->count-1 ) {
+						p->obj[i] = json_object_new_string(value);
+						if ( i > 0 && json_object_get_type(child) == json_type_array )
+						p->obj[i - 1], p->obj[i - 1]
+					} else {
+						idx = strtoul(last, &check, 0);
+						if (check == last + strlen(last)) {
+							// Numeric, so ARRAY //
+						} else {
+						}
+					}
+				}
+			}
+*/
 			//flags |= DIRTY_DATA;
 			/* Create/Check puth (like mkdir -p) */
 			/* Create last node, type string */
@@ -316,7 +338,7 @@ void process(json_object *root, char * key)
 	} else if (key && child && !(flags & (DELETE_MODE|SEARCH_MODE))) {
 		/* get, dump */
 		/*
-		 * TODO: JSON mode.
+		 * JSON mode.
 		 */
 		printf("%s = %s\n", key, json_object_to_json_string(child));
 		/*
@@ -471,8 +493,7 @@ main(int argc, char ** argv)
 
 	if (flags & STDOUT_RESULT)
 		printf("%s\n", json_object_to_json_string(obj));
-
-	if (flags & DIRTY_DATA)
+	else if (flags & DIRTY_DATA)
 		if (json_object_to_file(file, obj))
 			fprintf(stderr, "Error saving to file \"%s\"\n", file);
 
