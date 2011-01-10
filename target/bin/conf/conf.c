@@ -22,13 +22,29 @@
 
 #define MAX_TREE_PATH	15
 
+/* Flags */
 #define ALLOW_MULTI	(1<<0)	/* Allow more than one key for get/set/dump */
 #define DELETE_MODE	(1<<1)	/* Delete value mode */
 #define SEARCH_MODE	(1<<2)	/* Search mode */
 #define IGNORE_CASE	(1<<3)	/* Ignore case when search */
 #define STDOUT_RESULT	(1<<4)	/* Always copy result to stdout */
+#define DIRTY_DATA	(1<<5)	/* Data modified, need save */
 
-void usage()
+struct path {
+	char 		**part;	/* Variable path parts */
+	json_object 	**obj;	/* Objects for path parts */
+	int 		count;	/* Count of part */
+};
+
+/* Globals */
+static int flags = 0;
+
+/*
+ *
+ */
+
+static void
+usage()
 {
 	printf(
 	    "Usage:\n"
@@ -41,13 +57,6 @@ void usage()
 	    "\t\t-S copy result to stdout\n"
 	    );
 }
-
-struct path {
-	char 		**part;	/* Variable path parts */
-	json_object 	**obj;	/* Objects for path parts */
-	int 		count;	/* Count of part */
-};
-
 
 struct path *
 allocate_path(int max)
@@ -89,7 +98,7 @@ splitpath(char *path, int max)
 }
 
 void
-find(json_object *obj, char *key, struct path * p, int level, int flags)
+find(json_object *obj, char *key, struct path * p, int level)
 {
 	int l;
 	json_object *child;
@@ -119,7 +128,7 @@ find(json_object *obj, char *key, struct path * p, int level, int flags)
     			sprintf(p->part[level], "%d", l);
     			p->count = level+1;
 
-    			find(child, key, p, level + 1, flags);
+    			find(child, key, p, level + 1);
 
     			p->count = level;
     			free(p->part[level]);
@@ -152,7 +161,7 @@ find(json_object *obj, char *key, struct path * p, int level, int flags)
     			p->part[level] = (char *)ent->k;
     			p->count = level+1;
 
-    			find(child, key, p, level + 1, flags);
+    			find(child, key, p, level + 1);
 
     			p->count = level;
     			p->part[level] = 0;
@@ -213,7 +222,7 @@ json_object * get (json_object *obj, struct path *p, int idx)
 	return (child);
 }
 
-void process(json_object *root, char * key, int flags)
+void process(json_object *root, char * key)
 {
 	json_object 	*child = 0, *parentobj = 0;
 	struct path 	*p = 0;
@@ -275,6 +284,7 @@ void process(json_object *root, char * key, int flags)
 							if (idx < json_object_array_length(parentobj)) {
 								//json_object_put(child);
 								json_object_array_put_idx(parentobj, idx, json_object_new_string(value));
+								flags |= DIRTY_DATA;
 							}
 							else
 								fprintf(stderr, "Wrong index %s for ARRAY %s\n",
@@ -283,8 +293,11 @@ void process(json_object *root, char * key, int flags)
 							fprintf(stderr, "Wrong index %s for ARRAY %s\n",
 								    last, parent);
 					} else { /* Delete from HASH */
-						json_object_object_del(parentobj, last);
-						json_object_object_add(parentobj, last, json_object_new_string(value));
+						if (json_object_object_get(parentobj, last)) {
+							json_object_object_del(parentobj, last);
+							json_object_object_add(parentobj, last, json_object_new_string(value));
+							flags |= DIRTY_DATA;
+						}
 					}
 
 					/* Dump result */
@@ -296,6 +309,7 @@ void process(json_object *root, char * key, int flags)
 			/* Create child */
 			printf("NOTYET Create \"%s\" with value %s\n",
 			    key, json_object_to_json_string(p->obj[p->count-2]));
+			//flags |= DIRTY_DATA;
 			/* Create/Check puth (like mkdir -p) */
 			/* Create last node, type string */
 		}
@@ -344,6 +358,7 @@ void process(json_object *root, char * key, int flags)
 				arr->array[i] = arr->array[i+1];
 
 			arr->length --;
+			flags |= DIRTY_DATA;
 
 		} else {
 			/* Delete from HASH */
@@ -352,6 +367,7 @@ void process(json_object *root, char * key, int flags)
 			        goto parse_end;
 			}
 			json_object_object_del(parentobj, last);
+			flags |= DIRTY_DATA;
 		}
 
 		/* Dump result */
@@ -359,7 +375,7 @@ void process(json_object *root, char * key, int flags)
 
 	} else if (flags & SEARCH_MODE) {
 		struct path * p = allocate_path(max);
-		find(root, key, p, 0, flags);
+		find(root, key, p, 0);
 		deallocate_path(p);
 		free(key);
 		return;
@@ -377,10 +393,10 @@ parse_end:
 int
 main(int argc, char ** argv)
 {
-	json_object *obj;
-	struct stat sb;
-        char *input, *key, ch, *file = "hash.json";
-        int f, flags = ALLOW_MULTI;
+	json_object 	*obj;
+        char 		*key, ch, *file = "hash.json";
+
+        flags = ALLOW_MULTI;
 
 	MC_SET_DEBUG(1);
 
@@ -431,26 +447,7 @@ main(int argc, char ** argv)
 		return (1);
 	}
 
-	if (stat(file, &sb)) {
-		//XXX perror
-		return (1);
-	}
-
-	f = open(file, O_RDONLY);
-	if (f < 0) {
-		//XXX perror
-		return (1);
-	}
-
-	input = mmap(0, sb.st_size, PROT_READ, 0, f, 0);
-	//XXX Check "input"
-
-	CP("parse");
-        obj = json_tokener_parse(input);
-	CP("parse done");
-
-        munmap(input, sb.st_size);
-        close(f);
+	obj = json_object_from_file(file);
 
         if (is_error(obj)) {
                 DEBUG_PRINTF("error parsing json: %s\n",
@@ -466,14 +463,18 @@ main(int argc, char ** argv)
 	if (flags & ALLOW_MULTI) {
 		CP("Multi");
 		for (; argc; argc--)
-			process(obj, *(argv++), flags);
+			process(obj, *(argv++));
 	} else {
 		CP("Single");
-		process(obj, key, flags);
+		process(obj, key);
 	}
 
 	if (flags & STDOUT_RESULT)
 		printf("%s\n", json_object_to_json_string(obj));
+
+	if (flags & DIRTY_DATA)
+		if (json_object_to_file(file, obj))
+			fprintf(stderr, "Error saving to file \"%s\"\n", file);
 
 	/* Free json_object */
         json_object_put(obj);
