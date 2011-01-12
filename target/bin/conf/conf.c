@@ -225,10 +225,10 @@ json_object * get (json_object *obj, struct path *p, int idx)
 json_object *
 create(struct path *p, char *value, int level)
 {
-	json_object *obj, *child;
+	json_object *obj = 0, *child;
 	if (level > p->count) return (0);
 
-	return (0); /* Not yet*/
+//	return (0); /* Not yet*/
 
 	child = create(p, value, level+1);
 	if (!child) {
@@ -251,20 +251,31 @@ create(struct path *p, char *value, int level)
 
 		if ( p->obj[level] && json_object_get_type(p->obj[level]) == json_type_array && i >= 0 ) {
 			/* We have int, and existing object is array */
+			json_object_array_put_idx(p->obj[level], i, child);
 		} else if ( p->obj[level] && json_object_get_type(p->obj[level]) == json_type_object) {
 			/* We have not int, and existing object is HASH */
+			json_object_object_add(p->obj[level], p->part[level], child);
 		} else if ( !p->obj[level] ) {
 			/* We have no object, need create */
 			if (i>= 0) {
 				/* We have int, so we need ARRAY */
+				obj = json_object_new_array();
+				json_object_array_put_idx(obj, i, child);
 			} else {
 				/* Not int, so we need HASH */
+				obj = json_object_new_object();
+				json_object_object_add(obj, p->part[level], child);
 			}
 		} else {
+			/* Error */
+			printf("Can`t use object \"");
+			for (i = 0; i < level; i ++)
+				printf(".%s", p->part[i]);
+			printf("\" to attach new items\n");
 		}
 	}
 	printf("part = %s\n", p->part[level]);
-	return (0);
+	return (obj);
 }
 
 void process(json_object *root, char * key)
