@@ -226,11 +226,28 @@ json_object *
 create(struct path *p, char *value, int level)
 {
 	json_object *obj = 0, *child;
-	if (level > p->count) return (0);
+	if (!p->part[level]) return (0);
 
 //	return (0); /* Not yet*/
 
+	char * check;
+	int i = strtoul(p->part[level], &check, 0);
+	if (check != (p->part[level] + strlen(p->part[level]))) i = -1;
+
 	child = create(p, value, level+1);
+
+	printf("level=%d part = %s obj=%s type=%s i=%d\n",
+	    level,
+	    p->part[level],
+	    (p->obj[level]?"Exist":"Non"),
+	    (p->obj[level]?
+		((json_object_get_type(p->obj[level]) == json_type_array)?
+		    "ARRAY":(json_object_get_type(p->obj[level]) == json_type_object)?
+		    "HASH":"OTHER")
+		:"(null)"),
+		i
+	    );
+
 	if (!child) {
 		/* Last item */
 		/* Try parse as JSON object */
@@ -245,9 +262,12 @@ create(struct path *p, char *value, int level)
     		}
 		return (0);
 	} else {
-		char * check;
-		int i = strtoul(p->part[level], &check, 0);
-		if (check == (p->part[level] + strlen(p->part[level]))) i = -1;
+		printf("child type=%s\n", 
+		    ((json_object_get_type(child) == json_type_array)?
+			"ARRAY":
+			(json_object_get_type(child) == json_type_object)?
+			    "HASH":
+			    "OTHER"));
 
 		if ( p->obj[level] && json_object_get_type(p->obj[level]) == json_type_array && i >= 0 ) {
 			/* We have int, and existing object is array */
@@ -274,7 +294,7 @@ create(struct path *p, char *value, int level)
 			printf("\" to attach new items\n");
 		}
 	}
-	printf("part = %s\n", p->part[level]);
+
 	return (obj);
 }
 
@@ -365,7 +385,7 @@ void process(json_object *root, char * key)
 			/* Create child */
 			printf("NOTYET Create \"%s\" with value %s\n",
 			    key, json_object_to_json_string(p->obj[p->count-2]));
-			create(p, value, 0);
+			create(p, value, 1);
 
 /*			for (i = 0; i < (p->count - 1); i ++) {
 				if (p->obj[i] && !p->obj[i+1]) {
