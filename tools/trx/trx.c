@@ -93,11 +93,12 @@ main(int argc, char **argv)
 	}
 	printf("]\n");
 
-	out = fopen(outfilename, "w");
+	out = fopen(outfilename, "w+");
 	if (!out)
 		errx(2, "Can`t open file %s", outfilename);
 
 	uLong crc = crc32(0L, Z_NULL, 0);
+	printf("CRC = %08x\n", crc);
 
 	len = sizeof(struct trx_header); /* Host endian yet */
 
@@ -114,6 +115,26 @@ main(int argc, char **argv)
 		len += (uint32_t)size;
 		header.offsets[i] = htole32(offset[i]);
 	}
+	rewind(out);
+	fwrite(&header, sizeof(struct trx_header), 1, out);
+
+
+	fseek(out, 12, SEEK_SET);
+
+	uint8_t *buf = malloc(1024);
+	crc = crc32(0L, Z_NULL, 0);
+	int s = 0;
+
+	printf("CRC = %08x\n", crc);
+	for ( i = 0; (s = fread(buf, 1, 1024, out)); i += s) {
+		printf("crc32(%08x, %p, %d), i = %d\n", crc, buf, s, i);
+		crc = crc32(crc, buf, s);
+	}
+	printf("CRC = %08x\n", crc);
+
+	free(buf);
+
+
 	rewind(out);
 
 	header.crc32 = htole32((uint32_t)crc);
@@ -148,7 +169,14 @@ addfile(FILE *out, char *filename, uint32_t align, uint32_t *offset, uLong *crc)
 		}
 
 		prep = (*offset - cpos);
-		fwrite(&z, 1, prep, out);
+		if (prep > 0) {
+			uint8_t *buf = malloc(prep);
+			bzero(buf, prep);
+			fwrite(buf, prep, 1, out);
+			*crc = crc32(*crc, buf, s);
+			free(buf);
+		}
+
 	}
 
 	*offset = ftell(out);
