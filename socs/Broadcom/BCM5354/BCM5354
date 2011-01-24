@@ -65,8 +65,7 @@ options 	CD9660			# ISO 9660 Filesystem
 #options 	GEOM_PART_GPT		# GUID Partition Tables.
 options 	GEOM_LABEL		# Provides labelization
 device		geom_map
-#device		geom_uzip
-device		geom_ulzma
+device		geom_uncompress
 
 
 options         MROUTING                # Multicast routing

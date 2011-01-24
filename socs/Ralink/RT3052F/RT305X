@@ -114,8 +114,7 @@ device		cfi			# Detect Flash memmory
 device		cfid
 
 device		geom_map
-#device		geom_uzip
-device		geom_ulzma
+device		geom_uncompress
 
 device		usb
 device		u3g
