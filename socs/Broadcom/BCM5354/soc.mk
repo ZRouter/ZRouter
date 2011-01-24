@@ -75,8 +75,7 @@ KERNCONF_OPTIONS+= 	TMPFS
 KERNCONF_OPTIONS+= 	CD9660
 KERNCONF_OPTIONS+= 	GEOM_LABEL		# Provides labelization
 KERNCONF_DEVICES+=		geom_map
-#KERNCONF_DEVICES+=		geom_uzip
-KERNCONF_DEVICES+=		geom_ulzma
+KERNCONF_DEVICES+=		geom_uncompress
 
 
 
