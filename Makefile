@@ -169,13 +169,26 @@ WORLD_SUBDIRS+=sbin/${dir}
 WORLD_SUBDIRS+=lib/${lib}
 .endfor
 
-.for dir in ${WORLD_SUBDIRS_USRBIN}
+.for dir in ${WORLD_SUBDIRS_USR_BIN}
 WORLD_SUBDIRS+=usr.bin/${dir}
 .endfor
 
-.for dir in ${WORLD_SUBDIRS_USRSBIN}
+.for dir in ${WORLD_SUBDIRS_USR_SBIN}
 WORLD_SUBDIRS+=usr.sbin/${dir}
 .endfor
+
+.for dir in ${WORLD_SUBDIRS_LIBEXEC}
+WORLD_SUBDIRS+=libexec/${dir}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_GNU_LIB}
+WORLD_SUBDIRS+=gnu/lib/${dir}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_GNU_USR_BIN}
+WORLD_SUBDIRS+=gnu/usr.bin/${dir}
+.endfor
+
 
 # Project local tools
 .for dir in ${WORLD_SUBDIRS_ZROUTER}
@@ -375,10 +388,37 @@ image: firmware_image
 buildimage:	${BUILD_IMAGE_DEPEND}
 
 
-
+# XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
 all:	world kernel ports
 
+iso:	rootfs
+	makefs -t cd9660 -o "rockridge" D-Link_DIR-320_rootfs.iso D-Link_DIR-320_rootfs
+
+ulzma:	iso
+	mkulzma -v -s 131072 -o D-Link_DIR-320_rootfs.iso.ulzma D-Link_DIR-320_rootfs.iso
+
+kernel.bin:	kernel
+	target-objcopy -S -O binary kernel kernel.bin
+
+kernel.bin.${KERNEL_COMPRESSION_TYPE}:	kernel.bin
+	old-lzma e kernel.bin kernel.bin.${KERNEL_COMPRESSION_TYPE}
+
+kernel.${KERNEL_COMPRESSION_TYPE}:	kernel
+	${KERNEL_COMPRESSION_TOOL} e kernel kernel.${KERNEL_COMPRESSION_TYPE}
+
+UBOOT_KERNEL_LOAD_ADDRESS=80001000
+UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
+
+
+kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
+	uboot_mkimage -A ${TARGET} -O linux -T kernel \
+	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \
+	    -a ${UBOOT_KERNEL_LOAD_ADDRESS} \
+	    -e ${UBOOT_KERNEL_ENTRY_POINT} \
+	    -n 'FreeBSD Kernel Image' \
+	    -d ${KTFTP}/kernel.bin.${KERNEL_COMPRESSION_TYPE} \
+	    ${KTFTP}/kernel.${KERNEL_COMPRESSION_TYPE}.uboot
 
 
 
