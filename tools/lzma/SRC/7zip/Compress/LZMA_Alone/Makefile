@@ -1,4 +1,5 @@
 
+.PATH: ${.CURDIR}/../LZMA_C ${.CURDIR}/../LZMA ${.CURDIR}/../Branch ${.CURDIR}/../LZ ${.CURDIR}/../RangeCoder ${.CURDIR}/../../Common/ ${.CURDIR}/../../../Common/C
 #CFLAGS+= -O2 -pipe -fno-strict-aliasing -c -I ../../../
 CFLAGS+= -I ../../../
 CPPFLAGS+= -I ../../../
@@ -11,8 +12,10 @@ SRCS= LzmaAlone.cpp LzmaBench.cpp LzmaRam.cpp LzmaRamDecode.c ../LZMA_C/LzmaDeco
 ../../../Common/CommandLineParser.cpp ../../../Common/CRC.cpp \
 ../../../Common/String.cpp ../../../Common/StringConvert.cpp \
 ../../../Common/StringToInt.cpp ../../../Common/Vector.cpp
+OBJS=${SRCS:C/.*\///:C/\.c(pp)?/.o/}
 
-
+clean:
+	rm -f ${OBJS} ${PROG}
 
 nope:
 	c++ -O2 -pipe -fno-strict-aliasing -c -I ../../../ 	LzmaAlone.cpp
