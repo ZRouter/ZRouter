@@ -116,7 +116,6 @@ kernel:	kernel-toolchain kernel-build kernel-install
 .ORDER:	kernel-toolchain kernel-build kernel-install
 
 
-
 _WORLD_BUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
@@ -196,6 +195,13 @@ WORLD_SUBDIRS+=gnu/usr.bin/${dir}
 WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
+FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
+
+# Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
+.for var in ${FREEBSD_BUILD_ENV_VARS}
+FREEBSD_BUILD_ENV_${var}
+.endfor
+
 
 
 
@@ -205,152 +211,14 @@ world-toolchain:
 world-build:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
-
-
-
-FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
-# that maybe used for any platform
-# we need only say cross-build to configure
-PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8.2 --host=mipsel-portbld-freebsd8.2
-
-# Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
-.for var in ${FREEBSD_BUILD_ENV_VARS}
-FREEBSD_BUILD_ENV_${var}
-.endfor
-
-
-# Ports
-
-_TARGET_DEFS = \
-	TARGET_VENDOR=${TARGET_VENDOR} \
-	TARGET_DEVICE=${TARGET_DEVICE} \
-	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} \
-	TARGET_PROFILES="${TARGET_PROFILES}"
-
-
-
-_TARGET_CROSS_DEFS = \
-	PATH=${FREEBSD_BUILD_ENV_PATH}:/usr/local/bin:/usr/local/sbin \
-	PREFIX=${WORLDDESTDIR} \
-	LOCALBASE=${WORLDDESTDIR} \
-	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
-	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
-	GNU_CONFIGURE_PREFIX=${WORLDDESTDIR} \
-	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
-	NO_INSTALL_MANPAGES=yes \
-	WITHOUT_CHECK=yes \
-	NO_PKG_REGISTER=yes \
-	NO_DEPENDS=yes \
-	NOPORTDOCS=yes \
-	BINOWN=ray \
-	BINGRP=wheel \
-	NOPORTEXAMPLES=yes \
-	INSTALL_AS_USER=yes \
-	INSTALL="sh ${FREEBSD_SRC_TREE}/tools/install.sh" \
-	ac_cv_func_malloc_0_nonnull=yes \
-	ac_cv_func_realloc_0_nonnull=yes \
-	AUTOTOOLS_LOCALBASE=/usr/local
-
-#	LDADD="-L${WORLDDESTDIR}/lib"
-#	LIBTOOL=/usr/local/bin/libtool \
-#	-ELIBTOOL
-
-# ac_cv_func_malloc_0_nonnull=yes avoid "undefined reference to `rpl_malloc'"
-# ac_cv_func_realloc_0_nonnull=yes avoid "undefined reference to `rpl_realloc'"
-
-port-build:
-	mkdir -p ${WORLDDESTDIR}
-	@echo "----> Start building ports dependencies ..."
-.for dir in ${WORLD_SUBDIRS_PORTS}
-	@echo "Start ${dir} port building..."
-	cd ${ZROUTER_ROOT} ;${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=${dir} port-build-depend-cross
-.endfor
-	@echo "----> Ports dependencies build done ..."
-
-
-# Cross-compilation of dependency, build dependency must be built with host env
-# LIB and RUN dependency should be builded with cross environment
-# Else (FETCH, EXTRACT, PATCH, BUILD dependency) with host env
-
-port-build-depend-cross:
-.for dir in ${PORT_BUILD_DEPEND_CROSS}
-	@echo "--------> Start ${dir} port building ..."
-	@echo "------------> Test FETCH EXTRACT PATCH BUILD dependency for ${dir}..."
-	_DEPENDS=$$(cd ${dir} ; ${MAKE} -VFETCH_DEPENDS -VEXTRACT_DEPENDS -VPATCH_DEPENDS -VBUILD_DEPENDS) ; \
-	if [ "x$${_DEPENDS}" != "x" ] ; then \
-		echo "$${_DEPENDS}" ; \
-		${MAKE} -f /usr/ports/Mk/bsd.port.mk BUILD_DEPENDS="$${_DEPENDS}" depends ; \
-	fi
-	@echo "------------> Test LIB dependency for ${dir}..."
-	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VLIB_DEPENDS) ; \
-	echo "LIB_DEPENDS=$${_DEPENDS}" ; \
-	for _DEP in $${_DEPENDS} ; do \
-		_DEPTEST=$${_DEP%%:*} ; \
-		echo "Test if $${_DEPTEST} present" ; \
-		LIBNAME=$${_DEPTEST%.*} ; \
-		LIBVER=$${_DEPTEST#*.} ; \
-		if [ "$${LIBNAME}" = "$${LIBVER}" ] ; then LIBVER="" ; else LIBVER=".$${LIBVER}" ; fi ; \
-		SONAME=lib$${LIBNAME}.so$${LIBVER} ; \
-		echo Search for $${SONAME} ; \
-		MATCHED_LIBS=$$(find ${WORLDDESTDIR}/lib ${WORLDDESTDIR}/usr/lib -name $${SONAME}) ; \
-		_DEPPATH=$${_DEP#*:} ; \
-		if [ -z $${MATCHED_LIBS} ] ; then \
-			cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
-		fi ; \
-	done
-	@echo "------------> Test RUN dependency for ${dir}..."
-	@_DEPENDS=$$(cd ${dir} ; ${MAKE} -VRUN_DEPENDS) ; \
-	echo "RUN_DEPENDS=$${_DEPENDS}" ; \
-	for _DEP in $${_DEPENDS} ; do \
-		_DEPTEST=$${_DEP%%:*} ; \
-		echo "$${_DEPTEST} is pkg-config?" ; \
-		if [ "$${_DEPTEST}" = "pkg-config" ] ; then  continue ; fi ; \
-		echo "Test if $${_DEPTEST} present" ; \
-		_DEPPATH=$${_DEP#*:} ; \
-		cd ${ZROUTER_ROOT} ; ${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=$${_DEPPATH} port-build-depend-cross ; \
-	done
-	@echo "------------> Build ${dir}..."
-	@cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} generate-plist
-	@PORT_PLIST=$$( cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VTMPPLIST ) ; \
-	    PORT_STATUS=$$( ${ZROUTER_ROOT}/tools/checkdep.pl libs $${PORT_PLIST} ${WORLDDESTDIR} ) ; \
-	    if [ $${PORT_STATUS} -lt 50 ] ; then \
-		    echo "$${PORT_STATUS}% of files matched, do install" ; \
-		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
-		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
-		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install || \
-			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
-			    echo ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
-			    ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
-			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` && \
-			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` && \
-			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` && \
-			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
-			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
-			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install && \
-			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
-	    fi
-.endfor
-	@echo "--------> Done building ${dir} port ..."
-
-
-# Host tools required for extract, patch, configure, build etc.
-# All dependency should be builded and installed with host environment
-# so now we don`t care about dependency type.
-
-port-build-depend-host:
-	@echo "Start PORTNAME port building..."
-.for dir in ${PORT_BUILD_DEPEND_HOST}
-	@echo "---------> build/install/clean for port ${dir} as dependency with host environment"
-	cd ${dir} ; ${MAKE} install clean
-	@echo "---------> port ${dir} done (dependency)"
-.endfor
-
 world-install: rootfs-dir
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
+
+.include "Mk/zrouter.ports.mk"
 
 rootfs-dir:
 	mkdir -p ${WORLDDESTDIR}
@@ -392,20 +260,69 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 all:	world kernel ports
 
-iso:	rootfs
-	makefs -t cd9660 -o "rockridge" D-Link_DIR-320_rootfs.iso D-Link_DIR-320_rootfs
+NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
+NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
-ulzma:	iso
-	mkulzma -v -s 131072 -o D-Link_DIR-320_rootfs.iso.ulzma D-Link_DIR-320_rootfs.iso
 
-kernel.bin:	kernel
-	target-objcopy -S -O binary kernel kernel.bin
+ROOTFS_RMLIST= \
+    \\( \\( -type f -or -type l \\) -and \
+	    \\( -name kernel -or -name "*.a" \\) \\) -or \
+    \\( -type l -and -name sys \\) -or \
+    \\( -type d -and \\( \
+    -name include -or \
+    -name share -or \
+    -name libdata -or \
+    -name games -or \
+    -name src -or \
+    -name obj -or \
+    -name info -or \
+    -name man -or \
+    -name zfs \\) \\)
 
-kernel.bin.${KERNEL_COMPRESSION_TYPE}:	kernel.bin
-	old-lzma e kernel.bin kernel.bin.${KERNEL_COMPRESSION_TYPE}
+# Move kernel out of rootfs
+#		world kernel ports
+rootfs:
+	rm -f ${NEW_KERNEL}
+	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
+	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
+	cp -R ${WORLDDESTDIR} ${NEW_ROOTFS}
+	rm -rf `find ${NEW_ROOTFS} ${ROOTFS_RMLIST}`
 
-kernel.${KERNEL_COMPRESSION_TYPE}:	kernel
-	${KERNEL_COMPRESSION_TOOL} e kernel kernel.${KERNEL_COMPRESSION_TYPE}
+rootfs.iso:	rootfs
+	PATH=${FREEBSD_BUILD_ENV_PATH} makefs -t cd9660 -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
+
+MKULZMA_FLAGS?=-v
+MKULZMA_BLOCKSIZE?=131072
+
+rootfs.iso.ulzma:	rootfs.iso
+	PATH=${FREEBSD_BUILD_ENV_PATH} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
+
+${NEW_KERNEL}.bin:	${NEW_KERNEL}
+	PATH=${FREEBSD_BUILD_ENV_PATH} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
+
+${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin
+	oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
+
+${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}
+	oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
+
+${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
+	lzma e ${LZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
+
+${NEW_KERNEL}.xz:		${NEW_KERNEL}
+	lzma e ${LZMA_COMPRESS_FLAGS} ${NEW_KERNEL}
+
+${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
+	bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
+
+${NEW_KERNEL}.bz2:		${NEW_KERNEL}
+	bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}
+
+kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
+	gzip ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
+
+kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
+	gzip ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}
 
 UBOOT_KERNEL_LOAD_ADDRESS=80001000
 UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
