@@ -260,10 +260,13 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 all:	world kernel ports
 
-IMAGE_BUILD_PATHS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_ztools:${FREEBSD_BUILD_ENV_PATH}
+ZTOOLS_PATH=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
+IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
+
+.include "share/mk/zrouter.local.tools.mk"
 
 ROOTFS_RMLIST= \
     \\( \\( -type f -or -type l \\) -and \
@@ -298,27 +301,42 @@ MKULZMA_BLOCKSIZE?=131072
 rootfs.iso.ulzma:	rootfs.iso
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
+#
+# Convert kernel from ELF to BIN
+#
 kernel_bin ${NEW_KERNEL}.bin:	${NEW_KERNEL}
 	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
 
-kernel_bin_oldlzma ${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin
+#
+# Compress kernel with oldlzma
+#
+kernel_bin_oldlzma ${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma	${ZTOOLS_PATH}/packimage	${ZTOOLS_PATH}/trx
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
 
-kernel_oldlzma ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}
+kernel_oldlzma ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
 
+#
+# Compress kernel with xz
+#
 kernel_bin_xz ${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
 	PATH=${IMAGE_BUILD_PATHS} xz ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
 
 kernel_xz ${NEW_KERNEL}.xz:		${NEW_KERNEL}
 	PATH=${IMAGE_BUILD_PATHS} xz ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}
 
+#
+# Compress kernel with bz2
+#
 kernel_bin_bz2 ${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
 	PATH=${IMAGE_BUILD_PATHS} bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
 
 kernel_bz2 ${NEW_KERNEL}.bz2:		${NEW_KERNEL}
 	PATH=${IMAGE_BUILD_PATHS} bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}
 
+#
+# Compress kernel with gz
+#
 kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
 	PATH=${IMAGE_BUILD_PATHS} gzip ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin
 
