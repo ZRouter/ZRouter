@@ -218,7 +218,7 @@ world-install: rootfs-dir
 world:  world-toolchain world-build world-install
 .ORDER: world-toolchain world-build world-install
 
-.include "Mk/zrouter.ports.mk"
+.include "share/mk/zrouter.ports.mk"
 
 rootfs-dir:
 	mkdir -p ${WORLDDESTDIR}
