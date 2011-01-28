@@ -2,6 +2,7 @@
 .include <bsd.own.mk>
 
 SUBDIR+=config
+SUBDIR+=oldlzma
 SUBDIR+=packimage
 
 .include <bsd.subdir.mk>
