@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+
+# PROVIDE: buttons
+# REQUIRE: cdevd
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name="buttons"
+rcvar=`set_rcvar`
+load_rc_config $name
+start_cmd="buttons_start"
+
+buttons_start()
+{
+	echo "Initializing buttons for interrup events."
+	for pin in ${buttons_pins}; do
+		/usr/sbin/gpioctl -f ${buttons_gpioc_dev} -c ${pin} INT
+	done
+}
+
+run_rc_command "$1"
