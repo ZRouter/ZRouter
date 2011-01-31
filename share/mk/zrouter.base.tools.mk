@@ -1,17 +1,12 @@
 
+fstype=cd9660
+TDIR=/tmp/makefs_${fstype}_test
 
-
-makefs_cd9660:
-	# Test if makefs accept cd9660 filesystem
-	#if [  ] ; then fi
-
-${ZTOOLS_PATH}/oldlzma:
-	${MAKE} -C ${ZROUTER_ROOT}/tools/oldlzma DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install
-
-${ZTOOLS_PATH}/packimage:
-	${MAKE} -C ${ZROUTER_ROOT}/tools/packimage DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install
-
-${ZTOOLS_PATH}/trx:
-	${MAKE} -C ${ZROUTER_ROOT}/tools/trx DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install
-
+makefs_${fstype}:
+	# Test if makefs accept ${fstype} filesystem
+	STATUS=`mkdir -p ${TDIR}/fsroot \
+	touch ${TDIR}/fsroot/test.file \
+	makefs -t ${fstype} ${TDIR}/fsroot.${fstype} ${TDIR}/fsroot || echo MAKEFS_FAIL=${fstype} \
+	rm -rf ${TDIR}`
+	echo ${STATUS}
 
