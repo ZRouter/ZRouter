@@ -1,3 +1,4 @@
+BINDIR?=/usr/bin/
 
 CFLAGS+= -ISRC
 CXXFLAGS+= -ISRC

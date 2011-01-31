@@ -47,26 +47,26 @@ KERNEL_HINTS_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}.hints
 KERNEL_CONFIG_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}
 
 kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
-	@echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
-	@echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
-	@echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
-	@echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
-	@echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
-	@echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
+	echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
+	echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
+	echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
+	echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
+	echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
+	echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
 .for makeoption in ${KERNCONF_MAKEOPTIONS}
-	@echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
+	echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# files section" >> ${KERNEL_CONFIG_FILE}
+	echo "# files section" >> ${KERNEL_CONFIG_FILE}
 .for file in ${KERNCONF_FILES}
-	@echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
+	echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# options section" >> ${KERNEL_CONFIG_FILE}
+	echo "# options section" >> ${KERNEL_CONFIG_FILE}
 .for option in ${KERNCONF_OPTIONS}
-	@echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
+	echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# devices section" >> ${KERNEL_CONFIG_FILE}
+	echo "# devices section" >> ${KERNEL_CONFIG_FILE}
 .for device in ${KERNCONF_DEVICES}
-	@echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
+	echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
 # Generate .hints file
@@ -259,10 +259,11 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
 all:	world kernel ports
-
-ZTOOLS_PATH=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_ztools
+IMAGE_SUFFIX?=trx
+ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
+NEW_IMAGE=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 
 IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
 
@@ -301,7 +302,7 @@ ${KERNELDESTDIR}/boot/kernel/kernel:	kernel
 
 ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 
-rootfs.iso:	rootfs
+rootfs.iso ${NEW_ROOTFS}.iso:	rootfs
 	PATH=${IMAGE_BUILD_PATHS} makefs -t cd9660 -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
@@ -313,7 +314,7 @@ ${ZTOOLS_PATH}/oldlzma:
 
 oldlzma:	${ZTOOLS_PATH}/oldlzma
 
-rootfs.iso.ulzma:	rootfs.iso
+rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
 #
@@ -335,28 +336,28 @@ kernel_oldlzma ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
 # Compress kernel with xz
 #
 kernel_bin_xz ${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
-	PATH=${IMAGE_BUILD_PATHS} xz ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin --stdout > ${NEW_KERNEL}.bin.xz
+	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.xz
 
 kernel_xz ${NEW_KERNEL}.xz:		${NEW_KERNEL}
-	PATH=${IMAGE_BUILD_PATHS} xz ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL} --stdout > ${NEW_KERNEL}.bin.xz
+	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.xz
 
 #
 # Compress kernel with bz2
 #
 kernel_bin_bz2 ${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
-	PATH=${IMAGE_BUILD_PATHS} bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin --stdout > ${NEW_KERNEL}.bin.bz2
+	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.bz2
 
 kernel_bz2 ${NEW_KERNEL}.bz2:		${NEW_KERNEL}
-	PATH=${IMAGE_BUILD_PATHS} bzip2 ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL} --stdout > ${NEW_KERNEL}.bz2
+	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.bz2
 
 #
 # Compress kernel with gz
 #
 kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
-	PATH=${IMAGE_BUILD_PATHS} gzip ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin --stdout > ${NEW_KERNEL}.bin.gz
+	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.gz
 
 kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
-	PATH=${IMAGE_BUILD_PATHS} gzip ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} --stdout > ${NEW_KERNEL}.gz
+	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.gz
 
 UBOOT_KERNEL_LOAD_ADDRESS=80001000
 UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
@@ -371,7 +372,21 @@ kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
 	    -d ${KTFTP}/kernel.bin.${KERNEL_COMPRESSION_TYPE} \
 	    ${KTFTP}/kernel.${KERNEL_COMPRESSION_TYPE}.uboot
 
+kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
+	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
 
+# XXX: temporary
+kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz
+	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
+
+${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
+	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
+	#truncate -s 1834980 ${NEW_KERNEL}.bin.gz.sync
+	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
+	truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
+
+fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+	/linux/home/ray/firmware_mod_kit/src/asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
 .include <bsd.obj.mk>
 
