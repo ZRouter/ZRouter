@@ -8,24 +8,27 @@ libalias \
 libbsm \
 libc \
 libedit \
+libexpat \
 libcrypt \
-libcrypto \
 libipsec \
+libipx \
 libjail \
-libmd \
-libmemstat \
 libkiconv \
 libkvm \
-libexpat \
+libmd \
+libmemstat \
 msun \
 libsbuf \
-libssl \
 libthr \
 libutil \
 libz \
 ncurses
 
-# Compile ping without libipsec and ifconfig without libjail
+WORLD_SUBDIRS+= \
+secure/lib/libcrypto \
+secure/lib/libssl
+
+# Compile ping without libipsec and ifconfig without libjail,libipx
 # "libcrypto.so.6" not found, required by "bsdtar"
 # "libssl.so.6" not found, required by "fetch"
 # "libbsm.so.3" not found, required by "groups"
