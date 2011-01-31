@@ -16,4 +16,5 @@ SRCCONF=/dev/null
 export __MAKE_CONF
 export SRCCONF
 
-make TARGET_VENDOR=D-Link TARGET_DEVICE=DIR-320 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ zhttpd" rootfs.iso.ulzma kernel_bin_oldlzma kernel_bin_xz kernel_bin_gz kernel_bin_bz2  2>&1 | tee $0.${DATE}.log
+make TARGET_VENDOR=D-Link TARGET_DEVICE=DIR-320 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ zhttpd" kernel_bin_oldlzma kernel_bin_gz 2>&1 | tee $0.${DATE}.log
+#make TARGET_VENDOR=D-Link TARGET_DEVICE=DIR-320 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ zhttpd" rootfs.iso.ulzma kernel_bin_oldlzma kernel_bin_xz kernel_bin_gz kernel_bin_bz2  2>&1 | tee $0.${DATE}.log
