@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004  Manuel Novoa III  <mjn3@codepoet.org>
- * Copyright (C) 2006  OpenWrt developers <openwrt-developers@openwrt.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +16,50 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-//#include <param.h>
+/* July 29, 2004
+ *
+ * This is a hacked replacement for the 'trx' utility used to create
+ * wrt54g .trx firmware files.  It isn't pretty, but it does the job
+ * for me.
+ *
+ * As an extension, you can specify a larger maximum length for the
+ * .trx file using '-m'.  It will be rounded up to be a multiple of 4K.
+ * NOTE: This space will be malloc()'d.
+ *
+ * August 16, 2004
+ *
+ * Sigh... Make it endian-neutral.
+ *
+ * TODO: Support '-b' option to specify offsets for each file.
+ */
+
+/* March 04, 2005
+ *
+ * Copyright(c) 2005 Konstantin A. Klubnichkin and Oleg I. Vdovikin
+ *
+ * Added ASUS addver functionality, which is binary only
+ *
+ * addver is no longer needed, use utility like this
+ *
+ * asustrx -p WL500g -v 1.9.2.7 -o image.trx file [ file [ file ] ]  
+ */
+ 
+ /* September 22, 2006
+ *
+ * Copyright(c) 2006 Jeremy Collake <jeremy.collake@gmail.com>
+ *
+ * Added -b switch to force a segment start offset, padding up 
+ * to that point. This switch should immediately preceed filenames.
+ *
+ * Example of ASUS calls to their trx (addver called sperately):
+ *
+ *   trx -o WL530g_$(KVER).$(FVER)_$(LANGUAGE).bin -b 32 zImage -b 655360 target.cramfs
+ * 
+ *
+ * Also several other misc. changes where I saw appropriate.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -25,19 +67,40 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-//#include <byteswap.h>
-//#include <endian.h>
-#include <sys/types.h>
 #include <sys/endian.h>
+#include <sys/types.h>
 
-//#if __BYTE_ORDER == __BIG_ENDIAN
-//#define STORE32_LE(X)		bswap_32(X)
-//#elif __BYTE_ORDER == __LITTLE_ENDIAN
-//#define STORE32_LE(X)		(X)
-//#else
-//#error unkown endianness!
-//#endif
-#define STORE32_LE(X)		htole32(X)
+/* stuff for quick OS X compatibility by Jeremy Collake */
+#ifndef bswap_32
+#define bswap_32 flip_endian
+#endif
+
+// always flip, regardless of endianness of machine
+u_int32_t flip_endian(u_int32_t nValue)
+{
+	// my crappy endian switch
+	u_int32_t nR;
+	u_int32_t nByte1=(nValue&0xff000000)>>24;
+	u_int32_t nByte2=(nValue&0x00ff0000)>>16;
+	u_int32_t nByte3=(nValue&0x0000ff00)>>8;
+	u_int32_t nByte4=nValue&0x0ff;
+	nR=nByte4<<24;
+	nR|=(nByte3<<16);
+	nR|=(nByte2<<8);
+	nR|=nByte1;
+	return nR;
+}
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define STORE32_LE(X)		bswap_32(X)
+#define READ32_LE(X)		bswap_32(X)
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#define STORE32_LE(X)		(X)
+#define READ32_LE(X)		(X)
+#else
+#error unkown endianness!
+#endif
+/*jc end */
 
 uint32_t crc32buf(char *buf, size_t len);
 
@@ -46,7 +109,7 @@ uint32_t crc32buf(char *buf, size_t len);
 
 #define TRX_MAGIC	0x30524448	/* "HDR0" */
 #define TRX_VERSION	1
-#define TRX_MAX_LEN	0x5A0000
+#define TRX_MAX_LEN	0x9A0000    /* jc: change from 0x3A0000 */
 #define TRX_NO_HEADER	1		/* Do not write TRX header */	
 
 struct trx_header {
@@ -63,7 +126,7 @@ void usage(void) __attribute__ (( __noreturn__ ));
 
 void usage(void)
 {
-	fprintf(stderr, "Usage: trx [-o outfile] [-m maxlen] [-a align] [-b offset] file [file [file]]\n");
+	fprintf(stderr, "Use: trx [-p prodid] [-v ver] [-o ofile] [-m maxlen] [-b offs] file [-b offs] [file [file]]\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -76,36 +139,42 @@ int main(int argc, char **argv)
 	char *e;
 	int c, i;
 	size_t n;
-	uint32_t cur_len;
+	uint32_t cur_len;	
+	int boolSegmentSizesGiven=0; /* jc */
+	int nSegementCount=0;
 	unsigned long maxlen = TRX_MAX_LEN;
 	struct trx_header *p;
+	struct trx_header trxtemp;
+	memset(&trxtemp,0,sizeof(struct trx_header));
+	
+	struct {
+		uint8_t version[4];	/* Firmware version */
+		uint8_t prod_id[12];	/* Product Id */
+		uint8_t comp_hw[4][4];	/* Compatible hw list maj-min min/maj-min max */
+		uint8_t	pad[32];	/* Padding */
+	} asus = {
+		.prod_id    = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, /* jc: initialize .prod_id */
+		.version 	= { 1, 9, 2, 7 }, /* version is set to 1.9.2.7 by default */
+		.comp_hw[0]	= { 0, 2, 2, 99 } /* hardcoded hw compat list 0.02 - 2.99 */
+	};
 
-	fprintf(stderr, "mjn3's trx replacement - v0.81.1\n");
-
-	if (!(buf = malloc(maxlen))) {
-		fprintf(stderr, "malloc failed\n");
-		return EXIT_FAILURE;
-	}
-
-	p = (struct trx_header *) buf;
-
-	p->magic = STORE32_LE(TRX_MAGIC);
-	cur_len = sizeof(struct trx_header);
-	p->flag_version = STORE32_LE((TRX_VERSION << 16));
-
-	in = NULL;
-	i = 0;
-
-	while ((c = getopt(argc, argv, "-:o:m:a:b:")) != -1) {
-		printf("opt %c\n", c);
+	fprintf(stderr, "mjn3's trx replacement - v0.90, modified to pack ASUS compatible trx\n");
+	
+	while ((c = getopt(argc, argv, "b:o:m:p:v:")) != -1) {
 		switch (c) {
+			/* jc */
+			case 'b':			
+				boolSegmentSizesGiven=1;			 			
+				trxtemp.offsets[nSegementCount++]=STORE32_LE(strtoul(optarg, &e, 0));
+				if ((e == optarg) || *e) 
+				{
+					fprintf(stderr, "illegal numeric string\n");
+					usage();
+				}			
+				break;
+			/* jc end */			
 			case 'o':
 				ofn = optarg;
-				if (ofn && !(out = fopen(ofn, "w"))) {
-					fprintf(stderr, "can not open \"%s\" for writing\n", ofn);
-					usage();
-				}
-
 				break;
 			case 'm':
 				errno = 0;
@@ -123,39 +192,27 @@ int main(int argc, char **argv)
 					fprintf(stderr, "maxlen too small (or wrapped)\n");
 					usage();
 				}
-				if (maxlen > TRX_MAX_LEN) {
-					fprintf(stderr, "WARNING: maxlen exceeds default maximum!  Beware of overwriting nvram!\n");
-				}
-				if (!(buf = realloc(buf,maxlen))) {
-					fprintf(stderr, "realloc failed");
-					return EXIT_FAILURE;
-				}
 				break;
-			case 'a':
-				errno = 0;
-				n = strtoul(optarg, &e, 0);
-				if (errno || (e == optarg) || *e) {
-					fprintf(stderr, "illegal numeric string\n");
+			case 'p':
+				if ((n = strlen(optarg)) > sizeof(asus.prod_id)) {
+					fprintf(stderr, "product id too long\n");
 					usage();
 				}
-				if (cur_len & (n-1)) {
-					n = n - (cur_len & (n-1));
-					memset(buf + cur_len, 0, n);
-					cur_len += n;
-				}
+				memset(asus.prod_id, ' ', sizeof(asus.prod_id));
+				memcpy(asus.prod_id, optarg, n);
 				break;
-			case 'b':
-				errno = 0;
-				n = strtoul(optarg, &e, 0);
-				if (errno || (e == optarg) || *e) {
-					fprintf(stderr, "illegal numeric string\n");
-					usage();
+			case 'v':
+				for (n = 0; n < sizeof(asus.version) / sizeof(asus.version[0]); n++)
+				{
+					if (n != 0 && optarg[0] == '.' && optarg[1]) optarg++;
+					else if (n != 0) break;
+					
+					asus.version[n] = strtoul(optarg, &optarg, 10);
 				}
-				if (n < cur_len) {
-					fprintf(stderr, "WARNING: current length exceeds -b %d offset\n",n);
-				} else {
-					memset(buf + cur_len, 0, n - cur_len);
-					cur_len = n;
+				if (*optarg) 
+				{
+					fprintf(stderr, "invalid version string\n");
+					usage();
 				}
 				break;
 			default:
@@ -163,38 +220,94 @@ int main(int argc, char **argv)
 		}
 	}
 
-	argc -= optind;
-	argv += optind;
-
-	int files;
-	for (files = 0; files < argc; files++ ) {
-				printf("file %s\n", argv[files]);
-				p->offsets[i++] = STORE32_LE(cur_len);
-
-				if (!(in = fopen(argv[files], "r"))) {
-					fprintf(stderr, "can not open \"%s\" for reading\n", argv[files]);
-					usage();
-				}
-				n = fread(buf + cur_len, 1, maxlen - cur_len, in);
-				if (!feof(in)) {
-					fprintf(stderr, "fread failure or file \"%s\" too large\n",argv[files]);
-					fclose(in);
-					return EXIT_FAILURE;
-				}
-				fclose(in);
-#undef  ROUND
-#define ROUND 4
-				if (n & (ROUND-1)) {
-					memset(buf + cur_len + n, 0, ROUND - (n & (ROUND-1)));
-					n += ROUND - (n & (ROUND-1));
-				}
-				cur_len += n;
-
+	if (ofn && !(out = fopen(ofn, "w"))) 
+	{
+		fprintf(stderr, "can not open \"%s\" for writing\n", ofn);
+		usage();
 	}
 
-	if (!in) {
-		fprintf(stderr, "we require atleast one filename\n");
+	if (optind == argc) 
+	{
+		fprintf(stderr, "we require at least one arg\n");
 		usage();
+	}
+
+	if (argc - optind > 3) 
+	{
+		fprintf(stderr, "too many args: %d > 3\n", argc - optind);
+		usage();
+	}
+
+	if (maxlen > TRX_MAX_LEN) 	
+	{
+		fprintf(stderr, "WARNING: maxlen exceeds default maximum!  Beware of overwriting nvram!\n");
+	}
+
+	if (!(buf = malloc(maxlen))) 
+	{
+		fprintf(stderr, "malloc failed\n");
+		return EXIT_FAILURE;
+	}
+	memset(buf,0,maxlen); /* jc */
+
+	p = (struct trx_header *) buf;
+	memcpy(p,&trxtemp,sizeof(struct trx_header)); /* jc */
+	p->magic = STORE32_LE(TRX_MAGIC);
+	cur_len = sizeof(struct trx_header);
+	p->flag_version = STORE32_LE((TRX_VERSION << 16));
+
+	i = 0;
+
+	while (optind < argc) {		
+		/* jc */
+		if(!READ32_LE(p->offsets[i])) 
+		{			
+			p->offsets[i] = STORE32_LE(cur_len);
+		}
+		else
+		{			
+			if(cur_len>READ32_LE(p->offsets[i]))
+			{
+				fprintf(stderr, "offset too large\n");
+				return EXIT_FAILURE;			
+			}
+			cur_len=READ32_LE(p->offsets[i]);
+		}
+		/* jc end */
+
+		if (!(in = fopen(argv[optind], "r"))) {
+			fprintf(stderr, "can not open \"%s\" for reading\n", argv[optind]);
+			usage();
+		}			
+
+		n = fread(buf + cur_len, 1, maxlen - cur_len, in);
+		if (!feof(in)) {
+			fprintf(stderr, "fread failure or file \"%s\" too large cur:%d max: %d\n",
+					argv[optind], cur_len, maxlen);
+			fclose(in);
+			return EXIT_FAILURE;
+		}
+
+		fclose(in);
+		
+		++optind;
+
+		if (optind < argc) {
+#undef  ROUND
+#define ROUND 4
+			if (n & (ROUND-1)) {
+				memset(buf + cur_len + n, 0, ROUND - (n & (ROUND-1)));
+				n += ROUND - (n & (ROUND-1));
+			}
+		}
+
+		cur_len += n;
+		i++;
+	}
+	
+	/* reserve space for asus footer */
+	if (asus.prod_id[0]) {
+		cur_len += sizeof(asus);
 	}
 
 #undef  ROUND
@@ -205,6 +318,11 @@ int main(int argc, char **argv)
 		cur_len += ROUND - n;
 	}
 
+	/* add asus footer */
+	if (asus.prod_id[0]) {
+		memcpy(buf + cur_len - sizeof(asus), &asus, sizeof(asus));
+	}
+	
 	p->crc32 = crc32buf((char *) &p->flag_version,
 						cur_len - offsetof(struct trx_header, flag_version));
 	p->crc32 = STORE32_LE(p->crc32);
