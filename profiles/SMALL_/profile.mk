@@ -5,19 +5,36 @@
 
 WORLD_SUBDIRS_LIB+= \
 libalias \
+libbsm \
 libc \
 libedit \
+libexpat \
 libcrypt \
-libmd \
+libipsec \
+libipx \
+libjail \
 libkiconv \
 libkvm \
-libexpat \
+libmd \
+libmemstat \
 msun \
 libsbuf \
 libthr \
 libutil \
 libz \
 ncurses
+
+WORLD_SUBDIRS+= \
+secure/lib/libcrypto \
+secure/lib/libssl
+
+# Compile ping without libipsec and ifconfig without libjail,libipx
+# "libcrypto.so.6" not found, required by "bsdtar"
+# "libssl.so.6" not found, required by "fetch"
+# "libbsm.so.3" not found, required by "groups"
+# "libbsm.so.3" not found, required by "id"
+# "libbsm.so.3" not found, required by "login"
+# "libmemstat.so.3" not found, required by "netstat"
 
 #libgcc_s.so.1
 
@@ -48,6 +65,7 @@ uuidgen
 WORLD_SUBDIRS_SBIN+= \
 dmesg \
 ifconfig \
+init \
 ipfw \
 kldload \
 kldstat \
