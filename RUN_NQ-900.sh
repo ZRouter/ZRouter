@@ -16,5 +16,5 @@ SRCCONF=/dev/null
 export __MAKE_CONF
 export SRCCONF
 
-make TARGET_VENDOR=NorthQ TARGET_DEVICE=NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ zhttpd" kernel-build kernel-install world-build world-install rootfs.iso.ulzma kernel_bin_gz_trx 2>&1 | tee $0.${DATE}.log
+make TARGET_VENDOR=NorthQ TARGET_DEVICE=NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ zhttpd" kernel-build kernel-install world-build world-install fwimage 2>&1 | tee $0.${DATE}.log
 

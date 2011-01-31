@@ -259,10 +259,11 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
 all:	world kernel ports
-
+IMAGE_SUFFIX?=trx
 ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
+NEW_IMAGE=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 
 IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
 
@@ -292,13 +293,13 @@ rootfs:
 	cp -R ${WORLDDESTDIR} ${NEW_ROOTFS}
 	rm -rf `find ${NEW_ROOTFS} ${ROOTFS_RMLIST}`
 
-rootfs.iso:	rootfs
+rootfs.iso ${NEW_ROOTFS}.iso:	rootfs
 	PATH=${IMAGE_BUILD_PATHS} makefs -t cd9660 -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
 
-rootfs.iso.ulzma:	rootfs.iso
+rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	${NEW_ROOTFS}.iso
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
 #
@@ -362,6 +363,17 @@ kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
 # XXX: temporary
 kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz
 	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
+
+
+${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
+	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
+	#truncate -s 1834980 ${NEW_KERNEL}.bin.gz.sync
+	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
+	truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
+
+fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+	/linux/home/ray/firmware_mod_kit/src/asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+
 
 
 .include <bsd.obj.mk>
