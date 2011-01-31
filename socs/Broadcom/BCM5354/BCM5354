@@ -132,7 +132,7 @@ options         MROUTING                # Multicast routing
 #options 	BOOTP_WIRED_TO=bfe0
 #options 	BOOTP_COMPAT
 #options		ROOTDEVNAME=\"nfs:192.168.0.90:/usr/home/ray/Projects/MIPS/FreeBSD/rootfs-mips\"
-options		ROOTDEVNAME=\"cd9660:/dev/map/rootfs.ulzma\"
+options		ROOTDEVNAME=\"cd9660:/dev/map/rootfs.uncompress\"
 
 
 

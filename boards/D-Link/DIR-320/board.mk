@@ -25,7 +25,7 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 # Builded modules
-KERNCONF_MAKEOPTIONS+=	"MODULES_OVERRIDE=\"ipfw usb/umass usb/uplcom usb/u3g\""
+KERNCONF_MAKEOPTIONS+=	"MODULES_OVERRIDE=\"ipfw usb/umass usb/uplcom usb/u3g dummynet\""
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
