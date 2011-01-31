@@ -47,26 +47,26 @@ KERNEL_HINTS_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}.hints
 KERNEL_CONFIG_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}
 
 kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
-	@echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
-	@echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
-	@echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
-	@echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
-	@echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
-	@echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
+	echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
+	echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
+	echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
+	echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
+	echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
+	echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
 .for makeoption in ${KERNCONF_MAKEOPTIONS}
-	@echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
+	echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# files section" >> ${KERNEL_CONFIG_FILE}
+	echo "# files section" >> ${KERNEL_CONFIG_FILE}
 .for file in ${KERNCONF_FILES}
-	@echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
+	echo "files	\"${file}\"" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# options section" >> ${KERNEL_CONFIG_FILE}
+	echo "# options section" >> ${KERNEL_CONFIG_FILE}
 .for option in ${KERNCONF_OPTIONS}
-	@echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
+	echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
 .endfor
-	@echo "# devices section" >> ${KERNEL_CONFIG_FILE}
+	echo "# devices section" >> ${KERNEL_CONFIG_FILE}
 .for device in ${KERNCONF_DEVICES}
-	@echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
+	echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
 # Generate .hints file
@@ -260,7 +260,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 all:	world kernel ports
 
-ZTOOLS_PATH=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_ztools
+ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
@@ -356,6 +356,12 @@ kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
 	    -d ${KTFTP}/kernel.bin.${KERNEL_COMPRESSION_TYPE} \
 	    ${KTFTP}/kernel.${KERNEL_COMPRESSION_TYPE}.uboot
 
+kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
+	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
+
+# XXX: temporary
+kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz
+	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
 
 
 .include <bsd.obj.mk>
