@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# PROVIDE: hostname
+# REQUIRE: FILESYSTEMS
+# BEFORE:  NETWORKING
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="hostname"
+start_cmd="hostname_start"
+stop_cmd=":"
+
+hostname_start()
+{
+	if [ -n "`/bin/hostname -s`" ]; then
+		return
+	fi
+
+	check_startmsgs && echo -n "Setting hostname: ${hostname}"
+	/bin/hostname "${hostname}"
+	check_startmsgs && echo '.'
+}
+
+load_rc_config $name
+run_rc_command "$1"
