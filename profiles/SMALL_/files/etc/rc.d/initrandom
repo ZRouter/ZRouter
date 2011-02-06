@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# PROVIDE: initrandom
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name="initrandom"
+start_cmd="initrandom_start"
+stop_cmd=":"
+
+initrandom_start()
+{
+	soft_random_generator=`sysctl kern.random 2>/dev/null`
+
+	echo -n 'Entropy harvesting:'
+
+	if [ \! -z "${soft_random_generator}" ] ; then
+
+		if [ -w /dev/random ]; then
+				${SYSCTL_W} kern.random.sys.harvest.interrupt=1 >/dev/null
+				${SYSCTL_W} kern.random.sys.harvest.ethernet=1 >/dev/null
+				${SYSCTL_W} kern.random.sys.harvest.point_to_point=1 >/dev/null
+		fi
+
+		# XXX temporary until we can improve the entropy
+		# harvesting rate.
+		# Entropy below is not great, but better than nothing.
+		# This unblocks the generator at startup
+		( ps -fauxww; sysctl -a; date; df -ib; dmesg; ps -fauxww ) \
+		    | dd of=/dev/random bs=8k 2>/dev/null
+		cat /bin/ls | dd of=/dev/random bs=8k 2>/dev/null
+
+		echo -n ' kickstart'
+	fi
+
+	echo '.'
+}
+
+load_rc_config random
+run_rc_command "$1"

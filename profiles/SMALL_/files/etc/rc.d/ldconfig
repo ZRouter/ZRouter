@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+
+# PROVIDE: ldconfig
+
+. /etc/rc.subr
+
+name="ldconfig"
+ldconfig_command="/sbin/ldconfig"
+start_cmd="ldconfig_start"
+stop_cmd=":"
+
+ldconfig_start()
+{
+	local _files _ins
+
+	_ins=
+	ldconfig=${ldconfig_command}
+	checkyesno ldconfig_insecure && _ins="-i"
+	if [ -x "${ldconfig_command}" ]; then
+		_LDC="/lib /usr/lib"
+		for i in ${ldconfig_local_dirs}; do
+			if [ -d "${i}" ]; then
+				_files=`find ${i} -type f`
+				if [ -n "${_files}" ]; then
+					ldconfig_paths="${ldconfig_paths} `cat ${_files} | sort -u`"
+				fi
+			fi
+		done
+		for i in ${ldconfig_paths} /etc/ld-elf.so.conf; do
+			if [ -r "${i}" ]; then
+				_LDC="${_LDC} ${i}"
+			fi
+		done
+		check_startmsgs && echo 'ELF ldconfig path:' ${_LDC}
+		${ldconfig} -elf ${_ins} ${_LDC}
+
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"
