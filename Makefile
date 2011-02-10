@@ -105,12 +105,6 @@ _KERNEL_BUILD_ENV+="KMODOWN=${KMODOWN}"
 _KERNEL_BUILD_ENV+="KMODGRP=${KMODGRP}"
 #XXX_END Only for testing
 
-kernel-install: kernel-install-dir
-.if !empty(KERNELDESTDIR)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
-.else
-.error "KERNELDESTDIR must be set for kernel-install, since we always do cross-build"
-.endif
 
 kernel:	kernel-toolchain kernel-build kernel-install
 .ORDER:	kernel-toolchain kernel-build kernel-install
@@ -196,9 +190,10 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
+FREEBSD_BUILD_ENV_VARS_SECOND!=${FREEBSD_BUILD_ENV_VARS}
 
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
-.for var in ${FREEBSD_BUILD_ENV_VARS}
+.for var in ${FREEBSD_BUILD_ENV_VARS_SECOND}
 FREEBSD_BUILD_ENV_${var}
 .endfor
 
@@ -290,6 +285,12 @@ ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 # Move kernel out of rootfs
 #		world kernel ports
 rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
+	for d in ${ROOTFS_COPY_DIRS} ; do \
+		for f in `( cd $${d} ; find . -type f )` ; do \
+			mkdir -p `dirname ${WORLDDESTDIR}/$${f}` ; \
+			cp $${d}/$${f} ${WORLDDESTDIR}/$${f} ; \
+		done ; \
+	done
 	rm -f ${NEW_KERNEL}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
@@ -297,66 +298,96 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	rm -rf `find ${NEW_ROOTFS} ${ROOTFS_RMLIST}`
 
 ${ROOTFS_DEPTEST}:		world
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${KERNELDESTDIR}/boot/kernel/kernel:	kernel
+${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel
+	echo "++++++++++++++ Making $@ ++++++++++++++"
+	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
+
+#${FREEBSD_BUILD_ENV__SHLIBDIRPREFIX}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel
+
+kernel-install ${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
+	echo "++++++++++++++ Making $@ ++++++++++++++"
+.if !empty(KERNELDESTDIR)
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
+.else
+.error "KERNELDESTDIR must be set for kernel-install, since we always do cross-build"
+.endif
 
 ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
+	echo "++++++++++++++ Making $@ ++++++++++++++"
+	rm -f ${NEW_KERNEL}
+	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 
 rootfs.iso ${NEW_ROOTFS}.iso:	rootfs
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -t cd9660 -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
 
 ${ZTOOLS_PATH}/oldlzma:
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	mkdir -p ${ZTOOLS_PATH}
 	${MAKE} -C ${ZROUTER_ROOT}/tools/oldlzma/ DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install clean
 
 oldlzma:	${ZTOOLS_PATH}/oldlzma
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 
 rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
 #
 # Convert kernel from ELF to BIN
 #
-kernel_bin ${NEW_KERNEL}.bin:	${NEW_KERNEL}
+#kernel_bin 
+${NEW_KERNEL}.bin:	${NEW_KERNEL}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
 
 #
 # Compress kernel with oldlzma
 #
 kernel_bin_oldlzma ${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma	${ZTOOLS_PATH}/packimage	${ZTOOLS_PATH}/trx
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
 
 kernel_oldlzma ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
 
 #
 # Compress kernel with xz
 #
 kernel_bin_xz ${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.xz
 
 kernel_xz ${NEW_KERNEL}.xz:		${NEW_KERNEL}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.xz
 
 #
 # Compress kernel with bz2
 #
 kernel_bin_bz2 ${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.bz2
 
 kernel_bz2 ${NEW_KERNEL}.bz2:		${NEW_KERNEL}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.bz2
 
 #
 # Compress kernel with gz
 #
 kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.gz
 
 kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.gz
 
 UBOOT_KERNEL_LOAD_ADDRESS=80001000
@@ -364,6 +395,7 @@ UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
 
 
 kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	uboot_mkimage -A ${TARGET} -O linux -T kernel \
 	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \
 	    -a ${UBOOT_KERNEL_LOAD_ADDRESS} \
@@ -373,19 +405,23 @@ kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
 	    ${KTFTP}/kernel.${KERNEL_COMPRESSION_TYPE}.uboot
 
 kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
 
 # XXX: temporary
 kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
 
 ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
 	#truncate -s 1834980 ${NEW_KERNEL}.bin.gz.sync
 	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
 	truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
 
 fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+	echo "++++++++++++++ Making $@ ++++++++++++++"
 	/linux/home/ray/firmware_mod_kit/src/asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
 .include <bsd.obj.mk>
