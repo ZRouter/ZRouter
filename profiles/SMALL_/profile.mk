@@ -8,6 +8,7 @@ libalias \
 libbsm \
 libc \
 libedit \
+libelf \
 libexpat \
 libcrypt \
 libipsec \
@@ -18,7 +19,9 @@ libkvm \
 libmd \
 libmemstat \
 msun \
+libpmc \
 libsbuf \
+libtacplus \
 libthr \
 libutil \
 libz \
@@ -118,8 +121,14 @@ WORLD_SUBDIRS_GNU_USR_BIN+= \
 sort
 
 WORLD_SUBDIRS_GNU_LIB+= \
+csu \
 libgcc \
-libregex
+libregex \
+libreadline \
+libssp \
+libstdc++
+# XXX: libreadline must be replaced with libedit
+
 
 WORLD_SUBDIRS_LIB+= \
 libfetch \
