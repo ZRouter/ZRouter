@@ -134,6 +134,7 @@ WORLD_SUBDIRS_LIB+= \
 libfetch \
 libradius \
 libarchive \
+libmp \
 libnetgraph \
 libpam/libpam \
 libpam/modules/pam_unix \
