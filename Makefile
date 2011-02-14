@@ -53,6 +53,13 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
 	echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
 	echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
+	if [ "x${KERNCONF_MODULES_OVERRIDE}" = "xnone" ] ; then \
+		echo "makeoptions	MODULES_OVERRIDE=\"\""  >> ${KERNEL_CONFIG_FILE} ; \
+	else \
+		if [ "x${KERNCONF_MODULES_OVERRIDE}" != "x" ] ; then \
+		echo "makeoptions	MODULES_OVERRIDE=\"${KERNCONF_MODULES_OVERRIDE}\""  >> ${KERNEL_CONFIG_FILE} ; \
+		fi ; \
+	fi
 .for makeoption in ${KERNCONF_MAKEOPTIONS}
 	echo "makeoptions	${makeoption}" >> ${KERNEL_CONFIG_FILE}
 .endfor
@@ -67,6 +74,9 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "# devices section" >> ${KERNEL_CONFIG_FILE}
 .for device in ${KERNCONF_DEVICES}
 	echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
+.endfor
+.for nodevice in ${KERNCONF_NODEVICES}
+	echo "nodevice	${nodevice}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
 # Generate .hints file
@@ -142,6 +152,9 @@ _WORLD_INSTALL_ENV+="WITHOUT_CDDL=yes"
 _WORLD_BUILD_ENV+="WITHOUT_NIS=yes"
 _WORLD_INSTALL_ENV+="WITHOUT_NIS=yes"
 
+_WORLD_BUILD_ENV+="WITHOUT_BLUETOOTH=yes"
+_WORLD_INSTALL_ENV+="WITHOUT_BLUETOOTH=yes"
+
 _WORLD_BUILD_ENV+="WITHOUT_KERBEROS=yes"
 _WORLD_BUILD_ENV+="WITHOUT_KERBEROS_SUPPORT=yes"
 _WORLD_INSTALL_ENV+="WITHOUT_KERBEROS=yes"
@@ -202,10 +215,13 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
-FREEBSD_BUILD_ENV_VARS_SECOND!=${FREEBSD_BUILD_ENV_VARS}
+#.warning ${FREEBSD_BUILD_ENV_VARS}
+#FREEBSD_BUILD_ENV_VARS_SECOND!=${FREEBSD_BUILD_ENV_VARS}
+#.warning ${FREEBSD_BUILD_ENV_VARS_SECOND}
 
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
-.for var in ${FREEBSD_BUILD_ENV_VARS_SECOND}
+#.for var in ${FREEBSD_BUILD_ENV_VARS_SECOND}
+.for var in ${FREEBSD_BUILD_ENV_VARS}
 FREEBSD_BUILD_ENV_${var}
 .endfor
 
@@ -275,6 +291,7 @@ NEW_IMAGE=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
 
 .include "share/mk/zrouter.local.tools.mk"
+.include "share/mk/zrouter.base.tools.mk"
 
 ROOTFS_RMLIST= \
     \\( \\( -type f -or -type l \\) -and \
