@@ -1,0 +1,58 @@
+
+MPD MULTI-LINK PPP DAEMON FOR FREEBSD
+
+Version @VERSION@
+Written by Archie Cobbs <archie@FreeBSD.org>
+       and Alexander Motin <mav@FreeBSD.org>
+
+* WHAT IS IT?
+
+  A multi-link PPP daemon based on netgraph(4), combining the
+  configurability and flexibility of a user-mode with the speed and 
+  reliability of a kernel-mode.
+  Mpd supports thousands of Sync, Async, PPTP, L2TP, PPPoE, TCP and UDP 
+  links in client, server and access concentrator (LAC/PAC) modes.
+
+* HOW STABLE IS IT?
+
+  Most of this code has been thoroughly tested and production ready.
+
+* HOW DO I BUILD AND INSTALL IT?
+
+  cd /usr/ports/net/mpd5
+  make all install
+
+* HOW DO I SET IT UP?
+
+  Complete documentation is included in the "doc" subdirectory.
+
+  You will need to create your own versions of the four required
+  configuration files in /usr/local/etc/mpd5:
+
+    mpd.conf    - General configuration
+    mpd.script  - Modem scripts
+    mpd.secret  - Login/password pairs
+
+  If you're familiar with FreeBSD's "ppp" user-mode daemon, the
+  configuration method is similar: commands are read from a file.
+
+  Check the "conf" subdirectory for configuration file examples.
+
+  Then append the following lines to /etc/syslog.conf and create an
+  empty /var/log/mpd.log file to get proper logging:
+
+    !mpd
+    *.*                        /var/log/mpd.log
+
+  Add a corresponding line to /etc/newsyslog.conf as well to get
+  proper log rotation.
+
+* WHAT'S THE COPYRIGHT STATUS?
+
+  Berkeley style: see ``COPYRIGHT.iij'' and ``COPYRIGHT.whistle''.
+
+* WHERE CAN I GO FOR HELP?
+
+  MPD is now hosted on SourceForge:
+  http://sourceforge.net/projects/mpd
+

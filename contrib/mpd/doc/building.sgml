@@ -1,0 +1,48 @@
+<!-- $Id: building.sgml,v 1.7 2007/09/22 14:14:32 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Building mpd<label id="building"></heading>
+
+  <p>
+  If you choose to build mpd yourself to customize it, the
+  process is straightforward. First, edit the <tt>Makefile</tt>
+  to define (or undefine) the various device types and options
+  you want to support. Run 'configure' script and then type
+  <tt>make depend all</tt> to rebuild the binary.
+
+  The various build-time definitions in the Makefile are below:
+
+  <descrip>
+
+  <tag><tt>
+  MPD_CONF_DIR
+  </tt></tag>
+
+  The default configuration directory where mpd looks for
+  <tt>mpd.conf</tt>, etc.
+
+  <tag><tt>PHYSTYPE_MODEM</tt></tag><p>
+  <tag><tt>PHYSTYPE_TCP</tt></tag><p>
+  <tag><tt>PHYSTYPE_UDP</tt></tag><p>
+  <tag><tt>PHYSTYPE_NG_SOCKET</tt></tag><p>
+  <tag><tt>PHYSTYPE_PPTP</tt></tag><p>
+  <tag><tt>PHYSTYPE_L2TP</tt></tag><p>
+  <tag><tt>PHYSTYPE_PPPOE</tt></tag><p>
+
+  Define these to include support for the corresponding device type.
+
+  <tag><tt>ENCRYPTION_DES</tt></tag><p>
+
+  These enable support for the corresponding encryption types.
+
+  <tag><tt>
+  SYSLOG_FACILITY
+  </tt></tag>
+
+  Mpd normally logs via <tt>syslog(3)</tt> using the facility
+  <tt>LOG_DAEMON</tt>. You can customize the facility here.
+
+  </descrip>
+

@@ -1,0 +1,93 @@
+<!-- $Id: refs.sgml,v 1.12 2009/10/03 10:23:43 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>References<label id="refs"></heading>
+
+  <p>
+  The PPP protocol is documented in a slew of RFC's.
+  Some of these are listed below.
+
+  <p>
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1332.txt" name="RFC 1332 The PPP Internet Protocol Control Protocol (IPCP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1334.txt" name="RFC 1334 PPP Authentication Protocols">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1570.txt" name="RFC 1570 PPP LCP Extensions">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1661.txt" name="RFC 1661 The Point-to-Point Protocol (PPP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1662.txt" name="RFC 1662 PPP in HDLC-like Framing">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1877.txt" name="RFC 1877 PPP Internet Protocol Control Protocol Extensions for Name Server Addresses">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1962.txt" name="RFC 1962 The PPP Compression Control Protocol (CCP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1968.txt" name="RFC 1968 The PPP Encryption Control Protocol (ECP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1969.txt" name="RFC 1969 The PPP DES Encryption Protocol (DESE)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1973.txt" name="RFC 1973 PPP in Frame Relay">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1974.txt" name="RFC 1974 PPP Stac LZS Compression Protocol">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1978.txt" name="RFC 1978 PPP Predictor Compression Protocol">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1979.txt" name="RFC 1979 PPP Deflate Protocol">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1990.txt" name="RFC 1990 The PPP Multilink Protocol (MP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc1994.txt" name="RFC 1994 PPP Challenge Handshake Authentication Protocol (CHAP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2118.txt" name="RFC 2118 Microsoft Point-To-Point Compression (MPPC) Protocol">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2284.txt" name="RFC 2284 EAP">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2419.txt" name="RFC 2419 The PPP DES Encryption Protocol, Version 2 (DESE-bis)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2427.txt" name="RFC 2427 Multiprotocol Interconnect over Frame Relay">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2433.txt" name="RFC 2433 Microsoft PPP CHAP Extensions">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2516.txt" name="RFC 2516 A Method for Transmitting PPP Over Ethernet (PPPoE)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2548.txt" name="RFC 2548 Microsoft Vendor-specific RADIUS Attributes">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2637.txt" name="RFC 2637 Point-to-Point Tunneling Protocol (PPTP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2661.txt" name="RFC 2661 Layer Two Tunneling Protocol (L2TP)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2865.txt" name="RFC 2865 Remote Authentication Dial In User Service (RADIUS)">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2866.txt" name="RFC 2866 RADIUS Accounting">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2868.txt" name="RFC 2868 Attributes for Tunnel Protocol Support">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc2869.txt" name="RFC 2869 RADIUS Extensions">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc3576.txt" name="RFC 3576 Dynamic Authorization Extensions to RADIUS">
+
+<htmlurl url="http://www.ietf.org/rfc/rfc3579.txt" name="RFC 3579 RADIUS EAP">
+
+
+
+  <sect><heading>Credits<label id="credits"></heading>
+
+  <p>
+  <itemize>
+  <item>
+EAP, RADIUS enhancements, basework for Mpd4 was sponsored by <htmlurl url="http://www.surfnet.nl/" name="SURFnet">.
+  </item>
+  <item>
+L2TP enhancements were sponsored by <htmlurl url="http://www.scom.ca/" name="Scom.ca Internet Services Inc">.
+  </item>
+  <item>
+Built-in RADIUS server support was sponsored by <htmlurl url="http://ufanet.ru/" name="JSC 'Ufanet'">.
+  </item>
+  <item>
+Special thanks to <htmlurl url="http://optima.ua/" name="JSC 'Optima-Telecom'"> for a long-time support and production testing.
+  </item>
+  </itemize>
+  <p>

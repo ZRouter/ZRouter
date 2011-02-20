@@ -1,0 +1,44 @@
+<!-- $Id: udp.sgml,v 1.5 2007/09/28 21:47:53 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>UDP device type commands<label id="udp"></heading>
+
+  <p>
+  This chapter describes commands that are specific to UDP type links.
+  These commands apply to the currently active link, and are only
+  valid if the currently active link has type <bf>udp</bf>.
+
+  <p>
+  It is suggested that the <tt>set iface mtu</tt> command be used
+  when this link type is in use to avoid IP fragmentation if you want
+  to get something better channel utilization.
+
+  <p>
+  <bf>Note:</bf> Technically this device type is not completely correct, 
+  because PPP links are not allowed to re-order frames, yet UDP packets can
+  be delivered out of order. Therefore, if you use this link type you
+  should not enable multi-link PPP, PPP encryption, or PPP compression.
+  Otherwise, out of order frames will be dropped, leading to performance
+  degradation.
+
+<descrip>
+
+<tag><tt>
+set udp self <em>ipaddr</em> [ <em>port</em> ]
+</tt></tag>
+
+Sets the local IP address and port for the UDP connection.
+If none is specified, any suitable local IP address is used.
+Port specification is required for incoming connection accepting.
+
+<tag><tt>
+set udp peer <em>ipaddr</em> [ <em>port</em> ]
+</tt></tag>
+
+Sets the peer IP address and port for the UDP connection.
+Address and port specification is required for connection originating.
+For incoming connections it is not required, but can limit who can connect to us.
+
+</descrip>

@@ -1,0 +1,156 @@
+<!-- $Id: compression.sgml,v 1.23 2009/10/03 10:23:43 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Compression (CCP) layer<label id="compression"></heading>
+
+  <p>
+
+  This chapter describes commands that configure the Compression Control
+  Protocol (CCP) layer. All of these commands apply to the currently
+  active bundle.
+  <p>
+  To use CCP you should enable compression at the bundle level.
+  To allow compression to be negotiated you should enable here some of 
+  compression protocols.
+
+<descrip>
+
+<tag><tt>set ccp accept <em>option ...</em> </tt></tag><p>
+<tag><tt>set ccp deny <em>option ...</em> </tt></tag><p>
+<tag><tt>set ccp enable <em>option ...</em> </tt></tag><p>
+<tag><tt>set ccp disable <em>option ...</em> </tt></tag><p>
+<tag><tt>set ccp yes <em>option ...</em> </tt></tag><p>
+<tag><tt>set ccp no <em>option ...</em> </tt></tag><p>
+
+These commands configure various CCP options. Each direction of
+traffic (transmit and receive) is independent from the other.
+All options default to <tt><bf>disable</bf></tt> and <tt><bf>deny</bf></tt>.
+
+The <tt><bf>enable</bf></tt> and <tt><bf>disable</bf></tt> commands determine
+whether we desire the corresponding option on received data.
+The <tt><bf>accept</bf></tt> and <tt><bf>deny</bf></tt> commands determine
+whether we will allow the peer to request the corresponding option
+(which we must enable on our transmitted data).
+
+<p>
+The <bf><tt>yes</tt></bf> command is the same as
+<tt><bf>enable</bf></tt> and <tt><bf>accept</bf></tt>.
+The <bf><tt>no</tt></bf> command is the same as
+<tt><bf>disable</bf></tt> and <tt><bf>deny</bf></tt>.
+
+</descrip>
+
+<p>
+The options available at the CCP layer are listed below.
+
+<descrip>
+
+<tag><tt>pred1</tt></tag>
+
+This option enables Predictor-1 (RFC 1978) compression.
+Predictor-1 compression is much faster then Deflate.
+<P>
+This option requires ng_pred1 Netgraph node type, which is present
+since FreeBSD 6.2-STABLE of 2007-01-28.
+If there is no ng_pred1 in system, this algorithm is supported
+in user-level, but will consume more CPU power.
+
+The default is disable.
+
+<tag><tt>deflate</tt></tag>
+
+This option enables Deflate (RFC 1979) compression.
+Deflate compression usually gives better compression ratio then Predictor-1.
+<P>
+This option requires ng_deflate Netgraph node type, which is present
+since FreeBSD 6.2-STABLE of 2007-01-28.
+
+The default is disable.
+
+<tag><tt>mppc</tt></tag>
+
+This option enables MPPC compression/encryption subprotocol.
+For details see <ref id="mppc" name="the MPPC protocol chapter">.
+
+The default is disable.
+
+</descrip>
+</p>
+
+  <sect1><heading>MPPC protocol<label id="mppc"></heading>
+<p>  
+Mpd implements Microsoft Point-to-point compression (MPPC)
+CCP subprotol. To enable it, 'mppc' option should be enabled at the CCP layer.
+
+MPPC CCP subprotocol consists of MPPC compression and MPPE encryption parts.
+To make MPPC CCP actually do something you should enable some of them using
+options below.
+  
+<descrip>
+
+<tag><tt>set mppc accept <em>option ...</em> </tt></tag><p>
+<tag><tt>set mppc deny <em>option ...</em> </tt></tag><p>
+<tag><tt>set mppc enable <em>option ...</em> </tt></tag><p>
+<tag><tt>set mppc disable <em>option ...</em> </tt></tag><p>
+<tag><tt>set mppc yes <em>option ...</em> </tt></tag><p>
+<tag><tt>set mppc no <em>option ...</em> </tt></tag><p>
+
+These commands configure various MPPC options.
+
+<tag><tt>compress</tt></tag>
+
+Enables MPPC compression. This is the only compression method supported by 
+Microsoft Windows RAS.
+
+Note: This option requires ng_mppc node to be built with compression support,
+which is disabled by default, requiring external compressor code.
+Open-source implementation of this code, based on RFC2118, could be found
+at http://mavhome.dp.ua/MPPC/. But MPPC compression algorithm itself covered
+by US patent, so you may need to contact Hi/Fn Inc. to obtain their proprietary
+implementation.
+If kernel support is not detected, compression will not be negotiated.
+Use 'show version' command to get actual status.
+
+The default is disable.
+
+<tag><tt>e40</tt></tag>
+
+Enables 40-bit MPPE encryption.
+
+The default is disable.
+
+<tag><tt>e56</tt></tag>
+
+Enables 56-bit MPPE encryption.
+
+The default is disable.
+
+<tag><tt>e128</tt></tag>
+
+Enables 128-bit MPPE encryption.
+
+Note: in order for MPPE encryption to work, MS-CHAPv1 or MS-CHAPv2 auth
+is mandatory, because the MPPE keys are generated using the authentication
+results. If MS-CHAP auth is not used by link, encryption will not be negotiated.
+
+The default is disable.
+
+<tag><tt>stateless</tt></tag>
+
+Enables stateless mode. This mode requires more CPU time and is somewhat
+less secure, but allows faster recovery in the face of lost packets.
+
+The default is disable.
+
+<tag><tt>policy</tt></tag>
+
+If enabled, Mpd uses the MPPE-Types and MPPE-Policy info from the authentication 
+backend.
+
+The default is disable.
+
+</descrip>
+</p>
+

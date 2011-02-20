@@ -1,0 +1,151 @@
+.\"
+.\" Written by Archie Cobbs <archie@freebsd.org>
+.\" Copyright (c) 1995-1999 Whistle Communications, Inc. All rights reserved.
+.\" See ``COPYRIGHT.whistle''
+.\"
+.Dd @DATE@
+.Dt MPD5 8
+.Os
+.Sh NAME
+.Nm mpd5
+.Nd netgraph multi-link PPP daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl bkov
+.Op Fl d Ar directory
+.Op Fl f Ar file
+.Op Fl p Ar pid-file
+.Op Fl s Ar ident
+.Op Ar configuration
+.Sh DESCRIPTION
+.Nm
+is a user mode PPP daemon using the
+.Xr netgraph 4
+networking system.
+By using Netgraph,
+.Nm
+combines the robustness and flexibility of a user-mode PPP implementation
+with the speed and reliability of kernel-mode packet forwarding.
+All PPP negotiation is handled in user level code, while all data
+intensive operations such as encryption, compression, and multi-link
+framing are handled strictly in the kernel.
+Mpd supports several link layer types, a fully event-driven modem chat
+scripting language, and other features.
+.Pp
+.Nm
+creates a
+.Xr ng_ppp 4
+netgraph node that is placed between a
+.Xr ng_iface 4
+netgraph interface one or more link layer devices,
+performing multi-link PPP negotiation and encapsulation. In multi-link PPP a
+.Ar bundle
+is a collection of one or more
+.Ar links 
+between two peers. Each link corresponds to some device (e.g.,
+a modem), and each bundle corresponds to one netgraph interface.
+The idea is to use all of the links, together connected to a remote
+peer also performing multi-link PPP, to utilize their combined
+bandwidth.  Packets routed through the netgraph interface travel in
+multi-link fragments over all of the links.
+Each link is a normal PPP link and can deliver complete packets
+as well, so redundancy is another benefit.
+Attempts to connect two links in the same bundle to different peers,
+or to a peer that is not configured for multi-link PPP, will fail.
+.Pp
+In general, everything is controlled by executing commands which are either
+entered via the console command line or read from a configuration file. If
+.Nm
+is running as a background daemon, the console can be made accessible via
+.Xr telnet 1
+Since commands may apply to a single link, the console prompt always shows the
+.Ar current bundle
+or the
+.Ar current link
+in that bundle. 
+.Sh ON-LINE MANUAL
+Mpd is fully documented in the mpd manual, which is available in HTML.
+The manual can be found in the directory
+.Pa @PREFIX@/share/doc/mpd5 .
+.Sh OPTIONS
+Mpd supports the following command options:
+.Pp
+.Bl -tag -width Ds -compact
+.Pp
+.It Fl b
+.It Fl -background
+.Pp
+Detach from the terminal and run as a background deamon.
+.Pp
+.It Fl d Ar dirname
+.It Fl -directory Ar dirname
+.Pp
+Specify a configuration directory other than the default,
+.Pa @PREFIX@/etc/mpd5 .
+.Pp
+.It Fl f Ar file
+.It Fl -file Ar file
+.Pp
+Specify an initial configuration file other than the default,
+.Pa mpd.conf .
+.Pp
+.It Fl o
+.It Fl -one-shot
+.Pp
+Terminate daemon after the last link shutdown.
+.Pp
+.It Fl p Ar file
+.It Fl -pidfile Ar file
+.Pp
+Specify an lock/process ID storage file other than the default
+.Pa /var/run/mpd.pid .
+.Pp
+.It Fl k
+.It Fl -kill
+.Pp
+Kill any existing
+.Nm
+daemon currently running. The same pidfile must be used.
+.Pp
+.It Fl s Ar ident
+.It Fl -syslog-ident Ar ident
+.Pp
+Identifier to use for
+.Xr syslog 3 .
+.Pp
+.It Fl v
+.It Fl -version
+.Pp
+Display the program version and exit.
+.Pp
+.It Fl h
+.It Fl -help
+.Pp
+Display invocation usage and exit.
+.El
+.Sh FILES
+.Bl -tag -width /usr/local/share/doc/mpdXX -compact
+.It Pa @PREFIX@/share/doc/mpd5
+Directory containing the mpd manual
+.It Pa @PREFIX@/etc/mpd5
+Default configuration file directory
+.It Pa mpd.conf
+Configuration file
+.It Pa mpd.script
+Modem chat scripts
+.It Pa mpd.secret
+Account name, password pairs
+.It Pa /var/run/mpd.pid
+Stored process ID and lock file
+.El
+.Sh SEE ALSO
+.Xr netgraph 4 ,
+.Xr ngctl 8 ,
+.Xr ng_ppp 4 ,
+.Xr ng_iface 4 ,
+.Xr ppp 8 ,
+.Xr pppd 8 .
+.Sh AUTHORS
+.An Archie Cobbs Aq archie@FreeBSD.org
+.An Alexander Motin Aq mav@FreeBSD.org
+.An based on ppp daemon written by Toshiharu OHNO Aq tony-o@iij.ad.jp

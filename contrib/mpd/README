@@ -1,0 +1,26 @@
+Checklist for spinning a new release
+------------------------------------
+
+1. Use "cvs diff -u -r RELEASE_X_XX" to review all changes
+   since the previous list. Make sure all non-trivial changes
+   are noted in the documentation (changes.sgml).
+
+2. Edit src/Makefile and update the VERSION= line if it hasn't
+   already been updated to the next version.
+
+3. Use "cvs update" to ensure you have checked in all local changes.
+
+4. Use "cvs tag -cR RELEASE_X_XY" to put a tag for the new release.
+
+4. In the top level directory:
+
+	make distclean
+	TAG=RELEASE_X_XY make
+
+5. Submit the resulting two files to the ports maintainer:
+
+	mpd-x.xy.tar.gz		Distribution file
+	port.tgz		Updated port
+
+
+$Id: README,v 1.3 2007/02/06 19:17:19 amotin Exp $
