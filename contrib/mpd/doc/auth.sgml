@@ -1,0 +1,578 @@
+<!-- $Id: auth.sgml,v 1.52 2010/08/27 10:06:03 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Authentication, Authorization and Accounting (AAA)<label id="auth"></heading>
+
+<p>
+
+  Mpd currently supports authentication against (tried 
+  in this order) <ref id="extauth" name="external script">,
+  <ref id="radius" name="RADIUS">, PAM, systems password database 
+  (<tt>master.passwd</tt>), OPIE and internal <tt>mpd.secret</tt> file.
+  
+  This chapter describes commands that configure the Authentication 
+  subsystem of LCP layer. All of these commands apply to the currently
+  active link. 
+
+<descrip>
+
+<tag><tt>
+set auth authname <em>login</em>
+</tt></tag>
+
+This command sets the authentication login name associated with
+the link (in multi-link PPP, though each link is authenticated
+individually, they all must use the same login name). The
+<tt><em>login</em></tt> may have a corresponding entry in
+<tt>mpd.secret</tt>. The <tt><em>login</em></tt> and password
+are used when the peer requires us to authenticate ourselves.
+
+<tag><tt>
+set auth password <em>password</em>
+</tt></tag>
+
+This command is normally not necessary. It causes mpd to <em>not</em>
+lookup the password corresponding to <tt><em>login</em></tt>
+in <tt>mpd.secret</tt>, but rather to use
+<tt><em>password</em></tt> instead. If you're too lazy to set up
+<tt>mpd.secret</tt> and are only dialing out, you can use this
+command instead.
+
+<tag><tt>set auth max-logins <em>num</em> [CI]</tt></tag>
+
+Limit the max. amount of concurrent logins with the same username.
+If set to zero, then this feature is disabled. If CI argument is present
+login comparision will ba case insensitive.
+
+<tag><tt>set auth acct-update <em>seconds</em></tt></tag>
+
+Enables periodic accounting updates, if set to a value greater then 
+zero.
+
+<tag><tt>set auth timeout <em>seconds</em></tt></tag>
+
+Sets the timeout for the whole authentication process.
+It defaults to 40 seconds. 
+Under some circumstances the value should be changed; it usually 
+depends on the authentication backend and protocol.
+E.g. when using EAP with a slow RADIUS server this value should be increased.
+
+<tag><tt>
+<newline>set auth extauth-script <em>script</em>
+<newline>set auth extacct-script <em>script</em>
+</tt></tag>
+
+Sets scripts names for external authentication and accounting.
+
+<tag><tt>
+<newline>set auth enable <em>option ...</em>
+<newline>set auth disable <em>option ...</em>
+</tt></tag>
+
+</descrip>
+
+<p>
+
+The options available are:
+
+<descrip>
+
+<tag><tt>internal</tt></tag>
+
+Enables authentication against the <tt>mpd.secret</tt> file.
+
+Default <tt><bf>enable</bf></tt>.
+
+<tag><tt>radius-auth</tt></tag>
+
+Enable authentication via RADIUS. For details see
+<ref id="radius" name="the RADIUS chapter">.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>radius-acct</tt></tag>
+
+Enable per link accounting via RADIUS. For details see
+<ref id="radius" name="the RADIUS chapter">.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>ext-auth</tt></tag>
+
+Enable authentication by calling external script.
+This method pretended to be a fullfeatured alternative to the 
+<tt><bf>radius-auth</bf></tt>. For details see
+<ref id="extauth" name="the External authentication chapter">.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>ext-acct</tt></tag>
+
+Enable accounting by calling external script.
+This method pretended to be a fullfeatured alternative to the 
+<tt><bf>radius-acct</bf></tt>. For details see
+<ref id="extauth" name="the External authentication chapter">.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>pam-auth</tt></tag>
+
+Enables authentication using PAM service "mpd".
+This options can only be used with PAP.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>pam-acct</tt></tag>
+
+Enable accounting using PAM service "mpd".
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>system-auth</tt></tag>
+
+Enables authentication against the systems password database.
+This options can only be used with PAP and MS-CHAP, but not 
+with CHAP-MD5. If you intend to use this with MS-CHAP, then 
+the passwords in the <tt>master.passwd</tt> must be NT-Hashes.
+You can enable this by putting <tt>:passwd_format=nth:</tt> into 
+your <tt>/etc/login.conf</tt>, but you need at least FreeBSD 5.2.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>system-acct</tt></tag>
+
+Enable accounting via utmp/wtmp.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>opie</tt></tag>
+
+Enables authentication using OPIE.
+When using PAP there is nothing more todo. For all other 
+authentication protocols you have to put the username into 
+the <tt>mpd.secret</tt> file, but the specified password is 
+then interpreted as secret pass phrase. This is needed, because
+Mpd must be aware of the plaintext password when using CHAP.
+The (windows) endusers could generate their actual responses 
+themselfs using Winkey.
+<newline>
+<bf>IMPORTANT</bf>: Disable the internal authentication when using 
+OPIE and CHAP, because otherwise users are also able to authenticate 
+with their secret pass phrase.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>acct-mandatory</tt></tag>
+
+Makes accounting start mandatory. If enabled, on accounting start failure 
+connection will be dropped.
+
+Default <tt><bf>enable</bf></tt>.
+
+</descrip>
+</p>
+
+  <sect1><heading>RADIUS<label id="radius"></heading>
+
+<p>
+
+  This chapter describes RADIUS authentication backend.
+  Mpd supports both user authentication and session accounting using RADIUS.
+  RADIUS-Accounting and RADIUS-Authentication are independant so it is possible
+  to use them in any combination.
+
+  All authentication methods are supported with RADIUS (PAP, CHAP, MS-CHAPv1,
+  MS-CHAPv2, EAP). Password changing is currently not supported.
+
+  All of these commands apply to the currently active link.
+
+<descrip>
+
+<tag><tt>
+set radius server <em>name</em> <em>secret</em> [ <em>auth-port</em> [ <em>acct-port</em> ]]
+</tt></tag>
+
+Configure RADIUS server parameters. Multiple RADIUS servers may be configured 
+by repeating this command, and up to 10 servers may be specified.
+If one of auth/acct ports specified as 0, it will not be used for requests
+of that type.
+
+<tag><tt>
+set radius timeout <em>seconds</em>
+</tt></tag>
+
+Set the timeout for completion of RADIUS requests.
+
+The default is 5 second.
+
+<tag><tt>
+set radius retries <em>#retries</em>
+</tt></tag>
+
+Set the number of retries for RADIUS requests.
+
+The default is 3 retries.
+
+<tag><tt>
+set radius me <em>IP</em>|<em>ifname</em>|<em>hostname</em>
+</tt></tag>
+
+Send the given IP in the RAD_NAS_IP_ADDRESS attribute to the server.
+
+<tag><tt>
+set radius v6me <em>IPv6</em>
+</tt></tag>
+
+Send the given IP in the RAD_NAS_IPV6_ADDRESS attribute to the server.
+
+<tag><tt>
+set radius identifier <em>name</em>
+</tt></tag>
+
+Send the given name in the RAD_NAS_IDENTIFIER attribute to the server.
+If not set the local hostname is used.
+
+<tag><tt>
+set radius enable message-authentic
+</tt></tag>
+
+Adds the Message-Authenticator attribute to the RADIUS request. 
+The Message-Authenticator is an HMAC-MD5 checksum of the entire 
+Access-Request packet using the shared secret as the key. This 
+should protect the RADIUS server against online dictionary attacks.
+This is mandatory when using the EAP-RADIUS-Proxy and it's implicitly 
+added to the request by Mpd.
+
+<tag>RADIUS internals</tag>
+<p>
+
+RADIUS attributes supported by mpd:
+<VERB>
+N   Name                       	   Access	 Accounting
+	                	Req	Resp	Req	Resp
+1   User-Name			+	+	+	-
+2   User-Password		+	-	-	-
+3   CHAP-Password		+	-	-	-
+4   NAS-IP-Address		+	-	+	-
+5   NAS-Port			+	-	+	-
+6   Service-Type		+	-	+	-
+7   Framed-Protocol		+	-	+	-
+8   Framed-IP-Address		-	+	+	-
+9   Framed-IP-Netmask		-	+	+	-
+12  Framed-MTU			-	+	-	-
+13  Framed-Compression		-	+	-	-
+18  Reply-Message		-	+	-	-
+22  Framed-Route		-	+	-	-
+24  State			+	+	+	-
+25  Class			-	+	+	-
+27  Session-Timeout		-	+	-	-
+28  Idle-Timeout		-	+	-	-
+30  Called-Station-Id		+	-	+	-
+31  Calling-Station-Id		+	-	+	-
+32  NAS-Identifier		+	-	+	-
+40  Acct-Status-Type		-	-	+	-
+42  Acct-Input-Octets		-	-	+	-
+43  Acct-Output-Octets		-	-	+	-
+44  Acct-Session-Id		+	-	+	-
+45  Acct-Authentic		-	-	+	-
+46  Acct-Session-Time		-	-	+	-
+47  Acct-Input-Packets		-	-	+	-
+48  Acct-Output-Packets		-	-	+	-
+49  Acct-Terminate-Cause	-	-	+	-
+50  Acct-Multi-Session-Id	-	-	+	-
+51  Acct-Link-Count		-	-	+	-
+52  Acct-Input-Gigawords	-	-	+	-
+53  Acct-Output-Gigawords	-	-	+	-
+60  CHAP-Challenge		+	-	-	-
+61  NAS-Port-Type		+	-	+	-
+64  Tunnel-Type			+	-	+	-
+65  Tunnel-Medium-Type		+	-	+	-
+66  Tunnel-Client-Endpoint	+	-	+	-
+67  Tunnel-Server-Endpoint	+	-	+	-
+85  Acct-Interim-Interval	-	+	-	-
+87  NAS-Port-Id			+	-	+	-
+88  Framed-Pool			-	+	-	-
+90  Tunnel-Client-Auth-ID	+	-	+	-
+91  Tunnel-Server-Auth-ID	+	-	+	-
+95  NAS-IPv6-Address		+	-	+	-
+99  Framed-IPv6-Route		-	+	-	-
+
+    Microsoft VSA (311)
+1   MS-CHAP-Response		+	-	-	-
+2   MS-CHAP-Error		-	+	-	-
+7   MS-MPPE-Encryption-Policy	-	+	-	-
+8   MS-MPPE-Encryption-Types	-	+	-	-
+10  MS-CHAP-Domain		-	+	-	-
+11  MS-CHAP-Challenge		+	-	-	-
+12  MS-CHAP-MPPE-Keys		-	+	-	-
+16  MS-MPPE-Send-Key		-	+	-	-
+17  MS-MPPE-Recv-Key		-	+	-	-
+25  MS-CHAP2-Response		+	-	-	-
+26  MS-CHAP2-Success		-	+	-	-
+28  MS-Primary-DNS-Server	-	+	-	-
+29  MS-Secondary-DNS-Server	-	+	-	-
+30  MS-Primary-NBNS-Server	-	+	-	-
+31  MS-Secondary-NBNS-Server	-	+	-	-
+
+    DSL Forum VSA (3561)
+1   ADSL-Agent-Circuit-Id	+	-	+	-
+2   ADSL-Agent-Remote-Id	+	-	+	-
+
+    mpd VSA (12341)
+1   mpd-rule			-	+	-	-
+2   mpd-pipe			-	+	-	-
+3   mpd-queue			-	+	-	-
+4   mpd-table			-	+	-	-
+5   mpd-table-static		-	+	-	-
+6   mpd-filter			-	+	-	-
+7   mpd-limit			-	+	-	-
+8   mpd-input-octets		-	-	+	-
+9   mpd-input-packets		-	-	+	-
+10  mpd-output-octets		-	-	+	-
+11  mpd-output-packets		-	-	+	-
+12  mpd-link			+	-	+	-
+13  mpd-bundle			-	-	+	-
+14  mpd-iface			-	-	+	-
+15  mpd-iface-index		-	-	+	-
+16  mpd-input-acct		-	+	-	-
+17  mpd-output-acct		-	+	-	-
+18  mpd-action			-	+	-	-
+154 mpd-drop-user		-	-	-	+
+</VERB>
+
+To use mpd VSA you should add such dictionary to your RADIUS server:
+<verb>#----------------------------------------------------------
+# dictionary.mpd                                                                                   
+                                                                                                   
+VENDOR          mpd             12341                                                              
+                                                                                                   
+BEGIN-VENDOR	mpd
+
+ATTRIBUTE	mpd-rule	1	string
+ATTRIBUTE	mpd-pipe	2	string
+ATTRIBUTE	mpd-queue	3	string
+ATTRIBUTE	mpd-table	4	string
+ATTRIBUTE	mpd-table-static	5	string
+ATTRIBUTE	mpd-filter	6	string
+ATTRIBUTE	mpd-limit	7	string
+ATTRIBUTE	mpd-input-octets	8	string
+ATTRIBUTE	mpd-input-packets	9	string
+ATTRIBUTE	mpd-output-octets	10	string
+ATTRIBUTE	mpd-output-packets	11	string
+ATTRIBUTE	mpd-link	12	string
+ATTRIBUTE	mpd-bundle	13	string
+ATTRIBUTE	mpd-iface	14	string
+ATTRIBUTE	mpd-iface-index	15	integer
+ATTRIBUTE	mpd-input-acct	16	string
+ATTRIBUTE	mpd-output-acct	17	string
+ATTRIBUTE	mpd-action	18	string
+ATTRIBUTE	mpd-drop-user	154	integer
+
+END-VENDOR	mpd
+#----------------------------------------------------------
+</verb>
+
+Mpd allows RADIUS server to terminate user session by setting vendor specific
+mpd-drop-user attribute to nonzero value in accounting start/update reply packet.
+
+<tag>RADIUS ACL's</tag>
+<p>
+
+Mpd can use the Access Control Lists (ACLs) given by the RADIUS server.
+This ACLs may include ipfw rules, pipes, queues and tables and also mpd
+internal traffic filtering/shaping/limiting features. That two sets are 
+redundant. ipfw proposed as standard and universal solution, while internal
+filter/shaper/limiter based on ng_bpf+ng_car expected to work faster with
+big number of active links.
+
+<tag>ipfw</tag>
+<p>
+
+You can write in your RADIUS configuration something like:
+<verb>
+mpd-table += "1=10.0.0.1",
+mpd-table += "1=10.0.0.15",
+mpd-pipe += "1=bw 10Kbyte/s",
+mpd-pipe += "5=bw 20Kbyte/s",
+mpd-rule += "1=pipe %p1 all from any to table\\(%t1\\) in",
+mpd-rule += "2=pipe %p5 all from table\\(%t1\\) to any out",
+mpd-rule += "100=allow all from any to any",
+</verb>
+
+When mpd receives these parameters it will call ipfw(8) to create
+firewall rules, pipes and queues with unique numbers starting from 10000
+(configurable via 'set global start...'). %rX, %pX, %qX, %tX
+macroses will be expanded within mpd-rule and mpd-queue.
+To the end of each rule will be added "via ngX" to make the rule apply
+only to that client's networking interface.
+
+As a result of this example we would get these commands executed:
+<verb>
+ipfw table 32 add 10.0.0.1
+ipfw table 32 add 10.0.0.15
+ipfw pipe 10000 config bw 10Kbyte/s
+ipfw pipe 10001 config bw 20Kbyte/s
+ipfw add 10000 pipe 10000 all from any to table\(32\) in via ng0
+ipfw add 10001 pipe 10001 all from table\(32\) to any out via ng0
+ipfw add 10002 allow all from any to any via ng0
+</verb>
+When the link goes down, all created rules will be removed.
+
+Note: As soon as mpd executes ipfw commands using shell, shell's
+special characters like "(" and ")" must be slashed.
+
+<tag>internal (ng_bpf/ng_car)</tag>
+<p>
+
+Mpd can create complex per-interface traffic filtering/limiting engines inside
+netgraph when it is requested by mpd-filter and mpd-limit RADIUS attributes.
+
+mpd-filter attribute is a packet filter declaration for using in mpd-limit.
+mpd-filter consists of two main parts: match/nomatch verdict and the condition.
+tcpdump (libpcap) expression syntax used for conditions.
+
+mpd-filter: <em>match</em>|<em>nomatch</em> <em>{condition}</em>
+
+mpd-limit attribute is an action which should be done for packet. It consists
+of two main parts: filter and action. 
+
+mpd-limit: <em>{filter}</em> <em>{action}</em>
+
+Filter can be or "all" (any packet) or "fltX"
+(packets matching to specified mpd-filter).
+
+filter: <em>any</em>|<em>fltX</em>
+
+Action can be: "" (do nothing, just account),
+"pass" (stop processing and pass packet), 
+"deny" (stop processing and drop packet), 
+"rate-limit" (do Cisco-like rate-limit), 
+"shape" (do simple RED aware traffic shaping). 
+
+Actions "rate-limit" and "shape" can have optional "pass" suffix
+to stop processing after doing this action.
+
+action: <em></em> | <em>pass</em> | <em>deny</em> | 
+<em>rate-limit</em> <em>{rate(bits/s)}</em> [<em>{normal burst(bytes)}</em> [<em>{extended burst(bytes)}</em>]] [<em>pass</em>] |
+<em>shape</em> <em>{rate(bits/s)}</em> [<em>{burst(bytes)}</em>] [<em>pass</em>]
+
+As example you can write in your RADIUS configuration something like:
+<verb>
+mpd-filter += "1#1=nomatch dst net 10.0.0.0/24",
+mpd-filter += "1#2=match dst net 10.0.0.0/8",
+mpd-filter += "2#1=nomatch src net 10.0.0.0/24",
+mpd-filter += "2#2=match src net 11.0.0.0/8",
+mpd-limit += "in#1=flt1 pass",
+mpd-limit += "in#2#Biz=all shape 64000 4000",
+mpd-limit += "out#1=flt2 pass",
+mpd-limit += "out#2#Biz=all rate-limit 1024000 150000 300000",
+</verb>
+
+As result, one ng_bpf node will be created to implement traffic filters 
+and several (two for this example) ng_car nodes for traffic shaping 
+and rate-limiting. Incoming traffic to 10.0.0.0/8 except 10.0.0.0/24
+will be passed, other traffic will be shaped to 64Kbits/s. Outgoing
+traffic from 10.0.0.0/8 except 10.0.0.0/24 will be passed, all other
+will be limited to 1024Kbit/s. Also traffic that passed mpd-limit rules
+marked "Biz" will be accordingly accounted and present with that name
+in AAA accounting requests.
+
+</p>
+
+</descrip>
+</p>
+
+  <sect1><heading>External authentication<label id="extauth"></heading>
+
+  <p>
+Mpd supports authentication and accounting by calling external scripts. 
+Pathes to that scripts must be specified using <tt><bf>set auth extauth-script ...</bf></tt>
+and <tt><bf>set auth extacct-script ...</bf></tt> commands.
+
+On invocation extauth/extacct scripts receive on stdin set of request 
+attribute:value pairs terminated by empty line and must generate
+response in same format on stdout.
+
+Supported attributes:
+<verb>
+Name                       	   Access	 Accounting
+	                	Req	Resp	Req	Resp
+USER_NAME			+	+	+	-
+AUTH_TYPE			+	-	-	-
+USER_PASSWORD			+	+	-	-
+USER_NT_HASH			-	+	-	-
+USER_LM_HASH			-	+	-	-
+LINK				+	-	+	-
+NAS_PORT			+	-	+	-
+NAS_PORT_TYPE			+	-	+	-
+CALLING_STATION_ID		+	-	+	-
+CALLED_STATION_ID		+	-	+	-
+SELF_NAME			+	-	+	-
+PEER_NAME			+	-	+	-
+SELF_ADDR			+	-	+	-
+PEER_ADDR			+	-	+	-
+PEER_PORT			+	-	+	-
+PEER_MAC_ADDR			+	-	+	-
+PEER_IFACE			+	-	+	-
+PEER_IDENT			+	-	+	-
+RESULT				-	+	-	-
+FRAMED_IP_ADDRESS		-	+	+	-
+PRIMARY_DNS_SERVER		-	+	-	-
+SECONDARY_DNS_SERVER		-	+	-	-
+PRIMARY_NBNS_SERVER		-	+	-	-
+SECONDARY_NBNS_SERVER		-	+	-	-
+FRAMED_ROUTE			-	+	-	-
+FRAMED_IPV6_ROUTE		-	+	-	-
+FRAMED_MTU			-	+	-	-
+FRAMED_COMPRESSION		-	+	-	-
+FRAMED_POOL			-	+	-	-
+SESSION_TIMEOUT			-	+	-	-
+IDLE_TIMEOUT			-	+	-	-
+ACCT_INTERIM_INTERVAL		-	+	-	-
+ACCT_INTERIM_LIM_RECV		-	+	-	-
+ACCT_INTERIM_LIM_XMIT		-	+	-	-
+REPLY_MESSAGE			-	+	-	-
+MS_CHAP_ERROR			-	+	-	-
+IFACE				-	-	+	-
+IFACE_INDEX			-	-	+	-
+BUNDLE				-	-	+	-
+ACCT_STATUS_TYPE		-	-	+	-
+ACCT_SESSION_ID			+	-	+	-
+ACCT_MULTI_SESSION_ID		-	-	+	-
+ACCT_LINK_COUNT			-	-	+	-
+ACCT_TERMINATE_CAUSE		-	-	+	-
+ACCT_SESSION_TIME		-	-	+	-
+ACCT_INPUT_OCTETS		-	-	+	-
+ACCT_INPUT_PACKETS		-	-	+	-
+ACCT_OUTPUT_OCTETS		-	-	+	-
+ACCT_OUTPUT_PACKETS		-	-	+	-
+MPD_RULE			-	+	-	-
+MPD_PIPE			-	+	-	-
+MPD_QUEUE			-	+	-	-
+MPD_TABLE			-	+	-	-
+MPD_TABLE_STATIC		-	+	-	-
+MPD_FILTER			-	+	-	-
+MPD_LIMIT			-	+	-	-
+MPD_INPUT_OCTETS		-	-	+	-
+MPD_INPUT_PACKETS		-	-	+	-
+MPD_OUTPUT_OCTETS		-	-	+	-
+MPD_OUTPUT_PACKETS		-	-	+	-
+MPD_ACTION			-	+	-	-
+MPD_DROP_USER			-	-	-	+
+</verb>
+
+Attribute USER_PASSWORD provided in Access-Request only for PAP auth.
+Attributes USER_NT_HASH and USER_LM_HASH in Access-Reply used for
+MS-CHAP auth only.
+
+In reply script may specify any combination of attributes it needs. 
+The only mandatory attribute in Access-Response is RESULT. RESULT must
+be one of SUCCESS, UNDEF or FAIL. RESULT UNDEF means that mpd should
+authenticate user itself using USER_PASSWORD/USER_NT_HASH attribute
+supplied by script.
+
+For description of most attributes look their RADIUS alternatives.
+
+</p>
