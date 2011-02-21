@@ -423,15 +423,15 @@ UBOOT_KERNEL_LOAD_ADDRESS=80001000
 UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
 
 
-kernel.${KERNEL_COMPRESSION_TYPE}.uboot: kernel.${KERNEL_COMPRESSION_TYPE}
+kernel.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE}
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	uboot_mkimage -A ${TARGET} -O linux -T kernel \
 	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \
 	    -a ${UBOOT_KERNEL_LOAD_ADDRESS} \
 	    -e ${UBOOT_KERNEL_ENTRY_POINT} \
 	    -n 'FreeBSD Kernel Image' \
-	    -d ${KTFTP}/kernel.bin.${KERNEL_COMPRESSION_TYPE} \
-	    ${KTFTP}/kernel.${KERNEL_COMPRESSION_TYPE}.uboot
+	    -d ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE} \
+	    ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
 
 kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
 	echo "++++++++++++++ Making $@ ++++++++++++++"

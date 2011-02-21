@@ -94,7 +94,7 @@ COPTS+=		-DUSE_SYSTEM
 LDADD+=		-lnetgraph
 DPADD+=		${LIBNETGRAPH}
 
-LDADD+=		-L/usr/lib -lradius
+LDADD+=		-lradius
 DPADD+=		${LIBRADIUS}
 
 LDADD+=		-lssl

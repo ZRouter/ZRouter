@@ -1,4 +1,5 @@
 #!/bin/sh
+
 stty status '^T'
 trap : 2
 trap "echo 'Boot interrupted'; exit 1" 3
