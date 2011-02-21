@@ -148,8 +148,8 @@ rtld-elf \
 getty \
 telnetd
 
+#ppp \
 WORLD_SUBDIRS_USR_SBIN+= \
-ppp \
 ngctl \
 nghook \
 chroot \
