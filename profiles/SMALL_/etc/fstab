@@ -1,4 +1,0 @@
-# Already mounted
-#tmpfs		/tmp		tmpfs	rw		0	0
-/dev/msdosfs/KINGSTON	/mnt	msdosfs	rw,noauto	0	0
-#/dev/mtd/rootfs.ulzma	/	cd9660	ro		0	0

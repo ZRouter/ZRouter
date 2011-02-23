@@ -13,6 +13,28 @@ stop_cmd="main_stop"
 
 main_prestart()
 {
+	stty status '^T'
+	sysctl kern.coredump=0
+	sysctl net.inet.ip.forwarding=1
+
+	md=`/sbin/mdconfig -a -t malloc -s 10m`
+	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
+	mount /dev/${md} /tmp
+
+	mkdir -p /tmp/etc
+	mkdir -p /tmp/var/spool/lock
+	mkdir -p /tmp/var/run
+
+	mount_unionfs /tmp/etc /etc
+
+	kldload ipfw
+	ipfw add 65000 allow all from any to any
+	ifconfig lo0 127.0.0.1/8
+	ifconfig rt0 192.168.0.28/24
+	/sbin/mpd  --background
+
+	/usr/sbin/inetd -wW
+
 }
 
 main_start()
@@ -21,6 +43,7 @@ main_start()
 
 main_poststart()
 {
+	/bin/sh
 }
 
 main_stop()

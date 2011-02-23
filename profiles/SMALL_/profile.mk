@@ -11,6 +11,7 @@ libedit \
 libelf \
 libexpat \
 libcrypt \
+libgeom \
 libipsec \
 libipx \
 libjail \
@@ -23,9 +24,13 @@ libpmc \
 libsbuf \
 libtacplus \
 libthr \
+libufs \
 libutil \
 libz \
-ncurses
+ncurses/ncurses \
+ncurses/form \
+ncurses/menu \
+ncurses/panel
 
 WORLD_SUBDIRS+= \
 secure/lib/libcrypto \
@@ -49,6 +54,7 @@ cp \
 chmod \
 date \
 dd \
+df \
 expr \
 hostname \
 kenv \
@@ -75,9 +81,14 @@ kldstat \
 kldunload \
 ldconfig \
 md5 \
+mdconfig \
 mount \
 mount_cd9660 \
 mount_msdosfs \
+mount_nullfs \
+mount_unionfs \
+newfs \
+newfs_msdos \
 ping \
 rcorder \
 reboot \
@@ -112,6 +123,7 @@ sed \
 tail \
 tar \
 tee \
+telnet \
 uname \
 vi \
 wc \

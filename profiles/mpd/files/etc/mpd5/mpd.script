@@ -1,0 +1,455 @@
+DialPeer:
+	set $CallingID ""
+	set $CalledID $Telephone
+	if $Telephone == "00000" goto DialNullModem
+	set $optimize $OptimizeNextTime
+	set $OptimizeNextTime "no"
+	if $optimize == "yes" goto DialPeer2
+	call ModemFind
+	if $ErrorMsg == "" goto DialPeer1
+	log $ErrorMsg
+	failure
+
+DialPeer1:
+	set $ModTelephone $Telephone
+	call ModemIdent
+	if $ModemDescription != "" goto DialPeer2
+	log "The modem is not responding."
+	failure
+
+DialPeer2:
+	log "Detected $ModemDescription."
+	call $ModemSetupFunc
+	log "Dialing server at $Telephone..."
+	call ModemDial
+	if $dialResult == "OK" goto DialPeerOK
+	set $optimize "no"
+	failure
+
+DialPeerOK:
+	if $ConnectionSpeed == "" log "Connected at an unknown speed."
+	if $ConnectionSpeed == "" goto DialPeer3
+	log "Connected at $ConnectionSpeed."
+
+DialPeer3:
+	if $LoginScript == "yes" call AutoLogin
+	set $OptimizeNextTime "yes"
+	success
+
+DialNullModem:
+	log "Connected via null modem connection."
+	success
+
+ModemDial:
+	set $dialResult "FAIL"
+	set $ConnectionSpeed ""
+	if $ConnectTimeout == "" set $ConnectTimeout 45
+	print "AT${DialPrefix}${ModTelephone}\r\n"
+	match "NO CARRIER" DialAbortNoCar
+	match "NO DIAL" DialAbortNoDial
+	match "BUSY" DialAbortBusy
+	regex "CONNECT *([0-9]*).*$" DialConnect
+	match "ERR" DialError
+	wait $ConnectTimeout
+	log "No response from the modem after dialing."
+	return
+
+DialAbortNoCar:
+	log "The remote modem did not answer."
+	return
+
+DialAbortNoDial:
+	if $noDialToneSubr != "" goto $noDialToneSubr
+	log "No dialtone. Is the modem plugged in?"
+	return
+
+DialError:
+	if ${ModTelephone} != "" goto DialErrorInit
+	log "Invalid empty telephone number."
+	return
+
+DialErrorInit:
+	if $dialErrorSubr != "" goto $dialErrorSubr
+	log "Invalid dial init string."
+	return
+
+DialAbortBusy:
+	log "The line was busy."
+	return
+
+DialConnect:
+	set $ConnectionSpeed $matchedString1
+	set $dialResult "OK"
+	return
+
+AnswerCall:
+	set $CallingID ""
+	set $CalledID ""
+	set $optimize $OptimizeNextTime
+	set $OptimizeNextTime "no"
+	if $optimize == "yes" goto AnswerCall2
+	call ModemFind
+	if $ErrorMsg == "" goto AnswerCall0
+	log $ErrorMsg
+	failure
+
+AnswerCall0:
+	call ModemIdent
+	if $ModemDescription != "" goto AnswerCall1
+	log "The modem is not responding."
+	failure
+
+AnswerCall1:
+	log "Detected $ModemDescription."
+
+AnswerCall2:
+	if $ModemAnsSetupFunc == "" set $ModemAnsSetupFunc $ModemSetupFunc
+	call $ModemAnsSetupFunc
+	log "Waiting for ring..."
+	call ModemAnswer
+	if $answerReturn == "OK" goto AnswerCallOK
+	set $IdleResult ""
+	set $optimize "no"
+	failure
+
+AnswerCallOK:
+	log "Connected at $ConnectionSpeed."
+	set $OptimizeNextTime "yes"
+	set $IdleResult "answer"
+	success
+
+Ringback:
+	set $CallingID ""
+	set $CalledID ""
+	if $RingbackTimeout == "" set $RingbackTimeout "3600"
+	if $RingStoppedTime == "" set $RingStoppedTime "8"
+	set $ModemDetectRing RingbackWait
+	call ModemFind
+	if $ErrorMsg == "" goto Ringback1
+	log $ErrorMsg
+	failure
+
+Ringback1:
+	call ModemIdent
+	if $ModemDescription != "" goto Ringback2
+	log "The modem is not responding."
+	failure
+
+Ringback2:
+	log "Detected $ModemDescription."
+	goto $ModemDetectRing
+
+RingbackWait:
+	match "RING\r\n" RingbackGotRings
+	log "Remote Dial-Back mode enabled; waiting for incoming call."
+	wait $RingbackTimeout
+	failure
+
+RingbackGotRings:
+	log "Incoming call detected..."
+	if $ModemIsAnalog != "yes" goto RingbackDone
+
+RingbackWaitStop:
+	match "RING\r\n" RingbackWaitStop
+	wait $RingStoppedTime
+
+RingbackDone:
+	set $IdleResult "ringback"
+	success
+
+RingbackDetectCID:
+	if $cid match " *(.*) *" nop
+	set $cid $matchedString1
+	if $cid == "" goto RingbackDetectNoCID
+	log "Incoming call detected from $cid..."
+	success
+
+RingbackDetectNoCID:
+	log "Incoming call detected..."
+	success
+
+Identify:
+	call ModemFind
+	if $ErrorMsg == "" goto Identify1
+	failure
+
+Identify1:
+	call ModemIdent
+	if $ModemDescription == "" failure
+	log "ANALOG=$ModemIsAnalog"
+	log "DESCRIPTION=$ModemDescription"
+	success
+
+ModemIdent:
+	set $ModemDescription ""
+	set $ModemSetupFunc ""
+	set $ModemAnsSetupFunc ""
+	set $ModemDetectRing ""
+	set $ModemIsAnalog "yes"
+	if $InitString != "" goto ModemIdentCustom
+	print "ATI\r\n"
+	match "ERR" ModemIdentGeneric
+	match "OK\r\n" ModemIdentGeneric
+	wait 3
+	log "The modem is not responding."
+	failure
+
+ModemIdentGeneric:
+	set $ModemDescription "Hayes compatible modem"
+	set $ModemSetupFunc GenericSetup
+	return
+
+ModemIdentCustom:
+	set $ModemDescription "Custom modem"
+	set $ModemSetupFunc CustomSetup
+	return
+
+GenericSetup:
+	set $noDialToneSubr GenericNoDialtone
+	set $temp "M1"
+	if $SpeakerOff == "yes" set $temp "M0"
+	set $modemCmd "&F&C1&D2E0S0=0${temp}"
+	call ModemCmd2
+	return
+
+CustomSetup:
+	set $noDialToneSubr GenericNoDialtone
+	set $modemCmd "${InitString}"
+	call ModemCmd2
+	return
+
+GenericNoDialtone:
+	log "No dialtone. Is the modem plugged in?"
+	return
+
+Modem56Setup:
+	set $noDialToneSubr GenericNoDialtone
+	set $temp "M1"
+	if $SpeakerOff == "yes" set $temp "M0"
+	set $modemCmd "&FL2W2E0${temp}"
+	call ModemCmd2
+	return
+
+ModemAnswer:
+	if $RingTimeout == "" set $RingTimeout 600
+	if $ConnectTimeout == "" set $ConnectTimeout 45
+	match "RING\r" ModemAnswerGotRing
+	wait $RingTimeout
+	log "No RING detected after $RingTimeout seconds."
+	set $answerReturn "FAIL"
+	return
+
+ModemAnswerGotRing:
+	log "Incoming call detected..."
+	print "ATA\r\n"
+	regex "CONNECT *([0-9]*).*$" ModemAnswerConnect
+	wait $ConnectTimeout
+	log "Failed to connect incoming call."
+	set $answerReturn "FAIL"
+	return
+
+ModemAnswerConnect:
+	set $ConnectionSpeed $matchedString1
+	set $answerReturn "OK"
+	return
+
+ModemFind:
+	set $ErrorMsg ""
+	call ModemFind4
+	if $modemCmdResult == "OK" return
+	if $Serial230K != "yes" goto ModemFind1
+	set $newBaudrate 230400
+	if $Baudrate == "230400" set $newBaudrate 115200
+	set $Baudrate $newBaudrate
+	call ModemFind4
+	if $modemCmdResult == "OK" return
+
+ModemFind1:
+	set $Baudrate 115200
+	call ModemFind2
+	if $modemCmdResult == "OK" return
+	if $Serial230K != "yes" return
+	set $Baudrate 230400
+	wait 1
+	call ModemFind2
+	if $modemCmdResult == "OK" return
+	set $ErrorMsg "The modem is not responding."
+	return
+
+ModemFind2:
+	call ModemFind3
+	if $modemCmdResult == "OK" return
+	call SendTriplePlus
+	call ModemFind3
+	return
+
+ModemFind3:
+	set $modemCmd ""
+	set $modemCmdTimeout 1
+	call ModemCmd0
+	if $modemCmdResult == "OK" return
+	set $modemCmd "Z"
+	set $modemCmdTimeout 2
+	call ModemCmd0
+	if $modemCmdResult == "OK" return
+
+ModemFind4:
+	set $modemCmd ""
+	set $modemCmdTimeout 1
+	call ModemCmd0
+	return
+
+SetBaudrate:
+	if $Baudrate == $newBaudrate return
+	if $newBaudrate != 230400 goto SetBaudrate2
+	if $Serial230K != "yes" return
+
+SetBaudrate2:
+	log "Setting serial port speed to $newBaudrate..."
+	print "AT$modemCmd\r\n"
+	wait 1
+	set $Baudrate $newBaudrate
+	wait 1
+	set $modemCmd ""
+	goto ModemCmd2
+
+ModemCheckValue:
+	set $modemCmd "${checkCmd}?"
+	call ModemQuery
+	if $modemQuery == $checkValue return
+	set $valueChanged "yes"
+	set $checkValueMyNew $checkValueNew
+	if $checkValueNew == "" set $checkValueMyNew $checkValue
+	set $modemCmd "${checkCmd}=${checkValueMyNew}"
+	if $checkMsg != "" log $checkMsg
+	goto ModemCmd2
+
+ModemCmd:
+	set $modemCmdTimeout 3
+
+ModemCmd0:
+	print "AT$modemCmd\r\n"
+	match "OK\r\n" ModemCmdOk
+	match "ERR" ModemCmdErr
+	wait $modemCmdTimeout
+	set $modemCmdResult "TIMEOUT"
+
+ModemCmdTimeout:
+	set $ErrorMsg "The modem is not responding."
+	return
+
+ModemCmdOk:
+	set $modemCmdResult "OK"
+	return
+
+ModemCmdErr:
+	set $modemCmdResult "ERROR"
+	set $ErrorMsg "The modem did not accept the command AT$modemCmd."
+	return
+
+ModemCmd2:
+	call ModemCmd
+	if $modemCmdResult == "OK" return
+	log $ErrorMsg
+	failure
+
+ModemCmdSend:
+	print "AT$modemCmd\r\n"
+	match "\r\n" ModemCmdSend2
+	wait 3
+	goto ModemCmdTimeout
+
+ModemCmdSend2:
+	return
+
+ModemQuery:
+	call ModemCmdSend
+	call ReadLine
+	set $modemQuery $matchedString
+	if $modemQuery == "ERR" goto ModemQueryError
+	if $modemQuery == "ERROR" goto ModemQueryError
+	goto GetOK
+
+ModemQueryError:
+	call ModemCmdErr
+	failure
+
+ModemQueryStrip:
+	call ModemQuery
+	if $modemQuery match " *(.*) *" nop
+	set $modemQuery $matchedString1
+	return
+
+ReadLine:
+	regex "^.*$" ReadLineDone
+	wait $modemCmdTimeout
+	set $ErrorMsg "The modem is not responding."
+	log $ErrorMsg
+	failure
+
+ReadLineDone:
+	return
+
+GetOK:
+	match "OK\r\n" GotOK
+	wait 3
+	log "The modem is not responding."
+	failure
+GotOK
+	return
+
+SendTriplePlus:
+	print "\r\n"
+	wait 2
+	print "+++"
+	wait 2
+	return
+
+AutoLogin:
+	log "Initiating auto-login..."
+	timer autoLogin 5 AutoLoginTimeout
+	match autoLogin "\x7e\xff\x03\xc0\x21" AutoLoginFrame
+	match autoLogin "\x7e\xff\x7d\x23\xc0\x21\x7d\x21" AutoLoginFrame
+	match autoLogin "\x7e\xc0\x21" AutoLoginFrame
+	print "\x7e\xff\x7d\x23\xc0\x21\x7d\x24\xac\x7d\x20\x7d\x24\x2e\x2b\x7e"
+	match "ogin" AutoLoginPrompt
+	match "name" AutoLoginPrompt
+	wait 1
+	print "\r"
+	match "ogin" AutoLoginPrompt
+	match "name" AutoLoginPrompt
+	wait
+
+AutoLoginPrompt:
+	log "Sending login..."
+	print "${Login}\r"
+	match "word"
+	wait
+	log "Sending password..."
+	print "${Password}\r"
+	match "\r"
+	wait
+	if $didLogin != "yes" match "ogin:" LoginAgain
+	match ">"
+	match "%"
+	match ":"
+	wait
+	log "Enabling PPP..."
+	print "ppp\r"
+	cancel all
+	return
+
+LoginAgain:
+	set $didLogin "yes"
+	goto AutoLoginPrompt
+
+AutoLoginFrame:
+	log "Detected PPP frame."
+	cancel all
+	return
+
+AutoLoginTimeout:
+	log "Auto-login timeout."
+	cancel all
+	return
+

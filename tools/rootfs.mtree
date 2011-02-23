@@ -1,0 +1,682 @@
+
+/set type=file uname=root gname=wheel mode=0755
+.               type=dir
+    var             type=link
+
+    bin             type=dir
+        cat            
+        chmod          
+        cp             
+        date           
+        dd             
+        df             
+        expr           
+        hostname       
+        kenv           
+        kill           
+        link           
+        ln             
+        ls             
+        mkdir          
+        ps             
+        realpath       
+        rm             
+        sh             
+        sleep          
+        stty           
+        sync           
+        unlink         
+        upgrade        
+        uuidgen        
+    ..
+
+
+    boot            type=dir
+
+        defaults        type=dir
+        ..
+
+
+        firmware        type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0555
+        kernel          type=dir mode=0755
+            alias_cuseeme.ko
+            alias_dummy.ko 
+            alias_ftp.ko   
+            alias_irc.ko   
+            alias_nbt.ko   
+            alias_pptp.ko  
+            alias_skinny.ko
+            alias_smedia.ko
+            bridgestp.ko   
+            cam.ko         
+            dummynet.ko    
+            geom_label.ko  
+            geom_md.ko     
+            geom_uncompress.ko
+            if_bridge.ko   
+            ipfw.ko        
+            libalias.ko    
+            msdosfs.ko     
+            netgraph.ko    
+            ng_UI.ko       
+            ng_async.ko    
+            ng_atm.ko      
+            ng_atmllc.ko   
+            ng_bluetooth.ko
+            ng_bpf.ko      
+            ng_bridge.ko   
+            ng_bt3c.ko     
+            ng_btsocket.ko 
+            ng_car.ko      
+            ng_ccatm.ko    
+            ng_cisco.ko    
+            ng_deflate.ko  
+            ng_device.ko   
+            ng_echo.ko     
+            ng_eiface.ko   
+            ng_etf.ko      
+            ng_ether.ko    
+            ng_ether_echo.ko
+            ng_fec.ko      
+            ng_frame_relay.ko
+            ng_gif.ko      
+            ng_gif_demux.ko
+            ng_hci.ko      
+            ng_hole.ko     
+            ng_hub.ko      
+            ng_iface.ko    
+            ng_ip_input.ko 
+            ng_ipfw.ko     
+            ng_ksocket.ko  
+            ng_l2cap.ko    
+            ng_l2tp.ko     
+            ng_lmi.ko      
+            ng_mppc.ko     
+            ng_nat.ko      
+            ng_netflow.ko  
+            ng_one2many.ko 
+            ng_patch.ko    
+            ng_pipe.ko     
+            ng_ppp.ko      
+            ng_pppoe.ko    
+            ng_pptpgre.ko  
+            ng_pred1.ko    
+            ng_rfc1490.ko  
+            ng_socket.ko   
+            ng_source.ko   
+            ng_split.ko    
+            ng_sppp.ko     
+            ng_sscfu.ko    
+            ng_sscop.ko    
+            ng_tag.ko      
+            ng_tcpmss.ko   
+            ng_tee.ko      
+            ng_tty.ko      
+            ng_ubt.ko      
+            ng_uni.ko      
+            ng_vjc.ko      
+            ng_vlan.ko     
+            ngatmbase.ko   
+            random.ko      
+            rc4.ko         
+            u3g.ko         
+            ubtbcmfw.ko    
+            ucom.ko        
+            ufs.ko         
+            umass.ko       
+            umodem.ko      
+            unionfs.ko     
+            uplcom.ko      
+            wlan_acl.ko    
+            wlan_amrr.ko   
+            wlan_ccmp.ko   
+            wlan_rssadapt.ko
+            wlan_tkip.ko   
+            wlan_wep.ko    
+            wlan_xauth.ko  
+            zlib.ko        
+        ..
+
+
+        modules         type=dir mode=0755
+        ..
+
+    ..
+
+
+    dev             type=dir
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+    etc             type=dir mode=0755
+        auth.conf      
+        cdevd.conf     
+        crontab        
+        devfs.conf     
+        dhclient.conf  
+        dumpdates      
+        fbtab          
+        ftpusers       
+        gettytab       
+        group          
+        host.conf      
+        hosts          
+        hosts.allow    
+        hosts.equiv    
+        hosts.lpd      
+        inetd.conf     
+        libalias.conf  
+        login.access   
+        login.conf     
+        login.conf.db  
+        master.passwd   mode=0600
+        motd           
+        mpd             type=link mode=0755
+        netconfig      
+        netstart        mode=0755
+        network.subr   
+        networks       
+        nsswitch.conf  
+        printcap       
+        profile        
+        protocols      
+        pwd.db         
+        rc              mode=0755
+        rc.conf        
+        rc.firewall    
+        rc.shutdown    
+        rc.subr        
+        reboot.sh       mode=0755
+        remote         
+        resolv.conf     type=link mode=0755
+        rpc            
+        save_etc        mode=0755
+        services       
+        shells         
+        snmpd.config   
+        spwd.db         mode=0600
+        sysctl.conf    
+        termcap        
+        ttys           
+
+        X11             type=dir mode=0755
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        bin             type=dir
+            update         
+        ..
+
+
+        bluetooth       type=dir
+        ..
+
+
+        buttons         type=dir
+            WDS.sh         
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        defaults        type=dir mode=0755
+            devfs.rules    
+            periodic.conf  
+            rc.conf        
+        ..
+
+
+        devd            type=dir mode=0755
+        ..
+
+
+        gnats           type=dir mode=0755
+        ..
+
+
+        gss             type=dir mode=0755
+        ..
+
+
+        mail            type=dir mode=0755
+        ..
+
+
+        mpd5            type=dir mode=0755
+            mpd.conf       
+            mpd.script     
+        ..
+
+
+        mtree           type=dir mode=0755
+        ..
+
+
+        ntp             type=dir mode=0700
+        ..
+
+
+        pam.d           type=dir mode=0755
+            login          
+            passwd         
+            system         
+            telnetd        
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        periodic        type=dir
+
+            daily           type=dir
+                420.status-network
+            ..
+
+
+            monthly         type=dir
+            ..
+
+
+            security        type=dir
+            ..
+
+
+            weekly          type=dir
+            ..
+
+        ..
+
+
+        ppp             type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        racoon          type=dir mode=0755
+            psk.txt        
+            racoon.conf    
+            setkey.conf    
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        rc.d            type=dir
+            MAIN           
+            sshd           
+        ..
+
+
+        rc.d.x          type=dir
+            bridge         
+            bsnmpd         
+            cron           
+            defaultroute   
+            devd           
+            devfs          
+            dhclient       
+            hostapd        
+            hostid         
+            hostname       
+            inetd          
+            initrandom     
+            ipfw           
+            kldxref        
+            ldconfig       
+            local          
+            localpkg       
+            natd           
+            netif          
+            netoptions     
+            ntpd           
+            ntpdate        
+            ppp            
+            pppoed         
+            random         
+            routing        
+            serial         
+            syscons        
+            sysctl         
+            syslogd        
+            tmp            
+            var            
+            watchdogd      
+            wpa_supplicant 
+        ..
+
+
+        security        type=dir
+        ..
+
+
+        skel            type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        ssh             type=dir mode=0755
+            moduli         
+            ssh_config     
+            sshd_config    
+        ..
+
+
+        ssl             type=dir mode=0755
+        ..
+
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+    lib             type=dir
+        libalias.so.7  
+        libalias_cuseeme.so
+        libalias_dummy.so
+        libalias_ftp.so
+        libalias_irc.so
+        libalias_nbt.so
+        libalias_pptp.so
+        libalias_skinny.so
+        libalias_smedia.so
+        libbsdxml.so.4 
+        libc.so.7      
+        libcrypt.so.5  
+        libcrypto.so.6 
+        libedit.so.7   
+        libgcc_s.so.1  
+        libgeom.so.5   
+        libipsec.so.4  
+        libipx.so.5    
+        libjail.so.1   
+        libkiconv.so.4 
+        libkvm.so.5    
+        libm.so.5      
+        libmd.so.5     
+        libncurses.so.8
+        libpcap.so.7   
+        libreadline.so.8
+        libsbuf.so.5   
+        libssp.so.0    
+        libthr.so.3    
+        libufs.so.5    
+        libutil.so.9   
+        libz.so.6      
+
+        geom            type=dir
+        ..
+
+    ..
+
+
+    libexec         type=dir
+        ld-elf.so.1    
+    ..
+
+
+    media           type=dir
+    ..
+
+
+    mnt             type=dir
+    ..
+
+
+    proc            type=dir mode=0555
+    ..
+
+
+    rescue          type=dir
+    ..
+
+
+    root            type=dir
+    ..
+
+
+    sbin            type=dir
+        cdevd          
+        dmesg          
+        fastboot       
+        fasthalt       
+        halt           
+        ifconfig       
+        init           
+        ipfw           
+        kldload        
+        kldstat        
+        kldunload      
+        ldconfig       
+        md5            
+        mdconfig       
+        mount          
+        mount_cd9660   
+        mount_msdosfs  
+        mount_nullfs   
+        mount_unionfs  
+        mpd            
+        newfs          
+        newfs_msdos    
+        nextboot       
+        ping           
+        rcorder        
+        reboot         
+        rmd160         
+        route          
+        sha1           
+        sha256         
+        shttpd         
+        sysctl         
+        umount         
+    ..
+
+
+    tmp             type=dir mode=01755
+    ..
+
+
+    usr             type=dir
+
+        bin             type=dir
+            basename       
+            bsdtar         
+            crontab        
+            dirname        
+            egrep          
+            ex             
+            fetch          
+            fgrep          
+            find           
+            getopt         
+            grep           
+            groups         
+            head           
+            hex2bin        
+            id             
+            login          
+            minigzip       
+            netstat        
+            nex            
+            nvi            
+            nview          
+            passwd         
+            scp            
+            sed            
+            slogin         
+            sort           
+            ssh            
+            ssh-keygen     
+            tail           
+            tar             type=link
+            tee            
+            telnet         
+            uname          
+            vi             
+            view           
+            wc             
+            whoami         
+            xargs          
+            zegrep         
+            zfgrep         
+            zgrep          
+        ..
+
+
+        lib             type=dir
+            crtbegin.o     
+            crtbeginS.o    
+            crtbeginT.o    
+            crtend.o       
+            crtendS.o      
+            libalias.so     type=link
+            libarchive.so   type=link
+            libarchive.so.5
+            libbsdxml.so    type=link
+            libbsm.so       type=link
+            libbsm.so.3    
+            libbz2.so       type=link
+            libbz2.so.4    
+            libc.so         type=link
+            libcrypt.so     type=link
+            libcrypto.so    type=link
+            libcurses.so    type=link
+            libedit.so      type=link
+            libelf.so       type=link
+            libelf.so.1    
+            libfetch.so     type=link
+            libfetch.so.6  
+            libform.so      type=link
+            libform.so.5   
+            libgcc_s.so     type=link
+            libgeom.so      type=link
+            libgnuregex.so  type=link
+            libgnuregex.so.5
+            libhistory.so   type=link
+            libhistory.so.8
+            libipsec.so     type=link
+            libipx.so       type=link
+            libjail.so      type=link
+            libkiconv.so    type=link
+            libkvm.so       type=link
+            liblzma.so      type=link
+            liblzma.so.5   
+            libm.so         type=link
+            libmd.so        type=link
+            libmemstat.so   type=link
+            libmemstat.so.3
+            libmenu.so      type=link
+            libmenu.so.5   
+            libmp.so        type=link
+            libmp.so.7     
+            libncurses.so   type=link
+            libnetgraph.so  type=link
+            libnetgraph.so.4
+            libpam.so       type=link
+            libpam.so.5    
+            libpanel.so     type=link
+            libpanel.so.5  
+            libpcap.so      type=link
+            libpmc.so       type=link
+            libpmc.so.5    
+            libpthread.so   type=link
+            libradius.so    type=link
+            libradius.so.4 
+            libreadline.so  type=link
+            librt.so        type=link
+            librt.so.1     
+            libsbuf.so      type=link
+            libssh.so       type=link
+            libssh.so.5    
+            libssl.so       type=link
+            libssl.so.6    
+            libssp.so       type=link
+            libstdc++.so    type=link
+            libstdc++.so.6 
+            libtacplus.so   type=link
+            libtacplus.so.4
+            libtermcap.so   type=link
+            libtermlib.so   type=link
+            libthr.so       type=link
+            libtinfo.so     type=link
+            libufs.so       type=link
+            libutil.so      type=link
+            libwrap.so      type=link
+            libwrap.so.6   
+            libz.so         type=link
+            pam_unix.so     type=link
+            pam_unix.so.5  
+
+            aout            type=dir
+            ..
+
+
+            compat          type=dir
+
+                aout            type=dir
+                ..
+
+            ..
+
+
+            dtrace          type=dir
+            ..
+
+
+            engines         type=dir
+                lib4758cca.so  
+                libaep.so      
+                libatalla.so   
+                libchil.so     
+                libcswift.so   
+                libnuron.so    
+                libsureware.so 
+                libubsec.so    
+            ..
+
+        ..
+
+
+        libexec         type=dir
+            getty          
+            ld-elf.so.1     type=link
+            telnetd        
+
+            lpr             type=dir
+
+                ru              type=dir
+                ..
+
+            ..
+
+
+            sendmail        type=dir
+            ..
+
+
+            sm.bin          type=dir
+            ..
+
+        ..
+
+
+        local           type=dir
+        ..
+
+
+        sbin            type=dir
+            chroot         
+            cron           
+            gpioctl        
+            inetd          
+            ngctl          
+            nghook         
+            pwd_mkdb       
+            sshd           
+        ..
+
+    ..
+
+..
+

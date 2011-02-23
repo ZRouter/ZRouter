@@ -1,3 +1,0 @@
-#!/bin/sh
-
-kill -INT 1

@@ -1,8 +1,0 @@
-#!/bin/sh
-#
-# $FreeBSD$
-#
-
-# PROVIDE: LOGIN
-# REQUIRE: DAEMON
-
