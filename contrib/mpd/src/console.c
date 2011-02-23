@@ -233,8 +233,10 @@ ConsoleConnect(int type, void *cookie)
   cs->write = ConsoleSessionWrite;
   cs->writev = ConsoleSessionWriteV;
   cs->prompt = ConsoleSessionShowPrompt;
-  cs->state = STATE_USERNAME;
+//  cs->state = STATE_USERNAME;
+  cs->state = STATE_AUTHENTIC;
   cs->context.cs = cs;
+  cs->context.priv = 2; //-
   RWLOCK_WRLOCK(c->lock);
   SLIST_INSERT_HEAD(&c->sessions, cs, next);
   RWLOCK_UNLOCK(c->lock);

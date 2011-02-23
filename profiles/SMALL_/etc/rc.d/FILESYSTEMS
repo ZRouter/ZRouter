@@ -1,8 +1,0 @@
-#!/bin/sh
-#
-# $FreeBSD$
-#
-
-# PROVIDE: FILESYSTEMS
-# REQUIRE: root mountcritlocal zfs
-

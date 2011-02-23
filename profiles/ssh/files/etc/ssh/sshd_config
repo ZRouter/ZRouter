@@ -1,0 +1,58 @@
+#VersionAddendum FreeBSD-20090522
+
+#Port 22
+#Protocol 2
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+Protocol 2
+# HostKey for protocol version 1
+#HostKey /etc/ssh/ssh_host_key
+# HostKeys for protocol version 2
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_dsa_key
+#KeyRegenerationInterval 1h
+#ServerKeyBits 1024
+#SyslogFacility AUTH
+#LogLevel INFO
+#LoginGraceTime 2m
+#PermitRootLogin no
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+#RSAAuthentication yes
+#PubkeyAuthentication yes
+#AuthorizedKeysFile	.ssh/authorized_keys
+#RhostsRSAAuthentication no
+#HostbasedAuthentication no
+#IgnoreUserKnownHosts no
+#IgnoreRhosts yes
+#PasswordAuthentication no
+#PermitEmptyPasswords no
+#ChallengeResponseAuthentication yes
+#UsePAM yes
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
+#GatewayPorts no
+#X11Forwarding yes
+#X11DisplayOffset 10
+#X11UseLocalhost yes
+#PrintMotd yes
+#PrintLastLog yes
+#TCPKeepAlive yes
+#UseLogin no
+#UsePrivilegeSeparation yes
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+UseDNS no
+#PidFile /var/run/sshd.pid
+#MaxStartups 10
+#PermitTunnel no
+#ChrootDirectory none
+#Banner none
+#Match User anoncvs
+#	X11Forwarding no
+#	AllowTcpForwarding no
+#	ForceCommand cvs server

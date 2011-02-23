@@ -1,0 +1,221 @@
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+<link rel="stylesheet" href="css/router.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>${DEVICE_NAME}</title>
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/wizard.js"></script>
+<script type="text/javascript" src="js/tree.js"></script>
+
+<script type="text/javascript">
+<!--
+/* page init functoin */
+function init()
+{
+
+}
+
+/* parameter checking */
+function check()
+{
+
+}
+
+var tool_list = new Array();
+tool_list[0] = ["Administration Settings", 			"?page=tool_admin.html"];
+tool_list[1] = ["Firmware and SSL Certification Upload", 	"?page=tool_fw.html"];
+tool_list[2] = ["Configuration File", 				"?page=tool_config.html"];
+tool_list[3] = ["Time and Date", 				"?page=tool_sntp.html"];
+
+var config_list = new Array();
+config_list[0] = ["Save and Activate", 				"?page=no_changes2.html"];
+config_list[1] = ["Discard Changes", 				"?page=reboot2.html"];
+
+function genVerticalMenu(x, y, list, id)
+{
+	var str="";
+	x = get_obj("MainTable").offsetLeft + x;
+
+	str+="<div id='"+id+"' class='menu' style='display:none;position:absolute;top:"+y+"px;left:"+x+"px;'>";
+	str+="  <ul>\n";
+	for(var i=0; i<list.length; i++)
+	{
+		str+="    <li><a href='"+list[i][1]+"' target='ifrMain'>"+list[i][0]+"</a></li>\n";
+	}
+	str+="  </ul>\n";
+	str+="</div>";
+	document.write(str);
+}
+
+
+function genLogOutMenu(x, y, msg, id)
+{
+	var str="";
+	x = get_obj("MainTable").offsetLeft + x;
+	str+="<div id='"+id+"' class='menu'  style='display:none;position:absolute;top:"+y+"px;left:"+x+"px;'>\n";
+	str+="  <a href='?page=logout.html' class='logout'>"+msg+"</a>\n";
+	str+="</div>\n";
+	document.write(str);
+}
+
+function HideFrame()
+{
+	showlist("tool", 	"");
+	showlist("config",	"");
+	showlist("logout",	"");
+}
+
+function showlist(name, flag)
+{
+	if(flag == "yes")
+		document.getElementById(name).style.display = "";
+	else
+		document.getElementById(name).style.display = "none";
+}
+
+function gen_banner_td(name, flag)
+{
+	var str="";
+	var menu_name="";
+
+	if(name == "home")
+		menu_name = "Home";
+	else if(name == "tool")
+		menu_name = "Maintenance";
+	else if(name == "sys")
+		menu_name = "System";
+	else if(name == "config")
+		menu_name = "Configuration";
+	else if(name == "logout")
+		menu_name = "Logout";
+	else if(name == "help")
+		menu_name = "Help";
+
+	if(flag == "a_href")
+	{
+		str+="<td class='banner'>";
+		if(name == "sys")
+			str+="<a href='?page=sys_setting.html' target='ifrMain'>";
+		else if(name == "help")
+			str+="<a href='?page=help.html' target='_blank'>";
+		else
+			str+="<a href='?page=home_sys.html' target='ifrMain'>";
+	}
+	else
+		str+="<td class='banner' onclick=\"showlist('"+name+"','yes')\">";
+
+	if(name == "logout")
+		str+="<img src='img/tool_bar_v.jpg' height='18' border='0' hspace='5'>";
+
+	str+="<img src='img/"+name+".gif' width='16' border='0' hspace='10'>";
+
+	str+="<span id='banner_"+name+"' class='word'>"+menu_name+"</span>";
+
+	if(flag == "" && name != "logout")
+		str+="<span class='img'><img src='img/triangle.gif' hspace='8'></span>";
+
+	if(name != "help")
+		str+="<img src='img/tool_bar_v.jpg' height='18' border='0' hspace='10'>";
+
+	if(flag == "a_href")
+		str+="</a>";
+	str+="</td>";
+
+	document.write(str);
+
+}
+-->
+</script>
+</head>
+<body onload="init();" leftmargin="0" topmargin="0" style="overflow: auto;" bgcolor="#ccdce2" marginheight="0" marginwidth="0">
+  <form name="frm" id="frm" method="post" action="?page=main.html" onsubmit="return check();">
+    <input name="ACTION_POST" value="SOMETHING" type="hidden">
+    <input name="require_frame_name" value="" type="hidden">
+    <center>
+      <table id="MainTable" border="1" bordercolor="#1e4c7d" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td colspan="2" onmouseover="HideFrame();">
+              <table background="img/banner.jpg" border="0" cellpadding="0" cellspacing="0" height="56" width="786">
+                <tbody>
+                  <tr>
+                    <td align="right" valign="middle">
+   		      <font style="color: white; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">
+   		        <b>${DEVICE_NAME}&nbsp;&nbsp;&nbsp;</b>
+   		      </font>
+   		    </td>
+   		  </tr>
+   		</tbody>
+   	      </table>
+	    </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="" background="img/tool_bar.jpg">
+              <table border="0" cellpadding="0" cellspacing="0">
+                <tbody>
+                  <tr>
+<script type="text/javascript">
+    gen_banner_td("home", "a_href");
+    gen_banner_td("tool", "");
+    gen_banner_td("config", "");
+    gen_banner_td("sys", "a_href");
+    gen_banner_td("logout", "");
+    gen_banner_td("help", "a_href");
+</script>
+		  </tr>
+	        </tbody>
+	      </table>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td bordercolor="ccdce2" valign="top">
+	      <table onmouseover="HideFrame();" id="table_tree" border="1" cellpadding="0" cellspacing="0" frame="box" width="211">
+		<tbody>
+		  <tr>
+		    <td id="link_tree" valign="top">
+		      <iframe id="ifrMenu" class="ifrMenu" src="jstree_table.html" frameborder="0" height="100%" scrolling="no" width="100%"></iframe>
+                    </td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </td>
+	    <td bordercolor="ccdce2" valign="top">
+	      <table id="table_page" onmouseover="HideFrame();" border="0" cellpadding="0" cellspacing="0" frame="box" width="600%">
+		<tbody>
+		  <tr>
+		    <td>
+		      <iframe id="ifrMain" name="ifrMain" src="home_sys.html" onload="" frameborder="0" height="500" scrolling="auto" width="567"></iframe>
+		    </td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </td>
+	  </tr>
+	</tbody>
+      </table>
+    </center>
+    <script>
+<!--
+genVerticalMenu(90, 78, tool_list, "tool");
+genVerticalMenu(255,78, config_list, "config");
+genLogOutMenu(490, 78, "&nbsp;&nbsp;The current browser connection will<br>&nbsp;&nbsp;be disconnected if you click <b>here</b>.", "logout");
+
+function resize()
+{
+ 	var x = get_obj("MainTable").offsetLeft;
+ 	get_obj("tool").style.left= (x+90+"px");
+	get_obj("config").style.left= (x+255+"px");
+ 	get_obj("logout").style.left= (x+490+"px");
+}
+
+window.onresize = resize;
+
+var ifrMain = get_obj("ifrMain");
+
+-->
+    </script>
+  </form>
+</body>
+</html>
