@@ -105,7 +105,9 @@ _KERNEL_BUILD_ENV= \
 kernel-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 
-kernel-build:	kernelconfig kernelhints
+${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc:	kernel-toolchain
+
+kernel-build:	kernelconfig kernelhints ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
 
 #XXX_BEGIN Only for testing
@@ -116,8 +118,8 @@ _KERNEL_BUILD_ENV+=KMODGRP=${KMODGRP}
 #XXX_END Only for testing
 
 
-kernel:	kernel-toolchain kernel-build kernel-install
-.ORDER:	kernel-toolchain kernel-build kernel-install
+kernel:	kernel-toolchain kernel-build kernel-install-dir kernel-install
+.ORDER:	kernel-toolchain kernel-build kernel-install-dir kernel-install
 
 
 _WORLD_BUILD_ENV= \
@@ -173,7 +175,7 @@ _WORLD_INSTALL_ENV+=LIBOWN=${OWN}
 _WORLD_INSTALL_ENV+=LIBGRP=${GRP}
 _WORLD_INSTALL_ENV+=MANOWN=${OWN}
 _WORLD_INSTALL_ENV+=MANGRP=${GRP}
-_WORLD_INSTALL_ENV+=INSTALL="sh ${FREEBSD_SRC_TREE}/tools/install.sh"
+_WORLD_INSTALL_ENV+=INSTALL="sh ${ZROUTER_ROOT}/tools/install.sh"
 #XXX_END Only for testing
 
 WORLD_SUBDIRS+=include
@@ -234,7 +236,7 @@ FREEBSD_BUILD_ENV_${var}
 world-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
-world-build:
+world-build:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
 world-install: rootfs-dir
@@ -302,7 +304,6 @@ ROOTFS_RMLIST= \
     \\( -type l -and -name sys \\) -or \
     \\( -type d -and \\( \
     -name include -or \
-    -name share -or \
     -name libdata -or \
     -name games -or \
     -name src -or \
@@ -310,6 +311,11 @@ ROOTFS_RMLIST= \
     -name info -or \
     -name man -or \
     -name zfs \\) \\)
+
+ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
+	pc-sysinstall security sendmail skel syscons tabset tmac vi zoneinfo
+
+#    -name share -or \
 
 # XXX Need found some better or use per profile
 ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
@@ -328,23 +334,50 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 	cp -R ${WORLDDESTDIR} ${NEW_ROOTFS}
 	rm -rf `find ${NEW_ROOTFS} ${ROOTFS_RMLIST}`
+	for file in ${ROOTFS_RMFILES} ; do rm -rf ${NEW_ROOTFS}/usr/share/$${file} ; done
 	rm -rf ${NEW_ROOTFS}/var
 	ln -s /tmp/var ${NEW_ROOTFS}/var
 	rm -f ${NEW_ROOTFS}/etc/resolv.conf
 	ln -s /tmp/etc/resolv.conf ${NEW_ROOTFS}/etc/resolv.conf
+	cd ${NEW_ROOTFS}/bin/ ; \
+	 ln -sf rm unlink ; \
+	 ln -sf ln link
+	cd ${NEW_ROOTFS}/sbin/ ; \
+	 ln -sf reboot halt ; \
+	 ln -sf reboot fastboot ; \
+	 ln -sf reboot fasthalt ; \
+	 ln -sf md5 rmd160 ; \
+	 ln -sf md5 sha1 ; \
+	 ln -sf md5 sha256
+	cd ${NEW_ROOTFS}/usr/bin/ ; \
+	 ln -sf id groups ; \
+	 ln -sf id whoami ; \
+	 ln -sf grep egrep ; \
+	 ln -sf grep fgrep ; \
+	 ln -sf grep zgrep ; \
+	 ln -sf grep zegrep ; \
+	 ln -sf grep zfgrep ; \
+	 ln -sf ssh slogin ; \
+	 ln -sf vi nvi ; \
+	 ln -sf vi ex ; \
+	 ln -sf vi nex ; \
+	 ln -sf vi view ; \
+	 ln -sf vi nview
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
 
 ${ROOTFS_DEPTEST}:		world
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel
+${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
 
 #${FREEBSD_BUILD_ENV__SHLIBDIRPREFIX}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel
 
-kernel-install ${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
+kernel-install:				${KERNELDESTDIR}/boot/kernel/kernel
+
+${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 .if !empty(KERNELDESTDIR)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
@@ -357,17 +390,17 @@ ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 	rm -f ${NEW_KERNEL}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 
-rootfs.iso ${NEW_ROOTFS}.iso:	rootfs
+rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
 
-${ZTOOLS_PATH}/oldlzma:
-	echo "++++++++++++++ Making $@ ++++++++++++++"
-	mkdir -p ${ZTOOLS_PATH}
-	${MAKE} -C ${ZROUTER_ROOT}/tools/oldlzma/ DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install clean
+#${ZTOOLS_PATH}/oldlzma:
+#	echo "++++++++++++++ Making $@ ++++++++++++++"
+#	mkdir -p ${ZTOOLS_PATH}
+#	${MAKE} -C ${ZROUTER_ROOT}/tools/oldlzma/ DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install clean
 
 oldlzma:	${ZTOOLS_PATH}/oldlzma
 	echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -387,11 +420,15 @@ ${NEW_KERNEL}.bin:	${NEW_KERNEL}
 #
 # Compress kernel with oldlzma
 #
-kernel_bin_oldlzma ${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma	${ZTOOLS_PATH}/packimage	${ZTOOLS_PATH}/trx
+kernel_bin_oldlzma:	${NEW_KERNEL}.bin.oldlzma
+
+${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma	${ZTOOLS_PATH}/packimage	${ZTOOLS_PATH}/trx
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
 
-kernel_oldlzma ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
+kernel_oldlzma:		${NEW_KERNEL}.oldlzma
+
+${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
 
@@ -428,11 +465,12 @@ kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.gz
 
-UBOOT_KERNEL_LOAD_ADDRESS=80001000
-UBOOT_KERNEL_ENTRY_POINT=${UBOOT_KERNEL_LOAD_ADDRESS}
+UBOOT_KERNEL_LOAD_ADDRESS?=80001000
+UBOOT_KERNEL_ENTRY_POINT?=${UBOOT_KERNEL_LOAD_ADDRESS}
 
+kernel.${KERNEL_COMPRESSION_TYPE}.uboot:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
 
-kernel.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE}
+${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE}
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	uboot_mkimage -A ${TARGET} -O linux -T kernel \
 	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \

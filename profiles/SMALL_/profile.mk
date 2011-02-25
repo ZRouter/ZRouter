@@ -62,6 +62,7 @@ kill \
 ln \
 ls \
 mkdir \
+mv \
 ps \
 realpath \
 rm \
@@ -93,6 +94,7 @@ ping \
 rcorder \
 reboot \
 route \
+switchctl \
 sysctl \
 umount
 
@@ -115,6 +117,7 @@ getopt \
 grep \
 head \
 id \
+killall \
 login \
 minigzip \
 netstat \
@@ -124,6 +127,7 @@ tail \
 tar \
 tee \
 telnet \
+touch \
 uname \
 vi \
 wc \
@@ -169,3 +173,4 @@ cron \
 pwd_mkdb \
 inetd \
 gpioctl
+

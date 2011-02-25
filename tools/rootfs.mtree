@@ -14,7 +14,7 @@
         hostname       
         kenv           
         kill           
-        link           
+        link           type=link
         ln             
         ls             
         mkdir          
@@ -25,7 +25,7 @@
         sleep          
         stty           
         sync           
-        unlink         
+        unlink         type=link
         upgrade        
         uuidgen        
     ..
@@ -439,9 +439,9 @@
     sbin            type=dir
         cdevd          
         dmesg          
-        fastboot       
-        fasthalt       
-        halt           
+        fastboot       type=link
+        fasthalt       type=link
+        halt           type=link
         ifconfig       
         init           
         ipfw           
@@ -463,10 +463,10 @@
         ping           
         rcorder        
         reboot         
-        rmd160         
+        rmd160         type=link
         route          
-        sha1           
-        sha256         
+        sha1           type=link
+        sha256         type=link
         shttpd         
         sysctl         
         umount         
@@ -484,43 +484,43 @@
             bsdtar         
             crontab        
             dirname        
-            egrep          
-            ex             
+            egrep          type=link
+            ex             type=link
             fetch          
-            fgrep          
+            fgrep          type=link
             find           
             getopt         
             grep           
-            groups         
+            groups         type=link
             head           
             hex2bin        
             id             
             login          
             minigzip       
             netstat        
-            nex            
-            nvi            
-            nview          
+            nex            type=link
+            nvi            type=link
+            nview          type=link
             passwd         
             scp            
             sed            
-            slogin         
+            slogin         type=link
             sort           
             ssh            
             ssh-keygen     
             tail           
-            tar             type=link
+            tar            type=link
             tee            
             telnet         
             uname          
             vi             
-            view           
+            view           type=link
             wc             
-            whoami         
+            whoami         type=link
             xargs          
-            zegrep         
-            zfgrep         
-            zgrep          
+            zegrep         type=link
+            zfgrep         type=link
+            zgrep          type=link
         ..
 
 

@@ -22,8 +22,10 @@ main_prestart()
 	mount /dev/${md} /tmp
 
 	mkdir -p /tmp/etc
-	mkdir -p /tmp/var/spool/lock
+	mkdir -p /tmp/var/empty
+	mkdir -p /tmp/var/log
 	mkdir -p /tmp/var/run
+	mkdir -p /tmp/var/spool/lock
 
 	mount_unionfs /tmp/etc /etc
 
@@ -43,7 +45,6 @@ main_start()
 
 main_poststart()
 {
-	/bin/sh
 }
 
 main_stop()

@@ -11,8 +11,11 @@ TDIR=/tmp/makefs_${fstype}_test
 #	echo ${STATUS}
 
 
-makefs_${fstype}:
-	cd ${FREEBSD_SRC_TREE}/usr.sbin/makefs && make DESTDIR=${ZTOOLS_PATH}
+makefs_cd9660:	${ZTOOLS_PATH}/makefs
+
+${ZTOOLS_PATH}/makefs:
 	mkdir -p ${ZTOOLS_PATH}
-	cd ${FREEBSD_SRC_TREE}/usr.sbin/makefs && install -s -m 555 makefs ${ZTOOLS_PATH}
+	cd ${FREEBSD_SRC_TREE}/usr.sbin/makefs; \
+	make MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX} DESTDIR=${ZTOOLS_PATH}; \
+	make MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX} DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} WITHOUT_MAN=yes WITHOUT_INFO=yes WITHOUT_NLS=yes install
 
