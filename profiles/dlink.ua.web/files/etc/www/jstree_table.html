@@ -13,7 +13,7 @@
     <SCRIPT TYPE="text/javascript">
 function NoMessage()
 {
-	window.status="${DEVICE_NAME}";
+	window.status="<!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" -->";
 }
     </SCRIPT>
     <TITLE></TITLE>

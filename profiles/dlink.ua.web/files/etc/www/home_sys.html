@@ -4,7 +4,7 @@
   <HEAD>
     <LINK REL="stylesheet" HREF="index_files/router.css" TYPE="text/css">
     <META http-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-    <TITLE>DAP-3520</TITLE>
+    <TITLE><!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" --></TITLE>
   </HEAD>
   <BODY LEFTMARGIN="0" TOPMARGIN="0" STYLE="overflow:auto;" BGCOLOR="#ccdce2" MARGINHEIGHT="0" MARGINWIDTH="0">
     <TABLE ID="table_frame" BORDER="0" CELLPADDING="0" CELLSPACING="0">
@@ -19,12 +19,12 @@
             <TABLE ID="table_set_main" BORDER="0" CELLPADDING="0" CELLSPACING="0">
               <!-- ________________________________ Main Content Start ______________________________ -->
               <TBODY>
-                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">Model Name</TD><TD ID="td_right">DAP-3520</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">Model Name</TD><TD ID="td_right"><!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" --></TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">Firmware Version</TD><TD ID="td_right">1.00&nbsp;&nbsp;&nbsp;14:53:41 03/17/2009</TD></TR>
-                <TR><TD ID="td_left" HEIGHT="25">System Name</TD><TD ID="td_right">D-Link DAP-3520</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">System Name</TD><TD ID="td_right"><!--#exec "sysctl -n kern.ident | sed s/_/\ /" --></TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">Location</TD><TD ID="td_right"></TD></TR>
-                <TR><TD ID="td_left" HEIGHT="25">System Time</TD><TD ID="td_right">03/17/2009&nbsp;10:16:09</TD></TR>
-                <TR><TD ID="td_left" HEIGHT="25">Up Time</TD><TD ID="td_right">0 Days, 22:19:2</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">System Time</TD><TD ID="td_right"><!--#exec "LC_ALL=C date" --></TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">Up Time</TD><TD ID="td_right"><!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" --></TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">Operation Mode</TD><TD ID="td_right">Access Point</TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">MAC Address</TD><TD ID="td_right">00:21:91:5a:86:f2</TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">SSID 1~3</TD><TD ID="td_right">02:21:91:5a:86:f2 ~ 06:21:91:5a:86:f2</TD></TR>

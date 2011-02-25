@@ -10,7 +10,7 @@ var STARTALLOPEN = 0; //replace 0 with 1 to show the whole tree
 
 var ICONPATH = 'img/'; 
 
-var deviceType="DAP-3520";
+var deviceType="<!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" -->";
 
 var  band=0;
 

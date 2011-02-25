@@ -1,0 +1,6 @@
+
+
+1. Fix cfi driver for new MX chips
+2. replace trx with asustrx
+3. done with firmware packing
+4. upgrade utility board depended

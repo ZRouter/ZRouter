@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="css/router.css" type="text/css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>${DEVICE_NAME}</title>
+<title><!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" --></title>
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/wizard.js"></script>
 <script type="text/javascript" src="js/tree.js"></script>
@@ -143,7 +143,7 @@ function gen_banner_td(name, flag)
                   <tr>
                     <td align="right" valign="middle">
    		      <font style="color: white; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">
-   		        <b>${DEVICE_NAME}&nbsp;&nbsp;&nbsp;</b>
+   		        <b><!--#exec "sysctl -n kern.ident | sed s/.*_/\ /" -->&nbsp;&nbsp;&nbsp;</b>
    		      </font>
    		    </td>
    		  </tr>
