@@ -76,9 +76,9 @@ KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uncompress\\\"
 KERNCONF_OPTIONS+=	INET
 KERNCONF_OPTIONS+= 	TMPFS
 KERNCONF_OPTIONS+= 	CD9660
-KERNCONF_OPTIONS+= 	GEOM_LABEL		# Provides labelization
-KERNCONF_DEVICES+=		geom_map
-KERNCONF_DEVICES+=		geom_uncompress
+KERNCONF_OPTIONS+= 	GEOM_LABEL
+KERNCONF_DEVICES+=	geom_map
+KERNCONF_DEVICES+=	geom_uncompress
 
 
 
@@ -96,118 +96,118 @@ KERNCONF_OPTIONS+=	_KPOSIX_PRIORITY_SCHEDULING
 
 
 # XXX notyet; need to be auto probed children of siba_cc.
-KERNCONF_DEVICES+=		uart
+KERNCONF_DEVICES+=	uart
 
-KERNCONF_DEVICES+=		siba			# Sonics SiliconBackplane
-#KERNCONF_DEVICES+=		pci			# siba_pcib
+KERNCONF_DEVICES+=	siba
+#KERNCONF_DEVICES+=	pci
 
-KERNCONF_DEVICES+=		siba_cc			# Sonics SiliconBackplane ChipCommon core
-KERNCONF_DEVICES+=		siba_mips		# Sonics SiliconBackplane MIPS core
-KERNCONF_DEVICES+=		siba_sdram		# Sonics SiliconBackplane SDRAM core
-KERNCONF_DEVICES+=		bfe			# FastEthernet 44xx core
+KERNCONF_DEVICES+=	siba_cc
+KERNCONF_DEVICES+=	siba_mips
+KERNCONF_DEVICES+=	siba_sdram
+KERNCONF_DEVICES+=	bfe
 
 KERNCONF_OPTIONS+= 	BFE_PACKET_LIST_CNT=32
-#KERNCONF_DEVICES+=		miibus			# attachments
-KERNCONF_DEVICES+=		mii			# Only bfeswitch
-KERNCONF_DEVICES+=		bfeswitch		# ROBO switch
+#KERNCONF_DEVICES+=	miibus
+KERNCONF_DEVICES+=	mii
+KERNCONF_DEVICES+=	bfeswitch
 
-KERNCONF_DEVICES+=		gpio
-KERNCONF_DEVICES+=		gpioled
-
-
-KERNCONF_DEVICES+=		loop			# Network loopback
-KERNCONF_DEVICES+=		ether			# Ethernet support
-#KERNCONF_DEVICES+= 		tun			# Packet tunnel.
-KERNCONF_DEVICES+= 		pty			# Pseudo-ttys (telnet etc)
-#KERNCONF_DEVICES+=		md			# Memory "disks"
-KERNCONF_DEVICES+= 		bpf			# Berkeley packet filter
-KERNCONF_DEVICES+=		vlan
-#KERNCONF_DEVICES+=		lagg
-#KERNCONF_DEVICES+=          if_bridge
+KERNCONF_DEVICES+=	gpio
+KERNCONF_DEVICES+=	gpioled
 
 
-KERNCONF_DEVICES+=		cfi			# Detect Flash memmory
-KERNCONF_DEVICES+=		cfid
+KERNCONF_DEVICES+=	loop
+KERNCONF_DEVICES+=	ether
+#KERNCONF_DEVICES+= 	tun
+KERNCONF_DEVICES+= 	pty
+#KERNCONF_DEVICES+=	md
+KERNCONF_DEVICES+= 	bpf
+KERNCONF_DEVICES+=	vlan
+#KERNCONF_DEVICES+=	lagg
+#KERNCONF_DEVICES+=     if_bridge
 
 
-#KERNCONF_DEVICES+=		wlan
-#KERNCONF_DEVICES+=		wlan_wep
-#KERNCONF_DEVICES+=		wlan_ccmp
-#KERNCONF_DEVICES+=		wlan_tkip
-#KERNCONF_DEVICES+=		wlan_xauth
-#KERNCONF_DEVICES+=		wlan_acl
-#KERNCONF_DEVICES+=		wlan_amrr
+KERNCONF_DEVICES+=	cfi
+KERNCONF_DEVICES+=	cfid
 
-#KERNCONF_DEVICES+=		firmware
-#KERNCONF_DEVICES+=		bwn
-#KERNCONF_DEVICES+=		bwi
+
+#KERNCONF_DEVICES+=	wlan
+#KERNCONF_DEVICES+=	wlan_wep
+#KERNCONF_DEVICES+=	wlan_ccmp
+#KERNCONF_DEVICES+=	wlan_tkip
+#KERNCONF_DEVICES+=	wlan_xauth
+#KERNCONF_DEVICES+=	wlan_acl
+#KERNCONF_DEVICES+=	wlan_amrr
+
+#KERNCONF_DEVICES+=	firmware
+#KERNCONF_DEVICES+=	bwn
+#KERNCONF_DEVICES+=	bwi
 
 .if defined(WITH_IPSEC)
-KERNCONF_OPTIONS+=         IPSEC
-KERNCONF_OPTIONS+=         IPSEC_NAT_T
+KERNCONF_OPTIONS+=      IPSEC
+KERNCONF_OPTIONS+=      IPSEC_NAT_T
 
-KERNCONF_DEVICES+=		random
-KERNCONF_DEVICES+=		enc
-#KERNCONF_DEVICES+=		gif
-KERNCONF_DEVICES+=		ipsec
-KERNCONF_DEVICES+=		crypto
-#KERNCONF_DEVICES+=		cryptodev	# /dev/crypto for access to h/w
+KERNCONF_DEVICES+=	random
+KERNCONF_DEVICES+=	enc
+#KERNCONF_DEVICES+=	gif
+KERNCONF_DEVICES+=	ipsec
+KERNCONF_DEVICES+=	crypto
+#KERNCONF_DEVICES+=	cryptodev
 
-##KERNCONF_DEVICES+=		rndtest		# FIPS 140-2 entropy tester
-#KERNCONF_DEVICES+=		ubsec_siba
+##KERNCONF_DEVICES+=	rndtest
+#KERNCONF_DEVICES+=	ubsec_siba
 .endif
 
 
 .if defined(WITH_USB)
-#KERNCONF_OPTIONS+=		USB_EHCI_BIG_ENDIAN_DESC # XXX
-#KERNCONF_OPTIONS+=		USB_DEBUG
-#KERNCONF_OPTIONS+=		USB_VERBOSE
+#KERNCONF_OPTIONS+=	USB_EHCI_BIG_ENDIAN_DESC
+#KERNCONF_OPTIONS+=	USB_DEBUG
+#KERNCONF_OPTIONS+=	USB_VERBOSE
 
-KERNCONF_DEVICES+=		usb			# USB Bus (required)
-KERNCONF_DEVICES+=		ehci			# EHCI interface (USB 2.0)
-KERNCONF_DEVICES+=		ohci			# OHCI interface (USB 1.1)
+KERNCONF_DEVICES+=	usb
+KERNCONF_DEVICES+=	ehci
+KERNCONF_DEVICES+=	ohci
 .endif
 
 
-#KERNCONF_DEVICES+=		udbp		# USB Double Bulk Pipe devices
-#KERNCONF_DEVICES+=		uhid		# "Human Interface Devices"
-#KERNCONF_DEVICES+=		ukbd		# Keyboard
-#KERNCONF_DEVICES+=		ulpt		# Printer
-#KERNCONF_DEVICES+=		umass		# Disks/Mass storage - Requires scbus and da
-#KERNCONF_DEVICES+=		ums		# Mouse
-#KERNCONF_DEVICES+=		ural		# Ralink Technology RT2500USB wireless NICs
-#KERNCONF_DEVICES+=		rum		# Ralink Technology RT2501USB wireless NICs
-#KERNCONF_DEVICES+=		zyd		# ZyDAS zb1211/zb1211b wireless NICs
-#KERNCONF_DEVICES+=		urio		# Diamond Rio 500 MP3 player
+#KERNCONF_DEVICES+=	udbp
+#KERNCONF_DEVICES+=	uhid
+#KERNCONF_DEVICES+=	ukbd
+#KERNCONF_DEVICES+=	ulpt
+#KERNCONF_DEVICES+=	umass
+#KERNCONF_DEVICES+=	ums
+#KERNCONF_DEVICES+=	ural
+#KERNCONF_DEVICES+=	rum
+#KERNCONF_DEVICES+=	zyd
+#KERNCONF_DEVICES+=	urio
 # USB Serial devices
-#KERNCONF_DEVICES+=		u3g		# USB-based 3G modems (Option, Huawei, Sierra)
-#KERNCONF_DEVICES+=		umodem		# USB-based 3G modems (Option, Huawei, Sierra)
-#KERNCONF_DEVICES+=		uark		# Technologies ARK3116 based serial adapters
-#KERNCONF_DEVICES+=		ubsa		# Belkin F5U103 and compatible serial adapters
-#KERNCONF_DEVICES+=		uftdi		# For FTDI usb serial adapters
-#KERNCONF_DEVICES+=		uipaq		# Some WinCE based devices
-#KERNCONF_DEVICES+=		uplcom		# Prolific PL-2303 serial adapters
-#KERNCONF_DEVICES+=		uslcom		# SI Labs CP2101/CP2102 serial adapters
-#KERNCONF_DEVICES+=		uvisor		# Visor and Palm devices
-#KERNCONF_DEVICES+=		uvscom		# USB serial support for DDI pocket's PHS
+#KERNCONF_DEVICES+=	u3g
+#KERNCONF_DEVICES+=	umodem
+#KERNCONF_DEVICES+=	uark
+#KERNCONF_DEVICES+=	ubsa
+#KERNCONF_DEVICES+=	uftdi
+#KERNCONF_DEVICES+=	uipaq
+#KERNCONF_DEVICES+=	uplcom
+#KERNCONF_DEVICES+=	uslcom
+#KERNCONF_DEVICES+=	uvisor
+#KERNCONF_DEVICES+=	uvscom
 # USB Ethernet, requires miibus
-#KERNCONF_DEVICES+=		aue		# ADMtek USB Ethernet
-#KERNCONF_DEVICES+=		axe		# ASIX Electronics USB Ethernet
-#KERNCONF_DEVICES+=		cdce		# Generic USB over Ethernet
-#KERNCONF_DEVICES+=		cue		# CATC USB Ethernet
-#KERNCONF_DEVICES+=		kue		# Kawasaki LSI USB Ethernet
-#KERNCONF_DEVICES+=		rue		# RealTek RTL8150 USB Ethernet
-#KERNCONF_DEVICES+=		udav		# Davicom DM9601E USB
+#KERNCONF_DEVICES+=	aue
+#KERNCONF_DEVICES+=	axe
+#KERNCONF_DEVICES+=	cdce
+#KERNCONF_DEVICES+=	cue
+#KERNCONF_DEVICES+=	kue
+#KERNCONF_DEVICES+=	rue
+#KERNCONF_DEVICES+=	udav
 
 
 
 # SCSI peripherals
-#KERNCONF_DEVICES+=          scbus           # SCSI bus (required for SCSI)
-#KERNCONF_DEVICES+=          da              # Direct Access (disks)
-#KERNCONF_DEVICES+=          sa              # Sequential Access (tape etc)
-#KERNCONF_DEVICES+=          cd              # CD
-#KERNCONF_DEVICES+=          pass            # Passthrough device (direct SCSI access)
-##KERNCONF_DEVICES+=		cam
+#KERNCONF_DEVICES+=     scbus
+#KERNCONF_DEVICES+=     da
+#KERNCONF_DEVICES+=     sa
+#KERNCONF_DEVICES+=     cd
+#KERNCONF_DEVICES+=     pass
+##KERNCONF_DEVICES+=	cam
 
 
 
@@ -216,3 +216,4 @@ kernel_deflate:	${DEPEND_ON_LZMA}
 	${DEBUG}${LZMA} e ${KERNEL_PATH} ${KERNEL_PATH}.lzma
 	${DEBUG}cp ${KERNEL_PATH} ${KERNEL_PATH}.unpacked
 	${DEBUG}cp ${KERNEL_PATH}.lzma ${KERNEL_PATH}
+
