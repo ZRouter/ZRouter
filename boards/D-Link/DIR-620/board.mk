@@ -25,7 +25,7 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 # Builded modules
-#KERNCONF_MAKEOPTIONS+=	"MODULES_OVERRIDE=\"ipfw usb/umass usb/uplcom usb/u3g dummynet \""
+# device wlan in kernel alredy enable this modules
 KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 KERNCONF_MODULES_OVERRIDE+=random if_bridge bridgestp ipfw dummynet
 KERNCONF_MODULES_OVERRIDE+=libalias/libalias

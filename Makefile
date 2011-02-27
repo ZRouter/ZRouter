@@ -99,6 +99,7 @@ _KERNEL_BUILD_ENV= \
 	TARGET_ARCH=${TARGET_ARCH} \
 	TARGET_CPUARCH=${TARGET} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	WITHOUT_RESCUE=yes \
 	-DNO_CLEAN
 
 
@@ -122,19 +123,50 @@ kernel:	kernel-toolchain kernel-build kernel-install-dir kernel-install
 .ORDER:	kernel-toolchain kernel-build kernel-install-dir kernel-install
 
 
-_WORLD_BUILD_ENV= \
+_WORLD_TCBUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
 	TARGET_CPUARCH=${TARGET} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	WITHOUT_ATM=yes \
 	WITHOUT_INFO=yes \
+	WITHOUT_IPX=yes \
 	WITHOUT_LOCALES=yes \
 	WITHOUT_MAN=yes \
 	WITHOUT_NLS=yes \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
+	WITHOUT_CDDL=yes \
+	WITHOUT_CRYPTO=yes \
+	WITHOUT_NIS=yes \
+	WITHOUT_KERBEROS=yes \
 	-DNO_CLEAN
 
+_WORLD_BUILD_ENV= \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET} \
+	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	WITHOUT_ASSERT_DEBUG=yes \
+	WITHOUT_ATM=yes \
+	WITHOUT_INFO=yes \
+	WITHOUT_INSTALLLIB=yes \
+	WITHOUT_IPX=yes \
+	WITHOUT_LOCALES=yes \
+	WITHOUT_MAN=yes \
+	WITHOUT_NLS=yes \
+	WITHOUT_PROFILE=yes \
+	WITHOUT_RESCUE=yes \
+	WITHOUT_SSP=yes \
+	-DNO_CLEAN
+
+
+.if !defined(JAIL_ENABLE)
+_WORLD_BUILD_ENV+= WITHOUT_JAIL=yes
+.endif
+.if !defined(IPV6_ENABLE)
+_WORLD_BUILD_ENV+= WITHOUT_INET6=yes WITHOUT_INET6_SUPPORT=yes
+.endif
 .if !defined(INSTALL_MAN)
 _WORLD_BUILD_ENV+= WITHOUT_MAN=yes
 .endif
@@ -149,21 +181,15 @@ _WORLD_INSTALL_ENV+=NO_STATIC_LIB=yes
 _WORLD_INSTALL_ENV+=WITHOUT_TOOLCHAIN=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_CDDL=yes
-_WORLD_INSTALL_ENV+=WITHOUT_CDDL=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_NIS=yes
-_WORLD_INSTALL_ENV+=WITHOUT_NIS=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_BLUETOOTH=yes
-_WORLD_INSTALL_ENV+=WITHOUT_BLUETOOTH=yes
 
 _WORLD_BUILD_ENV+=NOENABLE_WIDEC=yes -DNOENABLE_WIDEC
-_WORLD_INSTALL_ENV+=NOENABLE_WIDEC=yes -DNOENABLE_WIDEC
 
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS=yes
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS_SUPPORT=yes
-_WORLD_INSTALL_ENV+=WITHOUT_KERBEROS=yes
-_WORLD_INSTALL_ENV+=WITHOUT_KERBEROS_SUPPORT=yes
 
 
 #XXX_BEGIN Only for testing
@@ -234,7 +260,7 @@ FREEBSD_BUILD_ENV_${var}
 # World
 #
 world-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
 world-build:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
@@ -416,13 +442,18 @@ rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
 ${NEW_KERNEL}.bin:	${NEW_KERNEL}
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
+	@if [ "x${KERNEL_SIZE_MAX}" != "x" -a $$(stat -f %z ${NEW_KERNEL}.bin) -ge ${KERNEL_SIZE_MAX} ] ; then \
+		echo "${NEW_KERNEL}.bin size ($$(stat -f %z ${NEW_KERNEL}.bin)) greater than KERNEL_SIZE_MAX (${KERNEL_SIZE_MAX}), will delete it"; \
+		rm -f ${NEW_KERNEL}.bin ; \
+		exit 1; \
+	fi
 
 #
 # Compress kernel with oldlzma
 #
 kernel_bin_oldlzma:	${NEW_KERNEL}.bin.oldlzma
 
-${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma	${ZTOOLS_PATH}/packimage	${ZTOOLS_PATH}/trx
+${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
 
@@ -480,12 +511,14 @@ ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPR
 	    -d ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE} \
 	    ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
 
-kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}
+#	${ZTOOLS_PATH}/packimage
+
+kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}	${ZTOOLS_PATH}/trx
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
 
 # XXX: temporary
-kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz
+kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/trx
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
 
@@ -496,9 +529,9 @@ ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
 	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
 	truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
 
-fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
 	echo "++++++++++++++ Making $@ ++++++++++++++"
-	/linux/home/ray/firmware_mod_kit/src/asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
 .include <bsd.obj.mk>
 
