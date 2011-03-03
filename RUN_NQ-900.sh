@@ -17,5 +17,10 @@ export __MAKE_CONF
 export SRCCONF
 
 #make TARGET_PAIR=NorthQ/NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ mpd dhcp ssh nfs_client" kernel_bin_gz rootfs.iso.ulzma  2>&1 | tee $0.${DATE}.log
-make TARGET_PAIR=NorthQ/NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} TARGET_PROFILES="SMALL_ mpd dhcp ssh" fwimage  2>&1 | tee $0.${DATE}.log
-
+# TARGET_PROFILES="SMALL_ mpd dhcp ssh"
+if [ "x$1" != "x" ]; then
+	make TARGET_PAIR=NorthQ/NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} $1  2>&1 | tee $0.${DATE}.log
+else
+	make TARGET_PAIR=NorthQ/NQ-900 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} fwimage  2>&1 | tee $0.${DATE}.log
+fi
+cp /usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/NorthQ_NQ-900.trx /tftpboot/NQ-900/
