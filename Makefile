@@ -392,14 +392,13 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
 
+#${ROOTFS_DEPTEST}:
 ${ROOTFS_DEPTEST}:		world
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 
 ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
-
-#${FREEBSD_BUILD_ENV__SHLIBDIRPREFIX}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel
 
 kernel-install:				${KERNELDESTDIR}/boot/kernel/kernel
 
@@ -418,15 +417,10 @@ ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 
 rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
 	echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} makefs -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
+	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
-
-#${ZTOOLS_PATH}/oldlzma:
-#	echo "++++++++++++++ Making $@ ++++++++++++++"
-#	mkdir -p ${ZTOOLS_PATH}
-#	${MAKE} -C ${ZROUTER_ROOT}/tools/oldlzma/ DESTDIR=${ZTOOLS_PATH} BINDIR= BINOWN=${OWN} BINGRP=${GRP} all install clean
 
 oldlzma:	${ZTOOLS_PATH}/oldlzma
 	echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -527,11 +521,25 @@ ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
 	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
 	#truncate -s 1834980 ${NEW_KERNEL}.bin.gz.sync
 	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
-	truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
+	#truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
+	_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz.sync` ; \
+	_NEW_SIZE=$$(( (($${_SIZE} + 0xffff) & 0xffff0000) - 0x1c )) ; \
+	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.bin.gz.sync
 
 fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+
+
+#45 3D CD 28
+#00 A0 1E 00 # Cramfs size
+#03 00 00 00
+#00 00 00 00
+#43 6F 6D 70 Compressed ROMFS
+#72 65 73 73
+#65 64 20 52
+#4F 4D 46 53
+
 
 .include <bsd.obj.mk>
 

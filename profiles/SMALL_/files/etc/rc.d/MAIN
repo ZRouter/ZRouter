@@ -29,6 +29,11 @@ main_prestart()
 
 	mount_unionfs /tmp/etc /etc
 
+	if [ -c /dev/map/config ]; then 
+		dd if=/dev/map/config of=/tmp/etc.tar.gz;
+		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
+	fi
+
 	kldload ipfw
 	ipfw add 65000 allow all from any to any
 	ifconfig lo0 127.0.0.1/8
@@ -49,6 +54,12 @@ main_poststart()
 
 main_stop()
 {
+	if [ -c /dev/map/config ]; then 
+		cd /tmp/ && tar cvzf /tmp/etc.tar.gz etc/* ;
+		sysctl hw.cfi.rdonly=0
+		dd if=/tmp/etc.tar.gz of=/dev/map/config bs=64k conv=sync ;
+		sysctl hw.cfi.rdonly=1
+	fi
 }
 
 load_rc_config $name

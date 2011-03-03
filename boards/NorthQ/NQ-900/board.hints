@@ -1,7 +1,11 @@
 
 # NVRAM partition
-hint.nvram.0.base=0x1fff8000
-hint.nvram.0.fallbackbase=0x1fc00400
+# Static, CFE internal
+hint.nvram.0.flags=0x05 # Broadcom + nocheck
+hint.nvram.0.base=0x1fc00400
+# Dynamic, editable form CFE, override values from first
+hint.nvram.1.flags=0x05 # Broadcom + nocheck
+hint.nvram.1.base=0x1cff8000
 
 # siba_cc0 at siba0
 
@@ -74,6 +78,9 @@ hint.gpiobutton.1.pins="0x80"
 hint.gpiobutton.1.name="reset"
 hint.gpiobutton.1.flags="0x0440" # pulldown
 
+#hint.cfi.0.width=2
+#hint.cfi.0.shift=2
+
 hint.map.0.at="cfid0"
 hint.map.0.name=cfe
 hint.map.0.start=0x00000000
@@ -83,21 +90,18 @@ hint.map.0.readonly=RO
 hint.map.1.at="cfid0"
 hint.map.1.name="kernel"
 hint.map.1.start=0x00040000
-hint.map.1.end=0x00200000
-#hint.map.1.end="search"
-#hint.map.1.searchkey="HDR0"
-#hint.map.1.searchstart=0x00100000
-#hint.map.1.searchstep=32
+hint.map.1.end="search"
+hint.map.1.searchkey=".!/bin/sh"
+hint.map.1.searchstart=0x00100000
+hint.map.1.searchstep=0x10000
 
 hint.map.2.at="cfid0"
-hint.map.2.end=0x00ff0000
 hint.map.2.name="rootfs"
-hint.map.2.start=0x00200000
-#hint.map.2.offset="28"
-#hint.map.2.start="search"
-#hint.map.2.searchkey="HDR0"
-#hint.map.2.searchstart=0x00100000
-#hint.map.2.searchstep=32
+hint.map.2.start="search"
+hint.map.2.end=0x00fd0000
+hint.map.2.searchkey=".!/bin/sh"
+hint.map.2.searchstart=0x00100000
+hint.map.2.searchstep=0x10000
 
 hint.map.3.at="cfid0"
 hint.map.3.name="nvram"
@@ -107,7 +111,12 @@ hint.map.3.end=0x01000000
 hint.map.4.at="cfid0"
 hint.map.4.name=upgrade
 hint.map.4.start=0x00040000
-hint.map.4.end=0x01000000
+hint.map.4.end=0x00fd0000
+
+hint.map.5.at="cfid0"
+hint.map.5.name=config
+hint.map.5.start=0x00fd0000
+hint.map.5.end=0x00ff0000
 
 
 

@@ -10,10 +10,10 @@ SOC_CHIP=BCM5354
 # Maybe used for kernel config and maybe multiple e.g. "cfi nand"
 BOARD_FLASH_TYPE=cfi
 # TODO: size suffixes
-BOARD_FLASH_SIZE=4194304
+BOARD_FLASH_SIZE=16777216
 
 KERNEL_COMPRESSION=lzma.4.17
-KERNEL_COMPRESSION_TYPE=oldlzma
+KERNEL_COMPRESSION_TYPE=gzip
 
 ###################################################
 #
@@ -26,7 +26,9 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 # Builded modules
-KERNCONF_MAKEOPTIONS+=	"MODULES_OVERRIDE=\"ipfw libalias dummynet usb/umass usb/uplcom usb/u3g\""
+# device wlan in kernel alredy enable this modules
+KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
+KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
 # Additional utilities
 #WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
@@ -81,4 +83,7 @@ KERNEL_SIZE_MAX=3145728
 
 # Image must not be biggest than GEOM_MAP_P4 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x007c0000
+
+TARGET_PROFILES+=SMALL_ mpd ssh hostap dhcp nfs_client net_help
+
 

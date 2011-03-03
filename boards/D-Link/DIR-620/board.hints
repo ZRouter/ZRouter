@@ -76,7 +76,8 @@ hint.gpioled.2.pins="0x4000"
 hint.gpioled.2.name="wps"
 hint.gpioled.2.flags="0x0182"
 
-
+hint.cfi.0.width=2
+hint.cfi.0.shift=2
 
 #0x00000000-0x00030000 : "Bootloader"
 #0x00030000-0x00040000 : "Factory"
