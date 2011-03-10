@@ -16,6 +16,7 @@ VERSION=		5.6a1
 LDADD+=		-lpthread
 DPADD+=		${LIBPTHREAD}
 
+CFLAGS+=	-g -I${.CURDIR}/../../../contrib/shttpd/src
 SRCS+= \
 	string.c \
 	shttpd.c \
@@ -23,7 +24,7 @@ SRCS+= \
 	auth.c \
 	md5.c \
 	cgi.c \
-	io_ssi.c \
+	io_ssi_zrouter.c \
 	io_file.c \
 	io_socket.c \
 	io_ssl.c \

@@ -78,8 +78,8 @@ hint.gpiobutton.1.pins="0x80"
 hint.gpiobutton.1.name="reset"
 hint.gpiobutton.1.flags="0x0440" # pulldown
 
-#hint.cfi.0.width=2
-#hint.cfi.0.shift=2
+hint.cfi.0.width=2
+hint.cfi.0.shift=2
 
 hint.map.0.at="cfid0"
 hint.map.0.name=cfe
