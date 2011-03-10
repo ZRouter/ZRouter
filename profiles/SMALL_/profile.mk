@@ -174,6 +174,14 @@ pwd_mkdb \
 inetd \
 gpioctl
 
+.if defined(WITH_USB)
+WORLD_SUBDIRS_USR_SBIN+= \
+usbconfig \
+usbdump
+
+WORLD_SUBDIRS_LIB+= \
+libusb
+.endif
 
 
 KERNCONF_MODULES_OVERRIDE+=random if_bridge bridgestp ipfw dummynet

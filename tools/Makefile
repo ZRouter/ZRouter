@@ -4,6 +4,7 @@
 SUBDIR+=config
 SUBDIR+=oldlzma
 SUBDIR+=packimage
+SUBDIR+=asustrx
 SUBDIR+=trx
 
 .include <bsd.subdir.mk>

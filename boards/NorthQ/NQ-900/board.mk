@@ -30,6 +30,9 @@ WITH_USB=yes
 KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
+KERNCONF_OPTIONS+=ALT_BREAK_TO_DEBUGGER
+
+
 # Additional utilities
 #WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 
@@ -81,9 +84,11 @@ KERNEL_SIZE_MAX=3145728
 # KERNEL_COMPRESSED_SIZE_MAX is unknown, limit between kernel and rootfs float 
 # (splited by HDR0 key, TRX header)
 
+MKULZMA_BLOCKSIZE=65536
+
 # Image must not be biggest than GEOM_MAP_P4 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x007c0000
 
-TARGET_PROFILES+=SMALL_ mpd ssh hostap dhcp nfs_client net_help
-
+TARGET_PROFILES+=SMALL_ mpd ssh hostap dhcp net_help nfs_client
+TARGET_PROFILES+=shttpd dlink.ua.web
 
