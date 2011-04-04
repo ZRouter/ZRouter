@@ -33,6 +33,10 @@ KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam 
 KERNCONF_OPTIONS+=ALT_BREAK_TO_DEBUGGER
 
 
+KERNCONF_DEVICES+=	spibus
+KERNCONF_DEVICES+=	gpiospi
+KERNCONF_DEVICES+=	mx25l
+
 # Additional utilities
 #WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 

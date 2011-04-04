@@ -17,6 +17,7 @@ _TARGET_CROSS_DEFS = \
 	PATH=${FREEBSD_BUILD_ENV_PATH}:/usr/local/bin:/usr/local/sbin \
 	PREFIX=${WORLDDESTDIR} \
 	LOCALBASE=${WORLDDESTDIR} \
+	CC="${CC} -L${WORLDDESTDIR}/lib -L${WORLDDESTDIR}/usr/lib" \
 	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	GNU_CONFIGURE_PREFIX=${WORLDDESTDIR} \
@@ -101,7 +102,7 @@ port-build-depend-cross:
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
 		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
 		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
-		    cd ${dir} ; ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install || \
+		    cd ${dir} ; PATH=${FREEBSD_BUILD_ENV_PATH} ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install || \
 			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
 			    echo ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
 			    ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \

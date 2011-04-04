@@ -17,6 +17,9 @@ KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
 
+# XXX Need found something better or use per profile
+ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
+
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
 
@@ -269,8 +272,12 @@ world-install: rootfs-dir
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
-world:  world-toolchain world-build world-install
-.ORDER: world-toolchain world-build world-install
+world-fix-lib-links:
+	echo "++++++++++++++ Making $@ ++++++++++++++"
+	cd ${WORLDDESTDIR}/usr/lib/ && ${ZROUTER_ROOT}/tools/fix_lib_links.sh
+
+world:  world-toolchain world-build world-install world-fix-lib-links
+.ORDER: world-toolchain world-build world-install world-fix-lib-links
 
 .include "share/mk/zrouter.ports.mk"
 
@@ -343,8 +350,6 @@ ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
 
 #    -name share -or \
 
-# XXX Need found some better or use per profile
-ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 
 # Move kernel out of rootfs
 #		world kernel ports
@@ -393,7 +398,7 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
 
 #${ROOTFS_DEPTEST}:
-${ROOTFS_DEPTEST}:		world
+${ROOTFS_DEPTEST}:		world	ports
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 
 ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
@@ -519,9 +524,6 @@ kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/
 ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
-	#truncate -s 1834980 ${NEW_KERNEL}.bin.gz.sync
-	#truncate -s `echo $$(( ${KERNEL_PART_SIZE} - ${TRX_HEADER_SIZE} ))` ${NEW_KERNEL}.bin.gz.sync
-	#truncate -s `echo $$(( 0x1c0000 - 0x1c ))` ${NEW_KERNEL}.bin.gz.sync
 	_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz.sync` ; \
 	_NEW_SIZE=$$(( (($${_SIZE} + 0xffff) & 0xffff0000) - 0x1c )) ; \
 	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.bin.gz.sync
@@ -530,15 +532,6 @@ fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOL
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
-
-#45 3D CD 28
-#00 A0 1E 00 # Cramfs size
-#03 00 00 00
-#00 00 00 00
-#43 6F 6D 70 Compressed ROMFS
-#72 65 73 73
-#65 64 20 52
-#4F 4D 46 53
 
 
 .include <bsd.obj.mk>

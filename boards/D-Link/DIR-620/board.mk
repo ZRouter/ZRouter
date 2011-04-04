@@ -51,6 +51,8 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 ###################################################
 
 TARGET_PROFILES+=SMALL_ mpd ssh shttpd dlink.ua.web hostap dhcp nfs_client
+# mono
+# racoon
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
