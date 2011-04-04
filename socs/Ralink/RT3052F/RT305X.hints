@@ -5,10 +5,18 @@ hint.obio.0.maddr=0x10000000
 hint.obio.0.msize=0x10000000
 
 # on-board Ralink Frame Engine
-#hint.rtfe.0.at="obio0"
-#hint.rtfe.0.maddr=0x12000000
-#hint.rtfe.0.msize=0x200000
-#hint.rtfe.0.irq=9
+#hint.rt.0.at="nexus0"
+#hint.rt.0.maddr=0x12000000
+#hint.rt.0.msize=0x200000
+#hint.rt.0.irq=9
+hint.rt.0.macaddr="00:18:e7:d5:83:90"
+
+# on-board Ralink 2872 802.11n core
+hint.rt2860.0.at="nexus0"
+hint.rt2860.0.maddr=0x10180000
+hint.rt2860.0.msize=0x40000
+hint.rt2860.0.irq=4
+
 
 # uart0
 #hint.uart.0.at="obio0"

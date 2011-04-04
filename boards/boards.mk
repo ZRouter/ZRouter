@@ -8,6 +8,11 @@ TARGET_DEVICE=${TARGET_PAIR:C/.*\///}
 .if exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) && exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
 TARGET_BOARDDIR= ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}
 .include "${TARGET_BOARDDIR}/board.mk"
+
+.if exists(${TARGET_BOARDDIR}/files)
+ROOTFS_COPY_DIRS+=${TARGET_BOARDDIR}/files
+.endif
+
 .endif
 
 .if !defined(TARGET_BOARDDIR)

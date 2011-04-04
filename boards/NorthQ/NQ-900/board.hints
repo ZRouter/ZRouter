@@ -31,52 +31,32 @@ hint.gpio.0.pins="16"
 hint.gpio.0.flags="0x00"
 hint.gpio.0.irq=0
 
-# GPIO 0:Wireless Link/ACT LED Active HIGH
+# GPIO 6 
 hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.pins="0x01"
-hint.gpioled.0.name="radio"
+hint.gpioled.0.pins="0x40"
+hint.gpioled.0.name="zreset"
 hint.gpioled.0.flags="0x0040" # pulldown
 
-# GPIO 1:Status LED Active HIGH
+# GPIO 7
 hint.gpioled.1.at="gpiobus0"
-hint.gpioled.1.pins="0x02"
-hint.gpioled.1.name="status"
+hint.gpioled.1.pins="0x80"
+hint.gpioled.1.name="zbypass"
 hint.gpioled.1.flags="0x0040" # pulldown
 
-# GPIO 2: TestPoint # Use it like LED
-hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.pins="0x04"
-hint.gpioled.2.name="TP"
-hint.gpioled.2.flags="0x0040" # pulldown
 
-# GPIO 3:WPS LED Active LOW BiColor
-# GPIO 4:WPS LED Active LOW
-hint.gpioled.3.at="gpiobus0"
-hint.gpioled.3.pins="0x08"
-hint.gpioled.3.name="wps1"
-hint.gpioled.3.flags="0x0120" # Inverse out with pullup
-hint.gpioled.4.at="gpiobus0"
-hint.gpioled.4.pins="0x10"
-hint.gpioled.4.name="wps2"
-hint.gpioled.4.flags="0x0120" # Inverse out with pullup
+hint.spi.0.at="gpiobus0"
+hint.spi.0.pins=0x0027
+hint.spi.0.sclk="2"
+hint.spi.0.mosi="1"
+hint.spi.0.miso="0"
+hint.spi.0.cs0="5"
 
-# GPIO 5:USB Link/ACT LED Active HIGH
-hint.gpioled.5.at="gpiobus0"
-hint.gpioled.5.pins="0x20"
-hint.gpioled.5.name="usb"
-hint.gpioled.5.flags="0x0040" # pulldown
+# MCU reset at gpio0:pin6
 
-# GPIO 6:WPS Start Button
-hint.gpiobutton.0.at="gpiobus0"
-hint.gpiobutton.0.pins="0x40"
-hint.gpiobutton.0.name="wps"
-hint.gpiobutton.0.flags="0x0440" # pulldown
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+hint.mx25l.0.chipname="at25128"
 
-# GPIO 7:Factory Reset Button
-hint.gpiobutton.1.at="gpiobus0"
-hint.gpiobutton.1.pins="0x80"
-hint.gpiobutton.1.name="reset"
-hint.gpiobutton.1.flags="0x0440" # pulldown
 
 hint.cfi.0.width=2
 hint.cfi.0.shift=2

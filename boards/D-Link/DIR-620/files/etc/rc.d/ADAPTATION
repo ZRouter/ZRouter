@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	ifconfig rt0 name lan0
+	ifconfig vlan2 create vlan 2 vlandev lan0
+	ifconfig vlan2 name wan0
+	# name wlan0 will be used when hostap or client are created
+	ifconfig rt28600 name wifi0
+	hostname `kenv HostName`
+	wan_mac_addr=`kenv WAN_MAC_ADDR`
+	# lan mac wan+1
+	# wlan mac wan+2
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
