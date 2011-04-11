@@ -16,8 +16,8 @@ SRCCONF=/dev/null
 export __MAKE_CONF
 export SRCCONF
 
-#make TARGET_PAIR=D-Link/DIR-620 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} kernel-install kernel.oldlzma.uboot world-build world-install rootfs.iso.ulzma 2>&1 | tee $0.${DATE}.log
-make TARGET_PAIR=D-Link/DIR-620 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} kernel.oldlzma.uboot rootfs.iso.ulzma 2>&1 | tee $0.${DATE}.log
+make TARGET_PAIR=D-Link/DIR-620 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} kernel.oldlzma.uboot 2>&1 | tee $0.${DATE}.log
+#make TARGET_PAIR=D-Link/DIR-620 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} kernel.oldlzma.uboot rootfs.iso.ulzma 2>&1 | tee $0.${DATE}.log
 cp /usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/D-Link_DIR-620_kernel.oldlzma.uboot /tftpboot/DIR-620/
 cp /usr/obj/usr/home/ray/work/DDTeam.net/ZRouter/zrouter/D-Link_DIR-620_rootfs_clean.iso.ulzma /tftpboot/DIR-620/
 

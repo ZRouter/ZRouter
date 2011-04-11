@@ -40,11 +40,17 @@ hint.uart.1.flags="0x30"
 
 
 # gpio
-# GPIO0  - WPS BTN	IN II IO
-hint.gpiobutton.0.at="gpiobus0"
-hint.gpiobutton.0.pins="0x01"
-hint.gpiobutton.0.name="wps"
-hint.gpiobutton.0.flags="0x0581"
+# XXX DEBUG WPS BTN as a reset
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x01"
+hint.gpioreset.0.name="wps"
+#hint.gpioreset.0.flags="0x0581"
+
+## GPIO0  - WPS BTN	IN II IO
+#hint.gpiobutton.0.at="gpiobus0"
+#hint.gpiobutton.0.pins="0x01"
+#hint.gpiobutton.0.name="wps"
+#hint.gpiobutton.0.flags="0x0581"
 
 # GPIO7  - MODE SW AP	IN II IO
 hint.gpiobutton.1.at="gpiobus0"

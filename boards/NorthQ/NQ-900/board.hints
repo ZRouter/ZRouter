@@ -65,7 +65,7 @@ hint.map.0.at="cfid0"
 hint.map.0.name=cfe
 hint.map.0.start=0x00000000
 hint.map.0.end=0x00040000
-hint.map.0.readonly=RO
+hint.map.0.readonly=1
 
 hint.map.1.at="cfid0"
 hint.map.1.name="kernel"

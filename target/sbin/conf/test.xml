@@ -1,0 +1,32 @@
+<root>
+  <inttest></inttest>
+  <interfaces descriptions="System interfaces">
+    <ipaddr descriptions="IPv4 Address" type="IPADDR" value="192.168.0.254" default="192.168.0.1"></ipaddr>
+    <alc0 descriptions="Gigabit Ethernet card">
+      <static descriptions="Static configuration">
+        <enable descriptions="Enabled status" type="BOOL" value="FALSE" default="FALSE"></enable>
+        <ipaddr descriptions="IPv4 Address" type="CIDR" value="255.255.255.0/255.255.255.0" default="255.255.255.0/255.255.255.0"></ipaddr>
+        <gwaddr descriptions="IPv4 Gateway Address" type="IPADDR" value="192.168.0.253" default="192.168.0.2"></gwaddr>
+        <dns1addr descriptions="IPv4 DNS1 Address" type="IPADDR" value="192.168.100.1" default="192.168.0.7"></dns1addr>
+        <dns2addr descriptions="IPv4 DNS2 Address" type="IPADDR" value="192.168.100.2" default="192.168.0.8"></dns2addr>
+      </static>
+      <DHCP descriptions="Get network config from DHCP server">
+        <enable descriptions="Enabled status" type="BOOL" value="FALSE" default="FALSE"></enable>
+        <ipaddr descriptions="IPv4 Address" type="CIDR" value="255.255.254.0/255.255.254.0" default="0.0.0.0/0.0.0.0"></ipaddr>
+        <gwaddr descriptions="IPv4 Gateway Address" type="IPADDR" value="192.168.0.253" default="0.0.0.0"></gwaddr>
+        <dns1addr descriptions="IPv4 DNS1 Address" type="IPADDR" value="192.168.100.1" default="0.0.0.0"></dns1addr>
+        <dns2addr descriptions="IPv4 DNS2 Address" type="IPADDR" value="192.168.100.2" default="0.0.0.0"></dns2addr>
+      </DHCP>
+    </alc0>
+    <run0 descriptions="802.11n card"></run0>
+    <lo0 descriptions="Local Loopback device"></lo0>
+    <wlan0 descriptions="Wireless LAN interface"></wlan0>
+    <lagg0 descriptions="Link aggrigation interface LACP"></lagg0>
+  </interfaces>
+  <switchports descriptions="Ethernet Switch ports">
+    <port0></port0>
+  </switchports>
+  <get command="pseudo" type="pseudo"></get>
+  <list command="pseudo" type="pseudo"></list>
+  <show command="pseudo" type="pseudo"></show>
+</root>

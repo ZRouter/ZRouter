@@ -121,7 +121,6 @@ _KERNEL_BUILD_ENV+=KMODOWN=${KMODOWN}
 _KERNEL_BUILD_ENV+=KMODGRP=${KMODGRP}
 #XXX_END Only for testing
 
-
 kernel:	kernel-toolchain kernel-build kernel-install-dir kernel-install
 .ORDER:	kernel-toolchain kernel-build kernel-install-dir kernel-install
 
