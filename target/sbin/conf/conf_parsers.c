@@ -3,17 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-//#include <sys/cdefs.h>
 
 #include <ctype.h>
 #include <unistd.h>
 
-//#include <sys/types.h>
-//#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <parsers.h>
+#include <conf_parsers.h>
 
 
 static char obuf[32];

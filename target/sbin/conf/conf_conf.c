@@ -1,12 +1,10 @@
 #include <stdio.h>
-//#include <stdlib.h>
 #include <string.h>
-//#include <strings.h>
 
 
-#include <node.h>
-#include <nodelist.h>
-#include <parsers.h>
+#include <conf_node.h>
+#include <conf_nodelist.h>
+#include <conf_parsers.h>
 
 
 Node *

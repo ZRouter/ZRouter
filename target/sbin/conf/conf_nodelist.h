@@ -1,7 +1,7 @@
 #ifndef __NODELIST_H__
 #define __NODELIST_H__
 
-#include "node.h"
+#include <conf_node.h>
 
 struct NodeList {
 	Node * nodes[256];
