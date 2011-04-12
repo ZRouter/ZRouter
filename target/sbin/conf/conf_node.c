@@ -3,7 +3,8 @@
 #include <stdlib.h> /* malloc/free */
 #include <string.h> /* strdup */
 #include <strings.h> /* bzero */
-#include "node.h"
+
+#include <conf_node.h>
 
 
 Node *
@@ -25,8 +26,6 @@ newNode(const char *name, Node *firstAttr)
 Node *
 newNodeNVD(const char *name, const char *value, const char * desc)
 {
-//	if (!name || !desc)
-//		return (0);
 	Node *node = newNode(name, 0);
 	node->value = strdup(value);
 	if (node->desc)
@@ -89,6 +88,27 @@ appendNewChildDescr(Node * parent, const char *name, const char *desc, Node *fir
 	return (new);
 }
 
+Node *
+applyNode(Node *parent, const char *name)
+{
+	Node *node;
+
+	if (!parent) return 0;
+
+	/* Return matched node */
+	if (parent->firstChild)
+		for (node = parent->firstChild; node; node = node->next) {
+			if (strcmp(node->name, name) == 0) {
+				return (node);
+			}
+		}
+
+	/* Create if no match */
+	node = newNode(name, 0);
+	appendChild(parent, node);
+	return (node);
+}
+
 void
 freeNode(Node *node)
 {
@@ -96,12 +116,60 @@ freeNode(Node *node)
 		freeNode(node->firstChild);
 	if (node->next)
 		freeNode(node->next);
-	free(node->name);
+	free((void *)node->name);
 	if (node->desc)
-		free(node->desc);
+		free((void *)node->desc);
 	if (node->value)
-		free(node->value);
+		free((void *)node->value);
 	free(node);
+}
+
+Node *
+findNodePath(Node *root, const char *path)
+{
+	char * subpath, *name, *p;
+	Node *node, *new;
+
+	if (!root || !path)
+		return (0);
+
+	if (strcmp(root->name, path) == 0)
+		return (root);
+
+	p = strdup(path);
+
+	subpath = strchr(p, '.');
+
+	if (subpath)
+		*(subpath++) = '\0';
+
+	name = p;
+
+	for (node = root; node; node = node->next ) {
+		if (strcmp(node->name, name) == 0) {
+			if (node->firstChild) {
+				new = findNodePath(node->firstChild, subpath);
+				if (new) {
+					free(p);
+					return (new);
+				}
+			}
+			if (!subpath) {
+				free(p);
+				return (node);
+			}
+		}
+	}
+	if (root->firstAttr) {
+		new = findNodePath(root->firstAttr, subpath);
+		if (new) {
+			free(p);
+			return (new);
+		}
+	}
+
+	free(p);
+	return (0);
 }
 
 Attr *
@@ -131,6 +199,29 @@ addAttr(Node *node, Attr *newAttr)
 		topAttr->prev = newAttr;
 
 	return (node);
+}
+
+void
+applyAttr(Node *parent, const char *name, const char *value)
+{
+	Node *node;
+
+	if (!parent) return;
+
+	/* Apply to matched attribute */
+	if (parent->firstAttr)
+		for (node = parent->firstAttr; node; node = node->next) {
+			if (strcmp(node->name, name) == 0) {
+				free((void *)node->value);
+				node->value = value;
+				return;
+			}
+		}
+
+	/* Create if no match */
+	addAttr(parent, newAttr(name, value));
+
+	return;
 }
 
 int

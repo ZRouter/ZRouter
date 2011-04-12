@@ -1,6 +1,7 @@
 #include <stdlib.h> /* malloc/free */
 #include <string.h> /* memcpy */
-#include "nodelist.h"
+
+#include <conf_nodelist.h>
 
 NodeList *
 NodeListInit()

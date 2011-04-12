@@ -6,28 +6,26 @@
 #include <strings.h>
 #include <sys/cdefs.h>
 
-//#include <signal.h>
-//#include <sys/wait.h>
 #include <ctype.h>
 #include <unistd.h>
-//#include <histedit.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+
+
+#include <conf_param.h>
+
+#include <conf_node.h>
+#include <conf_nodelist.h>
+#include <conf_conf.h>
+#include <conf_parsers.h>
+
+#ifdef WITH_XML_PARSER
 #include <bsdxml.h>
-
-
-#include <param.h>
-
-#include <node.h>
-#include <nodelist.h>
-#include <conf.h>
-#include <parsers.h>
-#ifdef USE_XML_PARSER
-#include <xml.h>
+#include <conf_xml.h>
 #endif
 
 
@@ -91,70 +89,16 @@ FillTree()
 	Node *testroot = 0;
 	Node *root = 0;
 
+#ifdef WITH_XML_PARSER
 	load_xml(&root, "test.xml");
-
 
 	if (load_xml_buf(&root, test, strlen(test)) == 0) {}
 
-	XMLdump(root);
+#endif
 
 	return (root);
 }
 
-Node *
-findNode(Node *root, char *path)
-{
-	char * subpath, *name, *p;
-	Node *node, *new;
-
-	if (!root || !path)
-		return (0);
-
-	printf("%s: path = %s\n", __func__, path);
-
-	if (strcmp(root->name, path) == 0) {
-		return (root);
-	}
-
-	p = strdup(path);
-
-	subpath = strchr(p, '.');
-
-	if (subpath)
-		*(subpath++) = '\0';
-
-	name = p;
-
-	printf("%s: path = %s (%s and %s)\n", __func__, path, name, subpath);
-
-
-	for (node = root; node; node = node->next ) {
-		printf("%s: %s == %s\n", __func__, node->name, name);
-		if (strcmp(node->name, name) == 0) {
-			if (node->firstChild) {
-				new = findNode(node->firstChild, subpath);
-				if (new) {
-					free(p);
-					return (new);
-				}
-			}
-			if (!subpath) {
-				free(p);
-				return (node);
-			}
-		}
-	}
-	if (root->firstAttr) {
-		new = findNode(root->firstAttr, subpath);
-		if (new) {
-			free(p);
-			return (new);
-		}
-	}
-
-	free(p);
-	return (0);
-}
 
 int
 main(int argc, char **argv)
@@ -165,30 +109,38 @@ main(int argc, char **argv)
 	NodeList *cwd = NodeListInit();
 
 	Node *root = FillTree();
+	Node *save = root;
+	root = root->firstChild;
 	NodeListPush(cwd, root);
 
-//	printf("TEXT_DUMP of root:\n");
-//	dump(root, "   ");
-//	printf("------------------------------------- TEXT_DUMP\n");
-//	printf("TEXT_DUMP of root:\n");
-//	dump(root, "-->");
-//	printf("------------------------------------- TEXT_DUMP\n");
-//	printf("XML_DUMP of root:\n");
-//	XMLdump(root);
-//	printf("------------------------------------- XML_DUMP\n");
+#ifdef WITH_XML_PARSER
+	printf("XML_DUMP of root:\n");
+	XMLdump(root);
+	printf("------------------------------------- XML_DUMP\n");
+#else
+	printf("TEXT_DUMP of root:\n");
+	dump(root, "-->");
+	printf("------------------------------------- TEXT_DUMP\n");
+#endif
 
-	Node *ip = findNode(root, (argc > 1)?argv[1]:"root.interfaces.alc0.static.ipaddr");
+
+	char *path = (argc > 1)?argv[1]:"root.interfaces.alc0.static.ipaddr";
+	Node *ip = findNodePath(root, path);
 	if (ip) {
-		printf("node found: name=\"%s\"\n", ip->name);
-		printf("XML_DUMP of root.interfaces.alc0.static.ipaddr:\n");
+#ifdef WITH_XML_PARSER
+		printf("XML_DUMP of %s:\n", path);
 		XMLdump(ip);
 		printf("------------------------------------- XML_DUMP\n");
-//		printf("TEXT_DUMP of root.interfaces.alc0.static.ipaddr:\n");
-//		dump(ip, ">  ");
-//		printf("------------------------------------- TEXT_DUMP\n");
+#else
+		printf("TEXT_DUMP of %s:\n",path);
+		dump(ip, ">  ");
+		printf("------------------------------------- TEXT_DUMP\n");
+#endif
+	} else {
+		printf("Path \"%s\" not found\n", path);
 	}
 
-	freeNode(root);
+	freeNode(save);
 	NodeListFree(cwd);
 	return (exitcode);
 }
