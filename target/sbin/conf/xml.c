@@ -17,34 +17,74 @@ struct xml_state {
 	Node *last;
 };
 
+static void
+applyAttrs(Node *parent, char *name, char *value)
+{
+	Node *node;
+
+	if (!parent) return;
+
+	/* Apply to matched attribute */
+	if (parent->firstAttr)
+		for (node = parent->firstAttr; node; node = node->next) {
+			if (strcmp(node->name, name) == 0) {
+				free(node->value);
+				node->value = value;
+				return;
+			}
+		}
+
+	/* Create if no match */
+	addAttr(parent, newAttr(name, value));
+
+	return;
+}
+
+static Node *
+applyNode(Node *parent, char *name)
+{
+	Node *node;
+
+	if (!parent) return 0;
+
+	/* Return matched node */
+	if (parent->firstChild)
+		for (node = parent->firstChild; node; node = node->next) {
+			if (strcmp(node->name, name) == 0) {
+				return (node);
+			}
+		}
+
+	/* Create if no match */
+	node = newNode(name, 0);
+	appendChild(parent, node);
+	return (node);
+}
+
 static void 
 startElement(void *st, const char *el,const char **attr) 
 {
 	int i;
-	Node *node;
+	Node *node = 0, *n;
 	struct xml_state *xst = st;
 
-	/* Create new node */
-	node = newNode(el, 0);
-
-	if (xst->last) {
-		/* Attach new node to upper */
-		appendChild(xst->last, node);
+	node = applyNode(xst->last, el);
+	if (!node) {
+		printf("ERROR: no target node\n");
+		return;
 	}
 
 	/* Set new node as last */
 	xst->last = node;
 
-	if (!xst->root)
-		xst->root = xst->last;
-
-	print_indent(xst->level);
-	printf("<%s", el);
+//	print_indent(xst->level);
+//	printf("<%s", el);
 	for (i = 0; attr[i] && *attr[i]; i+=2) {
-		printf("%s=\"%s\" ", attr[i], attr[i+1]);
-		addAttr(xst->last, newAttr(attr[i], attr[i+1]));
+//		printf(" %s=\"%s\"", attr[i], attr[i+1]);
+//		addAttr(xst->last, newAttr(attr[i], attr[i+1]));
+		applyAttrs(xst->last, attr[i], attr[i+1]);
 	}
-	printf(">\n");
+//	printf(">\n");
 	xst->level++;
 
 }
@@ -55,8 +95,8 @@ endElement(void *st, const char *el)
 	struct xml_state *xst = st;
 
 	xst->level--;
-	print_indent(xst->level);
-	printf("</%s>\n", el);
+//	print_indent(xst->level);
+//	printf("</%s>\n", el);
 
 	if (xst->last == xst->root) return;
 
@@ -79,13 +119,13 @@ static void characters(void *st, const char *ch, int len)
 
 int load_xml(Node **newroot, char *file) 
 {
-	char Buff[BUFFSIZE];
+	char buf[BUFFSIZE];
 	FILE *fp;
 	struct xml_state xst;
 
 	xst.level = 0;
-	xst.root = 0;
-	xst.last = 0;
+
+	xst.last = xst.root = (*newroot)?*newroot:newNode("root", 0);
 
 	fp = fopen(file,"r");
 
@@ -95,11 +135,10 @@ int load_xml(Node **newroot, char *file)
 	XML_SetUserData(parser, &xst);
 
 	for (;;) {
-    		int len  = fread(Buff, 1, BUFFSIZE, fp);
+    		int len  = fread(buf, 1, BUFFSIZE, fp);
     		int done = feof(fp);
-    		if (! XML_Parse(parser, Buff, len, done))
-
-    		return (-1);
+    		if (! XML_Parse(parser, buf, len, done))
+    			return (-1);
 
 		if (done) break;
 	}
@@ -115,8 +154,7 @@ int load_xml_buf(Node **newroot, char *buf, int len)
 	struct xml_state xst;
 
 	xst.level = 0;
-	xst.root = 0;
-	xst.last = 0;
+	xst.last = xst.root = (*newroot)?*newroot:newNode("root", 0);
 
 	XML_Parser parser = XML_ParserCreate(NULL);
 	XML_SetElementHandler(parser, startElement, endElement);
@@ -172,16 +210,15 @@ XMLdumpL(Node *top, int l)
 
 	printf(">");
 
+	if (top->firstChild)
+		/* Break line only if have childs */
+		printf("\n");
+
 	for (node = top->firstChild; node; node = node->next ) {
 
-		{
-			/* Break line only if have childs */
-			printf("\n");
 			XMLdumpL(node, l+1);
 			/* indent close tag only if have childs */
 			print_indent(l); 
-		}
-
 	}
 	printf("</%s>\n", top->name);
 }
