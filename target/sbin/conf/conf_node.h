@@ -32,6 +32,7 @@ Node *	appendNewChild(Node * parent, const char *childName, Attr *childFirstAttr
 Node *	appendNewChildDescr(Node * parent, const char *childName, const char *childDescr, Attr *childFirstAttr);
 void	freeNode(Node *node);
 Node *  findNodePath(Node *root, const char *path);
+int	nodeGetLevel(Node *node);
 
 
 
@@ -39,7 +40,9 @@ Node *	newAttr(const char *attrName, const char *attrValue);
 Node *  addAttr(Node *node, Attr *newAttr);
 void	applyAttr(Node *parent, const char *name, const char *value);
 void 	nodeSetAttr(Node *node, Attr *firstAttr);
-Attr * 	nodeGetAttr(Node *node); /* return firstAttr node */
+Attr * 	nodeGetAttrs(Node *node); /* return firstAttr node */
+const char * 	nodeGetAttr(Node *node, const char *name);
 int	NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue);
+int	nodeHasAttr(Node *node, const char *attrName);
 
 #endif /* __NODE_H__ */

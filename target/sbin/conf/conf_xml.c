@@ -12,9 +12,10 @@
 
 
 struct xml_state {
-	int level;
-	Node *root;
-	Node *last;
+	int 	level;
+	Node 	*root;
+	Node 	*last;
+	int	conf_id;
 };
 
 static void 
@@ -23,6 +24,7 @@ startElement(void *st, const char *el,const char **attr)
 	int i;
 	Node *node = 0, *n;
 	struct xml_state *xst = st;
+	char attrname[16];
 
 	node = applyNode(xst->last, el);
 	if (!node) {
@@ -34,7 +36,14 @@ startElement(void *st, const char *el,const char **attr)
 	xst->last = node;
 
 	for (i = 0; attr[i] && *attr[i]; i+=2)
-		applyAttr(xst->last, attr[i], attr[i+1]);
+		if (!xst->conf_id)
+			applyAttr(xst->last, attr[i], attr[i+1]);
+		else {
+			if (strcmp(attr[i], "value") == 0) {
+				sprintf(attrname, "value%d", xst->conf_id);
+				applyAttr(xst->last, attrname, attr[i+1]);
+			}
+		}
 
 	xst->level++;
 
@@ -59,17 +68,19 @@ static void characters(void *st, const char *ch, int len)
 
 
 
-int load_xml(Node **newroot, char *file) 
+int load_xml(Node **newroot, char *file, int conf_id)
 {
 	char buf[BUFFSIZE];
 	FILE *fp;
 	struct xml_state xst;
 
 	xst.level = 0;
-
+	xst.conf_id = conf_id;
 	xst.last = xst.root = (*newroot)?*newroot:newNode("root", 0);
 
 	fp = fopen(file,"r");
+	if (!fp)
+		return (EIO);
 
 	XML_Parser parser = XML_ParserCreate(NULL);
 	XML_SetElementHandler(parser, startElement, endElement);
@@ -91,11 +102,12 @@ int load_xml(Node **newroot, char *file)
 	return (0);
 }
 
-int load_xml_buf(Node **newroot, char *buf, int len)
+int load_xml_buf(Node **newroot, char *buf, int len, int conf_id)
 {
 	struct xml_state xst;
 
 	xst.level = 0;
+	xst.conf_id = conf_id;
 	xst.last = xst.root = (*newroot)?*newroot:newNode("root", 0);
 
 	XML_Parser parser = XML_ParserCreate(NULL);
