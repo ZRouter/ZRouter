@@ -1,6 +1,9 @@
 #ifndef _PARAM_H_
 #define _PARAM_H_
 
+#include <errno.h>
+#include <conf_strbuf.h>
+
 #ifndef INDENT
 #define INDENT "    "
 #endif

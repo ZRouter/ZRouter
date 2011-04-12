@@ -40,9 +40,22 @@ nodeSetAttr(Node *node, Node *attr)
 }
 
 Node *
-nodeGetAttr(Node *node)
+nodeGetAttrs(Node *node)
 {
 	return (node->firstAttr);
+}
+
+const char *
+nodeGetAttr(Node *node, const char *name)
+{
+	Node *attr;
+
+	for (attr = nodeGetAttrs(node); attr; attr = attr->next) {
+		if (strcmp(attr->name, name) == 0)
+			return (attr->value);
+	}
+
+	return (0);
 }
 
 Node *
@@ -107,6 +120,12 @@ applyNode(Node *parent, const char *name)
 	node = newNode(name, 0);
 	appendChild(parent, node);
 	return (node);
+}
+
+int
+nodeGetLevel(Node *node)
+{
+	return ((node->parent)?(nodeGetLevel(node->parent)+1):0);
 }
 
 void
@@ -251,14 +270,23 @@ NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
 	return (ret);
 }
 
+int
+nodeHasAttr(Node *node, const char *attrName)
+{
+	Attr *attr;
+	int ret = 0;
 
+	if (!node || !attrName)
+		return (0);
+	if (!node->firstAttr)
+		return (0);
 
-
-
-
-
-
-
-
+	for (attr = node->firstAttr; attr; attr = attr->next) {
+		if (!strcasecmp(attr->name, attrName)) {
+			return (1);
+		}
+	}
+	return (ret);
+}
 
 
