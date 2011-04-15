@@ -51,6 +51,22 @@
         <arg2 presence="mandatory"></arg2>
       </default>
     </load>
-  <commands>
+    <event command="pseudo" type="pseudo" handler="event">
+    </event>
+  </commands>
+  <events>
+    <event>
+      <match>
+	<type value="STARTUP"></type>
+      </match>
+      <do>
+	<command1 value="load config 2 xml test_config.xml"></command1>
+	<command2 value="load config 2 xml test_config.xml"></command2>
+	<command3 value="show config"></command3>
+	<command4 value="show config 2"></command4>
+	<command5 value="show config 2 xml"></command5>
+      </do>
+    </event>
+  </events>
 </root>
 

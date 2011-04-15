@@ -231,7 +231,8 @@ applyAttr(Node *parent, const char *name, const char *value)
 	if (parent->firstAttr)
 		for (node = parent->firstAttr; node; node = node->next) {
 			if (strcmp(node->name, name) == 0) {
-				free((void *)node->value);
+				if (node->value)
+					free((void *)node->value);
 				node->value = value;
 				return;
 			}

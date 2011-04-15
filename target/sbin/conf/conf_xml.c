@@ -78,6 +78,8 @@ int load_xml(Node **newroot, char *file, int conf_id)
 	xst.conf_id = conf_id;
 	xst.last = xst.root = (*newroot)?*newroot:newNode("root", 0);
 
+	printf("%s: filename %s\n", __func__, file);
+
 	fp = fopen(file,"r");
 	if (!fp)
 		return (EIO);
@@ -90,13 +92,17 @@ int load_xml(Node **newroot, char *file, int conf_id)
 	for (;;) {
     		int len  = fread(buf, 1, BUFFSIZE, fp);
     		int done = feof(fp);
-    		if (! XML_Parse(parser, buf, len, done))
-    			return (-1);
+    		if (XML_Parse(parser, buf, len, done) == XML_STATUS_ERROR) {
+    			printf("XML_Parse: %s, at %d:%d\n",
+    			    XML_ErrorString(XML_GetErrorCode(parser)),
+    			    XML_GetCurrentLineNumber(parser),
+    			    XML_GetCurrentColumnNumber(parser));
+    			return (ENXIO);
+    		}
 
 		if (done) break;
 	}
 	fclose(fp); 
-	printf("\n");
 
 	*newroot = xst.root;
 	return (0);
@@ -115,9 +121,13 @@ int load_xml_buf(Node **newroot, char *buf, int len, int conf_id)
 	XML_SetCharacterDataHandler(parser, characters);
 	XML_SetUserData(parser, &xst);
 
-    	if (! XML_Parse(parser, buf, len, 1))
-    		return (-1);
-	printf("\n");
+    	if (! XML_Parse(parser, buf, len, 1)) {
+    		printf("XML_Parse: %s, at %d:%d\n",
+    		    XML_ErrorString(XML_GetErrorCode(parser)),
+    		    XML_GetCurrentLineNumber(parser),
+    		    XML_GetCurrentColumnNumber(parser));
+    		return (ENXIO);
+    	}
 
 	*newroot = xst.root;
 	return (0);

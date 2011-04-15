@@ -250,6 +250,18 @@ dump_xml(Node *root, int conf_id)
 }
 
 int
+event(Config *c, int argc, char ** argv)
+{
+	int i;
+
+	printf("%s: args: ", __func__);
+	for (i = 0; i < argc; i ++) {
+		printf("%s ", argv[i]);
+	}
+	printf("\n");
+}
+
+int
 show_config(Config *c, int argc, char ** argv)
 {
 	int conf_id = 0;
@@ -299,6 +311,7 @@ docmd(Config *c, char *cmdline)
 		{&load_default, "load_default"},
 		{&load_config,  "load_config"},
 		{&show_config,  "show_config"},
+		{&event,        "event"},
 		{0,0}
 	};
 
@@ -354,12 +367,11 @@ docmd(Config *c, char *cmdline)
 
 	if (node) {
 		int level = i+1;
-		char *hname = nodeGetAttr(node, "handler");
+		const char *hname = nodeGetAttr(node, "handler");
 		if (hname) {
 			for (i = 0; commands[i].name; i ++)
 				if (strcmp(commands[i].name, hname) == 0) {
 					handler = commands[i].handler;
-					printf("Node %s, handler=%s l=%d, argc=%d argv[0]=%s\n", node->name, hname, level, argc-level, argv[level]);
 					handler(c, argc-level, argv+level);
 				}
 		}
@@ -372,6 +384,62 @@ docmd_free_cmd:
 	return (ret);
 
 }
+#if 0
+#define CONF_ETC_DIR "/etc/"
+#else
+#define CONF_ETC_DIR "./"
+#endif
+
+int
+init_defaults(Config **config, int argc, char **argv)
+{
+	int error = 0;
+	Config *c = malloc(sizeof(Config));
+	char *ar[2] = {"xml", CONF_ETC_DIR "conf_defaults.xml"};
+
+	c->tree = newNode("root", 0);
+	c->indent = INDENT;
+
+	int ch;
+
+	while ((ch = getopt(argc, argv, "f:")) != -1)
+		switch (ch) {
+		case 'f': /* location of conf_defaults.xml file */
+			ar[1] = optarg;
+			break;
+//		default:
+//			usage();
+		}
+	argv += optind;
+
+
+
+	/* Load defaults to have commands */
+	error = load_default(c, 2, ar);
+	if (error) {
+		printf("ERROR: %s\n", strerror(error));
+		free(c);
+		return (error);
+	}
+
+	c->root = c->tree->firstChild;
+
+	*config = c;
+
+	return (0);
+}
+
+int
+event_handler(Config *c, char *args)
+{
+	Strbuf *s;
+
+	s = strInit();
+	strAppend(s, "event ");
+	strAppend(s, args);
+	docmd(c, strGet(s));
+	strFree(s);
+}
 
 
 int
@@ -380,36 +448,33 @@ main(int argc, char **argv)
 	int f, num, exitcode = 0, i;
 	int error = 0;
 	const char *buf;
-	Config *c = malloc(sizeof(Config));
+	Config *c;
+
+	if (init_defaults(&c, argc, argv) != 0) {
+		exit(1);
+	}
 
 	NodeList *cwd = NodeListInit();
-	c->tree = newNode("root", 0);
-	c->indent = INDENT;
-
 
 	char *test_cmds[] = {
 //		"load default xml test.xml",
 //		"load config 3 xml test.xml",
-		"load config 2 xml test_config.xml",
-		"show config",
-		"show config 2",
-		"show config 2 xml",
+//		"load config 2 xml test_config.xml",
+//		"show config",
+//		"show config 2",
+//		"show config 2 xml",
 		0
 	};
 
-	/* Load defaults to have commands */
-	char *ar[2] = {"xml","test.xml"};
-	error = load_default(c, 2, ar);
-	if (error)
-		printf("ERROR: %s\n", strerror(error));
-
-	c->root = c->tree->firstChild;
 
 
 
 	for (i = 0; test_cmds[i]; i++) {
 		docmd(c, test_cmds[i]);
 	}
+
+	/* Call STARTUP event */
+	event_handler(c, "STARTUP");
 
 /*
 
@@ -435,7 +500,7 @@ main(int argc, char **argv)
 */
 
 	NodeListPush(cwd, c->root);
-
+/*
 #ifdef WITH_XML_PARSER
 	printf("XML_DUMP of root:\n");
 	XMLdump(c->root);
@@ -462,8 +527,10 @@ main(int argc, char **argv)
 	} else {
 		printf("Path \"%s\" not found\n", path);
 	}
-
-	freeNode(c->tree);
+*/
+	if (c->tree)
+		freeNode(c->tree);
 	NodeListFree(cwd);
+
 	return (exitcode);
 }
