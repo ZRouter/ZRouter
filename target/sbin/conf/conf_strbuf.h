@@ -14,6 +14,7 @@ void	strAppend(Strbuf *s, const char *str);
 Strbuf 	*strInit();
 char 	*strGet(Strbuf *s);
 void	strFree(Strbuf *s);
+void	strReset(Strbuf *s);
 
 #endif /* _CONF_STRBUF_H_ */
 

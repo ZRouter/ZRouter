@@ -100,10 +100,13 @@ FillTree()
 }
 #endif
 
+#define MAX_CMD_PATH 8
+
 struct config {
 	Node 	*tree;
 	Node	*root;
 	char	*indent;
+	char	*cwd[MAX_CMD_PATH];
 };
 
 typedef struct config Config;
@@ -197,10 +200,13 @@ void
 dump_xml_nodes_attr(Strbuf *s, Node *root, char *name)
 {
 	Node *node;
+	int i;
+
 	if (!root || !name)
 		return;
 
-//	print_indent(nodeGetLevel(root));
+	for (i = 0; i < nodeGetLevel(root); i ++)
+		strAppend(s, INDENT);
 	strAppend(s, "<");
 	strAppend(s, root->name);
 
@@ -211,19 +217,21 @@ dump_xml_nodes_attr(Strbuf *s, Node *root, char *name)
 	}
 	strAppend(s, ">");
 
-	if (root->firstChild)
+	if (root->firstChild) {
 		strAppend(s, "\n");
 
-	for (node = root; node; node = node->next) {
-		dump_xml_nodes_attr(s, node->firstChild, name);
-	}
+		for (node = root->firstChild; node; node = node->next) {
+			dump_xml_nodes_attr(s, node, name);
+		}
 
-//	if (root->firstChild)
-//		print_indent(nodeGetLevel(root));
+		/* Add indent If have childs */
+		for (i = 0; i < nodeGetLevel(root); i ++)
+			strAppend(s, INDENT);
+	}
 
 	strAppend(s, "</");
 	strAppend(s, root->name);
-	strAppend(s, ">");
+	strAppend(s, ">\n");
 }
 
 int
@@ -282,9 +290,94 @@ show_config(Config *c, int argc, char ** argv)
 }
 
 int
+docmd(Config *c, char *cmdline)
+{
+	struct commands {
+		int (*handler)(Config *, int, char **);
+		char *name;
+	} commands[] = {
+		{&load_default, "load_default"},
+		{&load_config,  "load_config"},
+		{&show_config,  "show_config"},
+		{0,0}
+	};
+
+	char **argv = malloc(sizeof(char *) * MAX_CMD_PATH);
+	char *cmd = strdup(cmdline);
+	char *p = cmd;
+	int argc, i, ret = 0;
+	int (*handler)(Config *, int, char **);
+
+	for (i = 0; (i < MAX_CMD_PATH) && *p; i++) {
+		argv[i] = p;
+//		printf("argv[%d]: %s\n", i, argv[i]);
+		p = strchr(p, ' ');
+
+		if (!p) break;
+
+		*p++ = '\0';
+		while (isspace(*p)) p++;
+	}
+
+	argc = i+1;
+
+//	printf("Args: ");
+//	for (i = 0; i < argc; i++) {
+//		printf("%s ", argv[i]);
+//	}
+//	printf("\n");
+
+	/* Now we have argc, argv */
+	int error;
+
+	Node *cmds = findNodePath(c->root, "root.commands");
+
+	if (!cmds) {
+		ret = 1;
+		goto docmd_free_cmd;
+	}
+
+	Strbuf *s = strInit();
+	Node *node = 0;
+
+	strAppend(s, "commands");
+	for (i = 0; i < argc; i ++)
+	{
+		strAppend(s, ".");
+		strAppend(s, argv[i]);
+
+		node = findNodePath(cmds, strGet(s));
+		if (NodeHasAttrVal(node, "command", "pseudo"))
+			break;
+	}
+	strFree(s);
+
+	if (node) {
+		int level = i+1;
+		char *hname = nodeGetAttr(node, "handler");
+		if (hname) {
+			for (i = 0; commands[i].name; i ++)
+				if (strcmp(commands[i].name, hname) == 0) {
+					handler = commands[i].handler;
+					printf("Node %s, handler=%s l=%d, argc=%d argv[0]=%s\n", node->name, hname, level, argc-level, argv[level]);
+					handler(c, argc-level, argv+level);
+				}
+		}
+	}
+
+docmd_free_cmd:
+	free(cmd);
+	free(argv);
+
+	return (ret);
+
+}
+
+
+int
 main(int argc, char **argv)
 {
-	int f, num, exitcode = 0;
+	int f, num, exitcode = 0, i;
 	int error = 0;
 	const char *buf;
 	Config *c = malloc(sizeof(Config));
@@ -293,10 +386,32 @@ main(int argc, char **argv)
 	c->tree = newNode("root", 0);
 	c->indent = INDENT;
 
+
+	char *test_cmds[] = {
+//		"load default xml test.xml",
+//		"load config 3 xml test.xml",
+		"load config 2 xml test_config.xml",
+		"show config",
+		"show config 2",
+		"show config 2 xml",
+		0
+	};
+
+	/* Load defaults to have commands */
 	char *ar[2] = {"xml","test.xml"};
 	error = load_default(c, 2, ar);
 	if (error)
 		printf("ERROR: %s\n", strerror(error));
+
+	c->root = c->tree->firstChild;
+
+
+
+	for (i = 0; test_cmds[i]; i++) {
+		docmd(c, test_cmds[i]);
+	}
+
+/*
 
 	char *co[3] = {"2", "xml","test_config.xml"};
 	error = load_config(c, 3, co);
@@ -317,8 +432,7 @@ main(int argc, char **argv)
 	error = show_config(c, 2, dt2);
 	if (error)
 		printf("ERROR: %s\n", strerror(error));
-
-	c->root = c->tree->firstChild;
+*/
 
 	NodeListPush(cwd, c->root);
 

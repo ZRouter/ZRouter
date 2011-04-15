@@ -26,8 +26,31 @@
   <switchports descriptions="Ethernet Switch ports">
     <port0></port0>
   </switchports>
-  <get command="pseudo" type="pseudo"></get>
-  <list command="pseudo" type="pseudo"></list>
-  <show command="pseudo" type="pseudo"></show>
+  <commands>
+    <get command="pseudo" type="pseudo"></get>
+    <list command="pseudo" type="pseudo"></list>
+    <show>
+      <!-- show config 2 xml -->
+      <!-- show config xml -->
+      <config command="pseudo" type="pseudo" handler="show_config">
+        <arg1 presence="optional"></arg1>
+        <arg2 presence="optional"></arg2>
+      </config>
+    </show>
+    <load>
+      <!-- load config 2 xml test_config.xml -->
+      <!-- load config xml test_config.xml -->
+      <config command="pseudo" type="pseudo" handler="load_config">
+        <arg1 presence="optional"></arg1>
+        <arg2 presence="mandatory"></arg2>
+        <arg3 presence="mandatory"></arg3>
+      </config>
+      <!-- load default xml test_config.xml -->
+      <default command="pseudo" type="pseudo" handler="load_default">
+        <arg1 presence="mandatory"></arg1>
+        <arg2 presence="mandatory"></arg2>
+      </default>
+    </load>
+  <commands>
 </root>
 

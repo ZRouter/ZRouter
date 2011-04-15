@@ -248,8 +248,9 @@ NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
 {
 	Attr *attr;
 	int ret = 0;
+
 	if (!node || !attrName)
-		return (-1);
+		return (0);
 	if (!node->firstAttr)
 		return (0);
 
@@ -266,27 +267,15 @@ NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
 				ret ++;
 		}
 	}
-	printf("%s: return %d\n", __func__, ret);
+
 	return (ret);
 }
 
 int
 nodeHasAttr(Node *node, const char *attrName)
 {
-	Attr *attr;
-	int ret = 0;
 
-	if (!node || !attrName)
-		return (0);
-	if (!node->firstAttr)
-		return (0);
-
-	for (attr = node->firstAttr; attr; attr = attr->next) {
-		if (!strcasecmp(attr->name, attrName)) {
-			return (1);
-		}
-	}
-	return (ret);
+	return (NodeHasAttrVal(node, attrName, 0));
 }
 
 
