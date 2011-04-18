@@ -105,6 +105,8 @@ FillTree()
 struct config {
 	Node 	*tree;
 	Node	*root;
+	Node	*events;
+	Node	*commands;
 	char	*indent;
 	char	*cwd[MAX_CMD_PATH];
 };
@@ -123,12 +125,12 @@ load_default(Config *c, int argc, char ** argv)
 
 #ifdef WITH_XML_PARSER
 	if (strcmp(argv[0], "xml") == 0)
-		return (load_xml(&c->tree, argv[1], 0));
+		return (load_xml(&c->tree, argv[1], 1));
 
 #endif
 #ifdef WITH_JSON_PARSER
 	if (strcmp(argv[0], "json") == 0)
-		return (load_json(&c->tree, argv[1], 0));
+		return (load_json(&c->tree, argv[1], 1));
 
 #endif
 
@@ -138,7 +140,7 @@ load_default(Config *c, int argc, char ** argv)
 int
 load_config(Config *c, int argc, char ** argv)
 {
-	int conf_id = 1;
+	int conf_id = 2;
 	/*
 	 * handle "load config 1 xml filename.xml"
 	 *        "load config 2 json filename.json"
@@ -252,13 +254,60 @@ dump_xml(Node *root, int conf_id)
 int
 event(Config *c, int argc, char ** argv)
 {
-	int i;
+	int i, ret = 0;
 
 	printf("%s: args: ", __func__);
 	for (i = 0; i < argc; i ++) {
 		printf("%s ", argv[i]);
 	}
 	printf("\n");
+
+	Node *cmds = c->events;
+
+	if (!cmds) {
+		ret = 1;
+		return (ret);
+	}
+
+	if (!c->events->firstChild) {
+		/* No handlers */
+		return (1);
+	}
+
+	Node *node = 0;
+	for (node = c->events->firstChild; node; node = node->next) {
+		int matched = 0;
+		printf("%s: Event name=%s\n", __func__, node->name);
+		if (node->firstChild && (strcmp(node->firstChild->name, "match") == 0)) {
+			Node *match = node->firstChild;
+			printf("%s: match node=%s\n", __func__, match->name);
+			Node *m;
+			for (m = match->firstChild; m; m = m->next) {
+				if (nodeHasAttr(m, "value")) {
+					//printf("%s: m->name=%s value=\"%s\"\n", __func__, m->name, nodeGetAttr(m, "value"));
+					matched = 1;
+				}
+			}
+		}
+		if (matched) {
+//			printf("Matched event:\n");
+//			dump(node, ">  ");
+//			printf("-------------------\n");
+			Node *cmds = findNodePath(node, "event.do");
+			if (cmds && cmds->firstChild) {
+				Node *m;
+				for (m = cmds->firstChild; m; m = m->next) {
+					if (nodeHasAttr(m, "value")) {
+						printf("Run command \"%s\"\n", nodeGetAttr(m, "value"));
+						docmd(c, nodeGetAttr(m, "value"));
+					}
+				}
+			}
+		}
+	}
+
+
+	return (ret);
 }
 
 int
@@ -321,9 +370,10 @@ docmd(Config *c, char *cmdline)
 	int argc, i, ret = 0;
 	int (*handler)(Config *, int, char **);
 
+	printf("cmd=%s\n", cmd);
+
 	for (i = 0; (i < MAX_CMD_PATH) && *p; i++) {
 		argv[i] = p;
-//		printf("argv[%d]: %s\n", i, argv[i]);
 		p = strchr(p, ' ');
 
 		if (!p) break;
@@ -334,16 +384,16 @@ docmd(Config *c, char *cmdline)
 
 	argc = i+1;
 
-//	printf("Args: ");
-//	for (i = 0; i < argc; i++) {
-//		printf("%s ", argv[i]);
-//	}
-//	printf("\n");
+	printf("%s: args: ", __func__);
+	for (i = 0; i < argc; i ++) {
+		printf("\"%s\", ", argv[i]);
+	}
+	printf("\n");
 
 	/* Now we have argc, argv */
 	int error;
 
-	Node *cmds = findNodePath(c->root, "root.commands");
+	Node *cmds = c->commands;
 
 	if (!cmds) {
 		ret = 1;
@@ -360,14 +410,21 @@ docmd(Config *c, char *cmdline)
 		strAppend(s, argv[i]);
 
 		node = findNodePath(cmds, strGet(s));
-		if (NodeHasAttrVal(node, "command", "pseudo"))
-			break;
+		if (node) {
+			printf("Path = %s, Node *node =  %p (name=%s)\n", strGet(s), node, node->name);
+			printf("\n\n\n");
+			if (nodeHasAttrVal(node, "command", "pseudo"))
+				break;
+		}
 	}
 	strFree(s);
 
+
 	if (node) {
+		printf("Node %s\n", node->name);
 		int level = i+1;
 		const char *hname = nodeGetAttr(node, "handler");
+		printf("hname=%s\n", hname);
 		if (hname) {
 			for (i = 0; commands[i].name; i ++)
 				if (strcmp(commands[i].name, hname) == 0) {
@@ -423,6 +480,8 @@ init_defaults(Config **config, int argc, char **argv)
 	}
 
 	c->root = c->tree->firstChild;
+	c->events = findNodePath(c->root, "root.events");
+	c->commands = findNodePath(c->root, "root.commands");
 
 	*config = c;
 
@@ -437,6 +496,7 @@ event_handler(Config *c, char *args)
 	s = strInit();
 	strAppend(s, "event ");
 	strAppend(s, args);
+	printf("%s\n", strGet(s));
 	docmd(c, strGet(s));
 	strFree(s);
 }
@@ -500,7 +560,7 @@ main(int argc, char **argv)
 */
 
 	NodeListPush(cwd, c->root);
-/*
+/* * /
 #ifdef WITH_XML_PARSER
 	printf("XML_DUMP of root:\n");
 	XMLdump(c->root);
@@ -511,7 +571,7 @@ main(int argc, char **argv)
 	printf("------------------------------------- TEXT_DUMP\n");
 #endif
 
-
+/ *
 	char *path = (argc > 1)?argv[1]:"root.interfaces.alc0.static.ipaddr";
 	Node *ip = findNodePath(c->root, path);
 	if (ip) {

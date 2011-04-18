@@ -245,7 +245,7 @@ applyAttr(Node *parent, const char *name, const char *value)
 }
 
 int
-NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
+nodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
 {
 	Attr *attr;
 	int ret = 0;
@@ -256,16 +256,19 @@ NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue)
 		return (0);
 
 	for (attr = node->firstAttr; attr; attr = attr->next) {
-		if (!strcasecmp(attr->name, attrName)) {
+		if (!attr)
+			return (0);
+		if (strcasecmp(attr->name, attrName) == 0) {
 			/* match attrName */
-			if (attrValue)
+			if (attrValue) {
 				/* attrValue checked */
-				if (!strcasecmp(attr->value, attrValue))
+				if (strcasecmp(attr->value, attrValue) == 0)
 					/* match attrValue */
 					ret++;
-			else
+			} else {
 				/* attrValue don`t checked, so matched */
 				ret ++;
+			}
 		}
 	}
 
@@ -276,7 +279,7 @@ int
 nodeHasAttr(Node *node, const char *attrName)
 {
 
-	return (NodeHasAttrVal(node, attrName, 0));
+	return (nodeHasAttrVal(node, attrName, 0));
 }
 
 

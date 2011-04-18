@@ -42,7 +42,7 @@ void	applyAttr(Node *parent, const char *name, const char *value);
 void 	nodeSetAttr(Node *node, Attr *firstAttr);
 Attr * 	nodeGetAttrs(Node *node); /* return firstAttr node */
 const char * 	nodeGetAttr(Node *node, const char *name);
-int	NodeHasAttrVal(Node *node, const char *attrName, const char *attrValue);
+int	nodeHasAttrVal(Node *node, const char *attrName, const char *attrValue);
 int	nodeHasAttr(Node *node, const char *attrName);
 
 #endif /* __NODE_H__ */

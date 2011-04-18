@@ -70,18 +70,12 @@ hint.map.0.readonly=1
 hint.map.1.at="cfid0"
 hint.map.1.name="kernel"
 hint.map.1.start=0x00040000
-hint.map.1.end="search"
-hint.map.1.searchkey=".!/bin/sh"
-hint.map.1.searchstart=0x00100000
-hint.map.1.searchstep=0x10000
+hint.map.1.end="search:0x00100000:0x10000:.!/bin/sh"
 
 hint.map.2.at="cfid0"
 hint.map.2.name="rootfs"
-hint.map.2.start="search"
+hint.map.2.start="search:0x00100000:0x10000:.!/bin/sh"
 hint.map.2.end=0x00fd0000
-hint.map.2.searchkey=".!/bin/sh"
-hint.map.2.searchstart=0x00100000
-hint.map.2.searchstep=0x10000
 
 hint.map.3.at="cfid0"
 hint.map.3.name="nvram"

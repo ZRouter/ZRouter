@@ -103,20 +103,14 @@ hint.map.5.at="cfid0"
 hint.map.5.start=0x00040000
 hint.map.5.name="kernel"
 hint.map.5.offset="96"
-hint.map.5.end="search"
-hint.map.5.searchkey="--PaCkImGs--"
-hint.map.5.searchstart="524384" # 8 64K blocks + AlphaHeaderSize( 96B )
-hint.map.5.searchstep="65536"
+hint.map.5.end="search:524384:65536:--PaCkImGs--" # 8 64K blocks + AlphaHeaderSize( 96B )
 
 
 hint.map.6.at="cfid0"
 hint.map.6.end=0x003e0000
 hint.map.6.name="rootfs"
 hint.map.6.offset="32"
-hint.map.6.start="search"
-hint.map.6.searchkey="--PaCkImGs--"
-hint.map.6.searchstart="524384" # 8 64K blocks + AlphaHeaderSize( 96B )
-hint.map.6.searchstep="65536"
+hint.map.6.start="search:524384:65536:--PaCkImGs--" # 8 64K blocks + AlphaHeaderSize( 96B )
 
 
 hint.map.7.at="cfid0"
