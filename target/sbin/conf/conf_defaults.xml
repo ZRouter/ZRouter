@@ -60,11 +60,10 @@
 	<type value="STARTUP"></type>
       </match>
       <do>
-	<command1 value="load config 2 xml test_config.xml"></command1>
-	<command2 value="load config 2 xml test_config.xml"></command2>
-	<command3 value="show config"></command3>
-	<command4 value="show config 2"></command4>
-	<command5 value="show config 2 xml"></command5>
+	<command value="load config 2 xml test_config.xml"></command>
+	<command value="show config"></command>
+	<command value="show config 2"></command>
+	<command value="show config 2 xml"></command>
       </do>
     </event>
   </events>

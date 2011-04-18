@@ -26,7 +26,13 @@ startElement(void *st, const char *el,const char **attr)
 	struct xml_state *xst = st;
 	char attrname[16];
 
-	node = applyNode(xst->last, el);
+	if (xst->conf_id == 1) {
+		/* conf_id is defaults, there we need only create */
+		node = appendNewChild(xst->last, el, 0);
+	} else {
+		node = applyNode(xst->last, el);
+	}
+
 	if (!node) {
 		printf("ERROR: no target node\n");
 		return;
@@ -36,7 +42,7 @@ startElement(void *st, const char *el,const char **attr)
 	xst->last = node;
 
 	for (i = 0; attr[i] && *attr[i]; i+=2)
-		if (!xst->conf_id)
+		if (xst->conf_id == 1)
 			applyAttr(xst->last, attr[i], attr[i+1]);
 		else {
 			if (strcmp(attr[i], "value") == 0) {
