@@ -31,6 +31,13 @@ hint.gpio.0.pins="16"
 hint.gpio.0.flags="0x00"
 hint.gpio.0.irq=0
 
+# gpio
+# XXX 
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x80"
+hint.gpioreset.0.name="wps"
+#hint.gpioreset.0.flags="0x0581"
+
 # GPIO 6 
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.pins="0x40"

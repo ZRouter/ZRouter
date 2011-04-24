@@ -156,7 +156,7 @@ load_config(Config *c, int argc, char ** argv)
 		argv++;
 	}
 
-	printf("%s %d %s %s\n", __func__, conf_id, argv[0], argv[1]);
+	//printf("%s %d %s %s\n", __func__, conf_id, argv[0], argv[1]);
 #ifdef WITH_XML_PARSER
 	if (strcmp(argv[0], "xml") == 0)
 		return (load_xml(&c->tree, argv[1], conf_id));
@@ -256,11 +256,11 @@ event(Config *c, int argc, char ** argv)
 {
 	int i, ret = 0;
 
-	printf("%s: args: ", __func__);
-	for (i = 0; i < argc; i ++) {
-		printf("%s ", argv[i]);
-	}
-	printf("\n");
+//	printf("%s: args: ", __func__);
+//	for (i = 0; i < argc; i ++) {
+//		printf("%s ", argv[i]);
+//	}
+//	printf("\n");
 
 	Node *cmds = c->events;
 
@@ -277,10 +277,10 @@ event(Config *c, int argc, char ** argv)
 	Node *node = 0;
 	for (node = c->events->firstChild; node; node = node->next) {
 		int matched = 0;
-		printf("%s: Event name=%s\n", __func__, node->name);
+//		printf("%s: Event name=%s\n", __func__, node->name);
 		if (node->firstChild && (strcmp(node->firstChild->name, "match") == 0)) {
 			Node *match = node->firstChild;
-			printf("%s: match node=%s\n", __func__, match->name);
+//			printf("%s: match node=%s\n", __func__, match->name);
 			Node *m;
 			for (m = match->firstChild; m; m = m->next) {
 				if (nodeHasAttr(m, "value")) {
@@ -298,7 +298,7 @@ event(Config *c, int argc, char ** argv)
 				Node *m;
 				for (m = cmds->firstChild; m; m = m->next) {
 					if (nodeHasAttr(m, "value")) {
-						printf("Run command \"%s\"\n", nodeGetAttr(m, "value"));
+//						printf("Run command \"%s\"\n", nodeGetAttr(m, "value"));
 						docmd(c, nodeGetAttr(m, "value"));
 					}
 				}
@@ -331,7 +331,7 @@ show_config(Config *c, int argc, char ** argv)
 		argc--;
 	}
 
-	printf("%s %d %s\n", __func__, conf_id, (argc)?argv[0]:"");
+//	printf("%s %d %s\n", __func__, conf_id, (argc)?argv[0]:"");
 
 	if (strcmp(argv[0], "text") == 0 || argc == 0)
 		return (dump_text(c->tree, conf_id));
@@ -370,7 +370,7 @@ docmd(Config *c, char *cmdline)
 	int argc, i, ret = 0;
 	int (*handler)(Config *, int, char **);
 
-	printf("cmd=%s\n", cmd);
+//	printf("cmd=%s\n", cmd);
 
 	for (i = 0; (i < MAX_CMD_PATH) && *p; i++) {
 		argv[i] = p;
@@ -384,11 +384,11 @@ docmd(Config *c, char *cmdline)
 
 	argc = i+1;
 
-	printf("%s: args: ", __func__);
-	for (i = 0; i < argc; i ++) {
-		printf("\"%s\", ", argv[i]);
-	}
-	printf("\n");
+//	printf("%s: args: ", __func__);
+//	for (i = 0; i < argc; i ++) {
+//		printf("\"%s\", ", argv[i]);
+//	}
+//	printf("\n");
 
 	/* Now we have argc, argv */
 	int error;
@@ -411,8 +411,8 @@ docmd(Config *c, char *cmdline)
 
 		node = findNodePath(cmds, strGet(s));
 		if (node) {
-			printf("Path = %s, Node *node =  %p (name=%s)\n", strGet(s), node, node->name);
-			printf("\n\n\n");
+//			printf("Path = %s, Node *node =  %p (name=%s)\n", strGet(s), node, node->name);
+//			printf("\n\n\n");
 			if (nodeHasAttrVal(node, "command", "pseudo"))
 				break;
 		}
@@ -421,10 +421,10 @@ docmd(Config *c, char *cmdline)
 
 
 	if (node) {
-		printf("Node %s\n", node->name);
+//		printf("Node %s\n", node->name);
 		int level = i+1;
 		const char *hname = nodeGetAttr(node, "handler");
-		printf("hname=%s\n", hname);
+//		printf("hname=%s\n", hname);
 		if (hname) {
 			for (i = 0; commands[i].name; i ++)
 				if (strcmp(commands[i].name, hname) == 0) {
@@ -496,7 +496,7 @@ event_handler(Config *c, char *args)
 	s = strInit();
 	strAppend(s, "event ");
 	strAppend(s, args);
-	printf("%s\n", strGet(s));
+//	printf("%s\n", strGet(s));
 	docmd(c, strGet(s));
 	strFree(s);
 }
@@ -526,7 +526,14 @@ main(int argc, char **argv)
 		0
 	};
 
+	Strbuf *s;
 
+	s = strInit();
+	strAppend(s, "event ${TEST} ${TEST} value ${TEST} ${TEST} value");
+	strReplace(s, "${TEST}", "test");
+	printf("%s\n", strGet(s));
+	strFree(s);
+	exit(0);
 
 
 	for (i = 0; test_cmds[i]; i++) {
