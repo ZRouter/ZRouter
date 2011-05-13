@@ -16,6 +16,7 @@ netgraph/bpf \
 netgraph/car \
 netgraph/deflate \
 netgraph/iface \
+netgraph/ipfw \
 netgraph/l2tp \
 netgraph/nat \
 netgraph/netflow \

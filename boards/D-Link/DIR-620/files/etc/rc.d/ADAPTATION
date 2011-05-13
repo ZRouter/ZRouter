@@ -19,7 +19,7 @@ adapt_prestart()
 	# name wlan0 will be used when hostap or client are created
 	ifconfig rt28600 name wifi0
 	hostname `kenv HostName`
-	wan_mac_addr=`kenv WAN_MAC_ADDR`
+	#wan_mac_addr=`kenv WAN_MAC_ADDR | head -1`
 	# lan mac wan+1
 	# wlan mac wan+2
 

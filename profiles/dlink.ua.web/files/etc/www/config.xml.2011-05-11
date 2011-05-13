@@ -1,0 +1,243 @@
+<interfaces>
+    <wan0>
+        <PPPoE enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
+    	    <action>
+    		<create type="socket" target="socket:127.0.0.1:5005">
+    		    <message>
+</message>
+    		</create>
+    	    </action>
+            <nat enable="true"></nat>
+            <username></username>
+            <password></password>
+            <service_name></service_name>
+            <device>wan0</device>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <gateway flags="DEFAULT">10.0.0.2</gateway>
+            <!-- <ip6addr></ip6addr> -->
+            <!-- Values holders -->
+            <dns1></dns1>
+            <dns2></dns2>
+        </PPPoE>
+        <PPP enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
+    	    <action>
+    		<up type="socket" target="socket:127.0.0.1:5005"></up>
+    		<destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+    		<down type="socket" target="socket:127.0.0.1:5005"></down>
+    		<create type="socket" target="socket:127.0.0.1:5005">
+    		    <message preprocess="true" root="interfaces.wan0.PPP">
+create bundle static ${name}
+set bundle links ${name}
+set iface addrs ${ipaddr} ${gateway}
+${default_route?"set iface route default":""}
+${nat?"set iface enable nat":""}
+set ipcp enable req-pri-dns
+set ipcp enable req-sec-dns
+open iface
+create link static ${name} modem
+set modem device ${device}
+set modem var $DialPrefix "DT"
+set modem var $Telephone "${phone}"
+set modem script DialPeer
+set modem idle-script Ringback
+set link disable chap pap
+set link accept chap pap
+set auth authname ${username}
+set auth password ${password}
+set link action bundle ${name}
+set link enable incoming
+open
+</message>
+    		</create>
+    		<destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+    	    </action>
+    	    <name>3G</name>
+            <nat enable="true"></nat>
+            <username></username>
+            <password></password>
+            <phone>#777</phone>
+            <service_name></service_name>
+            <device>/dev/cuaU0.0</device>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <gateway flags="DEFAULT">10.0.0.2</gateway>
+            <!-- <ip6addr></ip6addr> -->
+            <!-- Values holders -->
+            <dns1></dns1>
+            <dns2></dns2>
+        </PPP>
+        <DHCP enable="true">
+            <nat enable="true"></nat>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <!-- Values holders -->
+            <gateway></gateway>
+            <dns1></dns1>
+            <dns2></dns2>
+        </DHCP>
+        <Static enable="false">
+            <nat enable="true"></nat>
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/30</ipaddr>
+            <gateway>10.0.0.2</gateway>
+            <dns1>10.0.0.2</dns1>
+            <dns2>10.0.0.2</dns2>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+        </Static>
+    </wan0>
+    <wlan0 type="wlan">
+        <create>
+            <exec>ifconfig wlan0 create wlandev wifi0 wlanmode hostap</exec>
+        </create>
+        <wlan_interface>wifi0</wlan_interface>
+    </wlan0>
+    <wifi0>
+        <init>
+            <exec>ifconfig wifi0 up</exec>
+        </init>
+    </wifi0>
+    <lan0>
+        <init>
+            <exec>ifconfig lan0 up</exec>
+        </init>
+    </lan0>
+    <!-- <lan type="lagg">
+	<create>
+	    <exec order="1">ifconfig wlan0 ether `kenv WAN_MAC_ADDR`</exec>
+	    <exec order="2">ifconfig lan0 ether `kenv WAN_MAC_ADDR`</exec>
+	    <exec order="3">ifconfig lagg0 laggproto failover laggport lan0 laggport wlan0</exec>
+	</create>
+	<ipaddr>192.168.0.1/24</ipaddr>
+	<lagg_interfaces>lan0,wlan0</lagg_interfaces>
+    </lan> -->
+    <bridge0 type="bridge">
+        <create>
+            <exec order="1">ifconfig wlan0 ether `kenv WAN_MAC_ADDR`</exec>
+            <exec order="2">ifconfig lan0 ether `kenv WAN_MAC_ADDR`</exec>
+            <exec order="3">ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
+        </create>
+        <ipaddr>192.168.0.1/24</ipaddr>
+        <lagg_interfaces>lan0,wlan0</lagg_interfaces>
+    </bridge0>
+</interfaces>
+<switch>
+    <ports>
+        <port id="0" pvid="1" tagged="false"></port>
+        <port id="1" pvid="1" tagged="false"></port>
+        <port id="2" pvid="1" tagged="false"></port>
+        <port id="3" pvid="1" tagged="false"></port>
+        <port id="4" pvid="2" tagged="false"></port>
+        <port id="5" pvid="1" tagged="true"></port>
+        <port id="6" pvid="1" tagged="false"></port>
+    </ports>
+    <vlans>
+        <vlan id="0" vid="1">0,1,2,3,5</vlan>
+        <vlan id="1" vid="2">4,5</vlan>
+    </vlans>
+</switch>
+<dnsrelay enable="false"></dnsrelay>
+<dhcpd>
+    <instances>
+        <instance id="0" enable="true">
+            <interface>lan0</interface>
+            <domain>dlink.ua</domain>
+            <!-- <domainservers>192.168.0.1</domainservers> -->
+            <default-lease-time>600</default-lease-time>
+            <max-lease-time>7200</max-lease-time>
+            <range>
+                <start>192.168.0.100</start>
+                <end>192.168.0.200</end>
+            </range>
+            <!-- option domain-name "dlink.ua";
+option domain-name-servers 192.168.0.1;
+default-lease-time 600;
+max-lease-time 7200;
+subnet 192.168.0.0 netmask 255.255.255.0 {
+    range 192.168.0.100 192.168.0.200;
+    option routers 192.168.0.1;
+} -->
+        </instance>
+    </instances>
+</dhcpd>
+<routes>
+    <default>
+        <source priority="10">interfaces.wan0.DHCP.gateway</source>
+        <source priority="11">interfaces.wan0.PPPoE.gateway</source>
+        <source priority="12">interfaces.wan0.PPP.gateway</source>
+        <source priority="13">interfaces.wan0.Static.gateway</source>
+        <source priority="14">interfaces.wan0.PPTP.gateway</source>
+        <source priority="15">interfaces.wan0.L2TP.gateway</source>
+    </default>
+    <route id="1" enable="false">
+        <net>172.16.0.0/12</net>
+        <gw>192.168.0.2</gw>
+    </route>
+</routes>
+<resolve>
+    <search>dlink.ua</search>
+    <domain>dlink.ua dlink.ru</domain>
+    <options>attempts:5 timeout:10</options>
+    <nameserver order="100">8.8.8.8</nameserver>
+    <nameserver order="101">8.8.4.4</nameserver>
+</resolve>
+<info>
+    <hostname>dir620.dlink.ua</hostname>
+    <model>DIR-620</model>
+    <rev>A1</rev>
+    <location>home</location>
+    <firmware>
+        <version>DIR-620_0.1</version>
+        <date>May 5, 16:00:26 2011</date>
+	<update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/firmware/A1/last/D-Link_DIR-620.img</update_url>
+    </firmware>
+</info>
+<hostapd>
+    <instance id="0" enable="true">
+        <ieee80211d>1</ieee80211d>
+        <country_code>UA</country_code>
+        <interface>wlan0</interface>
+        <macaddr_acl>0</macaddr_acl>
+        <auth_algs>1</auth_algs>
+        <debug>0</debug>
+        <hw_mode>g</hw_mode>
+        <ctrl_interface>/var/run/hostapd</ctrl_interface>
+        <ctrl_interface_group>wheel</ctrl_interface_group>
+        <ssid>DIR-620</ssid>
+        <!-- Open -->
+        <wpa>0</wpa>
+        <!-- WPA -->
+        <!-- <wpa>1</wpa> -->
+        <!-- RSN/WPA2 -->
+        <!-- <wpa>2</wpa> -->
+    </instance>
+    <instance id="1" enable="false">
+        <ieee80211d>1</ieee80211d>
+        <country_code>UA</country_code>
+        <interface>wlan0</interface>
+        <macaddr_acl>0</macaddr_acl>
+        <auth_algs>1</auth_algs>
+        <debug>0</debug>
+        <hw_mode>g</hw_mode>
+        <ctrl_interface>/var/run/hostapd</ctrl_interface>
+        <ctrl_interface_group>wheel</ctrl_interface_group>
+        <ssid>DIR-620</ssid>
+        <!-- WPA -->
+        <!-- <wpa>1</wpa> -->
+        <!-- RSN/WPA2 -->
+        <wpa>2</wpa>
+        <wpa_passphrase>freebsdmall</wpa_passphrase>
+        <wpa_key_mgmt>WPA-PSK</wpa_key_mgmt>
+        <wpa_pairwise>CCMP TKIP</wpa_pairwise>
+    </instance>
+</hostapd>
+<http>
+    <users>
+	<user username="admin" password="admin" group="admin" />
+	<user username="user" password="123" group="stat" />
+    </users>
+    <host>192.168.0.1</host>
+    <port>80</port>
+</http>
