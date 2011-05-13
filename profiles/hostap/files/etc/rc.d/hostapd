@@ -9,8 +9,8 @@
 
 . /etc/rc.subr
 
-[ -z "${hostapd_enable}" ] && hostapd_enable="YES"
-
+#[ -z "${hostapd_enable}" ] && hostapd_enable="YES"
+hostapd_enable="YES"
 name="hostapd"
 command="/usr/sbin/${name}"
 rcvar=`set_rcvar`

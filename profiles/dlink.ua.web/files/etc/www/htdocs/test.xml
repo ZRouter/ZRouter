@@ -1,0 +1,36 @@
+function pppoe_status()
+    if rq.POST["cmd"] == "get" then
+	return (c:getNode(rq.POST["key"]):value());
+    elseif rq.POST["cmd"] == "set" then
+	c:getNode(rq.POST["key"]):value(rq.POST["value"]);
+	return (c:getNode(rq.POST["key"]):value());
+    elseif rq.POST["cmd"] == "setmany" then
+
+	--c:getNode(rq.POST["key"]):value(rq.POST["value"]);
+	--return (c:getNode(rq.POST["key"]):value());
+
+    elseif rq.POST["save"] == "config" then
+	print("try to save savetest.xml");
+	if not save_file("config.xml", xmldump(c:gettree())) then
+	    return ("Error saving configuration");
+	end
+	if os.execute("/etc/save_etc") ~= 0 then
+	    return ("Error saving configuration block to flash");
+	end
+	return ("Configuration saved successful");
+    end
+    if c:getNode("interfaces.wan0.PPPoE"):attr("enable") == "false" then
+	return "PPPoE disabled";
+    else
+	return "PPPoE enabled";
+    end
+end
+
+return ([[
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+]] ..
+pppoe_status() ..
+[[
+</data>
+]]);

@@ -20,6 +20,8 @@ SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
 # XXX Need found something better or use per profile
 ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 
+KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
+
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
 
@@ -440,7 +442,7 @@ rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
 ${NEW_KERNEL}.bin:	${NEW_KERNEL}
 	echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
-	@if [ "x${KERNEL_SIZE_MAX}" != "x" -a $$(stat -f %z ${NEW_KERNEL}.bin) -ge ${KERNEL_SIZE_MAX} ] ; then \
+	@if [ -n "${KERNEL_SIZE_MAX}" -a $$(stat -f %z ${NEW_KERNEL}.bin) -ge ${KERNEL_SIZE_MAX} ] ; then \
 		echo "${NEW_KERNEL}.bin size ($$(stat -f %z ${NEW_KERNEL}.bin)) greater than KERNEL_SIZE_MAX (${KERNEL_SIZE_MAX}), will delete it"; \
 		rm -f ${NEW_KERNEL}.bin ; \
 		exit 1; \
