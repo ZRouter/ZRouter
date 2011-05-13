@@ -20,7 +20,8 @@ span.boxitem {
 
 /* module examples */
 div.boxitem {
-    width:22em;
+    /*width:34em;*/
+    width:100%;
     overflow:hidden;
 }
 
@@ -29,7 +30,7 @@ div.boxitem {
 }
 
 div.boxitem .yui3-hd {
-    background: url(/img/tool_bar.jpg) repeat-x;
+    background: url(../img/tool_bar.jpg) repeat-x;
     cursor:pointer;
     cursor:hand;
     /*border:1px solid #243356;*/

@@ -97,34 +97,34 @@ h1
 }
 
 #table_tree{
-font-family: Arial;
-font-size: 22px;
-height: 514px;
-width: 200px;
-margin: 5px 4px 3px 1px;
-border-top-color:#808080;
-border-left-color:#808080;
-background:#FFFFFF;
+    font-family: Arial;
+    font-size: 22px;
+    height: 514px;
+    width: 200px;
+    margin: 5px 4px 3px 1px;
+    border-top-color:#808080;
+    border-left-color:#808080;
+    background:#FFFFFF;
 }
 
 #table_page{
-width:555px;
-height: 514px;
-margin: 5px 5px 5px 3px;
-border-width: 2px;
-border-top:solid 2 #ffffff;
-border-bottom:solid 2 #808080;
-border-left:solid 2 #ffffff;
-border-right:solid 2 #808080;
-background:#CCDCE2;
+    width:555px;
+    height: 514px;
+    margin: 5px 5px 5px 3px;
+    border-width: 2px;
+    border-top:solid 2 #ffffff;
+    border-bottom:solid 2 #808080;
+    border-left:solid 2 #ffffff;
+    border-right:solid 2 #808080;
+    background:#CCDCE2;
 }
 
 #table_frame{
-width:547px;
-height: 504px;
-margin: 2px 2px 2px 3px;
-border: 1px solid #136393;
-background:#E4EAEB;
+    width:547px;
+    height: 504px;
+    margin: 2px 2px 2px 3px;
+    border: 1px solid #136393;
+    background:#E4EAEB;
 }
 
 #alink_tree a:link, #alink_tree a:visited, #alink_tree a:active{

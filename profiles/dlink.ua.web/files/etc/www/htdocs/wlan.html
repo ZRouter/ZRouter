@@ -2,7 +2,7 @@
 <html>
     <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Internet connections configuration</title>
+	<title>Wireless configuration</title>
 	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
 
 <!-- JS -->
@@ -23,58 +23,170 @@
 	<link href="css/anim.css" rel="stylesheet" type="text/css">
     </head>
     <body class="yui3-skin-sam  yui-skin-sam">
-    <h1>Internet connections configuration</h1>
+    <h2>Wireless configuration</h2>
 
-<div id="Static" class="yui3-module boxitem">
+<div id="Static" class="boxitem">
     <div class="yui3-hd">
-        <h4>Ethernet Interface</h4>
+        <h4>Radio Settings</h4>
     </div>
     <div class="yui3-bd">
 	<form method="POST" target="/test.lua">
-	    <input type="hidden" name="path" value="interfaces.wan0.Static" />
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.Static'):attr('enable')) $$$><br/>
-	    Static <input type="radio" name="dhcp" value="false"> DHCP <input type="radio" name="dhcp" value="true"><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.Static.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.Static.gateway$$$"/><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.Static.nat'):attr('enable')) $$$><br/>
+<table width="100%">
+    <tr>
+	<td class=""><label for="radio_control">Enable Wireless&nbsp;:</label></td>
+	<td>
+	    <input id="radio_control" _value="data.wireless.radio_control" type="checkbox">
+	</td>
+	</tr>
+	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+		<td class="">Wireless Channel&nbsp;:</td>
+		<td> 
+		    <select disabled="disabled" _value="data.wireless.channel" name="channel" _disabled="!data.wireless.radio_control || data.wireless.auto_channel">
+			<option value="1">2.412 GHz - CH 1</option>
+			<option value="2">2.417 GHz - CH 2</option>
+			<option value="3">2.422 GHz - CH 3</option>
+			<option value="4">2.427 GHz - CH 4</option>
+			<option value="5">2.432 GHz - CH 5</option>
+			<option value="6">2.437 GHz - CH 6</option>
+			<option value="7">2.442 GHz - CH 7</option>
+			<option value="8">2.447 GHz - CH 8</option>
+			<option value="9">2.452 GHz - CH 9</option>
+			<option value="10">2.457 GHz - CH 10</option>
+			<option value="11">2.462 GHz - CH 11</option>
+		    </select>
+		</td>
+	</tr>
+
+	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+		<td class="">802.11 Mode&nbsp;:</td>
+		<td> 
+			<select _value="data.wireless.phy_mode" _disabled="!data.wireless.radio_control">
+				<option value="2">802.11g only</option>
+				<option value="3">Mixed 802.11g and 802.11b</option>
+				<option value="1">802.11b only</option>
+				<option value="8">802.11n only</option>
+				<option value="11">Mixed 802.11n, 802.11g and 802.11b</option>
+			</select>
+		</td>
+	</tr>
+
+	<!--@OPTIONAL:radio_type_NG or radio_type_NA@-->
+	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+		<td class="">Channel Width&nbsp;:</td>
+		<td> 
+			<select _value="data.wireless.cwm_mode" _disabled="!data.wireless.radio_control">
+				<option value="0">20 MHz</option>
+				<option value="1">Auto 20/40 MHz</option>
+
+				<!--@OPTIONAL:ar5416_extra_config@--><!--@ENDOPTIONAL@-->
+			</select>
+		</td>
+	</tr>
+	<!--@ENDOPTIONAL@-->
+	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+		<td class="">Transmission Rate&nbsp;:</td>
+		<td> 
+			<select _value="data.wireless.tx_rate" _disabled="!data.wireless.radio_control">
+
+				<!-- Turbo rates in brackets. Rates are given in units of 500 kbits/s -->
+				<option value="0">Best (automatic)</option>
+				<!--@OPTIONAL:radio_type_NA or radio_type_NG@-->
+				<option value="27">MCS 15 - 130 [270]</option>
+				<option value="26">MCS 14 - 117 [243]</option>
+				<option value="25">MCS 13 - 104 [216]</option>
+				<option value="24">MCS 12 - 78 [162]</option>
+
+				<option value="23">MCS 11 - 52 [108]</option>
+				<option value="22">MCS 10 - 39 [81]</option>
+				<option value="21">MCS 9 - 26 [54]</option>
+				<option value="20">MCS 8 - 13 [27]</option>
+				<option value="19">MCS 7 - 65 [135]</option>
+				<option value="18">MCS 6 - 58.5 [121.5]</option>
+
+				<option value="17">MCS 5 - 52 [108]</option>
+				<option value="16">MCS 4 - 39 [81]</option>
+				<option value="15">MCS 3 - 26 [54]</option>
+				<option value="14">MCS 2 - 19.5 [40.5]</option>
+				<option value="13">MCS 1 - 13 [27]</option>
+				<option value="12">MCS 0 - 6.5 [13.5]</option>
+
+				<!--@ENDOPTIONAL@-->
+				<!--@OPTIONAL:radio_type_A or radio_type_G@-->
+				<option value="11">54 [108]</option>
+				<option value="10">48 [96]</option>
+				<option value="9">36 [72]</option>
+				<option value="8">24 [48]</option>
+				<option value="7">18 [36]</option>
+
+				<option value="6">12 [24]</option>
+				<option value="5">9 [18]</option>
+				<option value="4">6 [12]</option>
+				<!--@ENDOPTIONAL@-->
+				<option value="3">11</option>
+				<option value="2">5.5</option>
+
+				<option value="1">2</option>
+				<option value="32768">1</option><!--Most significant bit is set to distinguish from Best-->
+			</select>
+			(Mbit/s) </td>
+	</tr>
+	<tr>
+
+		<td class="">Visibility Status&nbsp;:</td>
+		<td> 
+			<input id="visibility0" name="visibility" value="0" _value="data.wireless.invisibility" _disabled="!data.wireless.radio_control" type="radio">
+			<label for="visibility0">Visible</label> 
+			<input id="visibility1" name="visibility" value="1" _value="data.wireless.invisibility" _disabled="!data.wireless.radio_control" type="radio">
+			<label for="visibility1">Invisible</label>
+		</td>
+	</tr>
+</table>
+
+
+
+	</form>
+
+<!-- Subitems -->
+$$$code:dofile("htdocs/vaps.lua")$$$
+
 	</form>
     </div>
 </div>
-<div id="PPPoE" class="yui3-module boxitem">
-    <div class="yui3-hd">
-        <h4>PPPoE</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPPoE'):attr('enable')) $$$><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPPoE.nat'):attr('enable')) $$$><br/>
-            Username <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.username$$$"/><br/>
-            Password <input type="password" name="ipaddr" value="$$$interfaces.wan0.PPPoE.password$$$"/><br/>
-            Service name <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.service_name$$$"/><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.PPPoE.gateway$$$"/><br/>
-	</form>
+
     </div>
 </div>
-<div id="PPP" class="yui3-module boxitem">
-    <div class="yui3-hd">
-        <h4>PPP</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPP'):attr('enable')) $$$><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPP.nat'):attr('enable')) $$$><br/>
-            Username <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.username$$$"/><br/>
-            Password <input type="password" name="ipaddr" value="$$$interfaces.wan0.PPP.password$$$"/><br/>
-            Service name <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.service_name$$$"/><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.PPP.gateway$$$"/><br/>
-	</form>
-    </div>
-</div>
+
 
 <script type="text/javascript">
-function createFrame(frameid)
+function updateSecurityMode(obj)
+{
+    table = obj.parentNode.parentNode.parentNode;
+    trs = table.getElementsByTagName('tr'); 
+    for (i = 0; i < trs.length; i ++) //>
+    {
+	tr = trs[i];
+	class = tr.className;
+	if (!class || !class.match(/security\_mode\_/))
+	    continue;
+
+	if (class == ('security_mode_' + obj.value) )
+	    tr.style.display = '';
+	else
+	    tr.style.display = 'none';
+    }
+}
+
+sls = document.getElementsByTagName('select');
+for (i = 0; i < sls.length; i ++) //>
+{
+	sl = sls[i];
+	class = sl.className;
+	if (!class || !class.match(/security\_mode/))
+	    continue;
+	updateSecurityMode(sl);
+}
+
+function createFrame(frameid, rollup)
 {
     YUI().use("node", "anim", function(Y) {
 	var module = Y.one(frameid);
@@ -100,17 +212,18 @@ function createFrame(frameid)
 
 	// append dynamic control to header section
 	module.one('.yui3-hd').on('click', onClick);
-	onClick(0);
+	if (rollup)
+	    onClick(0);
     });
 }
 
-createFrame('#Static');
-createFrame('#PPPoE');
-//createFrame('#PPTP');
-//createFrame('#L2TP');
-createFrame('#PPP');
+createFrame('#wlan0', false);
+/*
+ TODO: foreach wlan if
+ createFrame('#wlan1', true ); */
 
 </script>
 
 </body>
 </html>
+

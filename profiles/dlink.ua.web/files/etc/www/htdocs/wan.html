@@ -32,11 +32,14 @@
     <div class="yui3-bd">
 	<form method="POST" target="/test.lua">
 	    <input type="hidden" name="path" value="interfaces.wan0.Static" />
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.Static'):attr('enable')) $$$><br/>
-	    Static <input type="radio" name="dhcp" value="false"> DHCP <input type="radio" name="dhcp" value="true"><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.Static.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.Static.gateway$$$"/><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.Static.nat'):attr('enable')) $$$><br/>
+	    <input type="hidden" name="cmd" value="setmany" />
+	<table>
+            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.Static'):attr('enable')) $$$></td></tr>
+	    <tr><td>Static:</td><td><input type="radio" name="dhcp" value="false"> DHCP <input type="radio" name="dhcp" value="true"></td></tr>
+            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.Static.ipaddr$$$"/></td></tr>
+            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.Static.gateway$$$"/></td></tr>
+            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.Static.nat'):attr('enable')) $$$></td></tr>
+	</table>
 	</form>
     </div>
 </div>
@@ -46,13 +49,17 @@
     </div>
     <div class="yui3-bd">
 	<form method="POST" target="/test.lua">
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPPoE'):attr('enable')) $$$><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPPoE.nat'):attr('enable')) $$$><br/>
-            Username <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.username$$$"/><br/>
-            Password <input type="password" name="ipaddr" value="$$$interfaces.wan0.PPPoE.password$$$"/><br/>
-            Service name <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.service_name$$$"/><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.PPPoE.gateway$$$"/><br/>
+	    <input type="hidden" name="path" value="interfaces.wan0.PPPoE" />
+	    <input type="hidden" name="cmd" value="setmany" />
+	<table>
+            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPPoE'):attr('enable')) $$$></td></tr>
+            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPPoE.nat'):attr('enable')) $$$></td></tr>
+            <tr><td>Username:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.username$$$"/></td></tr>
+            <tr><td>Password:</td><td><input type="password" name="ipaddr" value="$$$interfaces.wan0.PPPoE.password$$$"/></td></tr>
+            <tr><td>Service name:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.service_name$$$"/></td></tr>
+            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.ipaddr$$$"/></td></tr>
+            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.PPPoE.gateway$$$"/></td></tr>
+	</table>
 	</form>
     </div>
 </div>
@@ -62,13 +69,17 @@
     </div>
     <div class="yui3-bd">
 	<form method="POST" target="/test.lua">
-            Enabled: <input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPP'):attr('enable')) $$$><br/>
-            NAT Enabled: <input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPP.nat'):attr('enable')) $$$><br/>
-            Username <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.username$$$"/><br/>
-            Password <input type="password" name="ipaddr" value="$$$interfaces.wan0.PPP.password$$$"/><br/>
-            Service name <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.service_name$$$"/><br/>
-            IP Address <input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.ipaddr$$$"/><br/>
-            Gateway Address <input type="text" name="gateway" value="$$$interfaces.wan0.PPP.gateway$$$"/><br/>
+	    <input type="hidden" name="path" value="interfaces.wan0.PPP" />
+	    <input type="hidden" name="cmd" value="setmany" />
+	<table>
+            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPP'):attr('enable')) $$$></td></tr>
+            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPP.nat'):attr('enable')) $$$></td></tr>
+            <tr><td>Username:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.username$$$"/></td></tr>
+            <tr><td>Password:</td><td><input type="password" name="ipaddr" value="$$$interfaces.wan0.PPP.password$$$"/></td></tr>
+            <tr><td>Service name:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.service_name$$$"/></td></tr>
+            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.ipaddr$$$"/></td></tr>
+            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.PPP.gateway$$$"/></td></tr>
+	</table>
 	</form>
     </div>
 </div>
