@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Internet connections configuration</title>
+	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
+	<link href="css/anim.css" rel="stylesheet" type="text/css">
+    </head>
+    <body class="yui3-skin-sam  yui-skin-sam">
+    <h1>Users</h1>
+
+<script type="text/javascript" src="js/ajax.js"></script>
+<script>
+function send_update(form)
+{
+    var query = getValuesAsArray(form);
+    //window.alert(query);
+    ajax("POST", "/test.xml", query, true, 
+	    function (x) {
+//		window.alert(x.responseXML.getElementsByTagName("data")[0].firstChild.nodeValue);
+//		document.getElementById("output").innerHTML= x.responseText;
+	    }
+	);
+
+    return false;
+}
+</script>
+
+<div id="Users" class="yui3-module boxitem">
+    <div class="yui3-hd">
+        <h4>Users</h4>
+    </div>
+    <div class="yui3-bd">
+	<form method="POST" target="/test.xml">
+	    <input type="hidden" name="path" value="http.users.user[1]" />
+	    <input type="hidden" name="cmd" value="setmany" />
+	<table>
+            <tr>
+        	<td>Username:</td>
+        	<td><input name="smattr::username" type="text" value="$$$code: c:getNode('http.users.user[1]'):attr('username') $$$"></td>
+    	    </tr>
+            <tr>
+        	<td>Password:</td>
+        	<td><input name="smattr::password" type="text" value="$$$code: c:getNode('http.users.user[1]'):attr('password') $$$"></td>
+            </tr>
+            <!-- tr>
+        	<td>Group:</td>
+        	<td><input name="smattr::group" type="text" value="$$$code: c:getNode('http.users.user[1]'):attr('group') $$$"></td>
+            </tr -->
+            <tr>
+        	<td>&nbsp;</td>
+        	<td><input type="button" name="Update" value="Update" onclick="send_update(this.form)"/></td>
+            </tr>
+	</table>
+	</form>
+    </div>
+</div>
+
+
+</body>
+</html>
