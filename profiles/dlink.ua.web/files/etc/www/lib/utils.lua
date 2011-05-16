@@ -143,7 +143,7 @@ end
 
 function checked(v)
     if (v and v ~= "" and v ~= "false") then
-        return "checked";
+	return "checked";
     end
     return "";
 end

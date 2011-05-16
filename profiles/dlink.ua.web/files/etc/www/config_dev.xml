@@ -2,13 +2,9 @@
     <wan0>
         <PPPoE type="pppoe" enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
             <action>
-                <create type="socket" target="socket:127.0.0.1:5005">
-                    <message>
-</message>
-                </create>
+                <create target="socket:127.0.0.1:5005" type="socket"></create>
             </action>
             <nat enable="true"></nat>
-            <name>PPPoE</name>
             <username></username>
             <password></password>
             <service_name></service_name>
@@ -24,16 +20,16 @@
         </PPPoE>
         <PPP type="modem" enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
             <action>
-                <up type="socket" target="socket:127.0.0.1:5005"></up>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
-                <down type="socket" target="socket:127.0.0.1:5005"></down>
-                <create type="socket" target="socket:127.0.0.1:5005"></create>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+                <up target="socket:127.0.0.1:5005" type="socket"></up>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
+                <down target="socket:127.0.0.1:5005" type="socket"></down>
+                <create target="socket:127.0.0.1:5005" type="socket"></create>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
             </action>
             <name>3G</name>
             <nat enable="true"></nat>
-            <username></username>
-            <password></password>
+            <username>IT</username>
+            <password>IT</password>
             <phone>#777</phone>
             <service_name></service_name>
             <device>/dev/cuaU0.0</device>
@@ -46,9 +42,8 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPP>
-        <Static enable="true">
+        <DHCP enable="true">
             <nat enable="true"></nat>
-            <dhcp enable="true"></dhcp>
             <default_route>true</default_route>
             <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
             <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
@@ -56,6 +51,14 @@
             <gateway></gateway>
             <dns1></dns1>
             <dns2></dns2>
+        </DHCP>
+        <Static enable="false">
+            <nat enable="true"></nat>
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/30</ipaddr>
+            <gateway>10.0.0.2</gateway>
+            <dns1>10.0.0.2</dns1>
+            <dns2>10.0.0.2</dns2>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
         </Static>
     </wan0>
     <wlan0 type="wlan">
@@ -80,7 +83,7 @@
             <exec>ifconfig lan0 ether `kenv WAN_MAC_ADDR` down</exec>
             <exec>ifconfig bridge0 create addm lan0 up</exec>
             <exec>ifconfig lan0 up</exec>
-            <exec>ifconfig wlan0 up</exec>       
+            <exec>ifconfig wlan0 up</exec>
         </create>
         <init>
             <exec order="3">ifconfig bridge0 ether `kenv WAN_MAC_ADDR`</exec>
@@ -166,7 +169,7 @@ subnet 192.168.0.0 netmask 255.255.255.0 {
         <country_code>UA</country_code>
         <interface>wlan0</interface>
         <macaddr_acl>0</macaddr_acl>
-        <auth_algs>1</auth_algs>
+        <auth_algs>0</auth_algs>
         <debug>0</debug>
         <hw_mode>g</hw_mode>
         <ctrl_interface>/var/run/hostapd</ctrl_interface>
@@ -189,7 +192,7 @@ subnet 192.168.0.0 netmask 255.255.255.0 {
         <hw_mode>g</hw_mode>
         <ctrl_interface>/var/run/hostapd</ctrl_interface>
         <ctrl_interface_group>wheel</ctrl_interface_group>
-        <ssid>DIR-620</ssid>
+        <ssid>DIR-620-crypt</ssid>
         <!-- WPA -->
         <!-- <wpa>1</wpa> -->
         <!-- RSN/WPA2 -->
@@ -201,8 +204,8 @@ subnet 192.168.0.0 netmask 255.255.255.0 {
 </hostapd>
 <http>
     <users>
-        <user username="admin" password="admin" group="admin" />
-        <user username="user" password="123" group="stat" />
+        <user username="admin" group="admin" password="admin"></user>
+        <user username="user" group="stat" password="123"></user>
     </users>
     <host>192.168.0.1</host>
     <port>80</port>

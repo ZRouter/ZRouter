@@ -2,7 +2,7 @@
 ----------- Conf Class ------------
 -----------------------------------
 Conf = {};
-mt = {};
+local mt = {};
 
 function Conf:new(s)
     return setmetatable({ tree = s or '' }, mt)

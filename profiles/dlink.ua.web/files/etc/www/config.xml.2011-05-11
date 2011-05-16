@@ -1,14 +1,13 @@
 <interfaces>
     <wan0>
-        <PPPoE type="pppoe" enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
-            <action>
-                <create type="socket" target="socket:127.0.0.1:5005">
-                    <message>
+        <PPPoE enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
+    	    <action>
+    		<create type="socket" target="socket:127.0.0.1:5005">
+    		    <message>
 </message>
-                </create>
-            </action>
+    		</create>
+    	    </action>
             <nat enable="true"></nat>
-            <name>PPPoE</name>
             <username></username>
             <password></password>
             <service_name></service_name>
@@ -22,15 +21,39 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPPoE>
-        <PPP type="modem" enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
-            <action>
-                <up type="socket" target="socket:127.0.0.1:5005"></up>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
-                <down type="socket" target="socket:127.0.0.1:5005"></down>
-                <create type="socket" target="socket:127.0.0.1:5005"></create>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
-            </action>
-            <name>3G</name>
+        <PPP enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
+    	    <action>
+    		<up type="socket" target="socket:127.0.0.1:5005"></up>
+    		<destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+    		<down type="socket" target="socket:127.0.0.1:5005"></down>
+    		<create type="socket" target="socket:127.0.0.1:5005">
+    		    <message preprocess="true" root="interfaces.wan0.PPP">
+create bundle static ${name}
+set bundle links ${name}
+set iface addrs ${ipaddr} ${gateway}
+${default_route?"set iface route default":""}
+${nat?"set iface enable nat":""}
+set ipcp enable req-pri-dns
+set ipcp enable req-sec-dns
+open iface
+create link static ${name} modem
+set modem device ${device}
+set modem var $DialPrefix "DT"
+set modem var $Telephone "${phone}"
+set modem script DialPeer
+set modem idle-script Ringback
+set link disable chap pap
+set link accept chap pap
+set auth authname ${username}
+set auth password ${password}
+set link action bundle ${name}
+set link enable incoming
+open
+</message>
+    		</create>
+    		<destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+    	    </action>
+    	    <name>3G</name>
             <nat enable="true"></nat>
             <username></username>
             <password></password>
@@ -46,9 +69,8 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPP>
-        <Static enable="true">
+        <DHCP enable="true">
             <nat enable="true"></nat>
-            <dhcp enable="true"></dhcp>
             <default_route>true</default_route>
             <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
             <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
@@ -56,6 +78,14 @@
             <gateway></gateway>
             <dns1></dns1>
             <dns2></dns2>
+        </DHCP>
+        <Static enable="false">
+            <nat enable="true"></nat>
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/30</ipaddr>
+            <gateway>10.0.0.2</gateway>
+            <dns1>10.0.0.2</dns1>
+            <dns2>10.0.0.2</dns2>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
         </Static>
     </wan0>
     <wlan0 type="wlan">
@@ -71,20 +101,24 @@
     </wifi0>
     <lan0>
         <init>
-            <!-- exec>ifconfig lan0 up</exec -->
+            <exec>ifconfig lan0 up</exec>
         </init>
     </lan0>
+    <!-- <lan type="lagg">
+	<create>
+	    <exec order="1">ifconfig wlan0 ether `kenv WAN_MAC_ADDR`</exec>
+	    <exec order="2">ifconfig lan0 ether `kenv WAN_MAC_ADDR`</exec>
+	    <exec order="3">ifconfig lagg0 laggproto failover laggport lan0 laggport wlan0</exec>
+	</create>
+	<ipaddr>192.168.0.1/24</ipaddr>
+	<lagg_interfaces>lan0,wlan0</lagg_interfaces>
+    </lan> -->
     <bridge0 type="bridge">
         <create>
-            <exec>ifconfig wlan0 ether `kenv WAN_MAC_ADDR` down</exec>
-            <exec>ifconfig lan0 ether `kenv WAN_MAC_ADDR` down</exec>
-            <exec>ifconfig bridge0 create addm lan0 up</exec>
-            <exec>ifconfig lan0 up</exec>
-            <exec>ifconfig wlan0 up</exec>       
+            <exec order="1">ifconfig wlan0 ether `kenv WAN_MAC_ADDR`</exec>
+            <exec order="2">ifconfig lan0 ether `kenv WAN_MAC_ADDR`</exec>
+            <exec order="3">ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
         </create>
-        <init>
-            <exec order="3">ifconfig bridge0 ether `kenv WAN_MAC_ADDR`</exec>
-        </init>
         <ipaddr>192.168.0.1/24</ipaddr>
         <lagg_interfaces>lan0,wlan0</lagg_interfaces>
     </bridge0>
@@ -157,7 +191,7 @@ subnet 192.168.0.0 netmask 255.255.255.0 {
     <firmware>
         <version>DIR-620_0.1</version>
         <date>May 5, 16:00:26 2011</date>
-        <update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/firmware/A1/last/D-Link_DIR-620.img</update_url>
+	<update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/firmware/A1/last/D-Link_DIR-620.img</update_url>
     </firmware>
 </info>
 <hostapd>
@@ -201,8 +235,8 @@ subnet 192.168.0.0 netmask 255.255.255.0 {
 </hostapd>
 <http>
     <users>
-        <user username="admin" password="admin" group="admin" />
-        <user username="user" password="123" group="stat" />
+	<user username="admin" password="admin" group="admin" />
+	<user username="user" password="123" group="stat" />
     </users>
     <host>192.168.0.1</host>
     <port>80</port>

@@ -1,0 +1,55 @@
+function process()
+
+    if rq.POST["cmd"] == "get" then
+	return (c:getNode(rq.POST["key"]):value());
+    elseif rq.POST["cmd"] == "set" then
+	c:getNode(rq.POST["key"]):value(rq.POST["value"]);
+	return (c:getNode(rq.POST["key"]):value());
+    elseif rq.POST["cmd"] == "setmany" then
+	path = rq.POST["path"];
+	if not path then
+	    return ("path missing");
+	end
+
+	-- if name like "sm:key" do c:getNode(path .. "key"):value(rq.POST["value"]);
+	-- if name like "smattr:key:attr" do c:getNode(path .. "key"):attr("attr", rq.POST["value"]);
+	for k,v in pairs(rq.POST) do
+	    attr, _, subpath, attrname = string.find(k, "^smattr:(.-):(.*)");
+	    if (attr) then
+		if string.len(subpath) > 0 then
+		    subpath = path .. "." .. subpath;
+		else
+		    subpath = path;
+		end
+		c:getNode(subpath):attr(attrname, v);
+    	    elseif string.find(k, "^sm:") then
+    		_, _, subpath = string.find(k, "^sm:(.*)");
+		if string.len(subpath) > 0 then
+		    subpath = path .. "." .. subpath;
+		else
+		    subpath = path;
+		end
+		c:getNode(subpath):value(v);
+    	    end
+	end
+	return ("OK");
+    elseif rq.POST["save"] == "config" then
+	print("try to save savetest.xml");
+	if not save_file("config.xml", xmldump(c:gettree())) then
+	    return ("Error saving configuration");
+	end
+	if os.execute("/etc/save_etc") ~= 0 then
+	    return ("Error saving configuration block to flash");
+	end
+	return ("Configuration saved successful");
+    end
+end
+
+return ([[
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+]] ..
+process() ..
+[[
+</data>
+]]);

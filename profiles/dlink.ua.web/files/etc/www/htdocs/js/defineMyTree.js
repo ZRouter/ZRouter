@@ -32,6 +32,7 @@ aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Basic Settings </font
 insDoc(aux1, gLnk("R","Internet", "/wan.html"));
 insDoc(aux1, gLnk("R","Wireless", "/wlan.html"));
 insDoc(aux1, gLnk("R","LAN", "/lan.html"));
+insDoc(aux1, gLnk("R","Users", "/users.html"));
 //insDoc(aux1, gLnk("R","test", "/test.lua?key=val&key1=val1"));
 
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Advanced Settings </font>", ""));
