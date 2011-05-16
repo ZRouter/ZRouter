@@ -2,11 +2,12 @@
 ----------- Node Class ------------
 -----------------------------------
 sock = {};
-mt = {};
+local mt = {};
 
 function sock:new(s)
-    local s = setmetatable({ socket = s or require( "libhttpd" ) }, mt);
-    return (s);
+    local sock = setmetatable({ socket = s or require( "libhttpd" ) }, mt);
+    print("New socket object: " .. tostring(sock.socket));
+    return (sock);
 end
 
 function sock:open(host, port)
@@ -28,19 +29,27 @@ function sock:write(msg)
     return self.socket.write( self.sock, msg );
 end
 
-function sock:read()
+function sock:read(timeout)
     local line     = "";
     local response = "";
     local len;
     local length = 0;
 
-    repeat
+    if timeout then
+	os.execute("sleep " .. tostring(timeout));
+    end
+--    repeat
 	len,line = self.socket.read( self.sock );
-	if len then length = length + len; end
-	response = response .. line;
-    until len <= 0;
+	    print("Len: " .. tostring(len) .. " Line " .. tostring(line));
+	if len > 0 then
+	    length = length + len; 
+	    response = response .. line;
+	else
+	    return response, length;
+	end
+--    until len <= 0;
 
-    return response, length;
+--    return response, length;
 end
 
 function sock:drain()
@@ -81,7 +90,10 @@ function spadd(h, p, s)
     end
 
     local sock = sock:new(socket);
+    print("Socket object:" .. socket.version);
+    print("Socket object:" .. sock.socket.version);
     local name = string.format("%s:%s", h, tostring(p));
+    print(name);
     sock:open(h, p);
     s[name] = sock;
 

@@ -30,7 +30,7 @@ dofile('lib/utils.lua');
 dofile('lib/conf.lua');
 -- Node object
 dofile('lib/node.lua');
--- Node object
+-- base64 decode/encode
 dofile('lib/base64.lua');
 
 

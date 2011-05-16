@@ -15,7 +15,7 @@ function send_update(form)
 {
     var query = getValuesAsArray(form);
     //window.alert(query);
-    ajax("POST", "/test.xml", query, true, 
+    ajax("POST", "/cmd.xml", query, true, 
 	    function (x) {
 //		window.alert(x.responseXML.getElementsByTagName("data")[0].firstChild.nodeValue);
 //		document.getElementById("output").innerHTML= x.responseText;
@@ -31,7 +31,7 @@ function send_update(form)
         <h4>Users</h4>
     </div>
     <div class="yui3-bd">
-	<form method="POST" target="/test.xml">
+	<form method="POST" target="/cmd.xml">
 	    <input type="hidden" name="path" value="http.users.user[1]" />
 	    <input type="hidden" name="cmd" value="setmany" />
 	<table>
