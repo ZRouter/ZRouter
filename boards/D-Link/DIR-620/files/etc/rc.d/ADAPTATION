@@ -13,8 +13,37 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-	ifconfig rt0 name lan0
-	ifconfig vlan2 create vlan 2 vlandev lan0
+	switchctl /dev/switch0 set vlan 0 vid 1
+	switchctl /dev/switch0 set vlan 0 add 0 u
+	switchctl /dev/switch0 set vlan 0 add 1 u
+	switchctl /dev/switch0 set vlan 0 add 2 u
+	switchctl /dev/switch0 set vlan 0 add 3 u
+	switchctl /dev/switch0 set vlan 0 del 4
+	switchctl /dev/switch0 set vlan 0 add 5 t
+	switchctl /dev/switch0 set vlan 0 add 6 t
+
+	switchctl /dev/switch0 set vlan 1 vid 2
+	switchctl /dev/switch0 set vlan 1 del 0
+	switchctl /dev/switch0 set vlan 1 del 1
+	switchctl /dev/switch0 set vlan 1 del 2
+	switchctl /dev/switch0 set vlan 1 del 3
+	switchctl /dev/switch0 set vlan 1 add 4 u
+	switchctl /dev/switch0 set vlan 1 add 5 t
+	switchctl /dev/switch0 set vlan 1 add 6 t
+
+	switchctl /dev/switch0 set port 0 pvid 1 flags Untag
+	switchctl /dev/switch0 set port 1 pvid 1 flags Untag
+	switchctl /dev/switch0 set port 2 pvid 1 flags Untag
+	switchctl /dev/switch0 set port 3 pvid 1 flags Untag
+	switchctl /dev/switch0 set port 4 pvid 2 flags Untag
+
+	switchctl /dev/switch0 set port 5 pvid 1 flags Tag
+	switchctl /dev/switch0 set port 6 pvid 1 flags Tag
+
+	ifconfig rt0 up
+	ifconfig vlan1 create vlan 1 vlandev rt0
+	ifconfig vlan1 name lan0
+	ifconfig vlan2 create vlan 2 vlandev rt0
 	ifconfig vlan2 name wan0
 	# name wlan0 will be used when hostap or client are created
 	ifconfig rt28600 name wifi0

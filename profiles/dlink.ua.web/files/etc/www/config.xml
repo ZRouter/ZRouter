@@ -22,7 +22,7 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPPoE>
-        <PPP type="modem" enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
+        <PPP type="modem" enable="true" onchange="iface_changed('interfaces.wan0.PPP')">
             <action>
                 <up type="socket" target="socket:127.0.0.1:5005"></up>
                 <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
@@ -32,8 +32,8 @@
             </action>
             <name>3G</name>
             <nat enable="true"></nat>
-            <username></username>
-            <password></password>
+            <username>IT</username>
+            <password>IT</password>
             <phone>#777</phone>
             <service_name></service_name>
             <device>/dev/cuaU0.0</device>
@@ -46,9 +46,10 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPP>
-        <Static enable="true">
+        <Static type="hw" enable="true">
             <nat enable="true"></nat>
             <dhcp enable="true"></dhcp>
+            <device>wan0</device>
             <default_route>true</default_route>
             <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
             <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
@@ -108,7 +109,7 @@
 <dhcpd>
     <instances>
         <instance id="0" enable="true">
-            <interface>lan0</interface>
+            <interface>bridge0</interface>
             <domain>dlink.ua</domain>
             <!-- <domainservers>192.168.0.1</domainservers> -->
             <default-lease-time>600</default-lease-time>
@@ -117,14 +118,16 @@
                 <start>192.168.0.100</start>
                 <end>192.168.0.200</end>
             </range>
-            <!-- option domain-name "dlink.ua";
+            <!-- 
+option domain-name "dlink.ua";
 option domain-name-servers 192.168.0.1;
 default-lease-time 600;
 max-lease-time 7200;
 subnet 192.168.0.0 netmask 255.255.255.0 {
     range 192.168.0.100 192.168.0.200;
     option routers 192.168.0.1;
-} -->
+}
+ -->
         </instance>
     </instances>
 </dhcpd>

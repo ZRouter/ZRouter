@@ -56,6 +56,7 @@ open
 
 ]]
 
+require("sleep");
 
 MPD = {};
 mt = {};
@@ -64,14 +65,15 @@ function MPD:new(tree, s)
     return setmetatable({ c = tree, socket = s }, mt)
 end
 
-function MPD:msg(s, timeout)
---    print(tostring(self.socket));
-    print("DEBUG MPD:msg: " .. s);
+function MPD:msg(s, wait)
+    if self.debug then print("DEBUG MPD:msg: " .. s); end
     self.socket:write(s .. "\n");
-
---    return (true);
---    return print(self.socket:read());
-    return (self.socket:read(timeout));
+    if not wait then
+	-- Default wait 30ms
+	wait = 30;
+    end
+    msleep(wait);
+    return (self.socket:read());
 end
 
 function MPD:config_bundle(path, bundle)
@@ -80,6 +82,7 @@ function MPD:config_bundle(path, bundle)
     self:msg("create bundle static " .. bundle);
     self:msg("bundle " .. bundle);
 
+    -- Multilink only
 --    self:msg("set bundle links L1");
 
     -- TODO
@@ -168,11 +171,21 @@ function MPD:config_link(path, link, bundle)
     -- Open link
     self:msg("open");
 
-    self:msg("bundle " .. bundle);
-    print(self:msg("show bundle " .. bundle, 1));
 
 
     return (true);
+end
+
+function MPD:show_bundle(path, bundle)
+
+    self:msg("bundle " .. bundle);
+    local info = self:msg("show bundle " .. bundle, 500);
+
+    return (true);
+end
+
+function MPD:close()
+    self.socket:close();
 end
 
 mt.__index = MPD;

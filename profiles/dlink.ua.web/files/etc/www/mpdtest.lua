@@ -45,6 +45,8 @@ local path = "interfaces.wan0.PPP";
 mpd:config_bundle(path, bundle);
 mpd:config_link(path, "PPP", bundle);
 
+mpd:show_bundle(path, bundle);
+
 print("--   --");
 
 s:close();

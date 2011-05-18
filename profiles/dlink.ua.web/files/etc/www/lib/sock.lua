@@ -29,18 +29,18 @@ function sock:write(msg)
     return self.socket.write( self.sock, msg );
 end
 
-function sock:read(timeout)
+function sock:read()
     local line     = "";
     local response = "";
     local len;
     local length = 0;
 
-    if timeout then
-	os.execute("sleep " .. tostring(timeout));
-    end
+--    if timeout then
+--	os.execute("sleep " .. tostring(timeout));
+--    end
 --    repeat
 	len,line = self.socket.read( self.sock );
-	    print("Len: " .. tostring(len) .. " Line " .. tostring(line));
+	-- print("Len: " .. tostring(len) .. " Line " .. tostring(line));
 	if len > 0 then
 	    length = length + len; 
 	    response = response .. line;

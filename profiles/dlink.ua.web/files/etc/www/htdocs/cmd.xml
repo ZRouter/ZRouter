@@ -21,7 +21,9 @@ function process()
 		else
 		    subpath = path;
 		end
+		print(string.format("<%s %s=\"%s\">", subpath, attrname, v));
 		c:getNode(subpath):attr(attrname, v);
+		print("newval=" .. c:getNode(subpath):attr(attrname));
     	    elseif string.find(k, "^sm:") then
     		_, _, subpath = string.find(k, "^sm:(.*)");
 		if string.len(subpath) > 0 then

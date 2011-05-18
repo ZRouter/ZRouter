@@ -5,7 +5,7 @@
 DHCPDIR=${.CURDIR}/../../../contrib/dhcp
 .PATH: ${DHCPDIR}/client
 
-CFLAGS+=	-I${DHCPDIR} -I${DHCPDIR}/includes
+CFLAGS+=	-I${DHCPDIR} -I${DHCPDIR}/includes 
 
 PROG=		dhclient
 NO_MAN=
