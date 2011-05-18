@@ -39,7 +39,7 @@ main_prestart()
 	kldload ipfw
 	ipfw add 65000 allow all from any to any
 	ifconfig lo0 127.0.0.1/8
-	ifconfig rt0 192.168.0.28/24
+	#ifconfig rt0 192.168.0.28/24
 	/sbin/mpd  --background
 
 	/usr/sbin/inetd -wW

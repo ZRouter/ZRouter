@@ -62,6 +62,13 @@ static char ocopyright[] =
 #include "dhcpd.h"
 #include "version.h"
 
+#if __FreeBSD_version > 502010
+#include <sys/ioctl.h>
+#include <net/if_media.h>
+#include <net80211/ieee80211_ioctl.h>
+#include <net80211/ieee80211.h>
+#endif
+
 TIME cur_time;
 TIME default_lease_time = 43200; /* 12 hours... */
 TIME max_lease_time = 86400; /* 24 hours... */
@@ -107,7 +114,7 @@ int main (argc, argv, envp)
 	struct servent *ent;
 	struct interface_info *ip;
 	int seed;
-	int quiet = 0;
+	int quiet = 1;
 	char *s;
 
 	s = strrchr (argv [0], '/');
@@ -150,6 +157,9 @@ int main (argc, argv, envp)
 		} else if (!strcmp (argv [i], "-q")) {
 			quiet = 1;
 			quiet_interface_discovery = 1;
+		} else if (!strcmp (argv [i], "-v")) {
+			quiet = 0;
+			quiet_interface_discovery = 0;
  		} else if (argv [i][0] == '-') {
  		    usage (s);
  		} else {
@@ -160,7 +170,7 @@ int main (argc, argv, envp)
  			error ("Insufficient memory to %s %s",
  			       "record interface", argv [i]);
  		    memset (tmp, 0, sizeof *tmp);
- 		    strcpy (tmp -> name, argv [i]);
+ 		    strlcpy (tmp -> name, argv [i], IFNAMSIZ);
  		    tmp -> next = interfaces;
  		    tmp -> flags = INTERFACE_REQUESTED;
 		    interfaces_requested = 1;
@@ -292,7 +302,7 @@ static void usage (appname)
 	note (url);
 	note ("");
 
-	warn ("Usage: %s [-c] [-p <port>] [-lf lease-file]", appname);
+	warn ("Usage: %s [-c] [-q] [-v] [-p <port>] [-lf lease-file]", appname);
 	error ("       [-pf pidfile] [interface]");
 }
 

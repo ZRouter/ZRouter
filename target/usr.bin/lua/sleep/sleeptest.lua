@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-package.cpath = "./?.so";
+package.cpath = "?.so";
 require("sleep")
 p = print
 sf = string.format

@@ -8,4 +8,5 @@
 WORLD_SUBDIRS_ZROUTER+=target/usr.bin/lua/lua
 WORLD_SUBDIRS_ZROUTER+=target/usr.bin/lua/luaexpat
 WORLD_SUBDIRS_ZROUTER+=target/usr.bin/lua/libhttpd
+WORLD_SUBDIRS_ZROUTER+=target/usr.bin/lua/sleep
 

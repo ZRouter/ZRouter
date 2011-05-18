@@ -16,7 +16,13 @@
 --
 -- load the socket library
 --
+package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
 package.cpath = "/usr/lib/?.so";
+
+io.stdout = assert(io.open("/dev/console", "w"));
+io.stderr = io.stdout;
+
+
 socket = require( "libhttpd" );
 
 -- Expat binding
@@ -32,6 +38,10 @@ dofile('lib/conf.lua');
 dofile('lib/node.lua');
 -- base64 decode/encode
 dofile('lib/base64.lua');
+-- Socket helper
+dofile("lib/sock.lua");
+-- MPD helper
+dofile("lib/mpd.lua");
 
 
 print( "\n\nLoaded the socket library, version: \n  " .. socket.version );
@@ -687,6 +697,75 @@ function configure_lan(c)
 
 end
 
+mpd = 0;
+
+function configure_mpd_link(c, path, bundle, link)
+    if mpd == 0 then
+	local s = sock:new(socket);
+	s:open("127.0.0.1", 5005);
+	mpd = MPD:new(c, s);
+    end
+
+    local bundle = "PPP";
+    local path = "interfaces.wan0.PPP";
+
+    mpd:config_bundle(path, bundle);
+    mpd:config_link(path, link, bundle);
+
+    print(mpd:show_bundle(path, bundle));
+
+--    print("--   --");
+
+--    s:close();
+end
+
+function configure_wan(c)
+    -- TODO: auto enumerate wan links
+    local sub = "";
+    for _, sub in ipairs({"Static", "PPPoE", "PPP"}) do
+	print("sub=" .. sub);
+	local path = "interfaces.wan0." .. sub;
+
+	if c:getNode(path):attr("enable") == "true" then
+	    local subtype = c:getNode(path):attr("type");
+	    print("subtype=" .. subtype);
+	    if
+		(subtype == "l2tp") or
+		(subtype == "pppoe") or
+		(subtype == "pptp") then
+		-- TODO: multilink have different link names
+	    elseif (subtype == "modem") then
+		os.execute("kldload umodem");
+		os.execute("kldload u3g");
+		os.execute("sleep 1");
+		configure_mpd_link(c, path, sub, sub);
+	    elseif (subtype == "hw") then
+		local dhcp = c:getNode(path .. ".dhcp");
+		local dev = c:getNode(path .. ".device"):value();
+
+		-- Config static first
+		local ip = c:getNode(path .. ".ipaddr"):value();
+		print("Run: \"ifconfig " .. dev .. " " .. ip .. "\"");
+		if os.execute(string.format("ifconfig %s %s", dev, ip)) ~= 0 then
+		    print("\"ifconfig " .. dev .. " " .. ip .. "\" - fail");
+		end
+
+		if dhcp and dhcp:attr("enable") == "true" then
+		    print(path .. ".dhcp:attr(enable)=" .. dhcp:attr("enable"));
+		    -- Run dhclient
+		    print("Run dhclient on " .. dev);
+		    os.execute("mkdir /var/db/");
+		    os.execute(string.format("/sbin/dhclient %s", dev));
+		end
+	    else
+		print("Unsupported interface type " .. subtype);
+	    end
+	else
+	    print("Skiping disabled iface " .. path);
+	end
+    end
+end
+
 --
 --  Now start the server.
 --
@@ -698,6 +777,7 @@ c = Conf:new(load_file("config.xml"));
 print("Initialize board ...");
 
 configure_lan(c);
+configure_wan(c);
 
 print("Run server ...");
 start_server( c, config );
