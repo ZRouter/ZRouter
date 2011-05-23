@@ -26,25 +26,27 @@ host fantasia {
 
 require("ipcalc");
 
-dhcpd = {};
+DHCPD = {};
 local mt = {};
 
---dhcpd.instances.instance[1]
+--DHCPD.instances.instance[1]
 
 
-function dhcpd:new(c, path)
+function DHCPD:new(c, path, debug)
     t = {};
     t.path = path;
     t.c = c;
-    t.get  = function (var      ) return self.c:getNode(self.path .. "." .. var):value()    end;
-    t.attr = function (var, attr) return self.c:getNode(self.path .. "." .. var):attr(attr) end;
     t.iface = c:getNode(path .. "." .. "interface"):value()
     t.configfile = "/tmp/dhcpd_" .. t.iface .. ".conf";
     t.pidfile = "/tmp/dhcpd_" .. t.iface .. ".pid";
+    t.debug = debug;
     return setmetatable(t, mt);
 end
 
-function dhcpd:make_conf()
+function DHCPD:make_conf()
+
+    self.get  = function (var      ) return self.c:getNode(self.path .. "." .. var):value()    end;
+    self.attr = function (var, attr) return self.c:getNode(self.path .. "." .. var):attr(attr) end;
     self.conf_data = "";
 
     local function a(txt)
@@ -52,6 +54,7 @@ function dhcpd:make_conf()
 	    return (nil);
 	end
 	self.conf_data = self.conf_data .. txt .. "\n";
+	if self.debug then print(txt); end
     end
 
 
@@ -79,9 +82,25 @@ function dhcpd:make_conf()
 
 end
 
-function dhcpd:write(filename)
+function DHCPD:write()
 
-    local f = assert(io.open(filename, "w"));
+    local f = assert(io.open(self.configfile, "w"));
     f:write(self.conf_data);
     f:close();
 end
+
+function DHCPD:run()
+
+    os.execute("mkdir -p /var/run/");
+    os.execute("mkdir -p /var/db/");
+    os.execute("touch /var/db/dhcpd.leases");
+    os.execute("/sbin/dhcpd -lf /var/db/dhcpd.leases -cf " .. self.configfile .. " " .. self.iface);
+end
+
+function DHCPD:stop()
+
+    os.execute("kill `cat /var/run/dhcpd.pid`");
+end
+
+mt.__index = DHCPD;
+

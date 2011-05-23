@@ -1,8 +1,8 @@
 LUA_VERSION_NUM= 500
 
 LIB=	lxp
-#SHLIBDIR?= /lib
 SHLIB_NAME?=lxp.so
+LIBDIR?= /usr/lib/lua
 NO_MAN=
 SRCS=	lxplib.c
 INCS=	lxplib.h

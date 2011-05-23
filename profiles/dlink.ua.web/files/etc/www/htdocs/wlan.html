@@ -4,22 +4,6 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Wireless configuration</title>
 	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
-
-<!-- JS -->
-<script type="text/javascript" src="js/yui/yui-min.js"></script>
-<script type="text/javascript" src="js/oop/oop-min.js"></script>
-<script type="text/javascript" src="js/event-custom/event-custom-min.js"></script>
-<script type="text/javascript" src="js/attribute/attribute-base-min.js"></script>
-<script type="text/javascript" src="js/base/base-base-min.js"></script>
-<script type="text/javascript" src="js/event/event-base-min.js"></script>
-<script type="text/javascript" src="js/pluginhost/pluginhost-min.js"></script>
-<script type="text/javascript" src="js/dom/dom-min.js"></script>
-<script type="text/javascript" src="js/dom/dom-style-ie-min.js"></script>
-<script type="text/javascript" src="js/node/node-min.js"></script>
-<script type="text/javascript" src="js/event/event-base-ie-min.js"></script>
-<script type="text/javascript" src="js/anim/anim-min.js"></script>
-
-
 	<link href="css/anim.css" rel="stylesheet" type="text/css">
     </head>
     <body class="yui3-skin-sam  yui-skin-sam">
@@ -38,10 +22,10 @@
 	    <input id="radio_control" _value="data.wireless.radio_control" type="checkbox">
 	</td>
 	</tr>
-	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+	<tr>
 		<td class="">Wireless Channel&nbsp;:</td>
 		<td> 
-		    <select disabled="disabled" _value="data.wireless.channel" name="channel" _disabled="!data.wireless.radio_control || data.wireless.auto_channel">
+		    <select name="channel">
 			<option value="1">2.412 GHz - CH 1</option>
 			<option value="2">2.417 GHz - CH 2</option>
 			<option value="3">2.422 GHz - CH 3</option>
@@ -57,10 +41,10 @@
 		</td>
 	</tr>
 
-	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+	<tr>
 		<td class="">802.11 Mode&nbsp;:</td>
 		<td> 
-			<select _value="data.wireless.phy_mode" _disabled="!data.wireless.radio_control">
+			<select>
 				<option value="2">802.11g only</option>
 				<option value="3">Mixed 802.11g and 802.11b</option>
 				<option value="1">802.11b only</option>
@@ -70,24 +54,19 @@
 		</td>
 	</tr>
 
-	<!--@OPTIONAL:radio_type_NG or radio_type_NA@-->
-	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+	<tr>
 		<td class="">Channel Width&nbsp;:</td>
 		<td> 
-			<select _value="data.wireless.cwm_mode" _disabled="!data.wireless.radio_control">
+			<select>
 				<option value="0">20 MHz</option>
 				<option value="1">Auto 20/40 MHz</option>
-
-				<!--@OPTIONAL:ar5416_extra_config@--><!--@ENDOPTIONAL@-->
 			</select>
 		</td>
 	</tr>
-	<!--@ENDOPTIONAL@-->
-	<tr _displayed="!hide_disabled || data.wireless.radio_control">
+	<tr>
 		<td class="">Transmission Rate&nbsp;:</td>
 		<td> 
-			<select _value="data.wireless.tx_rate" _disabled="!data.wireless.radio_control">
-
+			<select>
 				<!-- Turbo rates in brackets. Rates are given in units of 500 kbits/s -->
 				<option value="0">Best (automatic)</option>
 				<!--@OPTIONAL:radio_type_NA or radio_type_NG@-->
@@ -129,16 +108,6 @@
 				<option value="32768">1</option><!--Most significant bit is set to distinguish from Best-->
 			</select>
 			(Mbit/s) </td>
-	</tr>
-	<tr>
-
-		<td class="">Visibility Status&nbsp;:</td>
-		<td> 
-			<input id="visibility0" name="visibility" value="0" _value="data.wireless.invisibility" _disabled="!data.wireless.radio_control" type="radio">
-			<label for="visibility0">Visible</label> 
-			<input id="visibility1" name="visibility" value="1" _value="data.wireless.invisibility" _disabled="!data.wireless.radio_control" type="radio">
-			<label for="visibility1">Invisible</label>
-		</td>
 	</tr>
 </table>
 
@@ -186,41 +155,6 @@ for (i = 0; i < sls.length; i ++) //>
 	updateSecurityMode(sl);
 }
 
-function createFrame(frameid, rollup)
-{
-    YUI().use("node", "anim", function(Y) {
-	var module = Y.one(frameid);
-
-	// add fx plugin to module body
-	var content = module.one('.yui3-bd').plug(Y.Plugin.NodeFX, {
-    	    from: { height: 1 },
-    	    to: {
-        	height: function(node) { // dynamic in case of change
-            	    return node.get('scrollHeight'); // get expanded height (offsetHeight may be zero)
-        	}
-    	    },
-
-    	    easing: Y.Easing.easeOut,
-    	    duration: 0.2
-        });
-
-	var onClick = function(e) {
-    	    module.toggleClass('yui3-closed');
-    	    content.fx.set('reverse', !content.fx.get('reverse')); // toggle reverse 
-    	    content.fx.run();
-	};
-
-	// append dynamic control to header section
-	module.one('.yui3-hd').on('click', onClick);
-	if (rollup)
-	    onClick(0);
-    });
-}
-
-createFrame('#wlan0', false);
-/*
- TODO: foreach wlan if
- createFrame('#wlan1', true ); */
 
 </script>
 
