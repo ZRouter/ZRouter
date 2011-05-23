@@ -22,7 +22,7 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPPoE>
-        <PPP type="modem" enable="true" onchange="iface_changed('interfaces.wan0.PPP')">
+        <PPP type="modem" enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
             <action>
                 <up type="socket" target="socket:127.0.0.1:5005"></up>
                 <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
@@ -59,11 +59,17 @@
             <dns2></dns2>
         </Static>
     </wan0>
-    <wlan0 type="wlan">
+    <wlan0 type="wlan" enable="true">
         <create>
             <exec>ifconfig wlan0 create wlandev wifi0 wlanmode hostap</exec>
         </create>
+        <init>
+            <exec>ifconfig wlan0 country UA channel 6 ht ssid DIR-620</exec>
+        </init>
         <wlan_interface>wifi0</wlan_interface>
+        <channel>6</channel>
+        <mode>11ng</mode>
+        <ht40>true</ht40>
     </wlan0>
     <wifi0>
         <init>
@@ -79,7 +85,7 @@
         <create>
             <exec>ifconfig wlan0 ether `kenv WAN_MAC_ADDR` down</exec>
             <exec>ifconfig lan0 ether `kenv WAN_MAC_ADDR` down</exec>
-            <exec>ifconfig bridge0 create addm lan0 up</exec>
+            <exec>ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
             <exec>ifconfig lan0 up</exec>
             <exec>ifconfig wlan0 up</exec>       
         </create>
@@ -118,16 +124,6 @@
                 <start>192.168.0.100</start>
                 <end>192.168.0.200</end>
             </range>
-            <!-- 
-option domain-name "dlink.ua";
-option domain-name-servers 192.168.0.1;
-default-lease-time 600;
-max-lease-time 7200;
-subnet 192.168.0.0 netmask 255.255.255.0 {
-    range 192.168.0.100 192.168.0.200;
-    option routers 192.168.0.1;
-}
- -->
         </instance>
     </instances>
 </dhcpd>

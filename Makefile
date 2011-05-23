@@ -21,6 +21,7 @@ SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
 ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 
 KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
+PREINSTALLDIRS=/lib
 
 # Board configyration must define used SoC/CPU
 .include "boards/boards.mk"
@@ -284,6 +285,8 @@ world:  world-toolchain world-build world-install world-fix-lib-links
 
 rootfs-dir:
 	mkdir -p ${WORLDDESTDIR}
+	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/
+	for dir in ${PREINSTALLDIRS}; do mkdir -p ${WORLDDESTDIR}/$${dir}; done
 
 kernel-install-dir:
 	mkdir -p ${KERNELDESTDIR}
@@ -334,7 +337,7 @@ IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
 
 ROOTFS_RMLIST= \
     \\( \\( -type f -or -type l \\) -and \
-	    \\( -name kernel -or -name "*.a" \\) \\) -or \
+	    \\( -name kernel -or -name "*.a" -or -name "crt*.o" \\) \\) -or \
     \\( -type l -and -name sys \\) -or \
     \\( -type d -and \\( \
     -name include -or \

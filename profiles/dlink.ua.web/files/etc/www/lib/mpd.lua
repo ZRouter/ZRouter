@@ -62,7 +62,7 @@ MPD = {};
 mt = {};
 
 function MPD:new(tree, s)
-    return setmetatable({ c = tree, socket = s }, mt)
+    return setmetatable({ c = tree, socket = s, debug = 1 }, mt)
 end
 
 function MPD:msg(s, wait)
@@ -73,7 +73,11 @@ function MPD:msg(s, wait)
 	wait = 30;
     end
     msleep(wait);
-    return (self.socket:read());
+
+    local ret = self.socket:read() or "";
+    if self.debug then print("DEBUG MPD:msg:return = [[" .. ret .. "]]"); end
+
+    return (ret);
 end
 
 function MPD:config_bundle(path, bundle)

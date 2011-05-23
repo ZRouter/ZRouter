@@ -17,11 +17,14 @@
 -- load the socket library
 --
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
-package.cpath = "/usr/lib/?.so";
+--package.cpath = "/usr/lib/?.so";
+package.cpath = 
+	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
+	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
+	"/lib/?/core.so;/usr/lib/?/core.so;/usr/lib/lua/?/core.so";
 
 io.stdout = assert(io.open("/dev/console", "w"));
 io.stderr = io.stdout;
-
 
 socket = require( "libhttpd" );
 
@@ -42,6 +45,10 @@ dofile('lib/base64.lua');
 dofile("lib/sock.lua");
 -- MPD helper
 dofile("lib/mpd.lua");
+-- DHCPD helper
+dofile("lib/dhcpd.lua");
+-- HOSTAPD helper
+dofile("lib/hostapd.lua");
 
 
 print( "\n\nLoaded the socket library, version: \n  " .. socket.version );
@@ -116,6 +123,7 @@ function processConnection( c, config )
     code    = 0;  -- Status code we send to the client
     request = ""; -- Request body read from client.
     rq = {};
+    rq.ip = ip;
 
 
     --
@@ -222,7 +230,7 @@ function processConnection( c, config )
         end
     end
 
-    if not rq.Group then
+    if not rq.Group and rq.ip ~= "127.0.0.1" then
         local message = "HTTP/1.1 401 Authorization Required\r\n" ;
         message = message .. "Server: lua-httpd " .. socket.version .. "\r\n";
         message = message .. "WWW-Authenticate: Basic realm=\"Secure Area\"";
@@ -362,13 +370,14 @@ function handleRequest( c, config, path, client, method, request, rq )
 
     -- Eval Lua code
     elseif (ext == "lua") or (ext == "xml") then
-        code, err = loadstring(t);
+        code, err = assert(loadstring(t));
         if not code then
             t = sendError( 500, "Error \"".. err .."\" when parse " .. urlEncode(path));
             retcode = "500"
         else
             t = code();
         end
+--        print(t or "(no output)", retcode or "");
     end
     socket.write( client, t );
     socket.close( client );
@@ -712,7 +721,7 @@ function configure_mpd_link(c, path, bundle, link)
     mpd:config_bundle(path, bundle);
     mpd:config_link(path, link, bundle);
 
-    print(mpd:show_bundle(path, bundle));
+--    print(mpd:show_bundle(path, bundle));
 
 --    print("--   --");
 
@@ -766,17 +775,52 @@ function configure_wan(c)
     end
 end
 
+dhcpd = 0;
+function start_dhcpd(c)
+    if c:getNode("dhcpd.instances.instance[1]"):attr("enable") == "true" then
+	if dhcpd == 0 then
+	    dhcpd = DHCPD:new(c, "dhcpd.instances.instance[1]");
+	end
+	dhcpd:make_conf();
+	dhcpd:write();
+	print("Start DHCPD");
+	dhcpd:run();
+    end
+end
+
 --
 --  Now start the server.
 --
 --
-config = {};
+
+-- Globals 
+config = {};	-- Unused now
+c = {}; 	-- XML tree from config.xml
+r = {};		-- Runtime varibles structure
+r.routes = {};
+r.routes["default"] = "127.0.0.1";
+r.routes["224.0.0.0/4"] = "-iface bridge0"
+
 
 print("Parse config ...");
 c = Conf:new(load_file("config.xml"));
+
+print("Run info collector ...");
+-- Run it as background task
+os.execute("/etc/www/collector.sh &");
+
 print("Initialize board ...");
 
+print("Init LAN");
 configure_lan(c);
+
+start_dhcpd(c);
+
+print("Init AP");
+ap = HOSTAPD:new(c, 1);
+ap:run();
+
+print("Init WAN links");
 configure_wan(c);
 
 print("Run server ...");

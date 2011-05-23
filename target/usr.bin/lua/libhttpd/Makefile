@@ -2,8 +2,8 @@ RELEASE=0.5.0
 LUA_VERSION_NUM= 500
 
 LIB=	libhttpd
-#SHLIBDIR?= /lib
 SHLIB_NAME?=libhttpd.so
+LIBDIR?= /usr/lib/lua
 NO_MAN=
 SRCS=	libhttpd.c
 #NO_WERROR=
