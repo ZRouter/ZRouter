@@ -26,7 +26,7 @@ package.cpath =
 io.stdout = assert(io.open("/dev/console", "w"));
 io.stderr = io.stdout;
 
-socket = require( "libhttpd" );
+socket = require("socket");
 
 -- Expat binding
 dofile('lib/xml.lua');
@@ -51,9 +51,6 @@ dofile("lib/dhcpd.lua");
 dofile("lib/hostapd.lua");
 
 
-print( "\n\nLoaded the socket library, version: \n  " .. socket.version );
-
-
 --
 --  A table of MIME types.  
 --  These values will be loaded from /etc/mime.types if available, otherwise
@@ -74,14 +71,12 @@ mime = {};
 function start_server( c, config )
     running = 1;
 
+
     --
     --  Bind a socket to the given port
     --
-    config.listener = socket.bind( c:getNode("http.port"):value() );
-
-    if ( config.listener == nil ) then
-       error("Error in bind()");
-    end
+    config.listener = assert(socket.bind(c:getNode("http.host"):value(), c:getNode("http.port"):value()));
+    config.listener:settimeout(5);
 
     --
     --   Print some status messages.
@@ -90,21 +85,61 @@ function start_server( c, config )
     print( "  http://" .. c:getNode("http.host"):value() .. ":" .. c:getNode("http.port"):value() .. "/" );
     print( "\n\n");
 
-
+    table.insert(r.tasks.countdown, { count=25, task=
+	function()
+	    print("task 0 ok"); 
+	    return (true); 
+	end 
+    });
+    table.insert(r.tasks.countdown, { count=10, task=
+	function()
+	    print("task 1 ok"); 
+	    return (true); 
+	end 
+    });
+    table.insert(r.tasks.countdown, { count=15, task=
+	function()
+	    print("task 2 ok"); 
+	    return (true); 
+	end 
+    });
+    table.insert(r.tasks.countdown, { count=5, task=
+	function()
+	    print("task 3 ok"); 
+	    return (true); 
+	end 
+    });
     --
     --  Loop accepting requests.
     --
     while ( running == 1 ) do
         processConnection( c, config );
+        periodic_tasks(c);
     end
 
 
     --
     -- Finished.
     --
-    socket.close( config.listener );
+    config.listener:close();
 end
 
+function periodic_tasks(c)
+    -- fetch collector info
+    local i;
+    local n = #r.tasks.countdown;
+
+    for i = n,1,-1 do
+	r.tasks.countdown[i].count = r.tasks.countdown[i].count - r.tasks.step;
+
+	if (r.tasks.countdown[i].count <= 0) then
+	    -- Task must return true, else run forever
+	    if r.tasks.countdown[i].task() then
+		table.remove(r.tasks.countdown, i);
+	    end
+	end
+    end
+end
 
 
 
@@ -115,7 +150,14 @@ function processConnection( c, config )
     --
     --  Accept a new connection
     --
-    client,ip = socket.accept( config.listener );
+    config.listener:settimeout(r.tasks.step);
+    local client = config.listener:accept();
+    if (not client) then return (nil) end;
+    local ip, port = client:getpeername();
+
+    if not client then
+	return (nil);
+    end
 
     found   = 0;  -- Found the end of the HTTP headers?
     chunk   = 0;  -- Count of data read from client socket
@@ -124,6 +166,7 @@ function processConnection( c, config )
     request = ""; -- Request body read from client.
     rq = {};
     rq.ip = ip;
+    rq.port = port;
 
 
     --
@@ -134,25 +177,32 @@ function processConnection( c, config )
     -- from the client but didn't manage to find a HTTP header end.
     -- This should help protect us from DOSes.
     --
-    while ( ( found == 0 ) and ( chunk < 10 ) ) do
-        length, data = socket.read(client);
-        if ( length < 1 ) then
-            found = 1;
-        end
+    --client:settimeout(0.1);
+    while ( true ) do
+    	local data, err = client:receive("*l");
 
-        size    = size + length;
-        request = request .. data;
+	if not data then break end
 
-        position,len = string.find( request, '\r\n\r\n' );
-        if ( position ~= nil )  then
-            rq.RequestBeader = string.sub(request, 0, position);
-            rq.RequestBody = string.sub(request, position+4);
-            rq.RequestBodyLength = len-4;
-            found = 1;
-        end
+        request = request .. data .. "\r\n";
 
-        chunk = chunk + 1;
+	if data:len() <= 0 then break end
     end
+
+    size = request:len();
+
+    print("Rq: \"" .. request .. "\"");
+
+    position,len = request:find("\r\n\r\n");
+--    print(position or "No match",len or "nope")
+    if ( position ~= nil )  then
+        rq.RequestHeader = request:sub(0, position);
+        rq.RequestBody   = request:sub(position+4);
+        rq.RequestBodyLength = len-4;
+    else
+	-- Maybe we need say ERROR!!!!
+	return (nil);
+    end
+
 
 
     --
@@ -178,10 +228,9 @@ function processConnection( c, config )
         end
 
         err = sendError(501, error);
-        size = string.len(err);
-        socket.write(client, err)
-        socket.close(client);
-        return size, "501";
+        client:send(err)
+        client:close();
+        return err:len(), "501";
     end
 
 
@@ -189,24 +238,26 @@ function processConnection( c, config )
     -- Decode the requested path.
     --
     path = urlDecode( path );
---    print(request);
-
 
     --
     -- find the Virtual Host which we need for serving, and find the
     -- user agent and referer for logging purposes.
     --
-    _, _, rq.Host           = string.find(request, "Host: ([^:\r\n]+)");
-    _, _, rq.Agent          = string.find(request, "Agent: ([^\r\n]+)");
-    _, _, rq.Referer        = string.find(request, "Referer: ([^\r\n]+)");
+    _, _, rq.Host           = request:find( "Host: (.-)\r?\n");
+    _, _, rq.Agent          = request:find( "Agent: (.-)\r?\n");
+    _, _, rq.Referer        = request:find( "Referer: (.-)\r?\n");
 
-    _, _, rq.Accept         = string.find(request, "Accept: ([^:\r\n]+)");
-    _, _, rq.AcceptLanguage = string.find(request, "Accept%-Language: ([^:\r\n]+)");
-    _, _, rq.AcceptEncoding = string.find(request, "Accept%-Encoding: ([^:\r\n]+)");
-    _, _, rq.AcceptCharset  = string.find(request, "Accept%-Charset: ([^:\r\n]+)");
-    _, _, rq.ContentType    = string.find(request, "Content%-Type: ([^:\r\n]+)");
-    _, _, rq.ContentLength  = string.find(request, "Content%-Length: ([^:\r\n]+)");
-    _, _, rq.Authorization  = string.find(request, "Authorization: ([^:\r\n]+)");
+    _, _, rq.Accept         = request:find( "Accept: (.-)\r?\n");
+    _, _, rq.AcceptLanguage = request:find( "Accept%-Language: ([^:\r\n]+)");
+    _, _, rq.AcceptEncoding = request:find( "Accept%-Encoding: ([^:\r\n]+)");
+    _, _, rq.AcceptCharset  = request:find( "Accept%-Charset: ([^:\r\n]+)");
+    _, _, rq.ContentType    = request:find( "Content%-Type: ([^:\r\n]+)");
+    _, _, rq.ContentLength  = request:find( "Content%-Length: ([^:\r\n]+)");
+    _, _, rq.Authorization  = request:find( "Authorization: ([^:\r\n]+)");
+
+    for k,v in pairs(rq) do
+	print("k=\"" .. k .. "\", v=\"" .. v .. "\"");
+    end
 
     rq.UserName = nil;
     rq.Password = nil;
@@ -232,7 +283,7 @@ function processConnection( c, config )
 
     if not rq.Group and rq.ip ~= "127.0.0.1" then
         local message = "HTTP/1.1 401 Authorization Required\r\n" ;
-        message = message .. "Server: lua-httpd " .. socket.version .. "\r\n";
+        message = message .. "Server: httpd\r\n";
         message = message .. "WWW-Authenticate: Basic realm=\"Secure Area\"";
         message = message .. "Content-type: text/html\r\n";
         message = message .. "Connection: close\r\n\r\n" ;
@@ -241,8 +292,8 @@ function processConnection( c, config )
         --Content-Length: 311
 
         size = string.len(message);
-        socket.write(client, message);
-        socket.close(client);
+        client:send(message);
+        client:close();
         code = "401";
     else
         size, code = handleRequest( c, config, path, client, method, request, rq );
@@ -253,12 +304,6 @@ function processConnection( c, config )
     if ( rq.Referer == nil ) then rq.Referer = "-" end;
     if ( code       == nil ) then code       = 0 ; end;
 
-    --
-    -- Log the access in something resembling the Apache common
-    -- log format.
-    -- 
-    -- Note: The logging does not write the name of the virtual host.
-    --
 --    logAccess( rq.UserName or "-", method, rq.Host, ip, path, code, size, rq.Agent, rq.Referer, major, minor );
 
 
@@ -269,7 +314,7 @@ function processConnection( c, config )
     --
     --  Close the client connection.
     --
-    socket.close( client );
+    client:close();
 end
 
 --
@@ -328,8 +373,8 @@ function handleRequest( c, config, path, client, method, request, rq )
     if ( fileExists(file) == false ) then 
         err = sendError(404, "File not found " .. urlEncode(path));
         size = string.len(err);
-        socket.write(client, err)
-        socket.close(client);
+        client:send(err)
+        client:close();
         return size, "404";
     end;
 
@@ -348,10 +393,11 @@ function handleRequest( c, config, path, client, method, request, rq )
     --
     -- Send out the header.
     --
-    socket.write( client, "HTTP/1.0 200 OK\r\n" );
-    socket.write( client, "Server: lua-httpd " .. socket.version .. "\r\n" );
-    socket.write( client, "Content-type: " .. mimetype  .. "\r\n" );
-    socket.write( client, "Connection: close\r\n\r\n" );
+    client:send(
+	"HTTP/1.0 200 OK\r\n" ..
+	"Server: httpd\r\n" ..
+	"Content-type: " .. mimetype  .. "\r\n" ..
+	"Connection: close\r\n\r\n" );
 
 
     --
@@ -379,8 +425,8 @@ function handleRequest( c, config, path, client, method, request, rq )
         end
 --        print(t or "(no output)", retcode or "");
     end
-    socket.write( client, t );
-    socket.close( client );
+    client:send(t);
+    client:close();
 
     return string.len(t), retcode;
 end
@@ -465,14 +511,13 @@ end
 --
 function sendError( status, str )
     message = "HTTP/1.0 " .. status .. " OK\r\n" ;
-    message = message .. "Server: lua-httpd " .. socket.version .. "\r\n";
+    message = message .. "Server: httpd\r\n";
     message = message .. "Content-type: text/html\r\n";
     message = message .. "Connection: close\r\n\r\n" ;
     message = message .. "<html><head><title>Error</title></head>" ;
     message = message .. "<body><h1>Error</h1>" ;
     message = message .. "<p>" .. str .. "</p></body></html>" ;
 
---    socket.write( client, message );
     return (message);
 end
 
@@ -797,17 +842,22 @@ end
 config = {};	-- Unused now
 c = {}; 	-- XML tree from config.xml
 r = {};		-- Runtime varibles structure
+
 r.routes = {};
 r.routes["default"] = "127.0.0.1";
 r.routes["224.0.0.0/4"] = "-iface bridge0"
-
+r.tasks = {};
+r.tasks.step = 5; -- Seconds
+r.tasks.periodic = {};
+r.tasks.onetime  = {}; -- At some time
+r.tasks.countdown= {}; -- when counter expired
 
 print("Parse config ...");
 c = Conf:new(load_file("config.xml"));
 
 print("Run info collector ...");
 -- Run it as background task
-os.execute("/etc/www/collector.sh &");
+--os.execute("/etc/www/collector.sh &");
 
 print("Initialize board ...");
 
