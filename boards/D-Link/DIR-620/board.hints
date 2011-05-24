@@ -38,6 +38,11 @@ hint.rt2860.0.irq=4
 #hint.uart.1.irq=5
 hint.uart.1.flags="0x30"
 
+# Configure SYSCTL_GPIOMODE to pass FUART pins to GPIO
+# original:
+# hint.sysctl.0.gpiomode=0x000283
+# required:
+hint.sysctl.0.gpiomode=0x00029f
 
 # gpio
 # XXX DEBUG WPS BTN as a reset
