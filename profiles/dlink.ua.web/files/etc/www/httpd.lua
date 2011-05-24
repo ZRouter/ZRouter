@@ -17,11 +17,11 @@
 -- load the socket library
 --
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
---package.cpath = "/usr/lib/?.so";
 package.cpath = 
 	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
+	"/lib/lua?.so;/usr/lib/lua?.so;/usr/lib/lua/lua?.so;" ..
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
-	"/lib/?/core.so;/usr/lib/?/core.so;/usr/lib/lua/?/core.so";
+	"/lib/?/core.so;/usr/lib/?/core.so;/usr/lib/lua/?/core.so;";
 
 io.stdout = assert(io.open("/dev/console", "w"));
 io.stderr = io.stdout;
@@ -833,10 +833,22 @@ function start_dhcpd(c)
     end
 end
 
---
---  Now start the server.
---
---
+function getopt(args, opts)
+    i=1;
+    while i < table.getn(arg) do 
+	if arg[i]:match("^-") then
+	    opts[arg[i]] = arg[i+1];
+	    i = i + 1;
+	end
+	i = i + 1;
+    end
+    return (opts);
+end
+
+
+
+
+
 
 -- Globals 
 config = {};	-- Unused now
@@ -851,6 +863,18 @@ r.tasks.step = 5; -- Seconds
 r.tasks.periodic = {};
 r.tasks.onetime  = {}; -- At some time
 r.tasks.countdown= {}; -- when counter expired
+
+opts = {};
+opts["-P"] = "/var/run/httpd.pid";
+
+if arg then
+    opts = getopt(arg, opts);
+end
+
+-- Check pidfile
+dofile("lib/pidfile.lua");
+pidfile(opts["-P"]);
+
 
 print("Parse config ...");
 c = Conf:new(load_file("config.xml"));

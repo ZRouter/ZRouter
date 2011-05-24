@@ -4,7 +4,7 @@
 #
 
 # PROVIDE: httpd
-# REQUIRE: MAIN
+# REQUIRE: MAIN collector
 # KEYWORD: nojail shutdown
 
 . /etc/rc.subr

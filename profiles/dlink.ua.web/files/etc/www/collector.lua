@@ -3,6 +3,7 @@
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
 package.cpath = 
 	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
+	"/lib/lua?.so;/usr/lib/lua?.so;/usr/lib/lua/lua?.so;" ..
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
 	"/lib/?/core.so;/usr/lib/?/core.so;/usr/lib/lua/?/core.so;";
 
@@ -131,7 +132,31 @@ function call_server(http, q)
 
 end
 
+function getopt(args, opts)
+    i=1;
+    while i < table.getn(arg) do 
+	if arg[i]:match("^-") then
+	    opts[arg[i]] = arg[i+1];
+	    i = i + 1;
+	end
+	i = i + 1;
+    end
+    return (opts);
+end
 
+
+
+opts = {};
+opts["-P"] = "/var/run/collector.pid";
+
+if arg then
+    opts = getopt(arg, opts);
+end
+
+
+-- Check pidfile
+dofile("lib/pidfile.lua");
+pidfile(opts["-P"]);
 
 socket = require("socket");
 http = require("socket.http")
