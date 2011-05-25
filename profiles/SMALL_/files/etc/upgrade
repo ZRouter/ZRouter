@@ -2,6 +2,7 @@
 
 URL=$1
 DEVICE=/dev/map/upgrade
+FWFILE=/tmp/fw.img
 BLOCK_SIZE=64
 GEOM_PART=`echo ${DEVICE} | sed 's/\/dev\///; s!\/!\\\/!' `
 
@@ -17,26 +18,35 @@ DEVICEBLKS=$((${DEVICESIZE} / ${BLOCK_SIZE} / 1024))
 
 #echo f1 > /dev/led/status
 cd /tmp
+rm -f ${FWFILE}
 echo "Fetching new image from "
-fetch -o /tmp/fw.img "$1" || exit 1
+fetch -o ${FWFILE} "$1" || exit 1
 
-lsline=`ls -l /tmp/fw.img`
+lsline=`ls -l ${FWFILE}`
 script="arg5() echo \$5; arg5 ${lsline}"
 size=`sh -c "${script}"`
 if [ ${size} -gt ${DEVICESIZE} ]; then
 	echo "new image too big ${size}, must be less than ${DEVICESIZE}"
 	exit 1
-fi 
+fi
 
-#sysctl hw.cfi.rdonly=0
-for p in collector.pid collector.sh.pid dhcpd.pid dhclient.pid httpd.pid httpd.sh.pid mpd.pid ; do
+# TODO: image check here
+
+# XXX: readonly for now
+sysctl hw.cfi.rdonly=1
+
+killall mpd
+for p in collector.sh.pid collector.pid dhcpd.pid dhclient.pid hostapd.pid httpd.sh.pid httpd.pid mpd.pid ; do
     echo "Kill ${p}"
-    kill `cat /var/run/${p}`
+    kill `cat /var/run/${p}` 2&>1 > /dev/null
+    # XXX: collector and httpd can't remove thier pid's (yet)
+    rm -f /var/run/${p}
 done
 echo "Update /dev/md0 mount to sync mode"
 mount -u -o sync /dev/md0 /tmp
 echo "Flashing new Firware image"
-upgrade -f /tmp/fw.img -V -R -d ${DEVICE}
+# -V don't verify, -S don't sync
+upgrade -f ${FWFILE} -V -S -d ${DEVICE}
 echo '.'
 
 #echo f9 > /dev/led/status
