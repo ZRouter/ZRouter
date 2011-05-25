@@ -2,6 +2,7 @@
 .include <bsd.own.mk>
 
 FREEBSD_SRC_TREE?=/usr/src
+OBJ_DIR?=/usr/obj
 
 # ZROUTER_ROOT can be set in environment
 .if !defined(ZROUTER_ROOT)
@@ -9,8 +10,8 @@ ZROUTER_ROOT=${.CURDIR}
 .endif
 
 # ZROUTER_OBJ can be set in environment
-ZROUTER_OBJ?=/usr/obj/${ZROUTER_ROOT}
-MAKEOBJDIRPREFIX?=/usr/obj/${ZROUTER_ROOT}/
+ZROUTER_OBJ?=${OBJ_DIR}/${ZROUTER_ROOT}
+MAKEOBJDIRPREFIX?=${OBJ_DIR}/${ZROUTER_ROOT}/
 KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
