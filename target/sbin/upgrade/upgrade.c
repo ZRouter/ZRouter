@@ -25,7 +25,9 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/reboot.h>
+#ifdef USE_MD5
 #include <md5.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,6 +54,7 @@ void usage()
 	exit(1);
 }
 
+#ifdef USE_MD5
 static int check_md5(FILE * fh, int blocksize)
 {
 	struct image_header header;
@@ -93,6 +96,7 @@ static int check_md5(FILE * fh, int blocksize)
 	if ( memcmp(digest, header.image_digest, 16)) return 1;
 	return 0;
 }
+#endif
 
 static void
 check_geom_debugflags16_enabled()
@@ -115,11 +119,20 @@ check_geom_debugflags16_enabled()
 
 int main(int argc, char **argv)
 {
-	int ch, i, c, verify = 1, check = 1, rebt = 1, silent = 0, blocksize = 0x10000, exitcode = 0;
+	int ch, i, c;
+#ifdef USE_MD5
+	int verify = 1;
+#endif
+	int check = 1, do_sync = 1, rebt = 1, silent = 0;
+	int blocksize = 0x10000, exitcode = 0;
 	char *file = 0, *device = DEFAULT_DEVICE, *buf;
 	FILE *fh, *ofh;
 
-	while ((ch = getopt(argc, argv, "f:d:qRs:V")) != -1)
+	while ((ch = getopt(argc, argv, "f:d:qRSs:"
+#ifdef USE_MD5
+	    "V"
+#endif
+	    )) != -1)
 		switch (ch) {
 		case 'f':
 			file = optarg;
@@ -133,12 +146,17 @@ int main(int argc, char **argv)
 		case 'R':
 			rebt = 0;
 			break;
+		case 'S':
+			do_sync = 0;
+			break;
 		case 's':
 			blocksize = strtoul(optarg, 0, 0);
 			break;
+#ifdef USE_MD5
 		case 'V':
 			verify = 0;
 			break;
+#endif
 		default:
 			usage();
 		}
@@ -167,8 +185,11 @@ int main(int argc, char **argv)
 		goto free_exit;
 	}
 
+#ifdef USE_MD5
 	if (verify) check = check_md5(fh, blocksize);
-	if (!silent && !check ) printf("Image check - %s\n", check?"FAIL":"ok" );
+#endif
+	if (!silent && !check )
+		printf("Image check - %s\n", check?"FAIL":"ok" );
 
 	ofh = fopen(device, "r+");
 	if ( !ofh )
@@ -180,36 +201,56 @@ int main(int argc, char **argv)
 
 	rewind(fh);
 
-	/* 0xff - mean erased flash  */
-	//memset(buf, 0xff, blocksize);
 	bzero(buf, blocksize);
+	/* Non buffered io for stdout */
 	setvbuf(stdout, NULL, _IONBF, 0);
+	/* Non buffered io for flash device, to avoid use of big memory chunks*/
+	setvbuf(ofh, NULL, _IONBF, 0);
 
 	for ( c = 0; (i = fread(buf, 1, blocksize, fh)); c++ )
 	{
-		if (c % 10) printf(".");
-		else      printf("%d", c);
+		if (!silent) {
+			if (c % 10) printf(".");
+			else      printf("%d", c);
+		}
 		/* always write blocksize, not "i", like `dd conv=sync` */
 		if (fwrite(buf, blocksize, 1, ofh) != 1)
 		{
-		    printf("Error when writing to %s, continue trying to make it done\n", device);
+		    printf("Error when writing to %s, "
+			"continue trying to make it done\n", device);
 		    exitcode = 7;
 		}
-		//memset(buf, 0xff, blocksize);
 		bzero(buf, blocksize);
 	}
 	printf("\n");
+
 	/* sync */
-	sync();
+	if (do_sync) {
+		if (!silent)
+			printf("Sync buffers\n");
+		sync();
+	}
 
-	if (verify) check = check_md5(ofh, blocksize);
-	else 	sleep(3); /* For make shure, what flash write done */
+#ifdef USE_MD5
+	if (verify) {
+		if (!silent)
+			printf("Verify md5 sum\n");
+		check = check_md5(ofh, blocksize);
+	} else
+#endif
+	{
+		if (!silent)
+			printf("Sleep 3 seconds...\n");
+		sleep(3); /* For make shure, what flash write done */
+	}
 
+#ifdef USE_MD5
 	if (verify && check)
 	{
 		printf("Verification fail\n");
 		exitcode = 7;
 	}
+#endif
 
 	if (rebt && !exitcode)
 	{
@@ -219,7 +260,15 @@ int main(int argc, char **argv)
 		 * maybe filesystem still alive
 		 */
 		printf("Write done, now rebooting\n");
-		reboot(RB_AUTOBOOT);
+		if (do_sync) {
+			if (!silent)
+				printf("reboot now ...\n");
+			reboot(RB_AUTOBOOT);
+		} else {
+			if (!silent)
+				printf("reboot w/o sync now ...\n");
+			reboot(RB_AUTOBOOT|RB_NOSYNC);
+		}
 	}
 
 close2_exit:
