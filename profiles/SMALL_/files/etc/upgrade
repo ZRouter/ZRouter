@@ -28,9 +28,16 @@ if [ ${size} -gt ${DEVICESIZE} ]; then
 	exit 1
 fi 
 
-echo "Flashing new Firware image"
 #sysctl hw.cfi.rdonly=0
-/bin/dd if=/tmp/fw.img of=${DEVICE} bs=${BLOCK_SIZE}k count=${DEVICEBLKS} conv=sync
+for p in collector.pid collector.sh.pid dhcpd.pid dhclient.pid httpd.pid httpd.sh.pid mpd.pid ; do
+    echo "Kill ${p}"
+    kill `cat /var/run/${p}`
+done
+echo "Update /dev/md0 mount to sync mode"
+mount -u -o sync /dev/md0 /tmp
+echo "Flashing new Firware image"
+upgrade -f /tmp/fw.img -V -R -d ${DEVICE}
 echo '.'
 
 #echo f9 > /dev/led/status
+

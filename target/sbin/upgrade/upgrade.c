@@ -11,7 +11,7 @@
 
 /*
  * What ./upgrade do
- * ./upgrade -S 0x10000 new_firmware.img /dev/map/upgrade
+ * ./upgrade -S 0x10000 -f new_firmware.img -d /dev/map/upgrade
  * Check new_firmware.img signature and CRC
  * open /dev/map/upgrade
  * pre shutdown most services ( first recomend turn-off Radio )
@@ -40,7 +40,7 @@
 void usage()
 {
 	printf(
-	    "./upgrade [-s 0x10000] [-D] -f new.img "
+	    "./upgrade [-s 0x10000] [-R] [-V] -f new.img "
 		"[-d /dev/device]\n"
 	    "\t-f img     - New system image filename\n"
 	    "\t-d dev     - Device name, default " DEFAULT_DEVICE "\n"
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 	if (verify) check = check_md5(ofh, blocksize);
 	else 	sleep(3); /* For make shure, what flash write done */
 
-	if (check)
+	if (verify && check)
 	{
 		printf("Verification fail\n");
 		exitcode = 7;
