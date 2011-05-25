@@ -3,15 +3,15 @@
 # $FreeBSD: src/etc/rc.d/sshd,v 1.14.2.1.2.1 2009/10/25 01:10:29 kensmith Exp $
 #
 
-# PROVIDE: sshd_kyes
+# PROVIDE: sshd_keys
 # REQUIRE: MAIN
 # KEYWORD: shutdown
 
 . /etc/rc.subr
 
-[ -z "$sshd_kyes_enable" ] && sshd_kyes_enable="YES"
+[ -z "$sshd_keys_enable" ] && sshd_keys_enable="YES"
 
-name="sshd_kyes"
+name="sshd_keys"
 rcvar=`set_rcvar`
 command="/usr/sbin/${name}"
 keygen_cmd="sshd_keygen"
