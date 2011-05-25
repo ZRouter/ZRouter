@@ -1,9 +1,10 @@
 
 PROG=	upgrade
-DPADD=	${LIBMD}
-LDADD=	-lmd
+
+#DPADD=	${LIBMD}
+#LDADD=	-lmd
 BINDIR?=/sbin/
-CFLAGS+=-Wall
+CFLAGS+=-Wall -static
 NO_MAN=	yet
 
 .include <bsd.prog.mk>
