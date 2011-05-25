@@ -68,7 +68,7 @@ function HOSTAPD:new(c, debug)
     t.debug = debug;
     t.configfile = {};
     t.conf_data = {};
-    t.pidfile = "/tmp/hostapd.pid";
+    t.pidfile = "/var/run/hostapd.pid";
     return setmetatable(t, mt);
 end
 
