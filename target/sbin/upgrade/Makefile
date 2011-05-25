@@ -1,9 +1,9 @@
 
-PROG=upgrade
+PROG=	upgrade
 DPADD=	${LIBMD}
 LDADD=	-lmd
-BINDIR?=/bin/
+BINDIR?=/sbin/
 CFLAGS+=-Wall
-NO_MAN=MAN
+NO_MAN=	yet
 
 .include <bsd.prog.mk>
