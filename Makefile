@@ -275,7 +275,7 @@ world-install: rootfs-dir
 		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
 world-fix-lib-links:
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	cd ${WORLDDESTDIR}/usr/lib/ && ${ZROUTER_ROOT}/tools/fix_lib_links.sh
 
 world:  world-toolchain world-build world-install world-fix-lib-links
@@ -403,16 +403,16 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 
 #${ROOTFS_DEPTEST}:
 ${ROOTFS_DEPTEST}:		world	ports
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
 ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
 
 kernel-install:				${KERNELDESTDIR}/boot/kernel/kernel
 
 ${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 .if !empty(KERNELDESTDIR)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
 .else
@@ -420,22 +420,22 @@ ${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}
 .endif
 
 ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	rm -f ${NEW_KERNEL}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 
 rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
 
 oldlzma:	${ZTOOLS_PATH}/oldlzma
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
 rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
 #
@@ -443,7 +443,7 @@ rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
 #
 #kernel_bin 
 ${NEW_KERNEL}.bin:	${NEW_KERNEL}
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
 	@if [ -n "${KERNEL_SIZE_MAX}" -a $$(stat -f %z ${NEW_KERNEL}.bin) -ge ${KERNEL_SIZE_MAX} ] ; then \
 		echo "${NEW_KERNEL}.bin size ($$(stat -f %z ${NEW_KERNEL}.bin)) greater than KERNEL_SIZE_MAX (${KERNEL_SIZE_MAX}), will delete it"; \
@@ -457,46 +457,46 @@ ${NEW_KERNEL}.bin:	${NEW_KERNEL}
 kernel_bin_oldlzma:	${NEW_KERNEL}.bin.oldlzma
 
 ${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
 
 kernel_oldlzma:		${NEW_KERNEL}.oldlzma
 
 ${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
 
 #
 # Compress kernel with xz
 #
 kernel_bin_xz ${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.xz
 
 kernel_xz ${NEW_KERNEL}.xz:		${NEW_KERNEL}
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.xz
 
 #
 # Compress kernel with bz2
 #
 kernel_bin_bz2 ${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.bz2
 
 kernel_bz2 ${NEW_KERNEL}.bz2:		${NEW_KERNEL}
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.bz2
 
 #
 # Compress kernel with gz
 #
 kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.gz
 
 kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.gz
 
 UBOOT_KERNEL_LOAD_ADDRESS?=80001000
@@ -505,7 +505,7 @@ UBOOT_KERNEL_ENTRY_POINT?=${UBOOT_KERNEL_LOAD_ADDRESS}
 kernel.${KERNEL_COMPRESSION_TYPE}.uboot:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
 
 ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE}
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	uboot_mkimage -A ${TARGET} -O linux -T kernel \
 	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \
 	    -a ${UBOOT_KERNEL_LOAD_ADDRESS} \
@@ -517,23 +517,23 @@ ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPR
 #	${ZTOOLS_PATH}/packimage
 
 kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}	${ZTOOLS_PATH}/trx
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
 
 # XXX: temporary
 kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/trx
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
 
 ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
 	_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz.sync` ; \
 	_NEW_SIZE=$$(( (($${_SIZE} + 0xffff) & 0xffff0000) - 0x1c )) ; \
 	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.bin.gz.sync
 
 fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
-	echo "++++++++++++++ Making $@ ++++++++++++++"
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
 
