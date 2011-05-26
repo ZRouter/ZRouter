@@ -112,27 +112,32 @@ hint.map.0.readonly=1
 hint.map.1.at="cfid0"
 hint.map.1.start=0x00030000
 hint.map.1.end=0x00040000
-hint.map.1.name="factory"
+hint.map.1.name="linuxconfig"
 
 hint.map.2.at="cfid0"
 hint.map.2.start=0x00040000
-hint.map.2.end=0x007e0000
-hint.map.2.name="upgrade"
+hint.map.2.end=0x00050000
+hint.map.2.name="factory"
 
 hint.map.3.at="cfid0"
-hint.map.3.name="kernel"
-hint.map.3.start=0x00040000
-hint.map.3.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.3.start=0x00050000
+hint.map.3.end=0x007e0000
+hint.map.3.name="upgrade"
 
 hint.map.4.at="cfid0"
-hint.map.4.name="rootfs"
-hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.4.end=0x007e0000
+hint.map.4.name="kernel"
+hint.map.4.start=0x00050000
+hint.map.4.end="search:0x00100000:0x10000:.!/bin/sh"
 
 hint.map.5.at="cfid0"
-hint.map.5.start=0x007e0000
-hint.map.5.end=0x00800000
-hint.map.5.name="config"
+hint.map.5.name="rootfs"
+hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.5.end=0x007e0000
+
+hint.map.6.at="cfid0"
+hint.map.6.start=0x007e0000
+hint.map.6.end=0x00800000
+hint.map.6.name="config"
 
 
 hint.rt.0.phymask=0x1f
