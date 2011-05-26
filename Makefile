@@ -537,7 +537,25 @@ fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOL
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
 
+# zimage used when it possible to use any formats (CFI devices must use trx 
+# format, but U-Boot devices must use only kernel in U-Boot format )
+ZROUTER_VERSION?=0.1-ALPHA
 
+zimage:		${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync ${NEW_ROOTFS}.iso.ulzma
+	cat ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync ${NEW_ROOTFS}.iso.ulzma > ${NEW_IMAGE}
+	IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
+	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX}
+
+${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
+	cp ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync
+	_SIZE=`stat -f %z ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync` ; \
+	_NEW_SIZE=$$(( ($${_SIZE} + ${PACKING_KERNEL_ROUND}) & ~(${PACKING_KERNEL_ROUND} - 1) )) ; \
+	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync
+
+# Howto
+# PACKING_KERNEL_ROUND=0x10000
+# echo $(( (${KERNEL_SIZE} + ${PACKING_KERNEL_ROUND}) & ~(${PACKING_KERNEL_ROUND} - 1) ))
 
 .include <bsd.obj.mk>
 
