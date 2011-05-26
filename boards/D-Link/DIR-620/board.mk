@@ -44,6 +44,7 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 
+
 ###################################################
 #
 #       Firmware Image Options
@@ -63,7 +64,10 @@ MKULZMA_BLOCKSIZE=65536
 PACKING_KERNEL_IMAGE?=kernel.oldlzma.uboot
 PACKING_ROOTFS_IMAGE?=rootfs.iso.ulzma
 
+# 64k
+PACKING_KERNEL_ROUND?=0x10000
+
 PACKING_ROOTFS_METHOD?=	tar.gz
 
-
+IMAGE_SUFFIX=zimage
 
