@@ -1,111 +1,46 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-    <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Internet connections configuration</title>
-	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
-	<link href="css/anim.css" rel="stylesheet" type="text/css">
-    </head>
-    <body class="yui3-skin-sam  yui-skin-sam">
+$$$code:inc("htdocs/header.html")$$$
     <h1>Internet connections configuration</h1>
 
-<div id="Static" class="yui3-module boxitem">
-    <div class="yui3-hd">
-        <h4>Ethernet Interface</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-	    <input type="hidden" name="path" value="interfaces.wan0.Static" />
-	    <input type="hidden" name="cmd" value="setmany" />
-	<table>
-            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.Static'):attr('enable')) $$$></td></tr>
-	    <tr><td>Static:</td><td><input type="radio" name="dhcp" value="false"> DHCP <input type="radio" name="dhcp" value="true"></td></tr>
-            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.Static.ipaddr$$$"/></td></tr>
-            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.Static.gateway$$$"/></td></tr>
-            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.Static.nat'):attr('enable')) $$$></td></tr>
-	</table>
-	</form>
-    </div>
-</div>
-<div id="PPPoE" class="yui3-module boxitem">
-    <div class="yui3-hd">
-        <h4>PPPoE</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-	    <input type="hidden" name="path" value="interfaces.wan0.PPPoE" />
-	    <input type="hidden" name="cmd" value="setmany" />
-	<table>
-            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPPoE'):attr('enable')) $$$></td></tr>
-            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPPoE.nat'):attr('enable')) $$$></td></tr>
-            <tr><td>Username:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.username$$$"/></td></tr>
-            <tr><td>Password:</td><td><input type="password" name="ipaddr" value="$$$interfaces.wan0.PPPoE.password$$$"/></td></tr>
-            <tr><td>Service name:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.service_name$$$"/></td></tr>
-            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPPoE.ipaddr$$$"/></td></tr>
-            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.PPPoE.gateway$$$"/></td></tr>
-	</table>
-	</form>
-    </div>
-</div>
-<div id="PPP" class="yui3-module boxitem">
-    <div class="yui3-hd">
-        <h4>PPP</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-	    <input type="hidden" name="path" value="interfaces.wan0.PPP" />
-	    <input type="hidden" name="cmd" value="setmany" />
-	<table>
-            <tr><td>Enabled:</td><td><input type="checkbox" $$$code: checked(c:getNode('interfaces.wan0.PPP'):attr('enable')) $$$></td></tr>
-            <tr><td>NAT Enabled:</td><td><input type="checkbox" name="nat" value="enable" $$$code: checked(c:getNode('interfaces.wan0.PPP.nat'):attr('enable')) $$$></td></tr>
-            <tr><td>Username:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.username$$$"/></td></tr>
-            <tr><td>Password:</td><td><input type="password" name="ipaddr" value="$$$interfaces.wan0.PPP.password$$$"/></td></tr>
-            <tr><td>Service name:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.service_name$$$"/></td></tr>
-            <tr><td>IP Address:</td><td><input type="text" name="ipaddr" value="$$$interfaces.wan0.PPP.ipaddr$$$"/></td></tr>
-            <tr><td>Gateway Address:</td><td><input type="text" name="gateway" value="$$$interfaces.wan0.PPP.gateway$$$"/></td></tr>
-	</table>
-	</form>
-    </div>
-</div>
-
-<script type="text/javascript">
-function createFrame(frameid)
+$$$code:conf_table("Static", "Ethernet Interface", "interfaces.wan0.Static", 
 {
-    YUI().use("node", "anim", function(Y) {
-	var module = Y.one(frameid);
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Automatic (DHCP)",	type = "attr", htmltype = "checkbox", 	node = "dhcp:enable" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
 
-	// add fx plugin to module body
-	var content = module.one('.yui3-bd').plug(Y.Plugin.NodeFX, {
-    	    from: { height: 1 },
-    	    to: {
-        	height: function(node) { // dynamic in case of change
-            	    return node.get('scrollHeight'); // get expanded height (offsetHeight may be zero)
-        	}
-    	    },
+$$$code:conf_table("PPPoE", "PPPoE", "interfaces.wan0.PPPoE", 
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},
+    { label = "Password", 		type = "node", htmltype = "text", 	node = "password" 	},
+    { label = "Service name", 		type = "node", htmltype = "text", 	node = "service_name" 	},
+    { label = "Device", 		type = "node", htmltype = "text", 	node = "device" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
 
-    	    easing: Y.Easing.easeOut,
-    	    duration: 0.2
-        });
+$$$code:conf_table("PPP", "PPP (3G)", "interfaces.wan0.PPP", 
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},
+    { label = "Password", 		type = "node", htmltype = "text", 	node = "password" 	},
+    { label = "Phone", 			type = "node", htmltype = "text", 	node = "phone" 		},
+    { label = "Init String",		type = "node", htmltype = "text", 	node = "init_string"	},
+    { label = "Device", 		type = "node", htmltype = "text", 	node = "device" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
 
-	var onClick = function(e) {
-    	    module.toggleClass('yui3-closed');
-    	    content.fx.set('reverse', !content.fx.get('reverse')); // toggle reverse 
-    	    content.fx.run();
-	};
+$$$code:inc("htdocs/footer.html")$$$
 
-	// append dynamic control to header section
-	module.one('.yui3-hd').on('click', onClick);
-	onClick(0);
-    });
-}
 
-createFrame('#Static');
-createFrame('#PPPoE');
-//createFrame('#PPTP');
-//createFrame('#L2TP');
-createFrame('#PPP');
-
-</script>
-
-</body>
-</html>

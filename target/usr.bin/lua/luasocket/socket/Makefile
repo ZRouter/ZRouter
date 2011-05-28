@@ -1,14 +1,9 @@
 
-NAME=socket
 CDIR=${.CURDIR}/../../../../../contrib/luasocket/src
 .PATH: ${CDIR}/
 
-CFLAGS+=	-I${CDIR}
-CFLAGS+=	-I${.CURDIR}/../../lua/
-
-NO_MAN=
-
-SRCS=	\
+NAME=		socket
+SRCS=		\
 	luasocket.c \
 	timeout.c \
 	buffer.c \
@@ -20,11 +15,13 @@ SRCS=	\
 	udp.c \
 	except.c \
 	select.c \
-	usocket.c 
-
-#INCS=		
+	usocket.c
 
 SHLIB_NAME= 	${NAME}-core.so
-LIBDIR?= /usr/lib/lua
+LIBDIR?= 	/usr/lib/lua
+CFLAGS+=	-I${CDIR}
+CFLAGS+=	-I${.CURDIR}/../../lua/
+
+NO_MAN=
 
 .include <bsd.lib.mk>

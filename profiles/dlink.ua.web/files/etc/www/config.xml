@@ -3,8 +3,7 @@
         <PPPoE type="pppoe" enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
             <action>
                 <create type="socket" target="socket:127.0.0.1:5005">
-                    <message>
-</message>
+                    <message></message>
                 </create>
             </action>
             <nat enable="true"></nat>
@@ -35,7 +34,7 @@
             <username>IT</username>
             <password>IT</password>
             <phone>#777</phone>
-            <service_name></service_name>
+            <init_string></init_string>
             <device>/dev/cuaU0.0</device>
             <default_route>true</default_route>
             <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
@@ -52,11 +51,11 @@
             <device>wan0</device>
             <default_route>true</default_route>
             <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
-            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.10/24</ipaddr>
             <!-- Values holders -->
-            <gateway></gateway>
-            <dns1></dns1>
-            <dns2></dns2>
+            <gateway>10.0.0.1</gateway>
+            <dns1>10.0.0.1</dns1>
+            <dns2>10.0.0.2</dns2>
         </Static>
     </wan0>
     <wlan0 type="wlan" enable="true">
@@ -203,6 +202,10 @@
         <user username="admin" password="admin" group="admin" />
         <user username="user" password="123" group="stat" />
     </users>
+    <!-- host>192.168.0.1</host 
+	bind to all, because we need local access also.
+	XXX: we should take care about ipfw deny for that.
+    -->
     <host>192.168.0.1</host>
     <port>80</port>
 </http>

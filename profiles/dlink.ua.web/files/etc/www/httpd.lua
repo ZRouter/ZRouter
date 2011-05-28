@@ -84,7 +84,7 @@ function start_server( c, config )
     print( "\nListening upon:" );
     print( "  http://" .. c:getNode("http.host"):value() .. ":" .. c:getNode("http.port"):value() .. "/" );
     print( "\n\n");
-
+--[[
     table.insert(r.tasks.countdown, { count=25, task=
 	function()
 	    print("task 0 ok"); 
@@ -109,6 +109,7 @@ function start_server( c, config )
 	    return (true); 
 	end 
     });
+]]
     --
     --  Loop accepting requests.
     --
@@ -177,43 +178,73 @@ function processConnection( c, config )
     -- from the client but didn't manage to find a HTTP header end.
     -- This should help protect us from DOSes.
     --
-    --client:settimeout(0.1);
+    -- client:settimeout(1);
+--    while ( true ) do
+--    	local data, err = client:receive("*l");
+--
+--	if not data then break end
+--
+--        request = request .. data .. "\r\n";
+--
+--	if data:len() <= 0 then break end
+--    end
+
+--    local request, err = client:receive("*a");
+
+
+--    size = request:len();
+--
+--    print("Rq: \"" .. request .. "\"");
+--
+--    position,len = request:find("\r\n\r\n");
+--    if ( position ~= nil )  then
+--        rq.RequestHeader = request:sub(0, position);
+--        rq.RequestBody   = request:sub(position+4);
+--        rq.RequestBodyLength = len-4;
+--    else
+--	-- Maybe we need say ERROR!!!!
+--	return (nil);
+--    end
+
+    rq.ContentLength = -1;
+    rq.RequestHeader = "";
+    i = 1;
     while ( true ) do
     	local data, err = client:receive("*l");
+    	--print(i, data or "(no data)", err or " . ");
+    	i = i + 1;
 
 	if not data then break end
 
-        request = request .. data .. "\r\n";
+	local match, _, len = data:find("Content%-Length: ([^:\r\n]+)");
+	if match then
+	    rq.ContentLength = tonumber(len);
+	end
+
+        rq.RequestHeader = rq.RequestHeader .. data .. "\r\n";
 
 	if data:len() <= 0 then break end
     end
 
-    size = request:len();
-
-    print("Rq: \"" .. request .. "\"");
-
-    position,len = request:find("\r\n\r\n");
---    print(position or "No match",len or "nope")
-    if ( position ~= nil )  then
-        rq.RequestHeader = request:sub(0, position);
-        rq.RequestBody   = request:sub(position+4);
-        rq.RequestBodyLength = len-4;
-    else
-	-- Maybe we need say ERROR!!!!
-	return (nil);
+    if rq.ContentLength >= 0 then
+	rq.RequestBodyLength = rq.ContentLength;
+	rq.RequestBody, err = client:receive(rq.RequestBodyLength);
     end
 
-
+    if err then
+	rq.RequestBodyLength = nil;
+	rq.RequestBody = nil;
+    end
 
     --
     --  OK We now have a complete HTTP request of 'size' bytes long
-    -- stored in 'request'.
+    -- stored in 'rq.RequestHeader'.
     --
     
     --
     -- Find the requested path.
     --
-    _, _, method, path, major, minor  = string.find(request, "([A-Z]+) (.+) HTTP/(%d).(%d)");
+    _, _, method, path, major, minor  = string.find(rq.RequestHeader, "([A-Z]+) (.+) HTTP/(%d).(%d)");
 
     --
     -- We only handle GET requests.
@@ -243,28 +274,28 @@ function processConnection( c, config )
     -- find the Virtual Host which we need for serving, and find the
     -- user agent and referer for logging purposes.
     --
-    _, _, rq.Host           = request:find( "Host: (.-)\r?\n");
-    _, _, rq.Agent          = request:find( "Agent: (.-)\r?\n");
-    _, _, rq.Referer        = request:find( "Referer: (.-)\r?\n");
+    _, _, rq.Host           = rq.RequestHeader:find( "Host: (.-)\r?\n");
+    _, _, rq.Agent          = rq.RequestHeader:find( "Agent: (.-)\r?\n");
+    _, _, rq.Referer        = rq.RequestHeader:find( "Referer: (.-)\r?\n");
 
-    _, _, rq.Accept         = request:find( "Accept: (.-)\r?\n");
-    _, _, rq.AcceptLanguage = request:find( "Accept%-Language: ([^:\r\n]+)");
-    _, _, rq.AcceptEncoding = request:find( "Accept%-Encoding: ([^:\r\n]+)");
-    _, _, rq.AcceptCharset  = request:find( "Accept%-Charset: ([^:\r\n]+)");
-    _, _, rq.ContentType    = request:find( "Content%-Type: ([^:\r\n]+)");
-    _, _, rq.ContentLength  = request:find( "Content%-Length: ([^:\r\n]+)");
-    _, _, rq.Authorization  = request:find( "Authorization: ([^:\r\n]+)");
+    _, _, rq.Accept         = rq.RequestHeader:find( "Accept: (.-)\r?\n");
+    _, _, rq.AcceptLanguage = rq.RequestHeader:find( "Accept%-Language: ([^:\r\n]+)");
+    _, _, rq.AcceptEncoding = rq.RequestHeader:find( "Accept%-Encoding: ([^:\r\n]+)");
+    _, _, rq.AcceptCharset  = rq.RequestHeader:find( "Accept%-Charset: ([^:\r\n]+)");
+    _, _, rq.ContentType    = rq.RequestHeader:find( "Content%-Type: ([^:\r\n]+)");
+    _, _, rq.ContentLength  = rq.RequestHeader:find( "Content%-Length: ([^:\r\n]+)");
+    _, _, rq.Authorization  = rq.RequestHeader:find( "Authorization: ([^:\r\n]+)");
 
-    for k,v in pairs(rq) do
-	print("k=\"" .. k .. "\", v=\"" .. v .. "\"");
-    end
+--    for k,v in pairs(rq) do
+--	print("k=\"" .. k .. "\", v=\"" .. v .. "\"");
+--    end
 
     rq.UserName = nil;
     rq.Password = nil;
     rq.Group    = nil;
     if rq.Authorization then
         local BasicAuth = "";
-        _, _, BasicAuth = string.find(request, "Basic ([^:\r\n]+)");
+        _, _, BasicAuth = string.find(rq.RequestHeader, "Basic ([^:\r\n]+)");
         if BasicAuth then
             local pair = b64dec(BasicAuth);
             _, _, _u, _p = string.find(pair, "(.-)%:(.*)");
@@ -296,7 +327,7 @@ function processConnection( c, config )
         client:close();
         code = "401";
     else
-        size, code = handleRequest( c, config, path, client, method, request, rq );
+        size, code = handleRequest( c, config, path, client, method, rq );
     end
 
 
@@ -320,7 +351,7 @@ end
 --
 --  Attempt to serve the given path to the given client
 --
-function handleRequest( c, config, path, client, method, request, rq )
+function handleRequest( c, config, path, client, method, rq )
     --
     -- Local file
     --
@@ -419,11 +450,10 @@ function handleRequest( c, config, path, client, method, request, rq )
         code, err = assert(loadstring(t));
         if not code then
             t = sendError( 500, "Error \"".. err .."\" when parse " .. urlEncode(path));
-            retcode = "500"
+            retcode = "500";
         else
             t = code();
         end
---        print(t or "(no output)", retcode or "");
     end
     client:send(t);
     client:close();
@@ -438,7 +468,6 @@ function evalembeded(s)
 
     match, _, code = string.find(s, "^code%:(.*)$");
     if match then
---      print("Eval code \"" .. code .. "\"");
         local func, err = loadstring("return " .. code);
         if not func then
             return err;
@@ -661,8 +690,8 @@ else
     --  The global MIME types file does not exist.
     --  Setup minimal defaults.
     --
-    print( "WARNING: /etc/mime.types could not be read." );
-    print( "         Running with minimal MIME types." );
+--    print( "WARNING: /etc/mime.types could not be read." );
+--    print( "         Running with minimal MIME types." );
 
     -- TODO: lua scripts can be able to set content type
     mime[ "lua" ]  = "text/html";
@@ -797,6 +826,19 @@ function configure_wan(c)
 		local dhcp = c:getNode(path .. ".dhcp");
 		local dev = c:getNode(path .. ".device"):value();
 
+    		local query = "cmd=event";
+        	query = query .. "&eventtype=linkup";
+        	query = query .. "&iface=" .. 	urlEncode(dev);
+        	query = query .. "&gw=" .. 	urlEncode(c:getNode(path .. ".gateway"):value());
+        	query = query .. "&ip=" .. 	urlEncode(c:getNode(path .. ".ipaddr"):value());
+        	query = query .. "&netmask=" .. urlEncode(c:getNode(path .. ".ipaddr"):value());
+    		query = query .. "&dns1=" .. 	urlEncode(c:getNode(path .. ".dns1"):value());
+    		query = query .. "&dns2=" .. 	urlEncode(c:getNode(path .. ".dns2"):value());
+
+		-- Call collector, to let him know about static config, and assign route+dns's
+    		print("fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"");
+    		os.execute("fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"");
+
 		-- Config static first
 		local ip = c:getNode(path .. ".ipaddr"):value();
 		print("Run: \"ifconfig " .. dev .. " " .. ip .. "\"");
@@ -808,7 +850,7 @@ function configure_wan(c)
 		    print(path .. ".dhcp:attr(enable)=" .. dhcp:attr("enable"));
 		    -- Run dhclient
 		    print("Run dhclient on " .. dev);
-		    os.execute("mkdir /var/db/");
+		    os.execute("mkdir -p /var/db/");
 		    os.execute(string.format("/sbin/dhclient %s", dev));
 		end
 	    else

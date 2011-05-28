@@ -81,7 +81,7 @@ function process(q, queryline)
 	    local iface = q["iface"];
 
 	    if not iface then
-		return ("ERROR: Interface not defined");
+		return ("collector.lua: ERROR: Interface not defined");
 	    end
 
 	    if type(r[iface]) ~= "table" then r[iface] = {}; end
@@ -91,6 +91,29 @@ function process(q, queryline)
 	    for k,v in pairs(q) do
 		if (k ~= "iface") and (k ~= "cmd") then
 		    r[iface][k] = v;
+		end
+	    end
+	    if q["eventtype"] == "linkup" then
+		-- XXX: should not be here
+		-- XXX: must check exit code
+		exitcode = os.execute(
+		    "route change default -iface " .. iface .." > /dev/null 2>&1 || " ..
+		    "route add default -iface " .. iface .." > /dev/null 2>&1"
+		);
+		local dns = {};
+		if q["dns1"] and q["dns1"]:len() >= 7 then
+		    table.insert(dns, q["dns1"]);
+		end
+		if q["dns2"] and q["dns2"]:len() >= 7 then
+		    table.insert(dns, q["dns2"]);
+		end
+		if table.getn(dns) > 0 then
+		    resolv_conf = io.open("/etc/resolv.conf", "w");
+		    for i,v in ipairs(dns) do
+			-- print("nameserver	" .. v);
+			resolv_conf:write("nameserver	" .. v .. "\n");
+		    end
+		    resolv_conf:close();
 		end
 	    end
 
@@ -122,7 +145,16 @@ end
 
 function call_server(http, q)
     local query = "http://127.0.0.1:80/event.xml?" .. q;
-    local body, headers, code = http.get(url);
+
+    local body, code, headers = http.request(query);
+
+    --[[
+    print("http.request(" .. query ..") ",
+	body or "(no body)",
+	headers or "(no headers)",
+	code or "(no code)"
+	);
+    ]]
 
     if code == 200 then
 	return (true);
@@ -159,12 +191,12 @@ dofile("lib/pidfile.lua");
 pidfile(opts["-P"]);
 
 socket = require("socket");
-http = require("socket.http")
+http = require("socket.http");
 server = assert(socket.bind(host, port));
 server:settimeout(5);
 
+
 while 1 do
---    print("server: waiting for client connection...");
     local method, path, query, major, minor;
 
     local control = server:accept();
@@ -183,9 +215,6 @@ while 1 do
     		break;
     	    end
 	end
-
-
-
 
 	if query then
 	    local q = parse_query(query);
@@ -206,18 +235,14 @@ while 1 do
 
     local n = table.getn(queue);
     if n > 0 then
-	for i = 1,n do
-	    if not queue[i].handled then
-		print("Will send " .. queue[i].query .. " to main server");
-		if (call_server(http, queue[i].query)) then
+	for i = n,1,-1 do
+	    if queue[i].handled ~= true then
+		-- print("queue[" .. i .. "] Will send " .. queue[i].query .. " to main server");
+		if (call_server(http, queue[i].query) == true) then
+		    -- print("queue[" .. i .. "] Will delete " .. queue[i].query .. " from queue");
 		    queue[i].handled = true;
+		    table.remove(queue, i);
 		end
-	    end
-	end
-	for k,v in ipairs(queue) do
-	    if queue[k].handled then
-		print("Will delete " .. queue[k].query .. " from queue");
-		queue[k] = nil;
 	    end
 	end
     end

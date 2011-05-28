@@ -10,20 +10,22 @@ function process()
 	if not path then
 	    return ("path missing");
 	end
+	-- print(rq.RequestBody);
 
 	-- if name like "sm:key" do c:getNode(path .. "key"):value(rq.POST["value"]);
 	-- if name like "smattr:key:attr" do c:getNode(path .. "key"):attr("attr", rq.POST["value"]);
 	for k,v in pairs(rq.POST) do
 	    attr, _, subpath, attrname = string.find(k, "^smattr:(.-):(.*)");
+	    if not v then v = ""; end
 	    if (attr) then
 		if string.len(subpath) > 0 then
 		    subpath = path .. "." .. subpath;
 		else
 		    subpath = path;
 		end
-		print(string.format("<%s %s=\"%s\">", subpath, attrname, v));
+--		print(string.format("<%s %s=\"%s\">", subpath, attrname, v));
 		c:getNode(subpath):attr(attrname, v);
-		print("newval=" .. c:getNode(subpath):attr(attrname));
+		print(subpath .." ".. attrname .. " newval=" .. c:getNode(subpath):attr(attrname));
     	    elseif string.find(k, "^sm:") then
     		_, _, subpath = string.find(k, "^sm:(.*)");
 		if string.len(subpath) > 0 then
@@ -31,12 +33,14 @@ function process()
 		else
 		    subpath = path;
 		end
-		c:getNode(subpath):value(v);
+--		print(subpath .. " try set val=\"" .. (v or "") .. "\"");
+		c:getNode(subpath):value(v or "");
+		print(subpath .. " newval=" .. c:getNode(subpath):value());
     	    end
 	end
 	return ("OK");
     elseif rq.POST["save"] == "config" then
-	print("try to save savetest.xml");
+	print("try to save config.xml");
 	if not save_file("config.xml", xmldump(c:gettree())) then
 	    return ("Error saving configuration");
 	end

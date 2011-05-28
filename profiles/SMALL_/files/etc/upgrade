@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# XXX: Should be in some plase like /etc/rc.conf
+# D-Link_DIR-620-0.1-ALPHA.9ced6c669eb1da9e67c0fd2024058159.zimage
+VENDOR=D-Link
+#HWNAME=DIR-620_A1
+HWNAME=DIR-620
+CURRENT_VERSION=0.1
+CURRENT_RELEASE=ALPHA
+
 URL=$1
 DEVICE=/dev/map/upgrade
 FWFILE=/tmp/fw.img
@@ -20,7 +28,7 @@ DEVICEBLKS=$((${DEVICESIZE} / ${BLOCK_SIZE} / 1024))
 
 for p in collector.sh.pid collector.pid dhcpd.pid hostapd.pid httpd.sh.pid httpd.pid ; do
     echo "Kill ${p}"
-    kill `cat /var/run/${p}` 2&>1 > /dev/null
+    kill `cat /var/run/${p}` > /dev/null 2>&1
     # XXX: collector and httpd can't remove thier pid's (yet)
     rm -f /var/run/${p}
 done
@@ -28,7 +36,7 @@ done
 
 cd /tmp
 rm -f ${FWFILE}
-echo "Fetching new image from "
+echo "Fetching new image from $1"
 fetch -o ${FWFILE} "$1" || exit 1
 
 lsline=`ls -l ${FWFILE}`
@@ -40,6 +48,14 @@ if [ ${size} -gt ${DEVICESIZE} ]; then
 fi
 
 # TODO: image check here
+SRCMD5=`echo "$1" | sed -E "s/^${VENDOR}\_${HWNAME}\-[[:digit:]]+\.[[:digit:]]+\-[[:alnum:]]+\.//; s/\.zimage$//"`
+arg4() echo $4; MD5=`arg4 \`md5 ${FWFILE}\``;
+
+if [ "${SRCMD5}" != "${MD5}" ]; then
+	echo "Checksum mismatch, upgrade aborted";
+	# XXX: Better to restore services
+	reboot;
+fi
 
 # XXX: readonly for now
 sysctl hw.cfi.rdonly=0
@@ -47,7 +63,7 @@ sysctl hw.cfi.rdonly=0
 killall mpd
 for p in dhclient.pid mpd.pid ; do
     echo "Kill ${p}"
-    kill `cat /var/run/${p}` 2&>1 > /dev/null
+    kill `cat /var/run/${p}` > /dev/null 2>&1
     # XXX: collector and httpd can't remove thier pid's (yet)
     rm -f /var/run/${p}
 done
