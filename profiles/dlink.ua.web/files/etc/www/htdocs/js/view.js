@@ -21,7 +21,7 @@ config_list[0] = ["Save Configuration",				"#", "tryget('save=config')"];
 
 function tryget(msg)
 {
-	ajax("POST", "/test.xml", msg + "&r=" + encodeURIComponent(Math.random()), true, 
+	ajax("POST", "/cmd.xml", msg + "&r=" + encodeURIComponent(Math.random()), true, 
 	    function (x) {
 		window.alert(x.responseXML.getElementsByTagName("data")[0].firstChild.nodeValue);
 	    }

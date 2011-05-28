@@ -1,12 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-    <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Internet connections configuration</title>
-	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
-	<link href="css/anim.css" rel="stylesheet" type="text/css">
-    </head>
-    <body class="yui3-skin-sam  yui-skin-sam">
+$$$code:inc("htdocs/header.html")$$$
+
     <h1>LAN configuration</h1>
 
 <div id="Static" class="yui3-module boxitem">
@@ -26,7 +19,7 @@
 function send_update(form)
 {
     var query = getValuesAsArray(form);
-    ajax("POST", "/cmd.xml", query, true, function (x) { });
+    ajax("POST", "/cmd.xml", query, true, function (x) {});
 
     return false;
 }
@@ -35,12 +28,10 @@ function send_update(form)
 <div id="PPPoE" class="yui3-module boxitem">
     <div class="yui3-hd">
         <h4>DHCPD</h4>
-        <h4 class="status"></h4>
     </div>
     <div class="yui3-bd">
-	<!-- form method="POST" target="/test.lua" onsubmit="send_update(this)" -->
 	<form method="POST" target="/cmd.xml">
-	    <input type="hidden" name="path" value="dhcpd.instances.instance[1]" />
+	    <input type="hidden" name="path" value="interfaces.PPP" />
 	    <input type="hidden" name="cmd" value="setmany" />
 	<table>
             <tr>
@@ -73,5 +64,5 @@ function send_update(form)
 </div>
 
 
-</body>
-</html>
+$$$code:inc("htdocs/footer.html")$$$
+

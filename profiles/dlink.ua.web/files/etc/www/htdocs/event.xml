@@ -24,13 +24,12 @@ function process()
 	return (c:getNode(rq.GET["key"]):value());
 
     elseif rq.GET["cmd"] == "event" then
-
---        if rq.GET["eventtype"] == "linkup" then
+	    print(rq.RequestHeader);
 
 	    local iface = rq.GET["iface"];
 
 	    if not iface then
-		return ("ERROR: Interface not defined");
+		return ("event.lua: ERROR: Interface not defined");
 	    end
 
 	    if type(r[iface]) ~= "table" then r[iface] = {}; end
@@ -41,14 +40,6 @@ function process()
 		end
 	    end
 
-
---	    r[iface]["eventtype"] = "linkup";
---	    r[iface]["gw"] = rq.GET["gw"] or "";
---	    r[iface]["dns1"] = rq.GET["dns1"] or "";
---	    r[iface]["dns2"] = rq.GET["dns2"] or "";
-
---	end
-
 	return "OK";
 
     elseif rq.GET["cmd"] == "revent" then
@@ -57,11 +48,6 @@ function process()
 
 	if r[iface] then
 	    return (tdump(r[iface]));
---	    return (
---		"eventtype=" .. (r[iface]["eventtype"] or "") ..
---		" gw="       .. (r[iface]["gw"       ] or "") ..
---		" dns1="     .. (r[iface]["dns1"     ] or "") ..
---		" dns2="     .. (r[iface]["dns2"     ] or ""));
 	else
 	    return ("ERROR: no data for interface " .. iface);
 	end

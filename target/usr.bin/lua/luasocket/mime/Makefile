@@ -1,18 +1,14 @@
 
-NAME=mime
 CDIR=${.CURDIR}/../../../../../contrib/luasocket/src
 .PATH: ${CDIR}/
 
+NAME=		mime
+SRCS=		mime.c
 CFLAGS+=	-I${CDIR}
 CFLAGS+=	-I${.CURDIR}/../../lua/
+SHLIB_NAME= 	${NAME}-core.so
+LIBDIR?= 	/usr/lib/lua
 
 NO_MAN=
-
-SRCS=		mime.c
-
-#INCS=		
-
-SHLIB_NAME= 	${NAME}-core.so
-LIBDIR?= /usr/lib/lua
 
 .include <bsd.lib.mk>

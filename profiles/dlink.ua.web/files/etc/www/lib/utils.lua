@@ -111,10 +111,14 @@ function read_file(_file)
     if f then
       xml = f:read("*a")
     else 
-      error(e)
+      return ("Can't open file " .. _file);
     end
 
     return xml;
+end
+
+function inc(_file)
+    return read_file(_file);
 end
 
 function load_file(_file)
@@ -154,4 +158,84 @@ function field(v)
     end
     return "";
 end
+
+function conf_table(id, header, rootpath, fields)
+
+	local ret = 
+		"<div id=\"" .. id .. "\" class=\"yui3-module boxitem\">\n" ..
+		"    <div class=\"yui3-hd\">\n" ..
+		"        <h4>" .. header .."</h4>\n" ..
+		"    </div>\n" ..
+		"    <div class=\"yui3-bd\">\n" ..
+		"	<form method=\"POST\" target=\"/cmd.xml\">\n" ..
+		"	    <input type=\"hidden\" name=\"path\" value=\"" .. rootpath .."\" />\n" ..
+		"	    <input type=\"hidden\" name=\"cmd\" value=\"setmany\" />\n" ..
+		"	<table>\n";
+
+
+	for i,v in ipairs(fields) do
+	    if v.type == "attr" then
+		local _, _, nodestr, attrstr = string.find(v.node, "(.-)%:(.*)");
+
+		print(string.format("node='%s' attr='%s'", nodestr or "(no node)", attrstr or "(no attr)"));
+
+		if not nodestr then
+		    nodestr = rootpath;
+		else
+		    nodestr = rootpath .. "." .. nodestr;
+		end
+
+		if not attrstr then
+		    ret = ret .. "Error parsing attr fileld at path " .. v.node;
+		else
+
+		attrvalue = c:getNode(nodestr):attr(attrstr) or "Error getting attribute value of " .. nodestr .. ":attr(" .. attrstr .. ")";
+		ret = ret ..
+		"            <tr>\n" ..
+		"        	<td>" .. v.label .. ":</td>\n" ..
+		"        	<td><input name=\"smattr:" .. v.node .. "\" type=\"" .. v.htmltype .. "\" " ..
+				    checked(attrvalue) ..
+				    "></td>\n" ..
+		"    	     </tr>\n";
+		end
+	    elseif v.type == "node" then
+		local nodestr = v.node;
+		if not nodestr then
+		    nodestr = rootpath;
+		else
+		    nodestr = rootpath .. "." .. nodestr;
+		end
+
+		local n = c:getNode(nodestr);
+
+		print("value=\"" ..tostring(n:value()) .. "\"");
+		if n then
+		    nodevalue = n:value() or "";
+		else
+		    nodevalue = "Error: node \"" .. nodestr .. "\" not found";
+		end
+
+		ret = ret ..
+		"            <tr>\n" ..
+		"        	<td>" .. v.label .. ":</td>\n" ..
+		"    		<td><input type=\"" .. v.htmltype .. "\" name=\"sm:" .. v.node .. "\" value=\"" ..
+				    nodevalue ..
+				    "\"/></td>\n" ..
+		"            </tr>\n";
+	    end
+	end
+
+	ret = ret ..
+		"            <tr>\n" ..
+		"        	<td>&nbsp;</td>\n" ..
+		"        	<td><input type=\"button\" name=\"Update\" value=\"Update\" onclick=\"send_update(this.form)\"/></td>\n" ..
+		"            </tr>\n" ..
+		"	</table>\n" ..
+		"	</form>\n" ..
+		"    </div>\n" ..
+		"</div>\n";
+
+	return (ret);
+end
+
 

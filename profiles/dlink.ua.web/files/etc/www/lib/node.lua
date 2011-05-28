@@ -30,24 +30,33 @@ function Node:attr(attr, value)
 	    self.node._attr[attr] = value;
 	    return (true);
 	else
-	    return (self.node._attr[attr]);
+	    return (self.node._attr[attr] or "");
 	end
     end
     return (nil);
 end
 
-function Node:value(value)
+function Node:value(_value)
     if self.node._children and 
 	self.node._children[1] and
 	self.node._children[1]._text then
 
-	if value then
-	    self.node._children[1]._text = value;
+	if _value then
+	    self.node._children[1]._text = _value;
 	    return (true);
 	else
-	    return (self.node._children[1]._text);
+	    return (self.node._children[1]._text or "");
 	end
+
     end
+
+    if _value then
+	if not self.node._children then
+	    self.node._children = {};
+	end
+	table.insert(self.node._children, { _text = _value });
+    end
+
     return (nil);
 end
 

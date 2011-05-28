@@ -7,8 +7,8 @@ MPDDIR=${.CURDIR}/../../../contrib/mpd
 
 CFLAGS+=	-I${MPDDIR}
 
-PROG=	mpd
-NO_MAN=	mpd.8
+PROG=		mpd
+NO_MAN=		mpd.8
 
 PREFIX?=		/
 BINDIR?=		${PREFIX}/sbin
@@ -66,61 +66,61 @@ COPTS+=			-DPROTO_NAME_LIST
 
 .if defined ( MPD_USE_TCP_WRAP )
 ## filter TCP accept connections
-LDADD+=		-lwrap
-DPADD+=		${LIBWRAP}
-COPTS+=		-DUSE_WRAP
+LDADD+=			-lwrap
+DPADD+=			${LIBWRAP}
+COPTS+=			-DUSE_WRAP
 .endif
 
 ## authentication methods: opie, pam, /etc/password
 .if defined ( MPD_USE_AUTH_OPIE )
-LDADD+=		-lopie
-DPADD+=		${LIBOPIE}
-COPTS+=		-DUSE_OPIE
+LDADD+=			-lopie
+DPADD+=			${LIBOPIE}
+COPTS+=			-DUSE_OPIE
 .endif
 
 .if defined ( MPD_USE_AUTH_PAM )
-LDADD+=		-lpam
-DPADD+=		${LIBPAM}
-COPTS+=		-DUSE_PAM
+LDADD+=			-lpam
+DPADD+=			${LIBPAM}
+COPTS+=			-DUSE_PAM
 .endif
 
 .if defined ( MPD_USE_AUTH_SYSTEM )
 ## based on /etc/password
-LDADD+=		-lcrypt -lutil
-DPADD+=		${LIBCRYPT} ${LIBUTIL}
-COPTS+=		-DUSE_SYSTEM
+LDADD+=			-lcrypt -lutil
+DPADD+=			${LIBCRYPT} ${LIBUTIL}
+COPTS+=			-DUSE_SYSTEM
 .endif
 
-LDADD+=		-lnetgraph
-DPADD+=		${LIBNETGRAPH}
+LDADD+=			-lnetgraph
+DPADD+=			${LIBNETGRAPH}
 
-LDADD+=		-lradius
-DPADD+=		${LIBRADIUS}
+LDADD+=			-lradius
+DPADD+=			${LIBRADIUS}
 
-LDADD+=		-lssl
-DPADD+=		${LIBSSL}
+LDADD+=			-lssl
+DPADD+=			${LIBSSL}
 
-MPD_VERSION=	mpd-${VERSION}
+MPD_VERSION=		mpd-${VERSION}
 
-COPTS+=		-DPATH_CONF_DIR=\"${MPD_CONF_DIR}\"
-COPTS+=		-DSYSLOG_FACILITY=${SYSLOG_FACILITY}
-COPTS+=		-DMPD_VERSION='"${MPD_VERSION}"'
+COPTS+=			-DPATH_CONF_DIR=\"${MPD_CONF_DIR}\"
+COPTS+=			-DSYSLOG_FACILITY=${SYSLOG_FACILITY}
+COPTS+=			-DMPD_VERSION='"${MPD_VERSION}"'
 #COPTS+=		-g
-COPTS+=		-Wall \
-		-Wcast-align \
-		-Wchar-subscripts \
-		-Wformat \
-		-Winline \
-		-Wmissing-declarations \
-		-Wmissing-prototypes \
-		-Wnested-externs \
-		-Wpointer-arith \
-		-Wwrite-strings \
-		-pthread \
-		-I${PREFIX}/include
+COPTS+=			-Wall \
+			-Wcast-align \
+			-Wchar-subscripts \
+			-Wformat \
+			-Winline \
+			-Wmissing-declarations \
+			-Wmissing-prototypes \
+			-Wnested-externs \
+			-Wpointer-arith \
+			-Wwrite-strings \
+			-pthread \
+			-I${PREFIX}/include
 
 .if defined ( MPD_VENDOR )
-COPTS+=		'-DMPD_VENDOR="${MPD_VENDOR}"'
+COPTS+=			'-DMPD_VENDOR="${MPD_VENDOR}"'
 .endif
 
 # Standard sources

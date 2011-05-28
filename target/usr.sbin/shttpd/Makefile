@@ -4,20 +4,18 @@
 
 .PATH: ${.CURDIR}/../../../contrib/shttpd/src
 
-#CFLAGS+=	-I${MPDDIR}
+PROG=		shttpd
+MAN=		shttpd.1
 
-PROG=	shttpd
-MAN=	shttpd.1
-
-PREFIX?=		/
-BINDIR?=		${PREFIX}/sbin
-VERSION=		5.6a1
+PREFIX?=	/
+BINDIR?=	${PREFIX}/sbin
+VERSION=	5.6a1
 
 LDADD+=		-lpthread
 DPADD+=		${LIBPTHREAD}
 
 CFLAGS+=	-g -I${.CURDIR}/../../../contrib/shttpd/src
-SRCS+= \
+SRCS+= 		\
 	string.c \
 	shttpd.c \
 	log.c \
@@ -33,9 +31,5 @@ SRCS+= \
 	io_cgi.c \
 	compat_unix.c \
 	standalone.c
-
-
-
-
 
 .include <bsd.prog.mk>

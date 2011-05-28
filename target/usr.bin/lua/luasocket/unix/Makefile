@@ -1,14 +1,11 @@
 
-NAME=unix
 CDIR=${.CURDIR}/../../../../../contrib/luasocket/src
 .PATH: ${CDIR}/
 
-CFLAGS+=	-I${CDIR}
-CFLAGS+=	-I${.CURDIR}/../../lua/
-
-NO_MAN=
-
-SRCS=	\
+NAME=		unix
+SHLIB_NAME= 	${NAME}-core.so
+LIBDIR?= 	/usr/lib/lua
+SRCS=		\
 	buffer.c \
 	auxiliar.c \
 	options.c \
@@ -17,9 +14,11 @@ SRCS=	\
 	usocket.c \
 	unix.c
 
-#INCS=		
+CFLAGS+=	-I${CDIR}
+CFLAGS+=	-I${.CURDIR}/../../lua/
 
-SHLIB_NAME= 	${NAME}-core.so
-LIBDIR?= /usr/lib/lua
+NO_MAN=
+
+
 
 .include <bsd.lib.mk>
