@@ -39,6 +39,14 @@ PREINSTALLDIRS=/lib
 .endif
 
 
+build-info:
+	@echo "++++++++++++++ Selected settings for building ++++++++++++++"
+	@echo "Device: ${TARGET_DEVICE}"
+	@echo "Vendor: ${TARGET_VENDOR}"
+	@echo "SoC Chip: ${SOC_CHIP}"
+	@echo "SoC Vendor: ${SOC_VENDOR}"
+	@echo
+
 basic-tools:
 	ZROUTER_ROOT=${ZROUTER_ROOT} MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -f ${ZROUTER_ROOT}/Makefile.tools
 
@@ -324,7 +332,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
-all:	world kernel ports
+all:	build-info world kernel ports
 IMAGE_SUFFIX?=trx
 ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
@@ -407,7 +415,7 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
+${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	build-info kernel-build
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
 
