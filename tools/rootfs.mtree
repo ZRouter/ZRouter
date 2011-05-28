@@ -347,6 +347,7 @@
 
         bin             type=dir
             basename       
+            bsdgrep        
             bsdtar         
             crontab        
             dirname        
@@ -356,7 +357,7 @@
             fgrep          type=link
             find           
             getopt         
-            grep           
+            grep           type=link
             groups         type=link
             head           
             hex2bin        

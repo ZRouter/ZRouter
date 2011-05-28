@@ -388,11 +388,12 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	cd ${NEW_ROOTFS}/usr/bin/ ; \
 	 ln -sf id groups ; \
 	 ln -sf id whoami ; \
-	 ln -sf grep egrep ; \
-	 ln -sf grep fgrep ; \
-	 ln -sf grep zgrep ; \
-	 ln -sf grep zegrep ; \
-	 ln -sf grep zfgrep ; \
+	 ln -sf bsdgrep grep ; \
+	 ln -sf bsdgrep egrep ; \
+	 ln -sf bsdgrep fgrep ; \
+	 ln -sf bsdgrep zgrep ; \
+	 ln -sf bsdgrep zegrep ; \
+	 ln -sf bsdgrep zfgrep ; \
 	 ln -sf ssh slogin ; \
 	 ln -sf vi nvi ; \
 	 ln -sf vi ex ; \
