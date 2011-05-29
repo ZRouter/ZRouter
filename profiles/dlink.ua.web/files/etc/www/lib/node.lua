@@ -54,7 +54,7 @@ function Node:value(_value)
 	if not self.node._children then
 	    self.node._children = {};
 	end
-	table.insert(self.node._children, { _text = _value });
+	table.insert(self.node._children, { _text = _value, _type = "TEXT" });
     end
 
     return (nil);
