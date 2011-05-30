@@ -190,11 +190,19 @@ function conf_table(id, header, rootpath, fields)
 		else
 
 		attrvalue = c:getNode(nodestr):attr(attrstr) or "Error getting attribute value of " .. nodestr .. ":attr(" .. attrstr .. ")";
+		local inserted = "";
+		if v.htmltype == "checkbox" then
+		    inserted = checked(attrvalue);
+		elseif v.htmltype == "text" then
+		    inserted = " value=\"" .. attrvalue .. "\"";
+		else
+		    inserted = "Unknown htmltype " .. v.htmltype;
+		end
 		ret = ret ..
 		"            <tr>\n" ..
 		"        	<td>" .. v.label .. ":</td>\n" ..
 		"        	<td><input name=\"smattr:" .. v.node .. "\" type=\"" .. v.htmltype .. "\" " ..
-				    checked(attrvalue) ..
+				    inserted ..
 				    "></td>\n" ..
 		"    	     </tr>\n";
 		end

@@ -286,10 +286,6 @@ function processConnection( c, config )
     _, _, rq.ContentLength  = rq.RequestHeader:find( "Content%-Length: ([^:\r\n]+)");
     _, _, rq.Authorization  = rq.RequestHeader:find( "Authorization: ([^:\r\n]+)");
 
---    for k,v in pairs(rq) do
---	print("k=\"" .. k .. "\", v=\"" .. v .. "\"");
---    end
-
     rq.UserName = nil;
     rq.Password = nil;
     rq.Group    = nil;
@@ -446,7 +442,7 @@ function handleRequest( c, config, path, client, method, rq )
         t = string.gsub(t, "%$%$%$(.-)%$%$%$", function (s) if not s then return; end return evalembeded(s) end);
 
     -- Eval Lua code
-    elseif (ext == "lua") or (ext == "xml") then
+    elseif (ext == "lua") or (ext == "xml") or (ext == "dat") then
         code, err = assert(loadstring(t));
         if not code then
             t = sendError( 500, "Error \"".. err .."\" when parse " .. urlEncode(path));
@@ -696,14 +692,15 @@ else
     -- TODO: lua scripts can be able to set content type
     mime[ "lua" ]  = "text/html";
     mime[ "xml" ]  = "application/xml";
-    mime[ "html" ]  = "text/html";
-    mime[ "txt"  ]  = "text/plain";
-    mime[ "js"   ]  = "text/plain";
-    mime[ "css"  ]  = "text/css";
-    mime[ "jpg"  ]  = "image/jpeg";
-    mime[ "jpeg" ]  = "image/jpeg";
-    mime[ "gif"  ]  = "image/gif";
-    mime[ "png"  ]  = "image/png";
+    mime[ "html"]  = "text/html";
+    mime[ "txt" ]  = "text/plain";
+    mime[ "js"  ]  = "text/plain";
+    mime[ "css" ]  = "text/css";
+    mime[ "jpg" ]  = "image/jpeg";
+    mime[ "jpeg"]  = "image/jpeg";
+    mime[ "gif" ]  = "image/gif";
+    mime[ "png" ]  = "image/png";
+    mime[ "dat" ]  = "application/octet-stream";
 end
 
 function checkIface(name)

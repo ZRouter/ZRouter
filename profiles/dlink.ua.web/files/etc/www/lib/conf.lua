@@ -23,6 +23,10 @@ function Conf:getNode(path)
 	end
 
 	match, _, name, _, rpath = string.find(lpath, "^([%w%_%-%[%]]+)(%.*)(%S*)$");
+	if not match then
+	    print("Wrong lpath " .. lpath);
+	    return (nil);
+	end
 
 	rmatch, _, idname, id = string.find(name, "^([%w%_%-]+)%[(%d+)%]$");
 	if rmatch then
