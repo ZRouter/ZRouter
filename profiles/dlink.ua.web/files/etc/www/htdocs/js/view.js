@@ -11,13 +11,14 @@ function check()
 }
 
 var tool_list = new Array();
-tool_list[0] = ["Administration Settings", 			"?page=tool_admin.html"];
-tool_list[1] = ["Firmware and SSL Certification Upload", 	"?page=tool_fw.html"];
-tool_list[2] = ["Configuration File", 				"?page=tool_config.html"];
-tool_list[3] = ["Time and Date", 				"?page=tool_sntp.html"];
+tool_list[0] = ["Reboot",				"#", "tryget('system=reboot')"];
+//tool_list[1] = ["Configuration File", 				"?page=tool_config.html"];
+//tool_list[1] = ["Firmware and SSL Certification Upload", 	"?page=tool_fw.html"];
+//tool_list[3] = ["Time and Date", 				"?page=tool_sntp.html"];
 
 var config_list = new Array();
 config_list[0] = ["Save Configuration",				"#", "tryget('save=config')"];
+config_list[1] = ["Load Configuration (-)",				"#", "tryget('load=config')"];
 
 function tryget(msg)
 {

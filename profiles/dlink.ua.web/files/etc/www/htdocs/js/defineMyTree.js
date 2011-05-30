@@ -29,12 +29,14 @@ var foldersTree = gHeader(deviceType, "/home_sys.html");
 var aux1, aux2;
 
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Basic Settings </font>", ""));
-insDoc(aux1, gLnk("R","&nbsp;Internet", "/wan.html"));
-insDoc(aux1, gLnk("R","&nbsp;Wireless", "/wlan.html"));
-insDoc(aux1, gLnk("R","&nbsp;LAN", "/lan.html"));
+insDoc(aux1, gLnk("R","&nbsp;Internet", "/Basic.wan.html"));
+insDoc(aux1, gLnk("R","&nbsp;Wireless", "/Basic.wlan.html"));
+insDoc(aux1, gLnk("R","&nbsp;LAN", "/Basic.lan.html"));
 
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Administration </font>", ""));
-insDoc(aux1, gLnk("R","&nbsp;Users", "/users.html"));
+insDoc(aux1, gLnk("R","&nbsp;Device Info", "/Administration.info.html"));
+insDoc(aux1, gLnk("R","&nbsp;Users", "/Administration.users.html"));
+insDoc(aux1, gLnk("R","&nbsp;Firmware", "/Administration.firmware.html"));
 
 //aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Advanced Settings </font>", ""));
 //insDoc(aux1, gLnk("R","&nbsp;Performance", "/home_sys.html?page=adv_perf.html"));

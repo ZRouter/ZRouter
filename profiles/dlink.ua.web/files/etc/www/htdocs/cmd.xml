@@ -1,11 +1,21 @@
 function process()
 
     if rq.POST["cmd"] == "get" then
+
 	return (c:getNode(rq.POST["key"]):value());
+
     elseif rq.POST["cmd"] == "set" then
+
 	c:getNode(rq.POST["key"]):value(rq.POST["value"]);
 	return (c:getNode(rq.POST["key"]):value());
+
+    elseif rq.POST["cmd"] == "upload_config" then
+
+	print(tdump(rq.POST));
+	return ("OK");
+
     elseif rq.POST["cmd"] == "setmany" then
+
 	path = rq.POST["path"];
 	if not path then
 	    return ("path missing");
@@ -39,7 +49,9 @@ function process()
     	    end
 	end
 	return ("OK");
+
     elseif rq.POST["save"] == "config" then
+
 	print("try to save config.xml");
 	if not save_file("config.xml", xmldump(c:gettree())) then
 	    return ("Error saving configuration");
@@ -48,10 +60,27 @@ function process()
 	    return ("Error saving configuration block to flash");
 	end
 	return ("Configuration saved successful");
+
+    elseif rq.POST["system"] == "reboot" then
+
+	print("Reboot device");
+	if os.execute("/sbin/reboot &") ~= 0 then
+	    return ("Error when try to execute /sbin/reboot");
+	end
+	return ("Reboot in progress");
+
+    else
+
+	print(tdump(rq));
+--	print(tdump(rq.POST));
+	return ("Unknow command");
+
     end
 end
 
-return ([[
+
+
+    return ([[
 <?xml version="1.0" encoding="utf-8" ?>
 <data>
 ]] ..
@@ -59,3 +88,5 @@ process() ..
 [[
 </data>
 ]]);
+
+
