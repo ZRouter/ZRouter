@@ -48,8 +48,13 @@ if [ ${size} -gt ${DEVICESIZE} ]; then
 fi
 
 # TODO: image check here
-SRCMD5=`echo "$1" | sed -E "s/^${VENDOR}\_${HWNAME}\-[[:digit:]]+\.[[:digit:]]+\-[[:alnum:]]+\.//; s/\.zimage$//"`
+SRCMD5=`echo "$1" | sed -E "s/^.*\/${VENDOR}\_${HWNAME}\-[[:digit:]]+\.[[:digit:]]+\-[[:alnum:]]+\.//; s/\.zimage$//"`
 arg4() echo $4; MD5=`arg4 \`md5 ${FWFILE}\``;
+
+echo "Orig MD5=${SRCMD5}"
+echo "Actl MD5=${MD5}"
+set
+
 
 if [ "${SRCMD5}" != "${MD5}" ]; then
 	echo "Checksum mismatch, upgrade aborted";
@@ -57,7 +62,6 @@ if [ "${SRCMD5}" != "${MD5}" ]; then
 	reboot;
 fi
 
-# XXX: readonly for now
 sysctl hw.cfi.rdonly=0
 
 killall mpd
@@ -71,7 +75,7 @@ echo "Update /dev/md0 mount to sync mode"
 mount -u -o sync /dev/md0 /tmp
 echo "Flashing new Firware image"
 # -V don't verify, -S don't sync
-upgrade -f ${FWFILE} -S -d ${DEVICE}
+upgrade -f ${FWFILE} -d ${DEVICE}
 echo '.'
 
 #echo f9 > /dev/led/status

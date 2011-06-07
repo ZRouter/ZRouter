@@ -14,6 +14,11 @@ function process()
 	print(tdump(rq.POST));
 	return ("OK");
 
+    elseif rq.POST["cmd"] == "upgrade" then
+
+	os.execute("LAST=`fetch -o - " .. c:getNode("info.firmware.update_url"):value() .."` ; /etc/upgrade ${LAST} > /dev/console 2>&1");
+	return ("OK");
+
     elseif rq.POST["cmd"] == "setmany" then
 
 	path = rq.POST["path"];
@@ -60,6 +65,19 @@ function process()
 	    return ("Error saving configuration block to flash");
 	end
 	return ("Configuration saved successful");
+
+    elseif rq.POST["restore"] == "config" then
+
+	if os.execute("rm /tmp/etc/www/config.xml") ~= 0 then
+	    return ("Can't remove current config");
+	end
+	if os.execute("/etc/save_etc") ~= 0 then
+	    return ("Error saving configuration block to flash");
+	end
+	if os.execute("/sbin/reboot &") ~= 0 then
+	    return ("Error when trying reboot");
+	end
+	return ("Configuration restored successful");
 
     elseif rq.POST["system"] == "reboot" then
 

@@ -4,7 +4,7 @@ LOG=/tmp/DHCLIENT-SCRIPT.log
 
 touch ${LOG}
 echo "DHCLIENT-SCRIPT: $*" >> ${LOG} 
-set >> ${LOG} 
+#set >> ${LOG} 
 echo >>  ${LOG}
 
 case ${reason} in
@@ -56,7 +56,6 @@ REBOOT|BOUND|RENEW)
 		i=$(( ${i} + 1 ))
         done
 
-	echo ${query}
         # Notify configuration handler
         fetch -qo - "http://127.0.0.1:8/event.xml?${query}"
 	;;

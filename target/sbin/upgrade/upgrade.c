@@ -229,6 +229,8 @@ int main(int argc, char **argv)
 		if (!silent)
 			printf("Sync buffers\n");
 		sync();
+		sync();
+		sync();
 	}
 
 #ifdef USE_MD5
@@ -236,21 +238,20 @@ int main(int argc, char **argv)
 		if (!silent)
 			printf("Verify md5 sum\n");
 		check = check_md5(ofh, blocksize);
-	} else
-#endif
-	{
-		if (!silent)
-			printf("Sleep 3 seconds...\n");
-		sleep(3); /* For make shure, what flash write done */
+		if (check)
+		{
+			printf("Verification fail\n");
+			exitcode = 7;
+		}
 	}
+#endif
 
-#ifdef USE_MD5
-	if (verify && check)
-	{
-		printf("Verification fail\n");
-		exitcode = 7;
-	}
-#endif
+	fclose(ofh);
+	ofh = 0;
+
+	if (!silent)
+		printf("Sleep 5 seconds...\n");
+	sleep(5); /* For make shure, what flash write done */
 
 	if (rebt && !exitcode)
 	{
@@ -272,7 +273,8 @@ int main(int argc, char **argv)
 	}
 
 close2_exit:
-	fclose(ofh);
+	if (ofh)
+		fclose(ofh);
 free_exit:
 	free(buf);
 	fclose(fh);
