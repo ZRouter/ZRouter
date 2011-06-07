@@ -40,6 +40,13 @@ adapt_prestart()
 	switchctl /dev/switch0 set port 5 pvid 1 flags Tag
 	switchctl /dev/switch0 set port 6 pvid 1 flags Tag
 
+	gpioctl -f /dev/gpioc0 -c 14 IN II PU INT
+
+	# Import MAC addresses with known names
+	kenv LAN_MAC_ADDR=`kenv ethaddr`
+	kenv WAN_MAC_ADDR=`kenv wanmac`
+	kenv WLAN_MAC_ADDR=`kenv wlanmac`
+
 	ifconfig rt0 up
 	ifconfig vlan1 create vlan 1 vlandev rt0
 	ifconfig vlan1 name lan0
@@ -47,6 +54,11 @@ adapt_prestart()
 	ifconfig vlan2 name wan0
 	# name wlan0 will be used when hostap or client are created
 	ifconfig rt28600 name wifi0
+
+	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+	ifconfig wifi0 ether `kenv WLAN_MAC_ADDR`
+
 	hostname `kenv HostName`
 	#wan_mac_addr=`kenv WAN_MAC_ADDR | head -1`
 	# lan mac wan+1

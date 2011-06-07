@@ -19,6 +19,7 @@ tool_list[0] = ["Reboot",				"#", "tryget('system=reboot')"];
 var config_list = new Array();
 config_list[0] = ["Save Configuration",				"#", "tryget('save=config')"];
 config_list[1] = ["Load Configuration (-)",				"#", "tryget('load=config')"];
+config_list[1] = ["Restore Configuration",				"#", "tryget('restore=config')"];
 
 function tryget(msg)
 {
@@ -95,20 +96,20 @@ function gen_banner_td(name, flag)
 		menu_name = "System";
 	else if(name == "config")
 		menu_name = "Configuration";
-	else if(name == "logout")
-		menu_name = "Logout";
-	else if(name == "help")
-		menu_name = "Help";
+//	else if(name == "logout")
+//		menu_name = "Logout";
+//	else if(name == "help")
+//		menu_name = "Help";
 
 	if(flag == "a_href")
 	{
 		str+="<td class='banner'>";
-		if(name == "sys")
-			str+="<a href='?page=sys_setting.html' target='ifrMain'>";
-		else if(name == "help")
-			str+="<a href='?page=help.html' target='_blank'>";
-		else
-			str+="<a href='?page=home_sys.html' target='ifrMain'>";
+//		if(name == "sys")
+//			str+="<a href='?page=sys_setting.html' target='ifrMain'>";
+//		else if(name == "help")
+//			str+="<a href='?page=help.html' target='_blank'>";
+//		else
+			str+="<a href='home_sys.html' target='ifrMain'>";
 	}
 	else
 		str+="<td class='banner' onclick=\"showlist('"+name+"','yes')\">";

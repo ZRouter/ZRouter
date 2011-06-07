@@ -23,8 +23,22 @@ function process()
 	c:getNode(rq.GET["key"]):value(rq.GET["value"]);
 	return (c:getNode(rq.GET["key"]):value());
 
+    elseif rq.GET["restore"] == "config" then
+
+	os.execute("echo \"event.xml: " .. rq.QueryString .."\" > /dev/console");
+	if os.execute("rm /tmp/etc/www/config.xml") ~= 0 then
+	    return ("Can't remove current config");
+	end
+	if os.execute("/etc/save_etc") ~= 0 then
+	    return ("Error saving configuration block to flash");
+	end
+	if os.execute("reboot") ~= 0 then
+	    return ("Error when trying reboot");
+	end
+	return ("Configuration restored successful");
+
     elseif rq.GET["cmd"] == "event" then
-	    print(rq.RequestHeader);
+	    -- print(rq.RequestHeader);
 
 	    local iface = rq.GET["iface"];
 
@@ -33,6 +47,14 @@ function process()
 	    end
 
 	    if type(r[iface]) ~= "table" then r[iface] = {}; end
+
+	    os.execute("echo \"event.xml: " .. rq.QueryString .."\" > /dev/console");
+	    -- Update NAT alias address for Static/DHCP
+	    if iface == "wan0" then
+		local ip = rq.GET["ip"];
+		ip = ip:gsub("/%d+", "");
+		os.execute("ngctl msg wan0nat: setaliasaddr " .. ip);
+	    end
 
 	    for k,v in pairs(rq.GET) do
 		if (k ~= "iface") and (k ~= "cmd") then

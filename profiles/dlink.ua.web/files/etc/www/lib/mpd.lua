@@ -13,6 +13,8 @@ set iface route default
 set iface enable on-demand
 set iface idle 900
 set iface enable nat
+set iface up-script /etc/mpd5-up.sh
+set iface down-script /etc/mpd5-down.sh
 
 set ipcp ranges 0.0.0.0/0 0.0.0.0/0
 set ipcp enable req-pri-dns
@@ -25,6 +27,7 @@ open iface
 create link static L1 modem
 create link static L1 pppoe
 create link static L1 pptp
+create link static L1 ltp
 
 set auth authname adbrd****@dsl.ukrtel.net
 set auth password *******
@@ -42,6 +45,8 @@ set pptp self 10.1.3.3
 set pptp peer 10.1.0.1
 set pptp disable windowing
 
+set l2tp peer 10.10.10.10
+
 set link disable chap pap
 set link accept chap pap
 set link action bundle B1
@@ -54,27 +59,46 @@ set link bandwidth 14194304
 open
 
 
+
+
+
+
 ]]
 
-require("sleep");
+--require("sleep");
 
 MPD = {};
 mt = {};
 
-function MPD:new(tree, s)
-    return setmetatable({ c = tree, socket = s, debug = 1 }, mt)
+function MPD:new(tree, host, port, debug)
+	local t = {};
+	if not host or not port then
+		print("No host or port");
+		return (nil);
+	end
+
+	t.socket = socket.connect(host, port);
+	if not t.socket then
+		print("Can't connect to " .. host .. ":" .. port);
+		return (nil);
+	end
+	t.c = tree;
+	t.debug = 1;
+	return setmetatable(t, mt);
 end
 
 function MPD:msg(s, wait)
-    if self.debug then print("DEBUG MPD:msg: " .. s); end
-    self.socket:write(s .. "\n");
-    if not wait then
-	-- Default wait 30ms
-	wait = 30;
-    end
-    msleep(wait);
 
-    local ret = self.socket:read() or "";
+    if self.debug then print("DEBUG MPD:msg: " .. s); end
+    self.socket:settimeout(0.1);
+    self.socket:send(s .. "\n");
+
+    local err = nil;
+    local ret = "";
+--    while not err do
+	local data, err = self.socket:receive("*a");
+	ret = ret .. (data or "");
+--    end
     if self.debug then print("DEBUG MPD:msg:return = [[" .. ret .. "]]"); end
 
     return (ret);
@@ -82,6 +106,8 @@ end
 
 function MPD:config_bundle(path, bundle)
     local node;
+
+--    self.socket:refresh();
     -- Create or select bundle
     self:msg("create bundle static " .. bundle);
     self:msg("bundle " .. bundle);
@@ -96,20 +122,22 @@ function MPD:config_bundle(path, bundle)
 --    end
 
     self:msg("set iface addrs 10.254.254.1 10.254.254.2");
+    self:msg("set iface up-script /etc/mpd-linkup");
+    self:msg("set iface down-script /etc/mpd-linkdown");
     self:msg("set ipcp ranges 0.0.0.0/0 0.0.0.0/0");
 
     -- We should apply default on a up-script run
 --     self:msg("set iface route default");
 
     local dod = self.c:getNode(path .. "." .. "on-demand")
-    if dod and dod:value() then
+    if dod and dod:attr("enable") == "true" then
 	self:msg("set iface enable on-demand");
         self:msg("set iface idle " .. self.c:getNode(path .. "." .. "idle-time"):value());
     end
 
 
     node = self.c:getNode(path .. "." .. "nat")
-    if node and node:value() == "true" then
+    if node and node:attr("enable") == "true" then
 	self:msg("set iface enable nat");
     end
 
@@ -181,6 +209,7 @@ function MPD:config_link(path, link, bundle)
 end
 
 function MPD:show_bundle(path, bundle)
+--    self.socket:refresh();
 
     self:msg("bundle " .. bundle);
     local info = self:msg("show bundle " .. bundle, 500);

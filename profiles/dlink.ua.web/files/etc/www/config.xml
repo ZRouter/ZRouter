@@ -1,15 +1,15 @@
 <interfaces>
     <wan0>
-        <PPPoE type="pppoe" enable="false" onchange="iface_changed('interfaces.wan0.PPPoE')">
+        <PPPoE enable="false" type="pppoe" onchange="iface_changed('interfaces.wan0.PPPoE')">
             <action>
-                <create type="socket" target="socket:127.0.0.1:5005">
+                <create target="socket:127.0.0.1:5005" type="socket">
                     <message></message>
                 </create>
             </action>
             <nat enable="true"></nat>
             <name>PPPoE</name>
-            <username></username>
-            <password></password>
+            <username>pppoe1</username>
+            <password>test</password>
             <service_name></service_name>
             <device>wan0</device>
             <default_route>true</default_route>
@@ -21,13 +21,13 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPPoE>
-        <PPP type="modem" enable="false" onchange="iface_changed('interfaces.wan0.PPP')">
+        <PPP enable="false" type="modem" onchange="iface_changed('interfaces.wan0.PPP')">
             <action>
-                <up type="socket" target="socket:127.0.0.1:5005"></up>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
-                <down type="socket" target="socket:127.0.0.1:5005"></down>
-                <create type="socket" target="socket:127.0.0.1:5005"></create>
-                <destroy type="socket" target="socket:127.0.0.1:5005"></destroy>
+                <up target="socket:127.0.0.1:5005" type="socket"></up>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
+                <down target="socket:127.0.0.1:5005" type="socket"></down>
+                <create target="socket:127.0.0.1:5005" type="socket"></create>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
             </action>
             <name>3G</name>
             <nat enable="true"></nat>
@@ -45,7 +45,7 @@
             <dns1></dns1>
             <dns2></dns2>
         </PPP>
-        <Static type="hw" enable="true">
+        <Static enable="true" type="hw">
             <nat enable="true"></nat>
             <dhcp enable="true"></dhcp>
             <device>wan0</device>
@@ -58,7 +58,7 @@
             <dns2>10.0.0.2</dns2>
         </Static>
     </wan0>
-    <wlan0 type="wlan" enable="true">
+    <wlan0 enable="true" type="wlan">
         <create>
             <exec>ifconfig wlan0 create wlandev wifi0 wlanmode hostap</exec>
         </create>
@@ -82,14 +82,14 @@
     </lan0>
     <bridge0 type="bridge">
         <create>
-            <exec>ifconfig wlan0 ether `kenv WAN_MAC_ADDR` down</exec>
-            <exec>ifconfig lan0 ether `kenv WAN_MAC_ADDR` down</exec>
+            <exec>ifconfig wlan0 ether `kenv LAN_MAC_ADDR` down</exec>
+            <exec>ifconfig lan0 ether `kenv LAN_MAC_ADDR` down</exec>
             <exec>ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
             <exec>ifconfig lan0 up</exec>
-            <exec>ifconfig wlan0 up</exec>       
+            <exec>ifconfig wlan0 up</exec>
         </create>
         <init>
-            <exec order="3">ifconfig bridge0 ether `kenv WAN_MAC_ADDR`</exec>
+            <exec order="3">ifconfig bridge0 ether `kenv LAN_MAC_ADDR`</exec>
         </init>
         <ipaddr>192.168.0.1/24</ipaddr>
         <lagg_interfaces>lan0,wlan0</lagg_interfaces>
@@ -153,9 +153,10 @@
     <rev>A1</rev>
     <location>home</location>
     <firmware>
+	<!-- XXX: version and build date should be here -->
         <version>DIR-620_0.1</version>
-        <date>May 5, 16:00:26 2011</date>
-        <update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/firmware/A1/last/D-Link_DIR-620.img</update_url>
+        <date>Mon 6 Jun 14:27:48 2011</date>
+        <update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/Firmware/FreeBSD/D-Link_DIR-620-last.txt</update_url>
     </firmware>
 </info>
 <hostapd>
@@ -199,13 +200,12 @@
 </hostapd>
 <http>
     <users>
-        <user username="admin" password="admin" group="admin" />
-        <user username="user" password="123" group="stat" />
+        <user username="admin" password="admin" group="admin"></user>
+        <user username="user" password="123" group="stat"></user>
     </users>
     <!-- host>192.168.0.1</host 
 	bind to all, because we need local access also.
-	XXX: we should take care about ipfw deny for that.
-    -->
+	XXX: we should take care about ipfw deny for that. -->
     <host>192.168.0.1</host>
     <port>80</port>
 </http>

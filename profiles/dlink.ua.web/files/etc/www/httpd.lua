@@ -74,8 +74,8 @@ function start_server( c, config )
 
     --
     --  Bind a socket to the given port
-    --
-    config.listener = assert(socket.bind(c:getNode("http.host"):value(), c:getNode("http.port"):value()));
+    -- c:getNode("http.host"):value()
+    config.listener = assert(socket.bind("*", c:getNode("http.port"):value()));
     config.listener:settimeout(5);
 
     --
@@ -311,7 +311,7 @@ function processConnection( c, config )
     if not rq.Group and rq.ip ~= "127.0.0.1" then
         local message = "HTTP/1.1 401 Authorization Required\r\n" ;
         message = message .. "Server: httpd\r\n";
-        message = message .. "WWW-Authenticate: Basic realm=\"Secure Area\"";
+        message = message .. "WWW-Authenticate: Basic realm=\"Secure Area\"\n";
         message = message .. "Content-type: text/html\r\n";
         message = message .. "Connection: close\r\n\r\n" ;
         message = message .. "<html><head><title>Error</title></head>" ;
@@ -781,9 +781,7 @@ mpd = 0;
 
 function configure_mpd_link(c, path, bundle, link)
     if mpd == 0 then
-	local s = sock:new(socket);
-	s:open("127.0.0.1", 5005);
-	mpd = MPD:new(c, s);
+	mpd = MPD:new(c, "127.0.0.1", 5005);
     end
 
     local bundle = "PPP";
@@ -801,6 +799,27 @@ end
 
 function configure_wan(c)
     -- TODO: auto enumerate wan links
+    --[[
+kldload ng_nat
+kldload ng_ipfw
+
+ngctl mkpeer ipfw: nat 60 out
+ngctl name ipfw:60 nat
+ngctl connect ipfw: nat: 61 in
+ngctl msg nat: setaliasaddr 192.168.101.204
+
+ipfw add 98 netgraph 61 all from any to any in via wan0
+ipfw add 99 netgraph 60 all from any to any out via wan0
+
+sysctl net.inet.ip.fw.one_pass=0
+    ]]
+
+    os.execute("kldload ng_nat");
+    os.execute("kldload ng_ipfw");
+    os.execute("sysctl net.inet.ip.fw.one_pass=0");
+
+
+
     local sub = "";
     for _, sub in ipairs({"Static", "PPPoE", "PPP"}) do
 	print("sub=" .. sub);
@@ -849,6 +868,22 @@ function configure_wan(c)
 		    print("Run dhclient on " .. dev);
 		    os.execute("mkdir -p /var/db/");
 		    os.execute(string.format("/sbin/dhclient %s", dev));
+		end
+
+		local nat = c:getNode(path .. ".nat");
+		if nat and nat:attr("enable") == "true" then
+		    local ip = c:getNode(path .. ".ipaddr"):value();
+		    ip = ip:gsub("/%d+", "");
+		    os.execute("ngctl mkpeer ipfw: nat 60 out");
+		    os.execute("ngctl name ipfw:60 wan0nat");
+		    os.execute("ngctl connect ipfw: wan0nat: 61 in");
+		    os.execute("ngctl msg wan0nat: setaliasaddr " .. ip);
+
+		    os.execute("ipfw add 98 netgraph 61 all from any to any in via wan0");
+		    os.execute("ipfw add 99 netgraph 60 all from any to any out via wan0");
+		else
+		    os.execute("ipfw delete 98");
+		    os.execute("ipfw delete 99");
 		end
 	    else
 		print("Unsupported interface type " .. subtype);
@@ -927,14 +962,31 @@ print("Initialize board ...");
 print("Init LAN");
 configure_lan(c);
 
+-- TODO: if DNS-Relay enabled
+-- XXX: dnsmasq able to do DHCPD also
+os.execute("dnsmasq -i bridge0");
+
 start_dhcpd(c);
 
-print("Init AP");
-ap = HOSTAPD:new(c, 1);
-ap:run();
+-- print("Init AP");
+-- ap = HOSTAPD:new(c, 1);
+-- ap:run();
 
 print("Init WAN links");
 configure_wan(c);
+
+os.execute("ipfw add 100 allow ip from any to any via lo0");
+os.execute("ipfw add 200 deny ip from any to 127.0.0.0/8");
+os.execute("ipfw add 300 deny ip from 127.0.0.0/8 to any");
+
+-- Hide Web-UI from WAN links
+os.execute("ipfw add 400 allow tcp from any to me 80 via lan0");
+os.execute("ipfw add 500 allow tcp from any to me 80 via bridge0");
+-- TODO: If not enabled WAN administration
+os.execute("ipfw add 600 deny tcp from any to me 80");
+-- check w/ ipfw NAT-ed packets
+os.execute("sysctl net.inet.ip.fw.one_pass=0");
+
 
 print("Run server ...");
 start_server( c, config );

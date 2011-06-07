@@ -86,7 +86,8 @@ function process(q, queryline)
 
 	    if type(r[iface]) ~= "table" then r[iface] = {}; end
 --	    rquery[iface] = queryline;
-	    table.insert(queue, {handled=false, query=queryline, qt=q});
+	    -- First element processed last (implement FIFO)
+	    table.insert(queue, 1, {handled=false, query=queryline, qt=q});
 
 	    for k,v in pairs(q) do
 		if (k ~= "iface") and (k ~= "cmd") then
@@ -97,8 +98,10 @@ function process(q, queryline)
 		-- XXX: should not be here
 		-- XXX: must check exit code
 		exitcode = os.execute(
-		    "route change default -iface " .. iface .." > /dev/null 2>&1 || " ..
-		    "route add default -iface " .. iface .." > /dev/null 2>&1"
+		    "route change default  " .. r[iface]["gw"] .." > /dev/null 2>&1 || " ..
+		    "route add default  " .. r[iface]["gw"] .." > /dev/null 2>&1"
+--		    "route change default -iface " .. iface .." > /dev/null 2>&1 || " ..
+--		    "route add default -iface " .. iface .." > /dev/null 2>&1"
 		);
 		local dns = {};
 		if q["dns1"] and q["dns1"]:len() >= 7 then
@@ -147,14 +150,6 @@ function call_server(http, q)
     local query = "http://127.0.0.1:80/event.xml?" .. q;
 
     local body, code, headers = http.request(query);
-
-    --[[
-    print("http.request(" .. query ..") ",
-	body or "(no body)",
-	headers or "(no headers)",
-	code or "(no code)"
-	);
-    ]]
 
     if code == 200 then
 	return (true);

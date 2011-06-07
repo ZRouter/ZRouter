@@ -40,58 +40,46 @@ hint.uart.1.flags="0x30"
 
 # Configure SYSCTL_GPIOMODE to pass FUART pins to GPIO
 # original:
-# hint.sysctl.0.gpiomode=0x000283
+# hint.rt305x_sysctl.0.gpiomode=0x000283
 # required:
-hint.sysctl.0.gpiomode=0x00029f
+hint.rt305x_sysctl.0.gpiomode=0x00029f
 
 # gpio
 # XXX DEBUG WPS BTN as a reset
 hint.gpioreset.0.at="gpiobus0"
-hint.gpioreset.0.pins="0x01"
+hint.gpioreset.0.pins="0x4000"
 hint.gpioreset.0.name="wps"
-#hint.gpioreset.0.flags="0x0581"
+hint.gpioreset.0.flags="0x0581"
 
 ## GPIO0  - WPS BTN	IN II IO
-#hint.gpiobutton.0.at="gpiobus0"
-#hint.gpiobutton.0.pins="0x01"
-#hint.gpiobutton.0.name="wps"
-#hint.gpiobutton.0.flags="0x0581"
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x01"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x0581"
 
-# GPIO7  - MODE SW AP	IN II IO
-hint.gpiobutton.1.at="gpiobus0"
-hint.gpiobutton.1.pins="0x80"
-hint.gpiobutton.1.name="mode_ap"
-hint.gpiobutton.1.flags="0x0581"
-
-# GPIO8  - ST LEDRED	OUT	/* 2pin BiDir RED/BLUE LED */
-# GPIO9  - ST LEDBLUE	OUT
+#GPIO8  SECU_LED_OR
 hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.pins="0x100"
+hint.gpioled.0.pins="0x0100"
 hint.gpioled.0.name="status_red"
 hint.gpioled.0.flags="0x0002"
+
+#GPIO9  STATUS
 hint.gpioled.1.at="gpiobus0"
-hint.gpioled.1.pins="0x200"
-#hint.gpioled.1.name="status_blue"
+hint.gpioled.1.pins="0x0200"
 hint.gpioled.1.name="status"
 hint.gpioled.1.flags="0x0002"
 
-# GPIO10 - RST BTN	IN II IO
-hint.gpiobutton.2.at="gpiobus0"
-hint.gpiobutton.2.pins="0x400"
-hint.gpiobutton.2.name="reset"
-hint.gpiobutton.2.flags="0x0581"
-
-# GPIO11 - MODE SW CL	IN II IO
-hint.gpiobutton.3.at="gpiobus0"
-hint.gpiobutton.3.pins="0x800"
-hint.gpiobutton.3.name="mode_wlan_client"
-hint.gpiobutton.3.flags="0x0581"
-
-# GPIO14 - WPS LED	OUT II IO
+#GPIO11 SECU_LED
 hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.pins="0x4000"
+hint.gpioled.2.pins="0x0800"
 hint.gpioled.2.name="wps"
 hint.gpioled.2.flags="0x0182"
+
+#GPIO12 POWER
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x1000"
+hint.gpioled.3.name="power"
+hint.gpioled.3.flags="0x0182"
 
 hint.cfi.0.width=2
 hint.cfi.0.shift=2
