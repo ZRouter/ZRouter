@@ -140,9 +140,10 @@ WORLD_SUBDIRS_GNU_LIB+= \
 csu \
 libgcc \
 libregex \
-libreadline \
 libssp \
 libstdc++
+
+#libreadline \
 # XXX: libreadline must be replaced with libedit
 
 
