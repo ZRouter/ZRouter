@@ -1,0 +1,128 @@
+# $FreeBSD$
+# device.hints
+hint.obio.0.at="nexus0"
+hint.obio.0.maddr=0x10000000
+hint.obio.0.msize=0x10000000
+
+hint.nvram.0.base=0x1f030000
+hint.nvram.0.maxsize=0x2000
+hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
+hint.nvram.1.base=0x1f032000
+hint.nvram.1.maxsize=0x4000
+hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
+
+# on-board Ralink Frame Engine
+#hint.rt.0.at="nexus0"
+#hint.rt.0.maddr=0x12000000
+#hint.rt.0.msize=0x200000
+#hint.rt.0.irq=9
+hint.rt.0.macaddr="00:18:e7:d5:83:90"
+
+# uart0
+#hint.uart.0.at="obio0"
+#hint.uart.0.maddr=0x10000C00
+#hint.uart.0.msize=0x100
+#hint.uart.0.irq=12
+#hint.uart.0.flags="0x30"
+
+# uart1
+#hint.uart.1.at="obio0"
+#hint.uart.1.maddr=0x10000500
+#hint.uart.1.msize=0x100
+#hint.uart.1.irq=5
+hint.uart.1.flags="0x30"
+
+# Configure SYSCTL_GPIOMODE to pass FUART pins to GPIO
+# original:
+# hint.rt305x_sysctl.0.gpiomode=0x000283
+# required:
+hint.rt305x_sysctl.0.gpiomode=0x00029f
+
+# gpio
+# XXX DEBUG WPS BTN as a reset
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x4000"
+hint.gpioreset.0.name="wps"
+hint.gpioreset.0.flags="0x0581"
+
+## GPIO0  - WPS BTN	IN II IO
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x01"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x0581"
+
+#GPIO8  SECU_LED_OR
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins="0x0100"
+hint.gpioled.0.name="status_red"
+hint.gpioled.0.flags="0x0002"
+
+#GPIO9  STATUS
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.pins="0x0200"
+hint.gpioled.1.name="status"
+hint.gpioled.1.flags="0x0002"
+
+#GPIO11 SECU_LED
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins="0x0800"
+hint.gpioled.2.name="wps"
+hint.gpioled.2.flags="0x0182"
+
+#GPIO12 POWER
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x1000"
+hint.gpioled.3.name="power"
+hint.gpioled.3.flags="0x0182"
+
+hint.cfi.0.width=2
+hint.cfi.0.shift=2
+
+#0x00000000-0x00030000 : "Bootloader"
+#0x00030000-0x00040000 : "Factory"
+#0x00040000-0x00070000 : "Config"
+#0x00070000-0x000b0000 : "Language"
+#0x000b0000-0x001a0000 : "Kernel"
+#0x001a0000-0x01000000 : "RootFS"
+
+hint.map.0.at="cfid0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00030000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="cfid0"
+hint.map.1.start=0x00030000
+hint.map.1.end=0x00040000
+hint.map.1.name="linuxconfig"
+
+hint.map.2.at="cfid0"
+hint.map.2.start=0x00040000
+hint.map.2.end=0x00050000
+hint.map.2.name="factory"
+
+hint.map.3.at="cfid0"
+hint.map.3.start=0x00050000
+hint.map.3.end=0x007e0000
+hint.map.3.name="upgrade"
+
+hint.map.4.at="cfid0"
+hint.map.4.name="kernel"
+hint.map.4.start=0x00050000
+hint.map.4.end="search:0x00100000:0x10000:.!/bin/sh"
+
+hint.map.5.at="cfid0"
+hint.map.5.name="rootfs"
+hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.5.end=0x007e0000
+
+hint.map.6.at="cfid0"
+hint.map.6.start=0x007e0000
+hint.map.6.end=0x00800000
+hint.map.6.name="config"
+
+
+hint.rt.0.phymask=0x1f
+hint.rt.0.media=100
+hint.rt.0.fduplex=1
+
