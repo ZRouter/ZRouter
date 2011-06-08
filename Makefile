@@ -24,7 +24,7 @@ ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
 PREINSTALLDIRS=/lib
 
-# Board configyration must define used SoC/CPU
+# Board configuration must define used SoC/CPU
 .include "boards/boards.mk"
 
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
@@ -277,6 +277,8 @@ world-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
 
 world-build:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
+	@echo "XXX: need to find a way to install required includes correctly"
+	mkdir -p ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/lzo
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
 world-install: rootfs-dir
