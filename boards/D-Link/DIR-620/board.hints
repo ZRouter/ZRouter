@@ -45,22 +45,31 @@ hint.uart.1.flags="0x30"
 hint.rt305x_sysctl.0.gpiomode=0x00029f
 
 # gpio
-# XXX DEBUG WPS BTN as a reset
-hint.gpioreset.0.at="gpiobus0"
-hint.gpioreset.0.pins="0x4000"
-hint.gpioreset.0.name="wps"
-hint.gpioreset.0.flags="0x0581"
 
-## GPIO0  - WPS BTN	IN II IO
+# Buttons
+# GPIO10 - Reset BTN	IN PU II INT
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x0400"
+hint.gpioreset.0.name="wps"
+hint.gpioreset.0.flags="0x04a1"
+
+## GPIO0  - WPS BTN	IN PU II INT
 hint.gpiobutton.0.at="gpiobus0"
 hint.gpiobutton.0.pins="0x01"
 hint.gpiobutton.0.name="wps"
-hint.gpiobutton.0.flags="0x0581"
+hint.gpiobutton.0.flags="0x04a1"
 
-#GPIO8  SECU_LED_OR
+# LEDs
+# Power Yellow	8
+# Power Green	9
+# WAN Green	12
+# WAN Yellow	14
+# WPS Orange	11
+# WPS Blue	13
+#GPIO8  STATUS ?
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.pins="0x0100"
-hint.gpioled.0.name="status_red"
+hint.gpioled.0.name="status_yellow"
 hint.gpioled.0.flags="0x0002"
 
 #GPIO9  STATUS
@@ -69,17 +78,29 @@ hint.gpioled.1.pins="0x0200"
 hint.gpioled.1.name="status"
 hint.gpioled.1.flags="0x0002"
 
-#GPIO11 SECU_LED
+#GPIO11 WPS Orange
 hint.gpioled.2.at="gpiobus0"
 hint.gpioled.2.pins="0x0800"
-hint.gpioled.2.name="wps"
-hint.gpioled.2.flags="0x0182"
+hint.gpioled.2.name="wps_orange"
+hint.gpioled.2.flags="0x0002"
 
-#GPIO12 POWER
+#GPIO12 WAN Green
 hint.gpioled.3.at="gpiobus0"
 hint.gpioled.3.pins="0x1000"
-hint.gpioled.3.name="power"
-hint.gpioled.3.flags="0x0182"
+hint.gpioled.3.name="wan"
+hint.gpioled.3.flags="0x0002"
+
+#GPIO13 WPS Blue
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x2000"
+hint.gpioled.3.name="wps"
+hint.gpioled.3.flags="0x0002"
+
+#GPIO14 WAN Yellow
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x4000"
+hint.gpioled.3.name="wan_yellow"
+hint.gpioled.3.flags="0x0002"
 
 hint.cfi.0.width=2
 hint.cfi.0.shift=2
