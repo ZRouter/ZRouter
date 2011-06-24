@@ -38,8 +38,13 @@ function process()
 		else
 		    subpath = path;
 		end
---		print(string.format("<%s %s=\"%s\">", subpath, attrname, v));
-		c:getNode(subpath):attr(attrname, v);
+
+		local n = c:getOrCreateNode(subpath);
+		if not n then
+		    print ("ERROR: can't find/create node \"" .. subpath .. "\"");
+		    return ("ERROR: can't find/create node \"" .. subpath .. "\"");
+		end
+		n:attr(attrname, v);
 		print(subpath .." ".. attrname .. " newval=" .. c:getNode(subpath):attr(attrname));
     	    elseif string.find(k, "^sm:") then
     		_, _, subpath = string.find(k, "^sm:(.*)");
@@ -48,9 +53,13 @@ function process()
 		else
 		    subpath = path;
 		end
---		print(subpath .. " try set val=\"" .. (v or "") .. "\"");
-		c:getNode(subpath):value(v or "");
-		print(subpath .. " newval=" .. c:getNode(subpath):value());
+		local n = c:getOrCreateNode(subpath);
+		if not n then
+		    print ("ERROR: can't find/create node \"" .. subpath .. "\"");
+		    return ("ERROR: can't find/create node \"" .. subpath .. "\"");
+		end
+		n:value(v or "");
+		print(subpath .. " newval=" .. n:value());
     	    end
 	end
 	return ("OK");

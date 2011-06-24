@@ -87,7 +87,7 @@ function system_event(config, msg)
 	elseif m.system == "GPIO" then
 	    -- GPIO messages
 	    -- XXX: should not be hardcoded
-	    if m.subsystem == "pin14" and m.bus == "gpiobus0" then
+	    if m.subsystem == "pin10" and m.bus == "gpiobus0" then
 		if     m.type == "PIN_LOW" then
 		    -- Pin return to normal state
 		    time = tonumber(m.period);

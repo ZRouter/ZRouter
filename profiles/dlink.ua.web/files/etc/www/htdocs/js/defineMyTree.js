@@ -33,6 +33,11 @@ insDoc(aux1, gLnk("R","&nbsp;Internet", "/Basic.wan.html"));
 insDoc(aux1, gLnk("R","&nbsp;Wireless", "/Basic.wlan.html"));
 insDoc(aux1, gLnk("R","&nbsp;LAN", "/Basic.lan.html"));
 
+aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Basic Settings </font>", ""));
+insDoc(aux1, gLnk("R","&nbsp;IPSec", "/Security.IPSec.html"));
+insDoc(aux1, gLnk("R","&nbsp;OpenVPN", "/Security.OpenVPN.html"));
+insDoc(aux1, gLnk("R","&nbsp;SSH Tunnels", "/Security.SSH.html"));
+
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Administration </font>", ""));
 insDoc(aux1, gLnk("R","&nbsp;Device Info", "/Administration.info.html"));
 insDoc(aux1, gLnk("R","&nbsp;Users", "/Administration.users.html"));

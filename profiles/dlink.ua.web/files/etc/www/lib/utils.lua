@@ -215,12 +215,10 @@ function conf_table(id, header, rootpath, fields)
 		end
 
 		local n = c:getNode(nodestr);
-
-		print("value=\"" ..tostring(n:value()) .. "\"");
 		if n then
 		    nodevalue = n:value() or "";
 		else
-		    nodevalue = "Error: node \"" .. nodestr .. "\" not found";
+		    nodevalue = "Error: node " .. nodestr .. " not found";
 		end
 
 		ret = ret ..
