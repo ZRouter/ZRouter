@@ -35,6 +35,7 @@ set auth password *******
 set modem device /dev/cuaU0.0
 set modem var $DialPrefix "DT"
 set modem var $Telephone "#777"
+set modem var $TryPPPEarly "yes"
 set modem script DialPeer
 set modem idle-script Ringback
 
@@ -77,11 +78,13 @@ function MPD:new(tree, host, port, debug)
 		return (nil);
 	end
 
-	t.socket = socket.connect(host, port);
-	if not t.socket then
-		print("Can't connect to " .. host .. ":" .. port);
-		return (nil);
-	end
+--	t.socket = socket.connect(host, port);
+--	if not t.socket then
+--		print("Can't connect to " .. host .. ":" .. port);
+--		return (nil);
+--	end
+	t.host = host;
+	t.port = port;
 	t.c = tree;
 	t.debug = 1;
 	return setmetatable(t, mt);
@@ -107,7 +110,11 @@ end
 function MPD:config_bundle(path, bundle)
     local node;
 
---    self.socket:refresh();
+    self.socket = socket.connect(self.host, self.port);
+	if not self.socket then
+		print("Can't connect to " .. self.host .. ":" .. self.port);
+		return (nil);
+	end
     -- Create or select bundle
     self:msg("create bundle static " .. bundle);
     self:msg("bundle " .. bundle);
@@ -135,6 +142,7 @@ function MPD:config_bundle(path, bundle)
         self:msg("set iface idle " .. self.c:getNode(path .. "." .. "idle-time"):value());
     end
 
+    self:msg("set iface name " .. bundle);
 
     node = self.c:getNode(path .. "." .. "nat")
     if node and node:attr("enable") == "true" then
@@ -146,11 +154,19 @@ function MPD:config_bundle(path, bundle)
 
     self:msg("open iface");
 
+    self:msg("exit");
+    self.socket:close();
 
     return (true);
 end
 
 function MPD:config_link(path, link, bundle)
+
+    self.socket = socket.connect(self.host, self.port);
+	if not self.socket then
+		print("Can't connect to " .. self.host .. ":" .. self.port);
+		return (nil);
+	end
 
     local mpdtype = self.c:getNode(path);
     if mpdtype and mpdtype:attr("type") then
@@ -176,6 +192,7 @@ function MPD:config_link(path, link, bundle)
     if mpdtype == "modem" then
 	self:msg("set modem device " .. self.c:getNode(path .. "." .. "device"):value() .. "");
 	self:msg("set modem var $DialPrefix \"DT\"");
+	self:msg("set modem var $TryPPPEarly \"yes\"");
 	self:msg("set modem var $Telephone \"" .. self.c:getNode(path .. "." .. "phone"):value() .. "\"");
 	self:msg("set modem script DialPeer");
 	self:msg("set modem idle-script Ringback");
@@ -202,6 +219,8 @@ function MPD:config_link(path, link, bundle)
 
     -- Open link
     self:msg("open");
+    self:msg("exit");
+    self.socket:close();
 
 
 
@@ -210,15 +229,18 @@ end
 
 function MPD:show_bundle(path, bundle)
 --    self.socket:refresh();
+    self.socket = socket.connect(self.host, self.port);
 
     self:msg("bundle " .. bundle);
     local info = self:msg("show bundle " .. bundle, 500);
+    self:msg("exit");
+    self.socket:close();
 
     return (true);
 end
 
 function MPD:close()
-    self.socket:close();
+--    self.socket:close();
 end
 
 mt.__index = MPD;

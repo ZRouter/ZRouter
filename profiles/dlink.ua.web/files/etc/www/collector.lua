@@ -77,6 +77,7 @@ end
 function process(q, queryline)
 
     if q["cmd"] == "event" then
+	    q["timestamp"] = os.date("%Y-%m-%d %H:%M:%S");
 
 	    local iface = q["iface"];
 

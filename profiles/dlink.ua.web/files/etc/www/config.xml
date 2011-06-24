@@ -209,3 +209,39 @@
     <host>192.168.0.1</host>
     <port>80</port>
 </http>
+<ipsec>
+    <remote id="0" enable="true">
+	<gateway>10.0.0.2:500</gateway>
+        <exchange_mode>main,aggressive</exchange_mode>
+        <my_identifier>address 10.0.0.1</my_identifier>
+        <peers_identifier>address 10.0.0.2</peers_identifier>
+        <lifetime>time 28800 sec</lifetime>
+	<initial_contact>on</initial_contact>
+        <passive>off</passive>
+        <proposal_check>obey</proposal_check>
+	<nat_traversal>off</nat_traversal>
+        <generate_policy>off</generate_policy>
+        <proposal>
+            <encryption_algorithm>3des</encryption_algorithm>
+            <hash_algorithm>md5</hash_algorithm>
+            <authentication_method>pre_shared_key</authentication_method>
+            <dh_group>5</dh_group>
+	</proposal>
+    </remote>
+    <sainfo id="0" enable="true"> 
+	<src>address 192.168.0.0/24 any</src>
+	<dst>address 192.168.2.0/24 any</dst>
+	<pfs_group>5</pfs_group>
+	<lifetime>time 3600 sec</lifetime>
+	<encryption_algorithm>3des</encryption_algorithm>
+	<authentication_algorithm>hmac_md5</authentication_algorithm>
+	<compression_algorithm>deflate</compression_algorithm>
+    </sainfo>
+    <setkey>
+	<line>spdadd 192.168.0.0/24 192.168.2.0/24 any -P out ipsec esp/tunnel/10.0.0.1-10.0.0.2/use</line>
+	<line>spdadd 192.168.2.0/24 192.168.0.0/24 any -P in ipsec esp/tunnel/10.0.0.2-10.0.0.1/use</line>
+	<line></line>
+	<line></line>
+    </setkey>
+</ipsec>
+

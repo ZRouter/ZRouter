@@ -58,6 +58,87 @@ function Conf:getNode(path)
     return (Node:new(ret, path));
 end
 
+--      node = { _name = <Element Name>,
+--              _type = ROOT|ELEMENT|TEXT|COMMENT|PI|DECL|DTD,
+--              _attr = { Node attributes - see callback API },
+--              _parent = <Parent Node>
+--              _children = { List of child nodes - ROOT/NODE only }
+--            }
+
+function createNode(_name, _type, _attr, _children, _parent)
+    -- TODO: check for "^(ROOT|ELEMENT|TEXT|COMMENT|PI|DECL|DTD)$"
+    if not _name or not _type then
+	print(_name or "(no name)", _type or "(no type)");
+
+	return (nil);
+    end
+
+    local t = {};
+    t._name = _name;
+    t._type = _type;
+    t._attr = _attr or {};
+    t._parent = _parent;
+    t._children = _children or {};
+    return (t);
+end
+
+function attachNode(parent, node)
+    if not parent or not node then
+	return (nil);
+    end
+
+    if not parent._children then
+	parent._children = {};
+    end
+
+    table.insert(parent._children, node);
+    node._parent = parent;
+
+    return (node);
+end
+
+function Conf:getOrCreateNode(path)
+    local node = self:getNode(path);
+    if node then
+	return (node);
+    end
+
+    node = self.tree;
+    for part in string.gmatch(path, "([^\.]+)%.?") do
+	local rmatch, _, idname, id = string.find(part, "^([%w%_%-]+)%[(%d+)%]$");
+	if rmatch then
+	    part = idname;
+	end
+
+	local matched = 0;
+	if type(node) == "table" and type(node._children) == "table" then
+    	    for _, v in ipairs(node._children) do
+
+    		if v._type == "ELEMENT" and v._name == part then
+		    matched = matched + 1;
+
+		    if id then
+			if id == matched then
+			    node = v;
+			    break;
+			end
+		    else
+			node = v;
+			break;
+		    end
+    		end
+    	    end
+    	end
+
+	if matched == 0 or (id and matched < tonumber(id)) then
+	    local new = createNode(part, "ELEMENT");
+	    attachNode(node, new);
+	    node = new;
+	end
+    end
+    return (Node:new(node, path));
+end
+
 function Conf:get(path)
     print(tostring(self.tree), path);
     return (path);

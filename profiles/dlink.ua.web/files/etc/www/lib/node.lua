@@ -5,6 +5,8 @@ Node = {};
 mtNode = {};
 
 function Node:new(s, path)
+
+    if type(s) ~= "table" then return (nil); end
     local node = setmetatable({ node = s or '' }, mtNode);
     node.path = path;
     return (node);

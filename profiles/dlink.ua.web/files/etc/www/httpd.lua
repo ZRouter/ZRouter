@@ -23,8 +23,8 @@ package.cpath =
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
 	"/lib/?/core.so;/usr/lib/?/core.so;/usr/lib/lua/?/core.so;";
 
-io.stdout = assert(io.open("/dev/console", "w"));
-io.stderr = io.stdout;
+--io.stdout = assert(io.open("/dev/console", "w"));
+--io.stderr = io.stdout;
 
 socket = require("socket");
 
@@ -42,7 +42,7 @@ dofile('lib/node.lua');
 -- base64 decode/encode
 dofile('lib/base64.lua');
 -- Socket helper
-dofile("lib/sock.lua");
+--dofile("lib/sock.lua");
 -- MPD helper
 dofile("lib/mpd.lua");
 -- DHCPD helper
@@ -299,7 +299,7 @@ function processConnection( c, config )
             for usr = 1, 8, 1 do
 
                 local u = c:getNode(string.format("http.users.user[%d]", usr));
-                if (u:attr("username") == _u) and (u:attr("password") == _p) then
+                if u and (u:attr("username") == _u) and (u:attr("password") == _p) then
                     rq.UserName = _u;
                     rq.Password = _p;
                     rq.Group    = u:attr("group");
@@ -867,7 +867,7 @@ sysctl net.inet.ip.fw.one_pass=0
 		    -- Run dhclient
 		    print("Run dhclient on " .. dev);
 		    os.execute("mkdir -p /var/db/");
-		    os.execute(string.format("/sbin/dhclient %s", dev));
+		    os.execute(string.format("/sbin/dhclient %s &", dev));
 		end
 
 		local nat = c:getNode(path .. ".nat");
