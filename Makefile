@@ -412,6 +412,7 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	 ln -sf vi nview
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; find ./usr/ -type d -empty -delete
 
 #${ROOTFS_DEPTEST}:
 ${ROOTFS_DEPTEST}:		world	ports
