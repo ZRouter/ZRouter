@@ -1,0 +1,60 @@
+prsa_tok.o prsa_tok.o: prsa_tok.c /usr/include/sys/cdefs.h \
+  /usr/include/stdio.h /usr/include/sys/_null.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/string.h \
+  /usr/include/strings.h /usr/include/openssl/bn.h \
+  /usr/include/openssl/e_os2.h /usr/include/openssl/opensslconf.h \
+  /usr/include/openssl/ossl_typ.h /usr/include/openssl/rsa.h \
+  /usr/include/openssl/asn1.h /usr/include/time.h \
+  /usr/include/sys/timespec.h /usr/include/openssl/bio.h \
+  /usr/include/stdarg.h /usr/include/openssl/crypto.h \
+  /usr/include/stdlib.h /usr/include/openssl/stack.h \
+  /usr/include/openssl/safestack.h /usr/include/openssl/opensslv.h \
+  /usr/include/openssl/symhacks.h prsa_par.h
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/stdio.h:
+
+/usr/include/sys/_null.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+/usr/include/string.h:
+
+/usr/include/strings.h:
+
+/usr/include/openssl/bn.h:
+
+/usr/include/openssl/e_os2.h:
+
+/usr/include/openssl/opensslconf.h:
+
+/usr/include/openssl/ossl_typ.h:
+
+/usr/include/openssl/rsa.h:
+
+/usr/include/openssl/asn1.h:
+
+/usr/include/time.h:
+
+/usr/include/sys/timespec.h:
+
+/usr/include/openssl/bio.h:
+
+/usr/include/stdarg.h:
+
+/usr/include/openssl/crypto.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/openssl/stack.h:
+
+/usr/include/openssl/safestack.h:
+
+/usr/include/openssl/opensslv.h:
+
+/usr/include/openssl/symhacks.h:
+
+prsa_par.h:
