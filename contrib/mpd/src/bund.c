@@ -331,8 +331,10 @@ BundJoin(Link l)
     b->pppConfig.links[l->bundleIndex].mru = lcp->peer_mru;
     b->pppConfig.links[l->bundleIndex].enableACFComp = lcp->peer_acfcomp;
     b->pppConfig.links[l->bundleIndex].enableProtoComp = lcp->peer_protocomp;
-    b->pppConfig.links[l->bundleIndex].bandwidth = (l->bandwidth / 8 + 5) / 10;
-    b->pppConfig.links[l->bundleIndex].latency = (l->latency + 500) / 1000;
+    b->pppConfig.links[l->bundleIndex].bandwidth =
+	MIN((l->bandwidth / 8 + 5) / 10, NG_PPP_MAX_BANDWIDTH);
+    b->pppConfig.links[l->bundleIndex].latency =
+	MIN((l->latency + 500) / 1000, NG_PPP_MAX_LATENCY);
 
     /* What to do when the first link comes up */
     if (b->n_up == 1) {
@@ -1666,6 +1668,7 @@ BundNgInit(Bund b)
       Log(LG_ERR, ("[%s] can't create netgraph interface", b->name));
       goto fail;
     }
+    strlcpy(b->iface.ngname, b->iface.ifname, sizeof(b->iface.ngname));
     newIface = 1;
     b->iface.ifindex = if_nametoindex(b->iface.ifname);
     Log(LG_BUND|LG_IFACE, ("[%s] Bundle: Interface %s created",
@@ -1715,7 +1718,7 @@ BundNgShutdown(Bund b, int iface, int ppp)
     char	path[NG_PATHSIZ];
 
     if (iface) {
-	snprintf(path, sizeof(path), "%s:", b->iface.ifname);
+	snprintf(path, sizeof(path), "%s:", b->iface.ngname);
 	NgFuncShutdownNode(gLinksCsock, b->name, path);
     }
     if (ppp) {
