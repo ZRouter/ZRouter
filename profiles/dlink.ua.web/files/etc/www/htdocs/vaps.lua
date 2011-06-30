@@ -100,20 +100,20 @@ function onetemplate(c, tamplate, i)
 
     vap = c:getNode(instance);
 
-    if (not vap) or (c:getNode(instance .. ".ssid"):value() == nil) then
+    if (not vap) or (c:getNodeValue(instance .. ".ssid") == nil) then
 	return ("");
     end
 
     repl["n"]			= tostring(i);
     repl["ifaceid"]		= "wlan" .. tostring(i);
     repl["iface"]		= repl["ifaceid"] .. ":";
-    repl["auth_algs"]		= c:getNode(instance .. ".auth_algs"):value();
-    repl["ssid"]		= c:getNode(instance .. ".ssid"):value();
-    repl["wpa"]			= c:getNode(instance .. ".wpa"):value();
-    repl["wpa_passphrase"]	= c:getNode(instance .. ".wpa_passphrase"):value();
-    repl["wpa_key_mgmt"]	= c:getNode(instance .. ".wpa_key_mgmt"):value();
+    repl["auth_algs"]		= c:getNodeValue(instance .. ".auth_algs") or "";
+    repl["ssid"]		= c:getNodeValue(instance .. ".ssid") or "";
+    repl["wpa"]			= c:getNodeValue(instance .. ".wpa") or "";
+    repl["wpa_passphrase"]	= c:getNodeValue(instance .. ".wpa_passphrase") or "";
+    repl["wpa_key_mgmt"]	= c:getNodeValue(instance .. ".wpa_key_mgmt") or "";
 
-    local visible = c:getNode(instance .. ".wpa_key_mgmt"):value();
+    local visible = c:getNodeValue(instance .. ".wpa_key_mgmt") or "";
     if (visible ~= "false") and (visible ~= "0") then
 	repl["visibility_checked"] = "checked";
     end

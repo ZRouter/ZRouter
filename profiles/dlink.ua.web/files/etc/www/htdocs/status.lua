@@ -52,6 +52,16 @@ return ([[
     [[
     </div>
 </div>
+<div id="IPSec0" class="yui3-module boxitem">
+    <div class="yui3-hd">
+        <h4>IPSec0</h4>
+    </div>
+    <div class="yui3-bd">
+    ]]
+    .. runtime("IPSec0") ..
+    [[
+    </div>
+</div>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script>
 function send_update(form)

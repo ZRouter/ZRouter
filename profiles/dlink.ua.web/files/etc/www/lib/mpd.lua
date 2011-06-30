@@ -38,6 +38,7 @@ set modem var $Telephone "#777"
 set modem var $TryPPPEarly "yes"
 set modem script DialPeer
 set modem idle-script Ringback
+set modem watch -cd
 
 set pppoe iface nfe0
 set pppoe service ""
@@ -196,6 +197,7 @@ function MPD:config_link(path, link, bundle)
 	self:msg("set modem var $Telephone \"" .. self.c:getNode(path .. "." .. "phone"):value() .. "\"");
 	self:msg("set modem script DialPeer");
 	self:msg("set modem idle-script Ringback");
+	self:msg("set modem watch -cd");
     elseif mpdtype == "pppoe" then
 	self:msg("set pppoe iface " .. self.c:getNode(path .. "." .. "interface"):value() .. "");
 	self:msg("set pppoe service \"" .. self.c:getNode(path .. "." .. "service"):value() .. "\"");
