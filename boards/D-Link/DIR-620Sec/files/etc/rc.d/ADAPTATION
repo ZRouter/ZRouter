@@ -40,7 +40,7 @@ adapt_prestart()
 	switchctl /dev/switch0 set port 5 pvid 1 flags Tag
 	switchctl /dev/switch0 set port 6 pvid 1 flags Tag
 
-	gpioctl -f /dev/gpioc0 -c 14 IN II PU INT
+	gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
 
 	# Import MAC addresses with known names
 	kenv LAN_MAC_ADDR=`kenv ethaddr`
