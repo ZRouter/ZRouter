@@ -12,7 +12,7 @@ echo f1 > /dev/led/status
 if [ "$1" = autoboot ]; then
 	autoboot=yes
 	_boot="faststart"
-	rc_fast=yes        
+	rc_fast=yes
 else
 	autoboot=no
 	_boot="quietstart"
