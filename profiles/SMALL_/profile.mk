@@ -118,11 +118,13 @@ grep \
 head \
 id \
 killall \
+logger \
 login \
 minigzip \
 netstat \
 passwd \
 sed \
+sockstat \
 tail \
 tar \
 tee \
@@ -173,7 +175,8 @@ chroot \
 cron \
 pwd_mkdb \
 inetd \
-gpioctl
+gpioctl \
+syslogd
 
 .if defined(WITH_USB)
 WORLD_SUBDIRS_USR_SBIN+= \

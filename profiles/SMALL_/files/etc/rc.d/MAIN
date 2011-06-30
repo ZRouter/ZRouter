@@ -28,6 +28,9 @@ main_prestart()
 	mkdir -p /tmp/var/log
 	mkdir -p /tmp/var/run
 	mkdir -p /tmp/var/spool/lock
+	touch /tmp/var/log/all.log
+
+	syslogd -s
 
 	mount_unionfs /tmp/etc /etc
 
@@ -40,9 +43,9 @@ main_prestart()
 	ipfw add 65000 allow all from any to any
 	ifconfig lo0 127.0.0.1/8
 	#ifconfig rt0 192.168.0.28/24
-	/sbin/mpd  --background
+	mpd  --background
 
-	/usr/sbin/inetd -wW
+	inetd -wW
 
 }
 
