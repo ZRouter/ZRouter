@@ -90,6 +90,7 @@
   
   struct ifacestate {
     char		ifname[IFNAMSIZ];	/* Name of my interface */
+    char		ngname[IFNAMSIZ];	/* Name of my Netgraph node */
     uint		ifindex;		/* System interface index */
     struct ifaceconf	conf;
     u_char		traffic[IFACE_IDLE_SPLIT];	/* Mark any traffic */

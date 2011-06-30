@@ -70,6 +70,7 @@
     SET_ADDRS,
     SET_ROUTE,
     SET_MTU,
+    SET_NAME,
     SET_UP_SCRIPT,
     SET_DOWN_SCRIPT,
     SET_ENABLE,
@@ -142,6 +143,8 @@
 	IfaceSetCommand, NULL, 2, (void *) SET_ROUTE },
     { "mtu {size}",			"Set max allowed interface MTU",
 	IfaceSetCommand, NULL, 2, (void *) SET_MTU },
+    { "name {name}",			"Set interface name",
+	IfaceSetCommand, NULL, 2, (void *) SET_NAME },
     { "up-script [{progname}]",		"Interface up script",
 	IfaceSetCommand, NULL, 2, (void *) SET_UP_SCRIPT },
     { "down-script [{progname}]",	"Interface down script",
@@ -1333,6 +1336,38 @@ IfaceSetCommand(Context ctx, int ac, char *av[], void *arg)
       }
       break;
 
+    case SET_NAME:
+      {
+	char *name = av[0];
+	struct ifreq ifr;
+	int s;
+
+	if (strlen(name) >= IF_NAMESIZE)
+	  Error("Interface name too long, >15 characters");
+
+	/* Get socket */
+	if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	  Error("[%s] IFACE: Can't get socket to set name", ctx->bund->name);
+	}
+
+	/* Set name of interface */
+	memset(&ifr, 0, sizeof(ifr));
+	strlcpy(ifr.ifr_name, iface->ifname, sizeof(ifr.ifr_name));
+	ifr.ifr_data = (caddr_t)name;
+	Log(LG_IFACE2, ("[%s] IFACE: setting %s name to %s",
+	  ctx->bund->name, iface->ifname, name));
+	if (ioctl(s, SIOCSIFNAME, (char *)&ifr) != -1) {
+	  close(s);
+	  /* Save name */
+	  strlcpy(iface->ifname, name, sizeof(iface->ifname));
+	} else {
+	  close(s);
+	  Error("[%s] IFACE: ioctl(%s, %s)", ctx->bund->name,
+	    iface->ifname, "SIOCSIFNAME");
+	}
+      }
+      break;
+
     case SET_UP_SCRIPT:
       switch (ac) {
 	case 0:
@@ -1917,7 +1952,7 @@ IfaceNgIpInit(Bund b, int ready)
 
     /* Connect graph to the iface node. */
     strcpy(cn.ourhook, hook);
-    snprintf(cn.path, sizeof(cn.path), "%s:", b->iface.ifname);
+    snprintf(cn.path, sizeof(cn.path), "%s:", b->iface.ngname);
     strcpy(cn.peerhook, NG_IFACE_HOOK_INET);
     if (NgSendMsg(gLinksCsock, path,
     	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
@@ -2006,7 +2041,7 @@ IfaceNgIpShutdown(Bund b)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     NgFuncDisconnect(gLinksCsock, b->name, path, NG_PPP_HOOK_INET);
 
-    snprintf(path, sizeof(path), "%s:", b->iface.ifname);
+    snprintf(path, sizeof(path), "%s:", b->iface.ngname);
     NgFuncDisconnect(gLinksCsock, b->name, path, NG_IFACE_HOOK_INET);
 }
 
@@ -2037,7 +2072,7 @@ IfaceNgIpv6Init(Bund b, int ready)
 
     /* Connect graph to the iface node. */
     strcpy(cn.ourhook, hook);
-    snprintf(cn.path, sizeof(cn.path), "%s:", b->iface.ifname);
+    snprintf(cn.path, sizeof(cn.path), "%s:", b->iface.ngname);
     strcpy(cn.peerhook, NG_IFACE_HOOK_INET6);
     if (NgSendMsg(gLinksCsock, path,
     	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
@@ -2069,7 +2104,7 @@ IfaceNgIpv6Shutdown(Bund b)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     NgFuncDisconnect(gLinksCsock, b->name, path, NG_PPP_HOOK_IPV6);
 
-    snprintf(path, sizeof(path), "%s:", b->iface.ifname);
+    snprintf(path, sizeof(path), "%s:", b->iface.ngname);
     NgFuncDisconnect(gLinksCsock, b->name, path, NG_IFACE_HOOK_INET6);
 }
 
