@@ -45,6 +45,8 @@ dofile('lib/base64.lua');
 --dofile("lib/sock.lua");
 -- MPD helper
 dofile("lib/mpd.lua");
+-- RACOON helper
+dofile("lib/racoon.lua");
 -- DHCPD helper
 dofile("lib/dhcpd.lua");
 -- HOSTAPD helper
@@ -75,8 +77,12 @@ function start_server( c, config )
     --
     --  Bind a socket to the given port
     -- c:getNode("http.host"):value()
-    config.listener = assert(socket.bind("*", c:getNode("http.port"):value()));
-    config.listener:settimeout(5);
+    s = socket.tcp();
+    assert(s:setoption("reuseaddr", true));
+    assert(s:bind("*", c:getNode("http.port"):value()));
+    assert(s:listen(8));
+    assert(s:settimeout(5));
+    config.listener = s;
 
     --
     --   Print some status messages.
@@ -972,8 +978,6 @@ start_dhcpd(c);
 -- ap = HOSTAPD:new(c, 1);
 -- ap:run();
 
-print("Init WAN links");
-configure_wan(c);
 
 os.execute("ipfw add 100 allow ip from any to any via lo0");
 os.execute("ipfw add 200 deny ip from any to 127.0.0.0/8");
@@ -987,6 +991,29 @@ os.execute("ipfw add 600 deny tcp from any to me 80");
 -- check w/ ipfw NAT-ed packets
 os.execute("sysctl net.inet.ip.fw.one_pass=0");
 
+racoon = 0;
+if racoon == 0 then
+	racoon = RACOON:new(c);
+end
+
+-- WAN links tasks
+table.insert(r.tasks.countdown, { count=2, task=
+	function()
+	    print("Init WAN links");
+	    os.execute("echo 'Init WAN links ...' > /dev/console");
+	    configure_wan(c);
+	    return (true); 
+	end 
+    });
+-- IPSec links tasks
+table.insert(r.tasks.countdown, { count=10, task=
+	function()
+	    print("Run racoon");
+	    os.execute("echo 'Run racoon ...' > /dev/console");
+	    racoon:run();
+	    return (true); 
+	end 
+    });
 
 print("Run server ...");
 start_server( c, config );

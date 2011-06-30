@@ -226,6 +226,7 @@
             <hash_algorithm>md5</hash_algorithm>
             <authentication_method>pre_shared_key</authentication_method>
             <dh_group>5</dh_group>
+            <psk>pskpskpsk</psk>
 	</proposal>
     </remote>
     <sainfo id="0" enable="true"> 

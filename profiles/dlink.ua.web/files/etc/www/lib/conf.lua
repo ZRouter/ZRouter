@@ -12,6 +12,14 @@ function Conf:gettree()
     return (self.tree);
 end
 
+function Conf:getNodeValue(path)
+    local node = self:getNode(path);
+    if type(node) == "table" then
+	return (node:value());
+    end
+    return (nil);
+end
+
 function Conf:getNode(path)
     local function getNodeL(node, lpath)
         local match, name, rpath, id = nil;

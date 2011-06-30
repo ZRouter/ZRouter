@@ -1,3 +1,16 @@
+
+function readpid(pidfilename)
+    local pidfile = io.open(pidfilename, "r");
+    if pidfile then
+	local pid = assert(pidfile:read("*n"));
+	pidfile:close();
+	return (pid);
+    end
+    -- TODO: rise error on read/open failures
+    return (nil);
+end
+
+
 --
 -- check(pidfilename)
 -- check for pid file and runnig process
@@ -7,11 +20,8 @@
 --
 
 function checkpid(pidfilename)
-    local pidfile = io.open(pidfilename, "r");
-    if pidfile then
-	local oldpid = assert(pidfile:read("*n"));
-	pidfile:close();
-
+    local oldpid = readpid(pidfilename);
+    if oldpid and oldpid > 0 then
 	local ret = os.execute("ps -axo command= " .. oldpid);
 	if ret == 0 then
 	    return (1); -- Process running
@@ -42,3 +52,18 @@ function pidfile(pidfilename)
 
     return (true);
 end
+
+
+function pidfile_signal(pidfilename, signal)
+    return (false);
+end
+
+--
+--
+-- Terminate running holder of pidfile, and write new pidfile
+--
+
+function pidfile_replace_stop()
+end
+
+
