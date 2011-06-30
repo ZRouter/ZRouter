@@ -1,6 +1,7 @@
 DialPeer:
 	set $CallingID ""
 	set $CalledID $Telephone
+	if $TryPPPEarly == "yes" call AutoLogin
 	if $Telephone == "00000" goto DialNullModem
 	set $optimize $OptimizeNextTime
 	set $OptimizeNextTime "no"
