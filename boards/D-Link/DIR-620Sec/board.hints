@@ -12,11 +12,10 @@ hint.nvram.1.maxsize=0x4000
 hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
 
 # on-board Ralink Frame Engine
-#hint.rt.0.at="nexus0"
-#hint.rt.0.maddr=0x12000000
-#hint.rt.0.msize=0x200000
-#hint.rt.0.irq=9
-hint.rt.0.macaddr="00:18:e7:d5:83:90"
+hint.rt.0.at="nexus0"
+hint.rt.0.maddr=0x10100000
+hint.rt.0.msize=0x10000
+hint.rt.0.irq=3
 
 # uart0
 #hint.uart.0.at="obio0"
@@ -64,13 +63,13 @@ hint.gpiobutton.0.flags="0x04a1"
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.pins="0x0100"
 hint.gpioled.0.name="status_yellow"
-hint.gpioled.0.flags="0x0002"
+hint.gpioled.0.flags="0x0102"
 
 #GPIO9  STATUS
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.pins="0x0200"
 hint.gpioled.1.name="status"
-hint.gpioled.1.flags="0x0002"
+hint.gpioled.1.flags="0x0102"
 
 #GPIO11 WPS Orange
 hint.gpioled.2.at="gpiobus0"
@@ -82,19 +81,19 @@ hint.gpioled.2.flags="0x0002"
 hint.gpioled.3.at="gpiobus0"
 hint.gpioled.3.pins="0x1000"
 hint.gpioled.3.name="wan"
-hint.gpioled.3.flags="0x0002"
+hint.gpioled.3.flags="0x0102"
 
 #GPIO13 WPS Blue
-hint.gpioled.3.at="gpiobus0"
-hint.gpioled.3.pins="0x2000"
-hint.gpioled.3.name="wps"
-hint.gpioled.3.flags="0x0002"
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.pins="0x2000"
+hint.gpioled.4.name="wps"
+hint.gpioled.4.flags="0x0002"
 
 #GPIO14 WAN Yellow
-hint.gpioled.3.at="gpiobus0"
-hint.gpioled.3.pins="0x4000"
-hint.gpioled.3.name="wan_yellow"
-hint.gpioled.3.flags="0x0002"
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.pins="0x4000"
+hint.gpioled.5.name="wan_yellow"
+hint.gpioled.5.flags="0x0102"
 
 hint.cfi.0.width=2
 hint.cfi.0.shift=2
