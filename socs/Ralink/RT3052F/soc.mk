@@ -1,9 +1,4 @@
 
-
-.warning "Ralink/RT3052F SoC"
-
-
-
 #XXX testing
 LZMA=lzma
 KERNEL_PATH=/usr/obj/kernel
@@ -53,8 +48,11 @@ KERNCONF_OPTIONS+=		SCSI_NO_OP_STRINGS
 #KERNCONF_MAKEOPTIONS+=	MODULES_OVERRIDE="wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt random if_bridge bridgestp msdosfs md ipfw dummynet libalias geom/geom_label geom/geom_uncompress ufs usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib"
 
 # Debug definitions
-#KERNCONF_OPTIONS+=		DDB
-#KERNCONF_OPTIONS+=		KDB
+##KERNCONF_MAKEOPTIONS+=	"DEBUG=-g"
+KERNCONF_OPTIONS+=		DDB
+KERNCONF_OPTIONS+=		KDB
+##KERNCONF_OPTIONS+=		PREEMPTION
+##KERNCONF_OPTIONS+=		KTRACE
 #KERNCONF_OPTIONS+=		LOCK_PROFILING
 #KERNCONF_OPTIONS+=		KTR
 
@@ -84,6 +82,10 @@ KERNCONF_DEVICES+=	vlan
 KERNCONF_DEVICES+=	uart
 KERNCONF_DEVICES+=	tun
 
+#KERNCONF_OPTIONS+=	IF_RT_DEBUG
+#KERNCONF_OPTIONS+=	IF_RT_PHY_SUPPORT
+#KERNCONF_OPTIONS+=	IF_RT_RING_DATA_COUNT=128
+KERNCONF_DEVICES+=	rt
 #KERNCONF_OPTIONS+=	RT2860_DEBUG
 .if !defined(WITHOUT_WIRELESS)
 KERNCONF_DEVICES+=	rt2860
