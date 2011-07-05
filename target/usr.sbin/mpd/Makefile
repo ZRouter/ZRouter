@@ -5,7 +5,7 @@
 MPDDIR=${.CURDIR}/../../../contrib/mpd
 .PATH: ${MPDDIR}/src/
 
-CFLAGS+=	-I${MPDDIR}
+CFLAGS+=	-I${MPDDIR} -I${.CURDIR}
 
 PROG=		mpd
 NO_MAN=		mpd.8

@@ -151,10 +151,7 @@
     char		lineBuf[CHAT_MAX_LINE];		/* line buffer */
     char		readBuf[CHAT_READBUF_SIZE];	/* read buffer */
     int			readBufLen;
-    chatlogfunc_t	log /*__printflike(2, 3)*/;
     chatbaudfunc_t	setBaudrate;
-    chatmallocfunc_t	malloc;
-    chatfreefunc_t	free;
     chatresultfunc_t	result;
   };
 
@@ -239,18 +236,13 @@
  */
 
 ChatInfo
-ChatInit(void *arg, chatbaudfunc_t setBaudrate,
-	chatlogfunc_t logger, chatmallocfunc_t malloc, chatfreefunc_t free)
+ChatInit(void *arg, chatbaudfunc_t setBaudrate)
 {
   ChatInfo	c;
 
-  c = (ChatInfo) (*malloc)(arg, sizeof(*c));
-  memset(c, 0, sizeof(*c));
+  c = (ChatInfo) Malloc(MB_CHAT, sizeof(*c));
   c->arg = arg;
   c->setBaudrate = setBaudrate;
-  c->log = logger;
-  c->malloc = malloc;
-  c->free = free;
   return(c);
 }
 
@@ -271,9 +263,11 @@ ChatActive(ChatInfo c)
 void
 ChatPresetVar(ChatInfo c, const char *name, const char *value)
 {
+  Link	const l = (Link) c->arg;
+
   if (ChatVarSet(c, name, value, 1, 1) < 0)
   {
-    (*c->log)(c->arg, CHAT_LG_ERROR, "chat: invalid variable \"%s\"", name);
+    Log(LG_ERR, ("[%s] CHAT: chat: invalid variable \"%s\"", l->name, name));
     return;
   }
 }
@@ -289,9 +283,7 @@ ChatGetVar(ChatInfo c, const char *var)
 {
   ChatVar	const cv = ChatVarGet(c, var);
 
-  return cv ?
-    strcpy((char *) (*c->malloc)(c->arg, strlen(cv->value) + 1), cv->value) :
-    NULL;
+  return cv ? Mstrdup(MB_CHAT, cv->value) : NULL;
 }
 
 /*
@@ -307,6 +299,7 @@ ChatStart(ChatInfo c, int fd, FILE *scriptfp,
 {
   ChatVar	baud;
   const char	*labelName;
+  Link	const l = (Link) c->arg;
 
 /* Sanity */
 
@@ -314,9 +307,9 @@ ChatStart(ChatInfo c, int fd, FILE *scriptfp,
   assert(c->state == CHAT_IDLE);
 
   if (label)
-    (*c->log)(c->arg, CHAT_LG_DEBUG, "running script at label \"%s\"", label);
+    Log(LG_CHAT2, ("[%s] CHAT: running script at label \"%s\"", l->name, label));
   else
-    (*c->log)(c->arg, CHAT_LG_DEBUG, "running script from beginning");
+    Log(LG_CHAT2, ("[%s] CHAT: running script from beginning", l->name));
 
   c->result = result;
   c->fd = fd;
@@ -327,8 +320,7 @@ ChatStart(ChatInfo c, int fd, FILE *scriptfp,
 
   assert(!c->scriptName);
   labelName = label ? label : "<default>";
-  c->scriptName =
-    strcpy((char *) (*c->malloc)(c->arg, strlen(labelName) + 1), labelName);
+  c->scriptName = Mstrdup(MB_CHAT, labelName);
 
 /* Jump to label, if any */
 
@@ -352,8 +344,10 @@ ChatStart(ChatInfo c, int fd, FILE *scriptfp,
 void
 ChatAbort(ChatInfo c)
 {
+  Link	const l = (Link) c->arg;
+
   if (c->state != CHAT_IDLE)
-    (*c->log)(c->arg, CHAT_LG_DEBUG, "script halted");
+    Log(LG_CHAT2, ("[%s] CHAT: script halted", l->name));
   ChatStop(c);
 }
 
@@ -368,6 +362,7 @@ ChatRead(int type, void *cookie)
   ChatMatch	match;
   int		nread, lineBufLen;
   char		ch;
+  Link		const l = (Link) c->arg;
 
 /* Sanity */
 
@@ -384,12 +379,12 @@ ChatRead(int type, void *cookie)
     {
       if (errno == EAGAIN)
 	break;
-      (*c->log)(c->arg, CHAT_LG_ERROR, "read: %s", strerror(errno));
+      Log(LG_ERR, ("[%s] CHAT: read: %s", l->name, strerror(errno)));
       goto die;
     }
     else if (nread == 0)
     {
-      (*c->log)(c->arg, CHAT_LG_NORMAL, "detected EOF from device");
+      Log(LG_CHAT, ("[%s] CHAT: detected EOF from device", l->name));
 die:
       ChatFailure(c);
       return;
@@ -406,7 +401,7 @@ die:
     if (lineBufLen < sizeof(c->lineBuf) - 1) {
       c->lineBuf[lineBufLen++] = ch;
     } else {
-      (*c->log)(c->arg, CHAT_LG_NORMAL, "warning: line buffer overflow");
+      Log(LG_CHAT, ("[%s] CHAT: warning: line buffer overflow", l->name));
     }
 
   /* Try to match a match pattern */
@@ -424,8 +419,7 @@ die:
 
       /* Check for end of line */
 
-	pmatch = (*c->malloc)(c->arg, nmatch * sizeof(*pmatch));
-	memset(pmatch, 0, nmatch * sizeof(*pmatch));
+	pmatch = Malloc(MB_CHAT, nmatch * sizeof(*pmatch));
 	pmatch[0].rm_so = 0;
 	pmatch[0].rm_eo = lineBufLen;
 	if (pmatch[0].rm_eo > 0 && c->lineBuf[pmatch[0].rm_eo - 1] == '\n') {
@@ -440,14 +434,14 @@ die:
 	switch ((r = regexec(&match->u.regex,
 		c->lineBuf, nmatch, pmatch, flags))) {
 	  default:
-	    (*c->log)(c->arg, CHAT_LG_ERROR, "regexec() returned %d?", r);
+	    Log(LG_ERR, ("[%s] CHAT: regexec() returned %d?", l->name, r));
 	    /* fall through */
 	  case REG_NOMATCH:
-	    (*c->free)(c->arg, pmatch);
+	    Freee(pmatch);
 	    continue;
 	  case 0:
 	    ChatSetMatchVars(c, 0, c->lineBuf, nmatch, pmatch);
-	    (*c->free)(c->arg, pmatch);
+	    Freee(pmatch);
 	    break;
 	}
 	break;
@@ -466,8 +460,8 @@ die:
       int	numPop;
 
       ChatDumpReadBuf(c);
-      (*c->log)(c->arg, CHAT_LG_DEBUG, "matched set \"%s\", goto label \"%s\"", 
-    	    match->set, match->label);
+      Log(LG_CHAT2, ("[%s] CHAT: matched set \"%s\", goto label \"%s\"",
+         l->name, match->set, match->label));
       numPop = match->frameDepth;
       strlcpy(label, match->label, sizeof(label));
       ChatCancel(c, match->set);
@@ -498,6 +492,7 @@ ChatTimeout(int type, void *cookie)
   ChatTimer	*tp;
   char		label[CHAT_MAX_LABEL];
   int		numPop;
+  Link		const l = (Link) c->arg;
 
 /* Sanity */
 
@@ -507,7 +502,7 @@ ChatTimeout(int type, void *cookie)
 
   for (tp = &c->timers; *tp != timer; tp = &(*tp)->next);
   assert(*tp);
-  (*c->log)(c->arg, CHAT_LG_DEBUG, "timer in set \"%s\" expired", timer->set);
+  Log(LG_CHAT2, ("[%s] CHAT: timer in set \"%s\" expired", l->name, timer->set));
 
 /* Cancel set */
 
@@ -536,6 +531,7 @@ static void
 ChatRun(ChatInfo c)
 {
   char	*line;
+  Link	const l = (Link) c->arg;
 
 /* Sanity */
 
@@ -557,20 +553,20 @@ ChatRun(ChatInfo c)
 
     if (!isspace(*line))
     {
-      (*c->free)(c->arg, line);
+      Freee(line);
       continue;
     }
 
   /* Parse out line */
 
     ac = ChatParseLine(c, line, av, CHAT_MAX_ARGS);
-    (*c->free)(c->arg, line);
+    Freee(line);
 
   /* Do command */
 
     ChatDoCmd(c, ac, av);
     while (ac > 0)
-      (*c->free)(c->arg, av[--ac]);
+      Freee(av[--ac]);
   }
 
 /* What state are we in? */
@@ -578,7 +574,7 @@ ChatRun(ChatInfo c)
   switch (c->state)
   {
     case CHAT_RUNNING:
-      (*c->log)(c->arg, CHAT_LG_ERROR, "EOF while reading script");
+      Log(LG_ERR, ("[%s] CHAT: EOF while reading script", l->name));
       ChatFailure(c);
       break;
     case CHAT_WAIT:
@@ -604,6 +600,7 @@ ChatDoCmd(ChatInfo c, int ac, char *av[])
   char	buf[200];
   u_int	secs;
   int	j, k;
+  Link	const l = (Link) c->arg;
 
 /* Show command */
 
@@ -612,7 +609,7 @@ ChatDoCmd(ChatInfo c, int ac, char *av[])
     snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
       !*av[k] || av[k][j] ? " \"%s\"" : " %s", av[k]);
   }
-  (*c->log)(c->arg, CHAT_LG_DEBUG, "line %d:%s", c->lineNum, buf);
+  Log(LG_CHAT2, ("[%s] CHAT: line %d:%s", l->name, c->lineNum, buf));
 
 /* Execute command */
 
@@ -627,8 +624,8 @@ ChatDoCmd(ChatInfo c, int ac, char *av[])
     case CMD_SET:
       if (ChatVarSet(c, av[1], av[2], 1, 0) < 0)
       {
-	(*c->log)(c->arg, CHAT_LG_ERROR,
-	  "line %d: %s: invalid variable \"%s\"", c->lineNum, SET, av[1]);
+	Log(LG_ERR, ("[%s] CHAT: line %d: %s: invalid variable \"%s\"",
+	  l->name, c->lineNum, SET, av[1]));
 	ChatFailure(c);
       }
       break;
@@ -710,8 +707,8 @@ ChatDoCmd(ChatInfo c, int ac, char *av[])
       {
 	if (!c->matches && !c->timers)
 	{
-	  (*c->log)(c->arg, CHAT_LG_ERROR,
-	    "line %d: %s with no events pending", c->lineNum, WAIT);
+	  Log(LG_ERR, ("[%s] CHAT: line %d: %s with no events pending",
+	    l->name, c->lineNum, WAIT));
 	  ChatFailure(c);
 	}
 	else
@@ -771,6 +768,7 @@ ChatIf(ChatInfo c, int ac, char *av[])
   char	*const arg1 = ChatExpandString(c, av[1]);
   char	*const arg2 = ChatExpandString(c, av[3]);
   int	proceed = 0, invert = 0;
+  Link	const l = (Link) c->arg;
 
 /* Check operator */
 
@@ -785,20 +783,19 @@ ChatIf(ChatInfo c, int ac, char *av[])
 
     if ((errcode = regcomp(&regex, arg2, REG_EXTENDED)) != 0) {
       regerror(errcode, &regex, errbuf, sizeof(errbuf));
-      (*c->log)(c->arg, CHAT_LG_ERROR,
-	"line %d: invalid regular expression \"%s\": %s",
-	c->lineNum, arg2, errbuf);
+      Log(LG_ERR, ("[%s] CHAT: line %d: invalid regular expression \"%s\": %s",
+        l->name, c->lineNum, arg2, errbuf));
     } else {
       proceed = ChatMatchRegex(c, &regex, arg1);
       regfree(&regex);
       invert = (*av[2] == '!');
     }
   } else {
-    (*c->log)(c->arg, CHAT_LG_ERROR,
-      "line %d: invalid operator \"%s\"", c->lineNum, av[2]);
+    Log(LG_ERR, ("[%s] CHAT: line %d: invalid operator \"%s\"",
+      l->name, c->lineNum, av[2]));
   }
-  (*c->free)(c->arg, arg1);
-  (*c->free)(c->arg, arg2);
+  Freee(arg1);
+  Freee(arg2);
 
 /* Do command */
 
@@ -830,7 +827,7 @@ ChatFailure(ChatInfo c)
   c->lastLog = NULL;
   ChatStop(c);
   (*c->result)(c->arg, 0, reason);
-  (*c->free)(c->arg, reason);
+  Freee(reason);
 }
 
 /*
@@ -847,9 +844,9 @@ ChatStop(ChatInfo c)
   for (var = c->temps; var; var = next)
   {
     next = var->next;
-    (*c->free)(c->arg, var->name);
-    (*c->free)(c->arg, var->value);
-    (*c->free)(c->arg, var);
+    Freee(var->name);
+    Freee(var->value);
+    Freee(var);
   }
   c->temps = NULL;
 
@@ -863,7 +860,7 @@ ChatStop(ChatInfo c)
 
 /* Forget active script name */
 
-  (*c->free)(c->arg, c->scriptName);
+  Freee(c->scriptName);
   c->scriptName = NULL;
 
 /* Cancel all sets */
@@ -875,7 +872,7 @@ ChatStop(ChatInfo c)
   EventUnRegister(&c->rdEvent);
   EventUnRegister(&c->wrEvent);
   if (c->out != NULL) {
-    (*c->free)(c->arg, c->out);
+    Freee(c->out);
     c->out = NULL;
     c->outLen = 0;
   }
@@ -890,7 +887,7 @@ ChatStop(ChatInfo c)
   c->readBufLen = 0;
   if (c->lastLog)
   {
-    (*c->free)(c->arg, c->lastLog);
+    Freee(c->lastLog);
     c->lastLog = NULL;
   }
 
@@ -908,13 +905,13 @@ ChatAddMatch(ChatInfo c, int exact, const char *set,
 	char *pat, const char *label)
 {
   ChatMatch	match, *mp;
+  Link		const l = (Link) c->arg;
 
   /* Expand pattern */
   pat = ChatExpandString(c, pat);
 
   /* Create new match */
-  match = (ChatMatch) (*c->malloc)(c->arg, sizeof(*match));
-  memset(match, 0, sizeof(*match));
+  match = (ChatMatch) Malloc(MB_CHAT, sizeof(*match));
   match->exact = !!exact;
   if (exact) {
     match->u.exact.pat = pat;
@@ -926,16 +923,15 @@ ChatAddMatch(ChatInfo c, int exact, const char *set,
 
     /* Convert pattern into compiled regular expression */
     errcode = regcomp(&match->u.regex, pat, REG_EXTENDED);
-    (*c->free)(c->arg, pat);
+    Freee(pat);
 
     /* Check for error */
     if (errcode != 0) {
       regerror(errcode, &match->u.regex, errbuf, sizeof(errbuf));
-      (*c->log)(c->arg, CHAT_LG_ERROR,
-	"line %d: invalid regular expression \"%s\": %s",
-	c->lineNum, pat, errbuf);
+      Log(LG_ERR, ("[%s] CHAT: line %d: invalid regular expression \"%s\": %s",
+        l->name, c->lineNum, pat, errbuf));
       ChatFailure(c);
-      (*c->free)(c->arg, match);
+      Freee(match);
       return;
     }
   }
@@ -960,8 +956,7 @@ ChatAddTimer(ChatInfo c, const char *set, u_int secs, const char *label)
 
 /* Add new timer */
 
-  timer = (ChatTimer) (*c->malloc)(c->arg, sizeof(*timer));
-  memset(timer, 0, sizeof(*timer));
+  timer = (ChatTimer) Malloc(MB_CHAT, sizeof(*timer));
   timer->c = c;
   timer->set = ChatExpandString(c, set);
   timer->label = ChatExpandString(c, label);
@@ -1013,7 +1008,7 @@ ChatCancel(ChatInfo c, const char *set0)
 
 /* Done */
 
-  (*c->free)(c->arg, set);
+  Freee(set);
 }
 
 /*
@@ -1026,6 +1021,7 @@ ChatGoto(ChatInfo c, const char *label0)
   const int	lineNum = c->lineNum;
   char		*label;
   int		rtn;
+  Link		const l = (Link) c->arg;
 
 /* Expand label */
 
@@ -1035,7 +1031,7 @@ ChatGoto(ChatInfo c, const char *label0)
 
   if (!strcmp(label, DEFAULT_LABEL))
   {
-    (*c->free)(c->arg, label);
+    Freee(label);
     return(0);
   }
 
@@ -1043,11 +1039,11 @@ ChatGoto(ChatInfo c, const char *label0)
 
   if ((rtn = ChatSeekToLabel(c, label)) < 0)
   {
-    (*c->log)(c->arg, CHAT_LG_ERROR,
-      "line %d: label \"%s\" not found", lineNum, label);
+    Log(LG_ERR, ("[%s] CHAT: line %d: label \"%s\" not found",
+      l->name, lineNum, label));
     ChatFailure(c);
   }
-  (*c->free)(c->arg, label);
+  Freee(label);
   return(rtn);
 }
 
@@ -1062,6 +1058,7 @@ ChatCall(ChatInfo c, const char *label0)
   ChatMatch	match;
   ChatTimer	timer;
   char		*label;
+  Link		const l = (Link) c->arg;
 
 /* Expand label */
 
@@ -1069,8 +1066,7 @@ ChatCall(ChatInfo c, const char *label0)
 
 /* Adjust stack */
 
-  frame = (ChatFrame) (*c->malloc)(c->arg, sizeof(*frame));
-  memset(frame, 0, sizeof(*frame));
+  frame = (ChatFrame) Malloc(MB_CHAT, sizeof(*frame));
   fgetpos(c->fp, &frame->posn);
   frame->lineNum = c->lineNum;
   frame->up = c->stack;
@@ -1080,11 +1076,11 @@ ChatCall(ChatInfo c, const char *label0)
 
   if (ChatSeekToLabel(c, label) < 0)
   {
-    (*c->log)(c->arg, CHAT_LG_ERROR,
-      "line %d: %s: label \"%s\" not found", frame->lineNum, CALL, label);
+    Log(LG_ERR, ("[%s] CHAT: line %d: %s: label \"%s\" not found",
+      l->name, frame->lineNum, CALL, label));
     ChatFailure(c);
   }
-  (*c->free)(c->arg, label);
+  Freee(label);
 
 /* Increment call depth for timer and match events */
 
@@ -1104,11 +1100,12 @@ ChatReturn(ChatInfo c, int seek)
   ChatFrame	frame;
   ChatMatch	*mp, match;
   ChatTimer	*tp, timer;
+  Link		const l = (Link) c->arg;
 
   if (c->stack == NULL)
   {
-    (*c->log)(c->arg, CHAT_LG_ERROR,
-      "line %d: %s without corresponding %s", c->lineNum, RETURN, CALL);
+    Log(LG_ERR, ("[%s] CHAT: line %d: %s without corresponding %s",
+      l->name, c->lineNum, RETURN, CALL));
     ChatFailure(c);
     return;
   }
@@ -1121,7 +1118,7 @@ ChatReturn(ChatInfo c, int seek)
     c->lineNum = frame->lineNum;
   }
   c->stack = frame->up;
-  (*c->free)(c->arg, frame);
+  Freee(frame);
 
 /* Decrement call depth for timer and match events */
 
@@ -1149,11 +1146,12 @@ static void
 ChatLog(ChatInfo c, int code, const char *string)
 {
   char	*exp_string;
+  Link	const l = (Link) c->arg;
 
   exp_string = ChatExpandString(c, string);
-  (*c->log)(c->arg, CHAT_LG_NORMAL, "%s", exp_string);
+  Log(LG_CHAT, ("[%s] CHAT: %s", l->name, exp_string));
   if (c->lastLog)
-    (*c->free)(c->arg, c->lastLog);
+    Freee(c->lastLog);
   c->lastLog = exp_string;
 }
 
@@ -1170,10 +1168,10 @@ ChatPrint(ChatInfo c, const char *string)
 /* Add variable-expanded string to output queue */
 
   exp_len = strlen(exp_string = ChatExpandString(c, string));
-  buf = (*c->malloc)(c->arg, c->outLen + exp_len);
+  buf = Malloc(MB_CHAT, c->outLen + exp_len);
   if (c->out != NULL) {
     memcpy(buf, c->out, c->outLen);
-    (*c->free)(c->arg, c->out);
+    Freee(c->out);
   } else
     assert(c->outLen == 0);
   memcpy(buf + c->outLen, exp_string, exp_len);
@@ -1183,7 +1181,7 @@ ChatPrint(ChatInfo c, const char *string)
 /* Debugging dump */
 
   ChatDumpBuf(c, exp_string, exp_len, "sending");
-  (*c->free)(c->arg, exp_string);
+  Freee(exp_string);
 
 /* Simulate a writable event to get things going */
 
@@ -1199,6 +1197,7 @@ ChatWrite(int type, void *cookie)
 {
   ChatInfo	const c = (ChatInfo) cookie;
   int		nw;
+  Link		const l = (Link) c->arg;
 
 /* Write as much as we can */
 
@@ -1206,7 +1205,7 @@ ChatWrite(int type, void *cookie)
   if ((nw = write(c->fd, c->out, c->outLen)) < 0) {
     if (errno == EAGAIN)
       return;
-    (*c->log)(c->arg, CHAT_LG_ERROR, "write: %s", strerror(errno));
+    Log(LG_ERR, ("[%s] CHAT: write: %s", l->name, strerror(errno)));
     ChatFailure(c);
     return;
   }
@@ -1215,7 +1214,7 @@ ChatWrite(int type, void *cookie)
 
   c->outLen -= nw;
   if (c->outLen <= 0) {
-    (*c->free)(c->arg, c->out);
+    Freee(c->out);
     c->out = NULL;
     c->outLen = 0;
   } else {
@@ -1233,11 +1232,12 @@ ChatSetBaudrate(ChatInfo c, const char *new)
 {
   char	*endptr;
   int	rate = strtoul(new, &endptr, 0);
+  Link	const l = (Link) c->arg;
 
   if (!*new || *endptr || (*c->setBaudrate)(c->arg, rate) < 0)
   {
-    (*c->log)(c->arg, CHAT_LG_NORMAL,
-      "line %d: invalid baudrate \"%s\"", c->lineNum, new);
+    Log(LG_CHAT, ("[%s] CHAT: line %d: invalid baudrate \"%s\"",
+       l->name, c->lineNum, new));
     ChatFailure(c);
     return(-1);
   }
@@ -1268,8 +1268,7 @@ ChatVarSet(ChatInfo c, const char *rname,
     new = ChatExpandString(c, value);
   else
   {
-    new = (*c->malloc)(c->arg, strlen(value) + 1);
-    strcpy(new, value);
+    new = Mstrdup(MB_CHAT, value);
   }
 
 /* Check for special variable names */
@@ -1278,7 +1277,7 @@ ChatVarSet(ChatInfo c, const char *rname,
   {
     if (!pre && ChatSetBaudrate(c, new) < 0)
     {
-      (*c->free)(c->arg, new);
+      Freee(new);
       return(0);
     }
   }
@@ -1293,17 +1292,15 @@ ChatVarSet(ChatInfo c, const char *rname,
 
     ovalue = var->value;
     var->value = new;
-    (*c->free)(c->arg, ovalue);
+    Freee(ovalue);
   }
   else
   {
 
   /* Create new struct and add to list */
 
-    var = (*c->malloc)(c->arg, sizeof(*var));
-    memset(var, 0, sizeof(*var));
-    var->name = (*c->malloc)(c->arg, strlen(name) + 1);
-    strcpy(var->name, name);
+    var = Malloc(MB_CHAT, sizeof(*var));
+    var->name = Mstrdup(MB_CHAT, name);
     var->value = new;
     var->next = *head;
     *head = var;
@@ -1380,15 +1377,15 @@ ChatVarExtract(const char *string, char *buf, int max, int strict)
 static void
 ChatFreeMatch(ChatInfo c, ChatMatch match)
 {
-  (*c->free)(c->arg, match->set);
-  (*c->free)(c->arg, match->label);
+  Freee(match->set);
+  Freee(match->label);
   if (match->exact) {
-    (*c->free)(c->arg, match->u.exact.pat);
-    (*c->free)(c->arg, match->u.exact.fail);
+    Freee(match->u.exact.pat);
+    Freee(match->u.exact.fail);
   } else {
     regfree(&match->u.regex);
   }
-  (*c->free)(c->arg, match);
+  Freee(match);
 }
 
 /*
@@ -1399,9 +1396,9 @@ static void
 ChatFreeTimer(ChatInfo c, ChatTimer timer)
 {
   EventUnRegister(&timer->event);
-  (*c->free)(c->arg, timer->set);
-  (*c->free)(c->arg, timer->label);
-  (*c->free)(c->arg, timer);
+  Freee(timer->set);
+  Freee(timer->label);
+  Freee(timer);
 }
 
 /*
@@ -1428,6 +1425,7 @@ static int
 ChatGetCmd(ChatInfo c, const char *token, int n_args)
 {
   int	k;
+  Link	const l = (Link) c->arg;
 
   for (k = 0; k < CHAT_NUM_COMMANDS; k++)
     if (!strcasecmp(gCmds[k].name, token))
@@ -1435,15 +1433,15 @@ ChatGetCmd(ChatInfo c, const char *token, int n_args)
       if ((gCmds[k].min && n_args < gCmds[k].min)
 	|| (gCmds[k].max && n_args > gCmds[k].max))
       {
-	(*c->log)(c->arg, CHAT_LG_ERROR,
-	  "line %d: %s: bad argument count", c->lineNum, token);
+	Log(LG_ERR, ("[%s] CHAT: line %d: %s: bad argument count",
+	  l->name, c->lineNum, token));
 	return(-1);
       }
       else
 	return(gCmds[k].id);
     }
-  (*c->log)(c->arg, CHAT_LG_ERROR,
-    "line %d: unknown command \"%s\"", c->lineNum, token);
+  Log(LG_ERR, ("[%s] CHAT: line %d: unknown command \"%s\"",
+    l->name, c->lineNum, token));
   return(-1);
 }
 
@@ -1501,7 +1499,7 @@ rescan:
 
   if (!doit)
   {
-    new = (*c->malloc)(c->arg, new_len + 1);
+    new = Malloc(MB_CHAT, new_len + 1);
     doit = 1;
     goto rescan;
   }
@@ -1541,9 +1539,9 @@ ChatSetMatchVars(ChatInfo c, int exact, const char *input, ...)
       continue;
     }
     *vp = var->next;
-    (*c->free)(c->arg, var->name);
-    (*c->free)(c->arg, var->value);
-    (*c->free)(c->arg, var);
+    Freee(var->name);
+    Freee(var->value);
+    Freee(var);
   }
 
   /* Set new match variables */
@@ -1553,7 +1551,7 @@ ChatSetMatchVars(ChatInfo c, int exact, const char *input, ...)
   } else {
     const int	nmatch = va_arg(args, int);
     regmatch_t	*const pmatch = va_arg(args, regmatch_t *);
-    char	*const value = (*c->malloc)(c->arg, strlen(input) + 1);
+    char	*const value = Malloc(MB_CHAT, strlen(input) + 1);
     int		k;
 
     for (k = 0; k < nmatch; k++) {
@@ -1567,7 +1565,7 @@ ChatSetMatchVars(ChatInfo c, int exact, const char *input, ...)
 	ChatVarSet(c, CHAT_VAR_MATCHED, value, 0, 0);
       ChatVarSet(c, name, value, 0, 0);
     }
-    (*c->free)(c->arg, value);
+    Freee(value);
   }
   va_end(args);
 }
@@ -1610,13 +1608,13 @@ static int
 ChatMatchRegex(ChatInfo c, regex_t *reg, const char *input)
 {
   const int	nmatch = reg->re_nsub + 1;
-  regmatch_t	*pmatch = (*c->malloc)(c->arg, nmatch * sizeof(*pmatch));
+  regmatch_t	*pmatch = Malloc(MB_CHAT, nmatch * sizeof(*pmatch));
   int		rtn, match;
+  Link		const l = (Link) c->arg;
 
-  memset(pmatch, 0, nmatch * sizeof(*pmatch));
   switch ((rtn = regexec(reg, input, nmatch, pmatch, 0))) {
     default:
-      (*c->log)(c->arg, CHAT_LG_ERROR, "regexec() returned %d?", rtn);
+      Log(LG_ERR, ("[%s] CHAT: regexec() returned %d?", l->name, rtn));
       /* fall through */
     case REG_NOMATCH:
       match = 0;
@@ -1626,7 +1624,7 @@ ChatMatchRegex(ChatInfo c, regex_t *reg, const char *input)
       match = 1;
       break;
   }
-  (*c->free)(c->arg, pmatch);
+  Freee(pmatch);
   return match;
 }
 
@@ -1647,8 +1645,7 @@ ChatComputeFailure(ChatInfo c, struct cm_exact *ex)
   const int	len = strlen(ex->pat);
   int		i, j, k;
 
-  ex->fail = (u_short *) (*c->malloc)(c->arg, len * sizeof(*ex->fail));
-  memset(ex->fail, 0, len * sizeof(*ex->fail));
+  ex->fail = (u_short *) Malloc(MB_CHAT, len * sizeof(*ex->fail));
   for (i = 1; i < len; i++) {
     for (j = i - 1; j > 0; j--) {
       for (k = 0; k < j && ex->pat[k] == ex->pat[i - j + k]; k++);
@@ -1669,13 +1666,14 @@ ChatDecodeTime(ChatInfo c, char *string, u_int *secsp)
 {
   u_long	secs;
   char		*secstr, *mark;
+  Link		const l = (Link) c->arg;
 
   secstr = ChatExpandString(c, string);
   secs = strtoul(secstr, &mark, 0);
-  (*c->free)(c->arg, secstr);
+  Freee(secstr);
   if (mark == secstr) {
-    (*c->log)(c->arg, CHAT_LG_ERROR,
-      "line %d: illegal value \"%s\"", c->lineNum, string);
+    Log(LG_ERR, ("[%s] CHAT: line %d: illegal value \"%s\"",
+      l->name, c->lineNum, string));
     return(0);
   }
   *secsp = (u_int) secs;
@@ -1724,12 +1722,13 @@ ChatDumpBuf(ChatInfo c, const char *buf, int len, const char *fmt, ...)
   va_list	args;
   char		cbuf[128];
   int		k, pos;
+  Link		const l = (Link) c->arg;
 
   /* Do label */
   va_start(args, fmt);
   vsnprintf(cbuf, sizeof(cbuf), fmt, args);
   va_end(args);
-  (*c->log)(c->arg, CHAT_LG_DEBUG, "%s", cbuf);
+  Log(LG_CHAT2, ("[%s] CHAT: %s", l->name, cbuf));
 
   /* Do bytes */
   for (pos = 0; pos < len; pos += DUMP_BYTES_PER_LINE) {
@@ -1753,8 +1752,6 @@ ChatDumpBuf(ChatInfo c, const char *buf, int len, const char *fmt, ...)
 		" ");
 	}
     }
-    (*c->log)(c->arg, CHAT_LG_DEBUG, "%s", cbuf);
+    Log(LG_CHAT2, ("[%s] CHAT: %s", l->name, cbuf));
   }
 }
-
-

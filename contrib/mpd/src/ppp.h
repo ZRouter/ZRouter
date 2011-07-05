@@ -196,10 +196,14 @@
   extern pid_t		gPid;
   extern int		gRouteSeq;
 
+#ifdef PHYSTYPE_PPTP
   extern int		gPPTPto;
   extern int		gPPTPtunlimit;
+#endif
+#ifdef PHYSTYPE_L2TP
   extern int		gL2TPto;
   extern int		gL2TPtunlimit;
+#endif
   extern int		gChildren;
   extern int		gMaxChildren;
 

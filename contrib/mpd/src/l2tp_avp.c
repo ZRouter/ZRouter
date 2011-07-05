@@ -164,7 +164,7 @@ ppp_l2tp_avp_list_extract(struct ppp_l2tp_avp_list *list, u_int index)
 	struct ppp_l2tp_avp *elem;
 	struct ppp_l2tp_avp *avp;
 
-	if (index < 0 || index >= list->length) {
+	if (index >= list->length) {
 		errno = EINVAL;
 		return (NULL);
 	}
@@ -182,7 +182,7 @@ ppp_l2tp_avp_list_extract(struct ppp_l2tp_avp_list *list, u_int index)
 int
 ppp_l2tp_avp_list_remove(struct ppp_l2tp_avp_list *list, u_int index)
 {
-	if (index < 0 || index >= list->length) {
+	if (index >= list->length) {
 		errno = EINVAL;
 		return (-1);
 	}

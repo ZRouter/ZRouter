@@ -48,6 +48,7 @@
 	struct optinfo	options;
 	char		callingnum[64];	/* PPTP phone number to use */
 	char		callednum[64];	/* PPTP phone number to use */
+	char		*fqdn_peer_addr;	/* FQDN Peer address */
     } conf;
     void		*listener;	/* Listener pointer */
     struct u_addr	self_addr;	/* Current self IP address */
@@ -81,6 +82,7 @@
     PPTP_CONF_OUTCALL,		/* when originating, calls are "outgoing" */
     PPTP_CONF_DELAYED_ACK,	/* enable delayed receive ack algorithm */
     PPTP_CONF_ALWAYS_ACK,	/* include ack with all outgoing data packets */
+    PPTP_CONF_RESOLVE_ONCE,	/* Only once resolve peer_addr */
 #if NGM_PPTPGRE_COOKIE >= 1082548365
     PPTP_CONF_WINDOWING		/* control (stupid) windowing algorithm */
 #endif
@@ -204,6 +206,7 @@
     { 0,	PPTP_CONF_OUTCALL,	"outcall"	},
     { 0,	PPTP_CONF_DELAYED_ACK,	"delayed-ack"	},
     { 0,	PPTP_CONF_ALWAYS_ACK,	"always-ack"	},
+    { 0,	PPTP_CONF_RESOLVE_ONCE,	"resolve-once"	},
 #if NGM_PPTPGRE_COOKIE >= 1082548365
     { 0,	PPTP_CONF_WINDOWING,	"windowing"	},
 #endif
@@ -249,8 +252,10 @@ PptpInit(Link l)
     pptp = (PptpInfo) (l->info = Malloc(MB_PHYS, sizeof(*pptp)));
 
     pptp->conf.self_addr.family = AF_INET;
+    pptp->conf.fqdn_peer_addr = NULL;
     Enable(&pptp->conf.options, PPTP_CONF_OUTCALL);
     Enable(&pptp->conf.options, PPTP_CONF_DELAYED_ACK);
+    Enable(&pptp->conf.options, PPTP_CONF_RESOLVE_ONCE);
 
     return(0);
 }
@@ -354,6 +359,12 @@ PptpOriginate(Link l)
     linfo.cancel = PptpCancel;
     strlcpy(pptp->callingnum, pptp->conf.callingnum, sizeof(pptp->callingnum));
     strlcpy(pptp->callednum, pptp->conf.callednum, sizeof(pptp->callednum));
+    if ((!Enabled(&pptp->conf.options, PPTP_CONF_RESOLVE_ONCE)) &&
+	(pptp->conf.fqdn_peer_addr != NULL)) {
+	struct u_range	rng;
+	if (ParseRange(pptp->conf.fqdn_peer_addr, &rng, ALLOW_IPV4|ALLOW_IPV6))
+	    pptp->conf.peer_addr = rng;
+    }
     if (!pptp->outcall) {
 	int frameType = PPTP_FRAMECAP_SYNC;
 	if (l->rep && !RepIsSync(l))
@@ -397,6 +408,9 @@ PptpShutdown(Link l)
 {
     PptpInfo      const pptp = (PptpInfo) l->info;
 
+
+    if (pptp->conf.fqdn_peer_addr)
+        Freee(pptp->conf.fqdn_peer_addr);
     if (pptp->listener) {
 	PptpCtrlUnListen(pptp->listener);
 	pptp->listener = NULL;
@@ -630,6 +644,7 @@ PptpStat(Context ctx)
     if (pptp->conf.self_port)
 	Printf(", port %u", pptp->conf.self_port);
     Printf("\r\n");
+    Printf("\tPeer FQDN    : %s\r\n", pptp->conf.fqdn_peer_addr);
     Printf("\tPeer range   : %s",
 	u_rangetoa(&pptp->conf.peer_addr, buf, sizeof(buf)));
     if (pptp->conf.peer_port)
@@ -1165,12 +1180,18 @@ static int
 PptpSetCommand(Context ctx, int ac, char *av[], void *arg)
 {
     PptpInfo		const pi = (PptpInfo) ctx->lnk->info;
+    char		**fqdn_peer_addr = &pi->conf.fqdn_peer_addr;
     struct u_range	rng;
     int			port;
 
     switch ((intptr_t)arg) {
 	case SET_SELFADDR:
 	case SET_PEERADDR:
+	    if ((ac == 1 || ac == 2) && (intptr_t)arg == SET_PEERADDR) {
+		if (*fqdn_peer_addr)
+		    Freee(*fqdn_peer_addr);
+		*fqdn_peer_addr = Mstrdup(MB_PHYS, av[0]);
+	    }
     	    if (ac < 1 || ac > 2 || !ParseRange(av[0], &rng, ALLOW_IPV4|ALLOW_IPV6))
 		return(-1);
     	    if (ac > 1) {

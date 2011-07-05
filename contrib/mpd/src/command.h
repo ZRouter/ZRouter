@@ -28,7 +28,9 @@
 
   /* Configuration options */
   enum {
+#ifdef USE_WRAP
     GLOBAL_CONF_TCPWRAPPER,	/* enable tcp-wrapper */
+#endif
     GLOBAL_CONF_ONESHOT		/* enable OneShot mode */
   };
 
