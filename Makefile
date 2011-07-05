@@ -270,6 +270,14 @@ FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_B
 FREEBSD_BUILD_ENV_${var}
 .endfor
 
+
+.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
+TARGET_ARCH_SUBDIR=	""
+.else
+TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
+.endif
+
+
 #
 # World
 #
@@ -278,7 +286,7 @@ world-toolchain:
 
 world-build:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
 	@echo "XXX: need to find a way to install required includes correctly"
-	mkdir -p ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/lzo
+	mkdir -p ${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}/tmp/usr/include/lzo
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
 
 world-install: rootfs-dir
@@ -346,9 +354,13 @@ IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
 .include "share/mk/zrouter.local.tools.mk"
 .include "share/mk/zrouter.base.tools.mk"
 
+.if !defined(ROOTFS_WITH_KERNEL)
+_FIND_MATCH_KERNEL=-name kernel -or
+.endif
+
 ROOTFS_RMLIST= \
     \\( \\( -type f -or -type l \\) -and \
-	    \\( -name kernel -or -name "*.a" -or -name "crt*.o" \\) \\) -or \
+	\\( ${_FIND_MATCH_KERNEL} -name "*.a" -or -name "crt*.o" \\) \\) -or \
     \\( -type l -and -name sys \\) -or \
     \\( -type d -and \\( \
     -name include -or \
@@ -362,9 +374,6 @@ ROOTFS_RMLIST= \
 
 ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
 	pc-sysinstall security sendmail skel syscons tabset tmac vi zoneinfo
-
-#    -name share -or \
-
 
 # Move kernel out of rootfs
 #		world kernel ports
@@ -440,6 +449,39 @@ ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
+
+rootfs.ffs ${NEW_ROOTFS}.ffs:	rootfs makefs_ffs
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
+	PATH=${IMAGE_BUILD_PATHS} makefs -t ffs -d 255 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -s ${ROOTFS_MEDIA_SIZE} -o minfree=0,version=1 ${NEW_ROOTFS}.ffs ${NEW_ROOTFS}
+
+#	blocks=$(($ROOTFS_MEDIA_SIZE / ${BLOCKSIZE} + 256))
+#	dd if=/dev/zero of=${NEW_ROOTFS}.ffs bs=${BLOCKSIZE} count=${blocks}
+#	if [ $? -ne 0 ]; then
+#	  echo "creation of image file failed"
+#	  exit 1
+#	fi
+#
+#	unit=`mdconfig -a -t vnode -f ${NEW_ROOTFS}.ffs`
+#	if [ $? -ne 0 ]; then
+#	  echo "mdconfig failed"
+#	  exit 1
+#	fi
+#
+#	gpart create -s GPT ${unit}
+#	gpart add -t freebsd-boot -s 64K ${unit}
+#	gpart bootcode -b ${NEW_ROOTFS}/boot/pmbr -p ${NEW_ROOTFS}/boot/gptboot -i 1 ${unit}
+#	gpart add -t freebsd-ufs -l FreeBSD_Install ${unit}
+#
+#	dd if=${tempfile} of=/dev/${unit}p2 bs=$BLOCKSIZE conv=sync
+#	if [ $? -ne 0 ]; then
+#	  echo "copying filesystem into image file failed"
+#	  exit 1
+#	fi
+#
+#	mdconfig -d -u ${unit}
+
+
+
 
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
