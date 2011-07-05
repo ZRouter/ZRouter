@@ -11,6 +11,8 @@ TDIR=/tmp/makefs_${fstype}_test
 #	echo ${STATUS}
 
 
+makefs_ffs:	${ZTOOLS_PATH}/makefs
+
 makefs_cd9660:	${ZTOOLS_PATH}/makefs
 
 ${ZTOOLS_PATH}/makefs:
