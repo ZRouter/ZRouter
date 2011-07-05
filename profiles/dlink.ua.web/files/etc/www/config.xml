@@ -245,4 +245,7 @@
 	<line></line>
     </setkey>
 </ipsec>
-
+<ntp enable="true">
+    <server id="1">ntp.dlink.com.tw</server>
+    <server id="2">ntp1.dlink.com</server>
+</ntp>
