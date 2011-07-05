@@ -72,6 +72,7 @@
 	char		callednum[64];	/* L2TP phone number to use */
 	char 		hostname[MAXHOSTNAMELEN]; /* L2TP local hostname */
 	char		secret[64];	/* L2TP tunnel secret */
+	char		*fqdn_peer_addr;	/* FQDN Peer address */
     } conf;
     u_char		opened;		/* L2TP opened by phys */
     u_char		incoming;	/* Call is incoming vs. outgoing */
@@ -102,7 +103,8 @@
     L2TP_CONF_OUTCALL,		/* when originating, calls are "outgoing" */
     L2TP_CONF_HIDDEN,		/* enable AVP hidding */
     L2TP_CONF_LENGTH,		/* enable Length field in data packets */
-    L2TP_CONF_DATASEQ		/* enable sequence fields in data packets */
+    L2TP_CONF_DATASEQ,		/* enable sequence fields in data packets */
+    L2TP_CONF_RESOLVE_ONCE	/* Only once resolve peer_addr */
   };
 
 /*
@@ -224,6 +226,7 @@
     { 0,	L2TP_CONF_HIDDEN,	"hidden"	},
     { 0,	L2TP_CONF_LENGTH,	"length"	},
     { 0,	L2TP_CONF_DATASEQ,	"dataseq"	},
+    { 0,	L2TP_CONF_RESOLVE_ONCE,	"resolve-once"	},
     { 0,	0,			NULL		},
   };
 
@@ -293,8 +296,10 @@ L2tpInit(Link l)
     l2tp->conf.peer_addr.addr.family = AF_INET;
     l2tp->conf.peer_addr.width = 0;
     l2tp->conf.peer_port = 0;
+    l2tp->conf.fqdn_peer_addr = NULL;
 
     Enable(&l2tp->conf.options, L2TP_CONF_DATASEQ);
+    Enable(&l2tp->conf.options, L2TP_CONF_RESOLVE_ONCE);
   
     return(0);
 }
@@ -398,6 +403,13 @@ L2tpOpen(Link l)
 	l->state = PHYS_STATE_CONNECTING;
 	strlcpy(pi->callingnum, pi->conf.callingnum, sizeof(pi->callingnum));
 	strlcpy(pi->callednum, pi->conf.callednum, sizeof(pi->callednum));
+
+	if ((!Enabled(&pi->conf.options, L2TP_CONF_RESOLVE_ONCE)) &&
+	    (pi->conf.fqdn_peer_addr != NULL)) {
+	    struct u_range	rng;
+	    if (ParseRange(pi->conf.fqdn_peer_addr, &rng, ALLOW_IPV4|ALLOW_IPV6))
+		pi->conf.peer_addr = rng;
+	}
 
 	ghash_walk_init(gL2tpTuns, &walk);
 	while ((tun = ghash_walk_next(gL2tpTuns, &walk)) != NULL) {
@@ -673,6 +685,11 @@ L2tpClose(Link l)
 static void
 L2tpShutdown(Link l)
 {
+    L2tpInfo const pi = (L2tpInfo) l->info;
+
+    if (pi->conf.fqdn_peer_addr)
+        Freee(pi->conf.fqdn_peer_addr);
+
     L2tpUnListen(l);
     Freee(l->info);
 }
@@ -899,6 +916,7 @@ L2tpStat(Context ctx)
     Printf("\tSelf addr    : %s, port %u",
 	u_addrtoa(&l2tp->conf.self_addr, buf, sizeof(buf)), l2tp->conf.self_port);
     Printf("\r\n");
+    Printf("\tPeer FQDN    : %s\r\n", l2tp->conf.fqdn_peer_addr);
     Printf("\tPeer range   : %s",
 	u_rangetoa(&l2tp->conf.peer_addr, buf, sizeof(buf)));
     if (l2tp->conf.peer_port)
@@ -1706,12 +1724,18 @@ static int
 L2tpSetCommand(Context ctx, int ac, char *av[], void *arg)
 {
     L2tpInfo		const l2tp = (L2tpInfo) ctx->lnk->info;
+    char		**fqdn_peer_addr = &l2tp->conf.fqdn_peer_addr;
     struct u_range	rng;
     int			port;
 
     switch ((intptr_t)arg) {
 	case SET_SELFADDR:
 	case SET_PEERADDR:
+	    if ((ac == 1 || ac == 2) && (intptr_t)arg == SET_PEERADDR) {
+		if (*fqdn_peer_addr)
+		    Freee(*fqdn_peer_addr);
+		*fqdn_peer_addr = Mstrdup(MB_PHYS, av[0]);
+	    }
     	    if (ac < 1 || ac > 2 || !ParseRange(av[0], &rng, ALLOW_IPV4|ALLOW_IPV6))
 		return(-1);
     	    if (ac > 1) {

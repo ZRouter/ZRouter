@@ -180,7 +180,7 @@ RadsrvEvent(int type, void *cookie)
 		state_len = len;
 		if (state != NULL)
 		    Freee(state);
-		state = Mdup(MB_AUTH, data, len);
+		state = Mdup(MB_RADSRV, data, len);
 		break;
 	    case RAD_CALLED_STATION_ID:
 		anysesid = 1;
@@ -774,14 +774,14 @@ RadsrvSetCommand(Context ctx, int ac, char *av[], void *arg)
 	  Error("cannot configure more than %d peers",
 	    RADSRV_MAX_SERVERS);
 	}
-	if (strlen(av[0]) > 255)
-	    Error("Hostname too long. > 255 char.");
+	if (strlen(av[0]) > MAXHOSTNAMELEN-1)
+	    Error("Hostname too long. > %d char.", MAXHOSTNAMELEN-1);
 	if (strlen(av[1]) > 127)
 	    Error("Shared Secret too long. > 127 char.");
 
-	peer = Malloc(MB_RADIUS, sizeof(*peer));
-	peer->hostname = Mstrdup(MB_RADIUS, av[0]);
-	peer->sharedsecret = Mstrdup(MB_RADIUS, av[1]);
+	peer = Malloc(MB_RADSRV, sizeof(*peer));
+	peer->hostname = Mstrdup(MB_RADSRV, av[0]);
+	peer->sharedsecret = Mstrdup(MB_RADSRV, av[1]);
 	peer->next = w->clients;
 	w->clients = peer;
 	break;

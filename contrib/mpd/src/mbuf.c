@@ -318,7 +318,7 @@ int
 MemStat(Context ctx, int ac, char *av[], void *arg)
 {
     struct typed_mem_stats stats;
-    int		i;
+    u_int	i;
     u_int	total_allocs = 0;
     u_int	total_bytes = 0;
 

@@ -51,7 +51,7 @@ USE_NG_PRED1=		yes
 USE_NG_TCPMSS=		yes
 USE_NG_VJC=		yes
 USE_IPFW=		yes
-USE_FETCH=		no	#yes
+USE_FETCH=		yes
 USE_TCP_WRAP=		yes
 #USE_AUTH_OPIE=		yes
 USE_AUTH_PAM=		yes
@@ -60,9 +60,6 @@ USE_AUTH_SYSTEM=	yes
 # Build with builtin libpdel
 
 NOLIBPDEL=		yes
-
-# Don`t build web server support
-NOWEB=			no
 
 # Set syslog logging facility. Change LOG_DAEMON to whatever you like.
 
@@ -141,11 +138,7 @@ STDSRCS=        assert.c auth.c bund.c rep.c ccp.c chap.c \
 		console.c command.c ecp.c event.c fsm.c iface.c input.c \
 		ip.c ipcp.c ipv6cp.c lcp.c link.c log.c main.c mbuf.c mp.c \
 		msg.c ngfunc.c pap.c phys.c proto.c radius.c radsrv.c timer.c \
-		util.c vars.c eap.c msoft.c ippool.c
-
-.if !defined ( NOWEB )
-STDSRCS+=	web.c
-.endif
+		util.c vars.c eap.c msoft.c web.c ippool.c
 
 .if defined ( NOLIBPDEL )
 COPTS+=		-DNOLIBPDEL -I./contrib/libpdel
@@ -166,12 +159,7 @@ PDELSRCS=	typed_mem.c \
 		structs_type_int.c \
 		structs_type_string.c \
 		structs_type_struct.c \
-		boundary_fp.c \
-		ssl_fp.c \
-		string_fp.c \
-		timeout_fp.c
-.if !defined ( NOWEB )
-PDELSRCS+=	http_connection.c \
+		http_connection.c \
 		http_head.c \
 		http_message.c \
 		http_mime.c \
@@ -180,12 +168,11 @@ PDELSRCS+=	http_connection.c \
 		http_server.c \
 		http_servlet_basicauth.c \
 		http_ssl.c \
-		http_status.c
-.endif
-.endif
-
-.if defined ( NOWEB )
-COPTS+=		-DNOWEB
+		http_status.c \
+		boundary_fp.c \
+		ssl_fp.c \
+		string_fp.c \
+		timeout_fp.c
 .endif
 
 # Add sources and flags for the various physical layer types

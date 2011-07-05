@@ -36,6 +36,7 @@ struct tcpinfo {
 	    struct u_range	peer_addr;
 	    in_port_t		self_port;
 	    in_port_t		peer_port;
+	    char		*fqdn_peer_addr; /* FQDN Peer address */
 	} conf;
 
 	/* State */
@@ -54,8 +55,15 @@ typedef struct tcpinfo	*TcpInfo;
 /* Set menu options */
 enum {
 	SET_PEERADDR,
-	SET_SELFADDR
+	SET_SELFADDR,
+	SET_ENABLE,
+	SET_DISABLE
 };
+
+  /* Binary options */
+  enum {
+    TCP_CONF_RESOLVE_ONCE	/* Only once resolve peer_addr */
+  };
 
 /*
  * INTERNAL FUNCTIONS
@@ -115,6 +123,10 @@ const struct cmdtab TcpSetCmds[] = {
 	TcpSetCommand, NULL, 2, (void *) SET_SELFADDR },
     { "peer {ip} [{port}]",		"Set remote IP address",
 	TcpSetCommand, NULL, 2, (void *) SET_PEERADDR },
+    { "enable [opt ...]",		"Enable option",
+	TcpSetCommand, NULL, 2, (void *) SET_ENABLE },
+    { "disable [opt ...]",		"Disable option",
+	TcpSetCommand, NULL, 2, (void *) SET_DISABLE },
     { NULL },
 };
 
@@ -126,6 +138,15 @@ struct TcpIf {
     EventRef	ctrlEvent;		/* listen for ctrl messages */
 };
 struct TcpIf TcpIfs[TCP_MAXPARENTIFS];
+
+ /*
+ * INTERNAL VARIABLES
+ */
+
+  static struct confinfo	gConfList[] = {
+    { 0,	TCP_CONF_RESOLVE_ONCE,	"resolve-once"	},
+    { 0,	0,			NULL		},
+  };
 
 /*
  * TcpInit()
@@ -149,6 +170,8 @@ TcpInit(Link l)
 
 	u_addrclear(&pi->peer_addr);
 	pi->peer_port=0;
+	pi->conf.fqdn_peer_addr = NULL;
+	Enable(&pi->conf.options, TCP_CONF_RESOLVE_ONCE);
 
 	return (0);
 }
@@ -259,6 +282,12 @@ TcpOpen(Link l)
 		l->state = PHYS_STATE_UP;
 		PhysUp(l);
 		return;
+	}
+	if ((!Enabled(&pi->conf.options, TCP_CONF_RESOLVE_ONCE)) &&
+	    (pi->conf.fqdn_peer_addr != NULL)) {
+	    struct u_range	rng;
+	    if (ParseRange(pi->conf.fqdn_peer_addr, &rng, ALLOW_IPV4|ALLOW_IPV6))
+		pi->conf.peer_addr = rng;
 	}
 
 	u_addrcopy(&pi->conf.peer_addr.addr,&pi->peer_addr);
@@ -515,6 +544,11 @@ TcpClose(Link l)
 static void
 TcpShutdown(Link l)
 {
+    TcpInfo const pi = (TcpInfo) l->info;
+
+    if (pi->conf.fqdn_peer_addr)
+        Freee(pi->conf.fqdn_peer_addr);
+
 	TcpDoClose(l);
 	TcpUnListen(l);
 	Freee(l->info);
@@ -661,6 +695,7 @@ TcpStat(Context ctx)
 	char	buf[48];
 
 	Printf("TCP configuration:\r\n");
+	Printf("\tPeer FQDN    : %s\r\n", pi->conf.fqdn_peer_addr);
 	Printf("\tSelf address : %s, port %u\r\n",
 	    u_addrtoa(&pi->conf.self_addr, buf, sizeof(buf)), pi->conf.self_port);
 	Printf("\tPeer address : %s, port %u\r\n",
@@ -836,12 +871,18 @@ static int
 TcpSetCommand(Context ctx, int ac, char *av[], void *arg)
 {
     TcpInfo		const pi = (TcpInfo) ctx->lnk->info;
+    char		**fqdn_peer_addr = &pi->conf.fqdn_peer_addr;
     struct u_range	rng;
     int			port;
 
     switch ((intptr_t)arg) {
 	case SET_PEERADDR:
 	case SET_SELFADDR:
+	    if ((ac == 1 || ac == 2) && (intptr_t)arg == SET_PEERADDR) {
+		if (*fqdn_peer_addr)
+		    Freee(*fqdn_peer_addr);
+		*fqdn_peer_addr = Mstrdup(MB_PHYS, av[0]);
+	    }
     	    if (ac < 1 || ac > 2 || !ParseRange(av[0], &rng, ALLOW_IPV4|ALLOW_IPV6))
 		return(-1);
 	    if (ac > 1) {
@@ -861,6 +902,14 @@ TcpSetCommand(Context ctx, int ac, char *av[], void *arg)
 		TcpUnListen(ctx->lnk);
 		TcpListen(ctx->lnk);
 	    }
+	    break;
+	case SET_ENABLE:
+	    EnableCommand(ac, av, &pi->conf.options, gConfList);
+	    TcpNodeUpdate(ctx->lnk);
+	    break;
+	case SET_DISABLE:
+	    DisableCommand(ac, av, &pi->conf.options, gConfList);
+	    TcpNodeUpdate(ctx->lnk);
 	    break;
 	default:
 		assert(0);

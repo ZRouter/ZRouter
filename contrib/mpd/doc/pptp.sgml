@@ -1,4 +1,4 @@
-<!-- $Id: pptp.sgml,v 1.18 2008/01/06 01:18:31 amotin Exp $ -->
+<!-- $Id: pptp.sgml,v 1.19 2011/03/25 11:47:43 amotin Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -128,7 +128,14 @@ PPTP peers, but usually results in better performance. The windowing
 mechanism is a design error in the PPTP protocol; L2TP, the successor 
 to PPTP, removes it.
 
-the default is disable.
+The default is disable.
+
+<tag><tt>resolve-once</tt></tag>
+
+Enables resolving peer address only once, on startup, or on manual
+typing in CLI.
+
+The default is enable.
 
 </descrip>
 

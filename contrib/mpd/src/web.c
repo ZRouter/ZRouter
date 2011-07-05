@@ -216,8 +216,9 @@ WebConsoleSessionShowPrompt(ConsoleSession cs)
 static void
 WebShowCSS(FILE *f)
 {
-  fprintf(f, "body {font : Arial, Helvetica, sans-serif; background-color: #EEEEEE; }\n");
+  fprintf(f, "body {font-family: Arial, Helvetica, Sans-Serif; background-color: #EEEEEE; }\n");
   fprintf(f, "table {background-color: #FFFFFF; }\n");
+  fprintf(f, "th, td {padding: 0 2pt 0 2pt; }\n");
   fprintf(f, "th {background-color: #00B000; }\n");
   fprintf(f, "td {background-color: #EEEEEE; }\n");
   fprintf(f, "td.r {background-color: #EECCCC; }\n");
@@ -254,9 +255,9 @@ WebShowSummary(FILE *f, int priv)
 	        L->tmpl?"d":FSM_COLOR(L->lcp.fsm.state), L->name, FsmStateName(L->lcp.fsm.state));
 	    fprintf(f, "<TD class=\"%s\"><A href=\"/cmd?link%%20%s&amp;show%%20auth\">%s</a></TD>\n", 
 	        L->tmpl?"d":FSM_COLOR(L->lcp.fsm.state), L->name, L->lcp.auth.params.authname);
-	    fprintf(f, "<TD class=\"L=%s\"><A href=\"/cmd?link%%20%s&amp;show%%20device\">%s</a></TD>\n", 
+	    fprintf(f, "<TD class=\"%s\"><A href=\"/cmd?link%%20%s&amp;show%%20device\">%s</a></TD>\n", 
 	        L->tmpl?"d":PHYS_COLOR(L->state), L->name, L->type?L->type->name:"");
-	    fprintf(f, "<TD class=\"L=%s\"><A href=\"/cmd?link%%20%s&amp;show%%20device\">%s</a></TD>\n", 
+	    fprintf(f, "<TD class=\"%s\"><A href=\"/cmd?link%%20%s&amp;show%%20device\">%s</a></TD>\n", 
 	        L->tmpl?"d":PHYS_COLOR(L->state), L->name, gPhysStateNames[L->state]);
 	    if (L->state != PHYS_STATE_DOWN) {
 		PhysGetPeerAddr(L, buf, sizeof(buf));
@@ -276,7 +277,7 @@ WebShowSummary(FILE *f, int priv)
 	    }
 	    if (priv) {
 		if (!L->tmpl) {
-		    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a><A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
+		    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a>&nbsp;<A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
 	    		L->name, L->name);
 		} else {
 		    fprintf(f, "<TD></TD>\n");

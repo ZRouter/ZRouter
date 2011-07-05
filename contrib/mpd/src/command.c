@@ -66,16 +66,30 @@
     SET_PIPE,
     SET_TABLE,
 #endif
+#ifdef PHYSTYPE_PPTP
     SET_PPTPTO,
     SET_PPTPLIMIT,
+#endif
+#ifdef PHYSTYPE_L2TP
     SET_L2TPTO,
     SET_L2TPLIMIT,
+#endif
     SET_MAX_CHILDREN,
 #ifdef USE_NG_BPF
     SET_FILTER
 #endif
   };
 
+  enum {
+    SHOW_IFACE,
+    SHOW_IP,
+    SHOW_USER,
+    SHOW_SESSION,
+    SHOW_MSESSION,
+    SHOW_BUNDLE,
+    SHOW_LINK,
+    SHOW_PEER
+  };
 
 /*
  * INTERNAL FUNCTIONS
@@ -120,14 +134,18 @@
     { "starttable {num}", 		"Initial ipfw table number" ,
        	GlobalSetCommand, NULL, 2, (void *) SET_TABLE },
 #endif /* USE_IPFW */
+#ifdef PHYSTYPE_L2TP
     { "l2tptimeout {sec}", 		"L2TP tunnel unused timeout" ,
        	GlobalSetCommand, NULL, 2, (void *) SET_L2TPTO },
     { "l2tplimit {num}", 		"Calls per L2TP tunnel limit" ,
        	GlobalSetCommand, NULL, 2, (void *) SET_L2TPLIMIT },
+#endif
+#ifdef PHYSTYPE_PPTP
     { "pptptimeout {sec}", 		"PPTP tunnel unused timeout" ,
        	GlobalSetCommand, NULL, 2, (void *) SET_PPTPTO },
     { "pptplimit {num}", 		"Calls per PPTP tunnel limit" ,
        	GlobalSetCommand, NULL, 2, (void *) SET_PPTPLIMIT },
+#endif
     { "max-children {num}",		"Max number of children",
 	GlobalSetCommand, NULL, 2, (void *) SET_MAX_CHILDREN },
 #ifdef USE_NG_BPF
@@ -138,7 +156,7 @@
   };
 
   static const struct confinfo	gGlobalConfList[] = {
-#ifdef USE_SYSTEM
+#ifdef USE_WRAP
     { 0,	GLOBAL_CONF_TCPWRAPPER,	"tcp-wrapper"	},
 #endif
     { 0,	GLOBAL_CONF_ONESHOT,	"one-shot"	},
@@ -161,6 +179,26 @@
     { NULL },
   };
 
+  static const struct cmdtab ShowSessCmds[] = {
+    { "iface {name}",			"Filter by iface name",
+	ShowSessions, NULL, 2, (void *) SHOW_IFACE },
+    { "ip {ip}",			"Filter by IP address",
+	ShowSessions, NULL, 2, (void *) SHOW_IP },
+    { "user {name}",			"Filter by user name",
+	ShowSessions, NULL, 2, (void *) SHOW_USER },
+    { "session {ID}",			"Filter by session ID",
+	ShowSessions, NULL, 2, (void *) SHOW_SESSION },
+    { "msession {ID}",			"Filter by msession ID",
+	ShowSessions, NULL, 2, (void *) SHOW_MSESSION },
+    { "bundle {name}",			"Filter by bundle name",
+	ShowSessions, NULL, 2, (void *) SHOW_BUNDLE },
+    { "link {name}",			"Filter by link name",
+	ShowSessions, NULL, 2, (void *) SHOW_LINK },
+    { "peer {name}",			"Filter by peer name",
+	ShowSessions, NULL, 2, (void *) SHOW_PEER },
+    { NULL },
+  };
+
   static const struct cmdtab ShowCommands[] = {
     { "bundle [{name}]",		"Bundle status",
 	BundStat, AdmitBund, 0, NULL },
@@ -177,7 +215,7 @@
     { "ecp",				"ECP status",
 	EcpStat, AdmitBund, 0, NULL },
     { "eap",				"EAP status",
-	EapStat, AdmitBund, 0, NULL },
+	EapStat, AdmitLink, 0, NULL },
     { "events",				"Current events",
 	ShowEvents, NULL, 0, NULL },
     { "ipcp",				"IPCP status",
@@ -235,7 +273,7 @@
     { "version",			"Version string",
 	ShowVersion, NULL, 0, NULL },
     { "sessions [ {param} {value} ]",	"Active sessions",
-	ShowSessions, NULL, 0, NULL },
+	CMD_SUBMENU, NULL, 2, (void *) ShowSessCmds},
     { "summary",			"Daemon status summary",
 	ShowSummary, NULL, 0, NULL },
     { NULL },
@@ -485,9 +523,15 @@ DoCommandTab(Context ctx, CmdTab cmdlist, int ac, char *av[])
 	return(CMD_ERR_NOCTX);
 
     /* Find command and either execute or recurse into a submenu */
-    if (cmd->func == CMD_SUBMENU)
-	rtn = DoCommandTab(ctx, (CmdTab) cmd->arg, ac - 1, av + 1);
-    else
+    if (cmd->func == CMD_SUBMENU) {
+        if ((intptr_t)cmd->arg == (intptr_t)ShowSessCmds) {
+            if (ac > 1)
+	        rtn = DoCommandTab(ctx, (CmdTab) cmd->arg, ac - 1, av + 1);
+            else
+                rtn = ShowSessions(ctx, 0, NULL, NULL);
+        } else
+            rtn = DoCommandTab(ctx, (CmdTab) cmd->arg, ac - 1, av + 1);
+    } else
 	rtn = (cmd->func)(ctx, ac - 1, av + 1, cmd->arg);
 
     return(rtn);
@@ -594,6 +638,7 @@ GlobalSetCommand(Context ctx, int ac, char *av[], void *arg)
       break;
 #endif /* USE_IPFW */
 
+#ifdef PHYSTYPE_L2TP
     case SET_L2TPTO:
 	val = atoi(*av);
 	if (val < 0 || val > 1000000)
@@ -609,7 +654,9 @@ GlobalSetCommand(Context ctx, int ac, char *av[], void *arg)
 	else
 	    gL2TPtunlimit = val;
       break;
+#endif
 
+#ifdef PHYSTYPE_PPTP
     case SET_PPTPTO:
 	val = atoi(*av);
 	if (val < 0 || val > 1000000)
@@ -625,6 +672,7 @@ GlobalSetCommand(Context ctx, int ac, char *av[], void *arg)
 	else
 	    gPPTPtunlimit = val;
       break;
+#endif
 
     case SET_MAX_CHILDREN:
 	val = atoi(*av);
@@ -786,6 +834,21 @@ ShowVersion(Context ctx, int ac, char *av[], void *arg)
 {
   Printf("MPD version: %s\r\n", gVersion);
   Printf("  Available features:\r\n");
+#ifdef	USE_IPFW
+  Printf("	ipfw rules	: yes\r\n");
+#else
+  Printf("	ipfw rules	: no\r\n");
+#endif
+#ifdef	USE_FETCH
+  Printf("	config fetch	: yes\r\n");
+#else
+  Printf("	config fetch	: no\r\n");
+#endif
+#ifdef	USE_NG_BPF
+  Printf("	ng_bpf		: yes\r\n");
+#else
+  Printf("	ng_bpf		: no\r\n");
+#endif
 #ifdef	USE_NG_CAR
   Printf("	ng_car		: yes\r\n");
 #else
@@ -810,6 +873,11 @@ ShowVersion(Context ctx, int ac, char *av[], void *arg)
 #endif
 #ifdef	USE_NG_NAT
   Printf("	ng_nat		: yes\r\n");
+#ifdef NG_NAT_DESC_LENGTH
+  Printf("	nat redirect	: yes\r\n");
+#else
+  Printf("	nat redirect	: no\r\n");
+#endif
 #else
   Printf("	ng_nat		: no\r\n");
 #endif
@@ -860,10 +928,14 @@ ShowGlobal(Context ctx, int ac, char *av[], void *arg)
     Printf("	startqueue	: %d\r\n", queue_pool_start);
     Printf("	starttable	: %d\r\n", table_pool_start);
 #endif
+#ifdef PHYSTYPE_L2TP
     Printf("	l2tptimeout	: %d\r\n", gL2TPto);
     Printf("	l2tplimit	: %d\r\n", gL2TPtunlimit);
+#endif
+#ifdef PHYSTYPE_PPTP
     Printf("	pptptimeout	: %d\r\n", gPPTPto);
     Printf("	pptplimit	: %d\r\n", gPPTPtunlimit);
+#endif
     Printf("	max-children	: %d\r\n", gMaxChildren);
     Printf("Global options:\r\n");
     OptStat(ctx, &gGlobalConf.options, gGlobalConfList);
@@ -960,7 +1032,9 @@ LoadCommand(Context ctx, int ac, char *av[], void *arg)
 #endif
 		strlcpy(filename, av[0], sizeof(filename));
 	}
-	ReadFile(filename, av[ac - 1], DoCommand, ctx);
+	if (ReadFile(filename, av[ac - 1], DoCommand, ctx) < 0)
+	    Printf("can't read configuration for \"%s\" from \"%s\"\r\n",
+		av[ac -1], filename);
 #ifdef USE_FETCH
 out:	if (fetch)
 	    unlink(filename);
@@ -1067,6 +1141,7 @@ ShowLayers(Context ctx, int ac, char *av[], void *arg)
   int	k;
 
   Printf("\tName\t\tDescription\r\n");
+  Printf("\t----\t\t-----------\r\n");
   for (k = 0; k < NUM_LAYERS; k++)
     Printf("\t%s\t\t%s\r\n", gLayers[k].name, gLayers[k].desc);
   return(0);
@@ -1083,6 +1158,7 @@ ShowTypes(Context ctx, int ac, char *av[], void *arg)
   int		k;
 
   Printf("\tName\t\tDescription\r\n");
+  Printf("\t----\t\t-----------\r\n");
   for (k = 0; (pt = gPhysTypes[k]); k++)
     Printf("\t%s\t\t%s\r\n", pt->name, pt->descr);
   return(0);
@@ -1186,7 +1262,7 @@ ShowSessions(Context ctx, int ac, char *av[], void *arg)
     Link  	L;
     char	peer[64], addr[64];
 
-    if (ac != 0 && ac != 2)
+    if (ac != 0 && ac != 1)
 	return (-1);
 
     for (l = 0; l < gNumLinks; l++) {
@@ -1194,29 +1270,37 @@ ShowSessions(Context ctx, int ac, char *av[], void *arg)
 	    B = L->bund;
 	    u_addrtoa(&B->iface.peer_addr, addr, sizeof(addr));
 	    PhysGetPeerAddr(L, peer, sizeof(peer));
-	    if (ac == 2) {
-		if (!strcmp(av[0], "iface")) {
-		    if (strcmp(av[1], B->iface.ifname))
+	    if (ac == 0)
+	        goto out;
+	    switch ((intptr_t)arg) {
+		case SHOW_IFACE:
+		    if (strcmp(av[0], B->iface.ifname))
 			continue;
-		} else if (!strcmp(av[0], "ip")) {
-		    if (strcmp(av[1], addr))
+		    break;
+		case SHOW_IP:
+		    if (strcmp(av[0], addr))
 			continue;
-		} else if (!strcmp(av[0], "user")) {
-		    if (strcmp(av[1], L->lcp.auth.params.authname))
+		    break;
+		case SHOW_USER:
+		    if (strcmp(av[0], L->lcp.auth.params.authname))
 			continue;
-		} else if (!strcmp(av[0], "msession")) {
-		    if (strcmp(av[1], B->msession_id))
+		    break;
+		case SHOW_MSESSION:
+		    if (strcmp(av[0], B->msession_id))
 			continue;
-		} else if (!strcmp(av[0], "session")) {
-		    if (strcmp(av[1], L->session_id))
+		    break;
+		case SHOW_SESSION:
+		    if (strcmp(av[0], L->session_id))
 			continue;
-		} else if (!strcmp(av[0], "bundle")) {
-		    if (strcmp(av[1], B->name))
+		    break;
+		case SHOW_BUNDLE:
+		    if (strcmp(av[0], B->name))
 			continue;
-		} else if (!strcmp(av[0], "link")) {
-		    if (av[1][0] == '[') {
+		    break;
+		case SHOW_LINK:
+		    if (av[0][0] == '[') {
 			int k;
-			if (sscanf(av[1], "[%x]", &k) != 1)
+			if (sscanf(av[0], "[%x]", &k) != 1)
 			    return (-1);
 			else {
 			    if (L->id != k)
@@ -1226,12 +1310,15 @@ ShowSessions(Context ctx, int ac, char *av[], void *arg)
 			if (strcmp(av[1], L->name))
 			    continue;
 		    }
-		} else if (!strcmp(av[0], "peer")) {
-		    if (strcmp(av[1], peer))
+		    break;
+		case SHOW_PEER:
+		    if (strcmp(av[0], peer))
 			continue;
-		} else
+			break;
+		default:
 		    return (-1);
 	    }
+out:
 	    Printf("%s\t%s\t%s\t%s\t", B->iface.ifname,
 		addr, B->name, B->msession_id);
 	    Printf("%s\t%d\t%s\t%s\t%s", 

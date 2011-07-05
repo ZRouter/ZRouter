@@ -40,6 +40,7 @@
 	struct u_range	peer_addr;	/* Configured peer IP address */
 	in_port_t	self_port;	/* Configured local port */
 	in_port_t	peer_port;	/* Configured peer port */
+	char		*fqdn_peer_addr; /* FQDN Peer address */
     } conf;
 
     /* State */
@@ -55,7 +56,14 @@
 
   enum {
     SET_PEERADDR,
-    SET_SELFADDR
+    SET_SELFADDR,
+    SET_ENABLE,
+    SET_DISABLE
+  };
+
+  /* Binary options */
+  enum {
+    UDP_CONF_RESOLVE_ONCE	/* Only once resolve peer_addr */
   };
 
 /*
@@ -113,6 +121,10 @@
 	UdpSetCommand, NULL, 2, (void *) SET_SELFADDR },
     { "peer {ip} [{port}]",		"Set remote IP address",
 	UdpSetCommand, NULL, 2, (void *) SET_PEERADDR },
+    { "enable [opt ...]",		"Enable option",
+	UdpSetCommand, NULL, 2, (void *) SET_ENABLE },
+    { "disable [opt ...]",		"Disable option",
+	UdpSetCommand, NULL, 2, (void *) SET_DISABLE },
     { NULL },
   };
 
@@ -127,6 +139,16 @@ struct UdpIf UdpIfs[UDP_MAXPARENTIFS];
 
 int UdpListenUpdateSheduled=0;
 struct pppTimer UdpListenUpdateTimer;
+
+ /*
+ * INTERNAL VARIABLES
+ */
+
+  static struct confinfo	gConfList[] = {
+    { 0,	UDP_CONF_RESOLVE_ONCE,	"resolve-once"	},
+    { 0,	0,			NULL		},
+  };
+
 
 /*
  * UdpInit()
@@ -149,6 +171,8 @@ UdpInit(Link l)
 
     u_addrclear(&pi->peer_addr);
     pi->peer_port=0;
+    pi->conf.fqdn_peer_addr = NULL;
+    Enable(&pi->conf.options, UDP_CONF_RESOLVE_ONCE);
 
     return(0);
 }
@@ -248,6 +272,13 @@ UdpOpen(Link l)
 	    goto fail;
 	}
 
+	if ((!Enabled(&pi->conf.options, UDP_CONF_RESOLVE_ONCE)) &&
+	    (pi->conf.fqdn_peer_addr != NULL)) {
+	    struct u_range	rng;
+	    if (ParseRange(pi->conf.fqdn_peer_addr, &rng, ALLOW_IPV4|ALLOW_IPV6))
+		pi->conf.peer_addr = rng;
+	}
+
 	/* Bind socket */
 	u_addrtosockaddr(&pi->conf.self_addr, pi->conf.self_port, &addr);
 	if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
@@ -321,6 +352,11 @@ UdpClose(Link l)
 static void
 UdpShutdown(Link l)
 {
+    UdpInfo const pi = (UdpInfo) l->info;
+
+    if (pi->conf.fqdn_peer_addr)
+        Freee(pi->conf.fqdn_peer_addr);
+
 	UdpDoClose(l);
 	UdpUnListen(l);
 	Freee(l->info);
@@ -463,6 +499,7 @@ UdpStat(Context ctx)
 	char	buf[48];
 
 	Printf("UDP configuration:\r\n");
+	Printf("\tPeer FQDN    : %s\r\n", pi->conf.fqdn_peer_addr);
 	Printf("\tSelf address : %s, port %u\r\n",
 	    u_addrtoa(&pi->conf.self_addr, buf, sizeof(buf)), pi->conf.self_port);
 	Printf("\tPeer address : %s, port %u\r\n",
@@ -696,12 +733,18 @@ static int
 UdpSetCommand(Context ctx, int ac, char *av[], void *arg)
 {
     UdpInfo		const pi = (UdpInfo) ctx->lnk->info;
+    char		**fqdn_peer_addr = &pi->conf.fqdn_peer_addr;
     struct u_range	rng;
     int			port;
 	
     switch ((intptr_t)arg) {
 	case SET_PEERADDR:
 	case SET_SELFADDR:
+	    if ((ac == 1 || ac == 2) && (intptr_t)arg == SET_PEERADDR) {
+		if (*fqdn_peer_addr)
+		    Freee(*fqdn_peer_addr);
+		*fqdn_peer_addr = Mstrdup(MB_PHYS, av[0]);
+	    }
     	    if (ac < 1 || ac > 2 || !ParseRange(av[0], &rng, ALLOW_IPV4|ALLOW_IPV6))
 		return(-1);
     	    if (ac > 1) {
@@ -722,6 +765,14 @@ UdpSetCommand(Context ctx, int ac, char *av[], void *arg)
 		UdpListen(ctx->lnk);
 	    }
     	    break;
+	case SET_ENABLE:
+	    EnableCommand(ac, av, &pi->conf.options, gConfList);
+	    UdpNodeUpdate(ctx->lnk);
+	    break;
+	case SET_DISABLE:
+	    DisableCommand(ac, av, &pi->conf.options, gConfList);
+	    UdpNodeUpdate(ctx->lnk);
+	    break;
 	default:
     	    assert(0);
     }

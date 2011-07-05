@@ -1,4 +1,4 @@
-<!-- $Id: udp.sgml,v 1.5 2007/09/28 21:47:53 amotin Exp $ -->
+<!-- $Id: udp.sgml,v 1.6 2011/03/25 11:47:43 amotin Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -40,5 +40,19 @@ set udp peer <em>ipaddr</em> [ <em>port</em> ]
 Sets the peer IP address and port for the UDP connection.
 Address and port specification is required for connection originating.
 For incoming connections it is not required, but can limit who can connect to us.
+
+</descrip>
+
+<p>
+The following options are supported:
+
+<descrip>
+
+<tag><tt>resolve-once</tt></tag>
+
+Enables resolving peer address only once, on startup, or on manual
+typing in CLI.
+
+The default is enable.
 
 </descrip>

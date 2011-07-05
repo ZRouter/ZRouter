@@ -137,7 +137,6 @@
 #ifdef SYSLOG_FACILITY
   extern char	gSysLogIdent[32];
 #endif
-  extern int	gLogInfo;
 
 /*
  * FUNCTIONS
@@ -148,7 +147,6 @@
   extern void	LogPrintf(const char *fmt, ...) __printflike(1, 2);
   extern void	vLogPrintf(const char *fmt, va_list args);
   extern void	LogPrintf2(const char *fmt, ...) __printflike(1, 2);
-  extern void	vLogPrintf2(const char *fmt, va_list args);
   extern int	LogCommand(Context ctx, int ac, char *av[], void *arg);
   extern void	LogDumpBuf2(const u_char *buf, int len,
 			const char *fmt, ...) __printflike(3, 4);
