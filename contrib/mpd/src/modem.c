@@ -255,10 +255,8 @@ ModemStart(void *arg)
     }
 
     /* Open and configure serial port */
-    if ((m->fd = OpenSerialDevice(l->name, m->device, m->speed)) < 0) {
-	m->opened = FALSE;
+    if ((m->fd = OpenSerialDevice(l->name, m->device, m->speed)) < 0)
         goto fail;
-    }
 
     /* If connecting, but no connect script, then skip chat altogether */
     if (m->opened && !*m->connScript) {
