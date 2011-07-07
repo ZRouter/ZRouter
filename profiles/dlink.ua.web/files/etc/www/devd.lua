@@ -93,8 +93,15 @@ function system_event(config, msg)
 		    time = tonumber(m.period);
 		    -- if hold time between 10 and 15 sec, call httpd to reset to default
 		    -- XXX better to send event to httpd, then httpd will decide what to do
+		    -- XXX2 but if httpd have wrong config, then he can't start
 		    if 10 < time and time < 15 then
-			call_server(config, "restore=config");
+			-- XXX: always do restore config here, because wrong config break httpd yet
+			-- if call_server(config, "restore=config") == false then
+			    -- If we can't get success from httpd, then we restore default manualy
+			    os.execute("mv /tmp/etc/www/config.xml /tmp/etc/www/config.xml.bak");
+			    os.execute("/etc/save_etc");
+			    os.execute("reboot");
+			-- end
 			os.execute("echo \"devd.lua: User request Reset to Default\" > /dev/console");
 		    end
 		elseif m.type == "PIN_HIGH" then
