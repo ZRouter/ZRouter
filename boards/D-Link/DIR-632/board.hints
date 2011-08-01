@@ -37,16 +37,26 @@ hint.arge.0.msize=0x1000
 hint.arge.0.irq=2
 hint.arge.0.media=100
 hint.arge.0.fduplex=1
-hint.arge.0.phymask=0xff
+#hint.arge.0.phymask=0x00000001 # Limit to only PHY0 (RTL8309 switch)
+hint.arge.0.phymask=0xffffffff
 
 hint.arge.1.at="nexus0"
 hint.arge.1.maddr=0x1a000000
 hint.arge.1.msize=0x1000
 hint.arge.1.irq=3
-#hint.arge.1.media=100
-#hint.arge.1.fduplex=1
-hint.arge.1.phymask=0xff
+hint.arge.1.media=100
+hint.arge.1.fduplex=1
+#hint.arge.1.phymask=0x00000001 # Limit to only PHY0 (internal S26 switch)
+hint.arge.1.phymask=0xffffffff
 
+hint.nvram.0.base=0x1f030000
+hint.nvram.0.maxsize=0x2000
+hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
+
+hint.switch.0.iface="arge0"
+hint.switch.0.driver="rtl830x_switch"
+hint.switch.1.iface="arge1"
+hint.switch.1.driver="ar724x_switch"
 
 # GPIO
 hint.gpio.0.at="apb0"
@@ -54,19 +64,27 @@ hint.gpio.0.maddr=0x18040000
 hint.gpio.0.msize=0x1000
 hint.gpio.0.irq=2
 
+# (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<13) | (1<<14) | (1<<15) | (1<<16)
+#  000011 11100000 11000011
+# Output: 0,1,6,7,13,14,15,16,17
 
-
-# 1	LED	STATUS Yellow
+# 0	LED	WPS
 hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="status"
-hint.gpioled.0.pins=0x0002
+hint.gpioled.0.name="wps"
+hint.gpioled.0.pins=0x0001
 hint.gpioled.0.flags="0x0102"
 
-# 11	LED	USB
+# 1	LED	STATUS Yellow
 hint.gpioled.1.at="gpiobus0"
-hint.gpioled.1.name="usb"
-hint.gpioled.1.pins=0x0800
+hint.gpioled.1.name="status"
+hint.gpioled.1.pins=0x0002
 hint.gpioled.1.flags="0x0102"
+
+# 11	LED	USB
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.name="usb"
+hint.gpioled.2.pins=0x0800
+hint.gpioled.2.flags="0x0102"
 
 # ? 	BUTTON	RESET
 #hint.gpioreset.0.at="gpiobus0"
@@ -98,18 +116,17 @@ hint.mx25l.0.cs=0
 # Watchdog
 hint.ar71xx_wdog.0.at="nexus0"
 
+
 hint.map.0.at="flash/spi0"
 hint.map.0.start=0x00000000
 hint.map.0.end=0x00040000
 hint.map.0.name="bootloader"
 hint.map.0.readonly=1
 
-
 hint.map.1.at="flash/spi0"
 hint.map.1.start=0x00040000
 hint.map.1.end=0x00050000
-hint.map.1.name="config_wu"
-
+hint.map.1.name="nvram"
 
 hint.map.2.at="flash/spi0"
 hint.map.2.start=0x00050000
@@ -123,16 +140,24 @@ hint.map.3.name="kernel"
 
 hint.map.4.at="flash/spi0"
 hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.4.end=0x007e0000
+hint.map.4.end=0x007b0000
 hint.map.4.name="rootfs"
 
 hint.map.5.at="flash/spi0"
-hint.map.5.start=0x007e0000
-hint.map.5.end=0x00800000
-hint.map.5.name="config"
+hint.map.5.start=0x007b0000
+hint.map.5.end=0x007c0000
+hint.map.5.name="MAC"
+#hint.map.5.readonly=1
 
+hint.map.6.at="flash/spi0"
+hint.map.6.start=0x007c0000
+hint.map.6.end=0x007f0000
+hint.map.6.name="config"
+#hint.map.6.readonly=1
 
-
-
-
+hint.map.7.at="flash/spi0"
+hint.map.7.start=0x007f0000
+hint.map.7.end=0x00800000
+hint.map.7.name="ART"
+#hint.map.7.readonly=1
 
