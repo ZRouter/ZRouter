@@ -43,7 +43,7 @@ hint.rt305x_sysctl.0.gpiomode=0x00029f
 # GPIO10 - Reset BTN	IN PU II INT
 hint.gpioreset.0.at="gpiobus0"
 hint.gpioreset.0.pins="0x0400"
-hint.gpioreset.0.name="wps"
+hint.gpioreset.0.name="reset"
 hint.gpioreset.0.flags="0x04a1"
 
 ## GPIO0  - WPS BTN	IN PU II INT
