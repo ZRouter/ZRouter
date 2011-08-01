@@ -220,16 +220,16 @@ _WORLD_INSTALL_ENV+=INSTALL="sh ${ZROUTER_ROOT}/tools/install.sh"
 
 WORLD_SUBDIRS+=include
 
+.for lib in ${WORLD_SUBDIRS_LIB}
+WORLD_SUBDIRS+=lib/${lib}
+.endfor
+
 .for dir in ${WORLD_SUBDIRS_BIN}
 WORLD_SUBDIRS+=bin/${dir}
 .endfor
 
 .for dir in ${WORLD_SUBDIRS_SBIN}
 WORLD_SUBDIRS+=sbin/${dir}
-.endfor
-
-.for lib in ${WORLD_SUBDIRS_LIB}
-WORLD_SUBDIRS+=lib/${lib}
 .endfor
 
 .for dir in ${WORLD_SUBDIRS_USR_BIN}
@@ -582,10 +582,7 @@ kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/
 
 ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync
-	_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz.sync` ; \
-	_NEW_SIZE=$$(( (($${_SIZE} + 0xffff) & 0xffff0000) - 0x1c )) ; \
-	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.bin.gz.sync
+	dd if=${NEW_KERNEL}.bin.gz of=${NEW_KERNEL}.bin.gz.sync bs=64k conv=sync
 
 fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -602,10 +599,7 @@ zimage:		${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync ${NEW_ROOTFS}.iso.u
 
 ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	cp ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync
-	_SIZE=`stat -f %z ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync` ; \
-	_NEW_SIZE=$$(( ($${_SIZE} + ${PACKING_KERNEL_ROUND}) & ~(${PACKING_KERNEL_ROUND} - 1) )) ; \
-	truncate -s $${_NEW_SIZE} ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync
+	dd if=${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot of=${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync bs=64k conv=sync
 
 # Howto
 # PACKING_KERNEL_ROUND=0x10000
