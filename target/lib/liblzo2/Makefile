@@ -40,7 +40,13 @@ INCS=	lzo/lzo1.h	\
 	lzo/lzodefs.h
 
 INCSDIR=	/usr/include/lzo
-
+# /usr/obj//usr/home/ray/work/DDTeam.net/ZRouter/zrouter/tmp//usr/1/MIPS_FreeBSD/HEAD/head/tmp/usr/include/lzo
+# /usr/obj/
+# /usr/home/ray/work/DDTeam.net/ZRouter/zrouter
+# /tmp/
+# /usr/1/MIPS_FreeBSD/HEAD/head
+# /tmp
+# /usr/include/lzo
 
 LIB=		lzo2
 SHLIB_MAJOR= 	0
