@@ -146,5 +146,8 @@ KERNCONF_DEVICES+=		ipsec
 KERNCONF_DEVICES+=		crypto
 .endif
 
-
+WORLD_SUBDIRS+=			\
+	sys/boot/i386/btx	\
+	sys/boot/i386/pmbr	\
+	sys/boot/i386/gptboot
 
