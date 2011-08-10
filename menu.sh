@@ -34,7 +34,7 @@
 main_menu() {
 	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
-	${SH} -c "${DIALOG} --title \"ZRouter build menu\" --menu ' ' 13 60 6 \
+	${SH} -c "${DIALOG} --title \"ZRouter build menu ${PROFILE_NAME}\" --menu ' ' 13 60 6 \
 	    Device \"Select the target device\" \
 	    Targets \"Select the build targets\" \
 	    Paths \"Set the paths of sources and build objects\" \
@@ -271,6 +271,7 @@ TARGETS="${TARGETS}"
 FREEBSD_SRC_TREE="${FREEBSD_SRC_TREE}"
 OBJ_DIR="${OBJ_DIR}"
 EOF
+	PROFILE_NAME="(${PROFILE})"
 	return 0
 }
 
@@ -320,6 +321,7 @@ load_profile() {
 		    \"\nThere is a problem with the selected profile (not a file ?).\nThe file could not be read.\" 8 65"
 		return 1
 	fi
+	PROFILE_NAME="(${PROFILE})"
 	return 0
 }
 
@@ -332,7 +334,7 @@ build_info() {
 	else
 		BOX_SIZE=$(($BOX_SIZE + 10))
 	fi
-	${SH} -c "${DIALOG} --title \"ZRouter build settings\" --yesno \
+	${SH} -c "${DIALOG} --title \"ZRouter build settings ${PROFILE_NAME}\" --yesno \
 	    \"\nPROFILE: ${PROFILE} \
 	    \nTARGET_PAIR: ${TARGET_PAIR} \
 	    \nTARGETS: ${TARGETS} \
@@ -352,12 +354,13 @@ build_info() {
 #
 # Set defaults
 #
-BUILD_PROFILES_DIR=build_profiles
-FREEBSD_SRC_TREE="/usr/src"
-OBJ_DIR="/usr/obj"
-TARGET_PAIR="NONE"
-PROFILE="NONE"
-TARGETS="kernel.oldlzma.uboot rootfs.iso.ulzma"
+: ${BUILD_PROFILES_DIR:="build_profiles"}
+: ${FREEBSD_SRC_TREE:="/usr/src"}
+: ${OBJ_DIR:="/usr/obj"}
+: ${TARGET_PAIR:="NONE"}
+: ${PROFILE:="NONE"}
+: ${TARGETS:="kernel.oldlzma.uboot rootfs.iso.ulzma"}
+PROFILE_NAME="(${PROFILE})"
 
 #
 # Tools paths
