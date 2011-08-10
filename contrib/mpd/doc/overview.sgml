@@ -1,0 +1,74 @@
+<!-- $Id: overview.sgml,v 1.9 2007/10/07 21:07:33 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Overview<label id="overview"></heading>
+
+      <p>
+	Mpd is a netgraph(4) based implementation of the multi-link
+	PPP protocol for FreeBSD. It is designed to be both fast
+	and flexible as it handles configuration and negotiation in
+	user land, while routing all data packets strictly in the
+	kernel.      
+
+	Mpd has unified support for many link types:
+	<itemize>
+        <item><bf>modem</bf> to connect using different asychronous
+	    serial connections, including modems, ISDN terminal adapters,
+	    and null-modem.
+	    Mpd includes event-driven scripting language for modem
+	    identification, setup, manual server login, etc.
+        <item><bf>pptp</bf> to connect over the Internet using
+	    the Point-to-Point Tunnelling Protocol (PPTP).
+	    This protocol is supported by the most OSes and hardware vendors.
+        <item><bf>l2tp</bf> to connect over the Internet using
+	    the Layer Two Tunnelling Protocol (L2TP).
+	    L2TP is a PPTP successor supported with modern clients and servers.
+        <item><bf>pppoe</bf> to connect over an Ethernet port
+	    using the PPP-over-Ethernet (PPPoE) protocol.
+	    This protocol is often used by DSL providers.
+	<item><bf>tcp</bf> to tunnel PPP session over a TCP connection.
+	    Frames are encoded in the same was as asychronous serial connections.
+        <item><bf>udp</bf> to tunnel PPP session over a UDP connection.
+	    Each frame is encapsulated in a UDP datagram packet.
+        <item><bf>ng</bf> to connect using different devices supported by netgraph.
+	    Netgraph is highly modular kernel networking system,
+	    supporting synchronous serial connections, Cisco HDLC, Frame Relay, and other protocols.
+	</itemize>
+
+	It supports numerous PPP sub-protocols and extensions, such as:
+	<itemize>
+        <item>Multi-link PPP
+        <item>PAP, CHAP, MS-CHAP and EAP authentication 
+        <item>traffic compression (MPPC, Deflate, Predictor-1)
+        <item>traffic encryption (MPPE, DESE, DESE-bis)
+        <item>IPCP and IPV6CP parameter negotiation
+        </itemize>
+	
+	Depending on configured rules and connection parameters mpd can operate
+	as usual PPP client/server or forward connection unmodified
+	to other host using any supported link type providing LAC/PAC/TSA
+	functionality for building distributed access networks.
+
+	Mpd also includes many additional features: 
+	<itemize>
+        <item>IPv4 and IPv6 support
+        <item>Telnet and HTTP control interfaces.
+        <item>Different authentication and accounting methods (RADIUS, PAM, script, file, ...)
+        <item>NetFlow traffic accounting
+        <item>Network address translation (NAT)
+        <item>Dial-on-demand with idle timeout 
+        <item>Dynamic demand based link management (also known as ``rubber bandwidth'') 
+        <item>Powerful chat scripting language for asynchronous serial ports 
+        <item>Pre-tested chat scripts for several common modems and ISDN TAs
+        <item>Clean device-type independent design 
+        <item>Comprehensive logging
+	</itemize>
+      <p>
+	Mpd was originally developed at Whistle Communications, Inc.
+	for use in the Whistle InterJet.
+	It is based on the original <tt>iij-ppp</tt> user-mode PPP code,
+	though it has been completely rewritten since then.
+	Mpd is now hosted on sourceforge.net
+	<htmlurl url="http://sourceforge.net/projects/mpd/" name="MPD Project Page">.

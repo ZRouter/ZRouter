@@ -1,0 +1,85 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>IPSec configuration</h1>
+
+
+<!-- ipsec>
+    <remote id="0" enable="true">
+	<gateway>10.0.0.2:500</gateway>
+        <exchange_mode>main,aggressive</exchange_mode>
+        <my_identifier>address 10.0.0.1</my_identifier>
+        <peers_identifier>address 10.0.0.2</peers_identifier>
+        <lifetime>time 28800 sec</lifetime>
+	<initial_contact>on</initial_contact>
+        <passive>off</passive>
+        <proposal_check>obey</proposal_check>
+	<nat_traversal>off</nat_traversal>
+        <generate_policy>off</generate_policy>
+        <proposal>
+            <encryption_algorithm>3des</encryption_algorithm>
+            <hash_algorithm>md5</hash_algorithm>
+            <authentication_method>pre_shared_key</authentication_method>
+            <dh_group>5</dh_group>
+	</proposal>
+    </remote>
+    <sainfo id="0" enable="true"> 
+	<src>address 192.168.0.0/24 any</src>
+	<dst>address 192.168.2.0/24 any</dst>
+	<pfs_group>5</pfs_group>
+	<lifetime>time 3600 sec</lifetime>
+	<encryption_algorithm>3des</encryption_algorithm>
+	<authentication_algorithm>hmac_md5</authentication_algorithm>
+	<compression_algorithm>deflate</compression_algorithm>
+    </sainfo>
+    <setkey>
+	<line>spdadd 192.168.0.0/24 192.168.2.0/24 any -P out ipsec esp/tunnel/10.0.0.1-10.0.0.2/use</line>
+	<line>spdadd 192.168.2.0/24 192.168.0.0/24 any -P in ipsec esp/tunnel/10.0.0.2-10.0.0.1/use</line>
+    <setkey>
+</ipsec -->
+
+
+$$$code:conf_table("IPSec", "IPSec link configuration", "ipsec.remote[1]",
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Gateway", 		type = "node", htmltype = "text", 	node = "gateway"		},
+    { label = "Exchange Mode", 		type = "node", htmltype = "text", 	node = "exchange_mode"		},
+    { label = "My ID", 			type = "node", htmltype = "text", 	node = "my_identifier"		},
+    { label = "Peer ID", 		type = "node", htmltype = "text", 	node = "peers_identifier"	},
+    { label = "Lifetime", 		type = "node", htmltype = "text", 	node = "lifetime"		},
+    { label = "Initial Contact", 	type = "node", htmltype = "text", 	node = "initial_contact"	},
+    { label = "Passive", 		type = "node", htmltype = "text", 	node = "passive"		},
+    { label = "Proposal Check", 	type = "node", htmltype = "text", 	node = "proposal_check"		},
+    { label = "NAT Traversal", 		type = "node", htmltype = "text", 	node = "nat_traversal"		},
+    { label = "Generate Policy", 	type = "node", htmltype = "text", 	node = "generate_policy"	},
+})$$$
+$$$code:conf_table("IPSecProposal", "IPSec link1 proposal configuration", "ipsec.remote[1].proposal",
+{
+    { label = "Encryption Algorithm", 	type = "node", htmltype = "text", 	node = "encryption_algorithm"	},
+    { label = "HASH Algorithm", 	type = "node", htmltype = "text", 	node = "hash_algorithm"		},
+    { label = "DH Group", 		type = "node", htmltype = "text", 	node = "dh_group"		},
+    { label = "Pre Shared Key", 	type = "node", htmltype = "text", 	node = "psk"			},
+})$$$
+
+$$$code:conf_table("IPSecTunnel", "IPSec link1 Tunnel configuration", "ipsec.sainfo[1]",
+{
+    { label = "Source Address",		type = "node", htmltype = "text", 	node = "src"			},
+    { label = "Destination Address",	type = "node", htmltype = "text", 	node = "dst"			},
+    { label = "PFS Group", 		type = "node", htmltype = "text", 	node = "pfs_group"		},
+    { label = "Lifetime", 		type = "node", htmltype = "text", 	node = "lifetime"		},
+    { label = "Encryption Algorithm", 	type = "node", htmltype = "text", 	node = "encryption_algorithm"	},
+    { label = "Auth Algorithm", 	type = "node", htmltype = "text", 	node = "authentication_algorithm"},
+    { label = "Compression Algorithm", 	type = "node", htmltype = "text", 	node = "compression_algorithm"	},
+})$$$
+
+$$$code:conf_table("SPD", "IPSec Policy (setkey) configuration", "ipsec.setkey",
+{
+    { label = "Line1",	type = "node", htmltype = "text", node = "line[1]"},
+    { label = "Line2",	type = "node", htmltype = "text", node = "line[2]"},
+    { label = "Line3",	type = "node", htmltype = "text", node = "line[3]"},
+    { label = "Line4",	type = "node", htmltype = "text", node = "line[4]"},
+})$$$
+
+
+$$$code:inc("htdocs/footer.html")$$$
+
+
+

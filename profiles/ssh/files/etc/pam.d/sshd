@@ -1,0 +1,18 @@
+# PAM configuration for the "telnetd" service
+#
+
+# auth
+#auth		sufficient	pam_ssh.so		no_warn try_first_pass
+auth		required	pam_unix.so		no_warn try_first_pass
+
+# account
+#account		required	pam_nologin.so
+#account		required	pam_login_access.so
+account		required	pam_unix.so
+
+# session
+#session 	optional	pam_ssh.so
+#session		required	pam_lastlog.so		no_fail
+
+# password
+password	required	pam_unix.so		no_warn try_first_pass

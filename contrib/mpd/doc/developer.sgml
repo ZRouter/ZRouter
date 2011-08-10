@@ -1,0 +1,56 @@
+<!-- $Id: developer.sgml,v 1.4 2007/10/05 17:36:02 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Hints for developers<label id="developer"></heading>
+
+  <p>
+  This chapter describes describes some hints for developers.
+
+<descrip>
+
+<tag>Source-Code-Style</tag>
+<p>
+There is not so much to say about that, just take a look at the existing 
+source files. <newline>
+The Tab-Width is eight with an indent of fore. Please make a space between 
+operators and operands.
+</p>
+
+<tag>NgFuncGetStats</tag>
+<p>
+NEVER call NgFuncGetStats() with the <em>clear</em> parameter set to true, because 
+there are other functions (echo requests/replies, bandwidth management) 
+wich relies on increasing link-stats. Mpd carries a copy of the netgraph 
+link-stats at link-level, just use these instead. You can call 
+LinkUpdateStats() for updating the internal stats-struct.
+</p>
+
+<tag>New Authentication-Backends</tag>
+<p>
+Authentication backends must run independently from the rest of Mpd, i.e. 
+you must not access any Mpd resource, because 
+the authentication process is started in its own thread (you have to 
+take care about thread-safety). An <tt>AuthData</tt> object is passed 
+to your authenticating function which carries a copy of all required
+information. If your backend provides other parameters, like MTU, IP, etc. 
+then put these at the appropriate place into <tt>AuthData</tt> or 
+<tt>Auth</tt>.
+
+If you can't avoid reading from Mpd's internal data, then acquire the 
+Giant Mutex:
+<code>
+[...]
+  pthread_mutex_lock(&amp;gGiantMutex);
+  [do whatever]
+  pthread_mutex_unlock(&amp;gGiantMutex);
+[...]
+</code>
+</p>
+
+</descrip>
+
+
+</p>
+

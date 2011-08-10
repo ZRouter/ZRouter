@@ -1,0 +1,118 @@
+<!-- $Id: invoke.sgml,v 1.8 2007/11/10 15:34:41 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Invoking mpd<label id="invoke"></heading>
+
+	
+<p>
+	Mpd is invoked by first setting up your configuration
+	files, and then running
+<tscreen><tt>
+<bf>mpd [ <em>options</em> ] [ <em>configuration</em> ] </bf>
+</tt></tscreen>
+	On startup mpd run commands from the <tt>startup</tt> label.
+	Aftre that, if <tt><em>configuration</em></tt> is supplied,
+	mpd looks in <tt>mpd.conf</tt> for a matching label,
+	and runs the corresponding commands. If 
+	<tt><em>configuration</em></tt> is not supplied,
+	mpd looks for the configuration named <tt>default</tt>.
+
+	Mpd can either be run in interactive mode or in the
+	background as a daemon. In interactive mode mpd
+	accepts commands typed at the console.
+
+	Mpd understands the following command line options.
+	Each option has a short, single character form, as
+	well as an equivalent long form.
+
+	<descrip>
+
+	<tag><tt>
+	-b  --background
+	</tt></tag>
+
+	Run as a background daemon.
+
+	<tag><tt>
+	-d  --directory <em>dir</em>
+	</tt></tag>
+
+	This option allows you to specify a different directory
+	for the mpd configuration files other than the default
+	<tt>/usr/local/etc/mpd</tt>.
+
+	<tag><tt>
+	-f  --file <em>filename</em>
+	</tt></tag>
+
+	Specify an initial configuration file other than the default,
+	<tt>mpd.conf</tt>.
+
+	<tag><tt>
+	-o  --one-shot
+	</tt></tag>
+
+	This option forces mpd terminate itself after the last link disappear.
+	Link templates are not counted as links.
+
+	<tag><tt>
+	-p  --pidfile <em>filename</em>
+	</tt></tag>
+
+	Mpd will open and lock <tt><em>filename</em></tt> and
+	write its process ID before starting. If another mpd
+	process is already running, mpd will not start.
+	The default is <tt>/var/run/mpd.pid</tt>.
+
+	<tag><tt>
+	-k  --kill
+	</tt></tag>
+
+	With this option, pd will attempt to kill any existing mpd
+	process before beginning execution. The previous process
+	must have written its process ID in the PID file
+	<tt>/var/run/mpd.pid</tt> (or the file you specify with
+	the <tt>--pidfile</tt> option).
+
+	<tag><tt>
+	-s  --syslog-ident <em>ident</em>
+	</tt></tag>
+
+	Mpd normally logs via <tt>syslog(3)</tt> with the identifier
+	<tt>mpd</tt>. This option allows you to change that identifier.
+
+	<tag><tt>
+	-v  --version
+	</tt></tag>
+
+	Displays the version number of mpd and exits.
+
+	<tag><tt>
+	-h  --help
+	</tt></tag>
+
+	Displays a usage message and exits.
+
+	</descrip>
+
+	Mpd responds to the following signals while it is running:
+
+	<descrip>
+
+	<tag>SIGTERM</tag>
+	Attempt to gracefully shut down all active connections and exit.
+
+	<tag>SIGUSR1</tag>
+	This signal causes mpd to initiate a connection
+	with the first link. If mpd is already
+	attempting to connect, this signal has no effect.
+
+	<tag>SIGUSR2</tag>
+	This signal has the opposite effect, namely, it causes
+	mpd to close the first link. If the link
+	is already in a closed state, this signal has no effect.
+
+	</descrip>
+

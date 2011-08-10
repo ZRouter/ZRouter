@@ -1,0 +1,13 @@
+
+
+switch	port	all
+switch	port	0
+switch	port	0-2
+
+switch 
+{
+    port
+    {
+	all
+    }
+}

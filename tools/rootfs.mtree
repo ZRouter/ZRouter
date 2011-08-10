@@ -1,0 +1,439 @@
+
+/set type=file uname=root gname=wheel mode=0755
+.               type=dir
+    var             type=link
+
+    bin             type=dir
+        cat            
+        chmod          
+        cp             
+        date           
+        dd             
+        df             
+        expr           
+        hostname       
+        kenv           
+        kill           
+        link           type=link
+        ln             
+        ls             
+        mkdir          
+        ps             
+        realpath       
+        rm             
+        sh             
+        sleep          
+        stty           
+        sync           
+        unlink         type=link
+        upgrade        
+        uuidgen        
+    ..
+
+
+    boot            type=dir
+
+        defaults        type=dir
+        ..
+
+
+        firmware        type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0555
+        kernel          type=dir mode=0755
+        ..
+
+
+        modules         type=dir mode=0755
+        ..
+
+    ..
+
+
+    dev             type=dir
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+    etc             type=dir mode=0755
+        auth.conf      
+        cdevd.conf     
+        crontab        
+        devfs.conf     
+        dhclient.conf  
+        dumpdates      
+        fbtab          
+        ftpusers       
+        gettytab       
+        group          
+        host.conf      
+        hosts          
+        hosts.allow    
+        hosts.equiv    
+        hosts.lpd      
+        inetd.conf     
+        libalias.conf  
+        login.access   
+        login.conf     
+        login.conf.db  
+        master.passwd   mode=0600
+        motd           
+        mpd             type=link mode=0755
+        netconfig      
+        netstart        mode=0755
+        network.subr   
+        networks       
+        nsswitch.conf  
+        printcap       
+        profile        
+        protocols      
+        pwd.db         
+        rc              mode=0755
+        rc.conf        
+        rc.firewall    
+        rc.shutdown    
+        rc.subr        
+        reboot.sh       mode=0755
+        remote         
+        resolv.conf     type=link mode=0755
+        rpc            
+        save_etc        mode=0755
+        services       
+        shells         
+        snmpd.config   
+        spwd.db         mode=0600
+        sysctl.conf    
+        termcap        
+        ttys           
+
+        X11             type=dir mode=0755
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        bin             type=dir
+            update         
+        ..
+
+
+        bluetooth       type=dir
+        ..
+
+
+        buttons         type=dir
+            WDS.sh         
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        defaults        type=dir mode=0755
+            devfs.rules    
+            periodic.conf  
+            rc.conf        
+        ..
+
+
+        devd            type=dir mode=0755
+        ..
+
+
+        gnats           type=dir mode=0755
+        ..
+
+
+        gss             type=dir mode=0755
+        ..
+
+
+        mail            type=dir mode=0755
+        ..
+
+
+        mpd5            type=dir mode=0755
+            mpd.conf       
+            mpd.script     
+        ..
+
+
+        mtree           type=dir mode=0755
+        ..
+
+
+        ntp             type=dir mode=0700
+        ..
+
+
+        pam.d           type=dir mode=0755
+            login          
+            passwd         
+            system         
+            telnetd        
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        periodic        type=dir
+
+            daily           type=dir
+                420.status-network
+            ..
+
+
+            monthly         type=dir
+            ..
+
+
+            security        type=dir
+            ..
+
+
+            weekly          type=dir
+            ..
+
+        ..
+
+
+        ppp             type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        racoon          type=dir mode=0755
+            psk.txt        
+            racoon.conf    
+            setkey.conf    
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        rc.d            type=dir
+            MAIN           
+            sshd           
+        ..
+
+
+        security        type=dir
+        ..
+
+
+        skel            type=dir
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        ssh             type=dir mode=0755
+            moduli         
+            ssh_config     
+            sshd_config    
+        ..
+
+
+        ssl             type=dir mode=0755
+        ..
+
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+    lib             type=dir
+        libalias.so.7  
+        libalias_cuseeme.so
+        libalias_dummy.so
+        libalias_ftp.so
+        libalias_irc.so
+        libalias_nbt.so
+        libalias_pptp.so
+        libalias_skinny.so
+        libalias_smedia.so
+        libbsdxml.so.4 
+        libc.so.7      
+        libcrypt.so.5  
+        libcrypto.so.6 
+        libedit.so.7   
+        libgcc_s.so.1  
+        libgeom.so.5   
+        libipsec.so.4  
+        libipx.so.5    
+        libjail.so.1   
+        libkiconv.so.4 
+        libkvm.so.5    
+        libm.so.5      
+        libmd.so.5     
+        libncurses.so.8
+        libpcap.so.7   
+        libreadline.so.8
+        libsbuf.so.5   
+        libssp.so.0    
+        libthr.so.3    
+        libufs.so.5    
+        libutil.so.9   
+        libz.so.6      
+
+        geom            type=dir
+        ..
+
+    ..
+
+
+    libexec         type=dir
+        ld-elf.so.1    
+    ..
+
+
+    media           type=dir
+    ..
+
+
+    mnt             type=dir
+    ..
+
+
+    proc            type=dir mode=0555
+    ..
+
+
+    rescue          type=dir
+    ..
+
+
+    root            type=dir
+    ..
+
+
+    sbin            type=dir
+        cdevd          
+        dmesg          
+        fastboot       type=link
+        fasthalt       type=link
+        halt           type=link
+        ifconfig       
+        init           
+        ipfw           
+        kldload        
+        kldstat        
+        kldunload      
+        ldconfig       
+        md5            
+        mdconfig       
+        mount          
+        mount_cd9660   
+        mount_msdosfs  
+        mount_nullfs   
+        mount_unionfs  
+        mpd            
+        newfs          
+        newfs_msdos    
+        nextboot       
+        ping           
+        rcorder        
+        reboot         
+        rmd160         type=link
+        route          
+        sha1           type=link
+        sha256         type=link
+        shttpd         
+        sysctl         
+        umount         
+    ..
+
+
+    tmp             type=dir mode=01755
+    ..
+
+
+    usr             type=dir
+
+        bin             type=dir
+            basename       
+            bsdgrep        
+            bsdtar         
+            crontab        
+            dirname        
+            egrep          type=link
+            ex             type=link
+            fetch          
+            fgrep          type=link
+            find           
+            getopt         
+            grep           type=link
+            groups         type=link
+            head           
+            hex2bin        
+            id             
+            login          
+            minigzip       
+            netstat        
+            nex            type=link
+            nvi            type=link
+            nview          type=link
+            passwd         
+            scp            
+            sed            
+            slogin         type=link
+            sort           
+            ssh            
+            ssh-keygen     
+            tail           
+            tar            type=link
+            tee            
+            telnet         
+            uname          
+            vi             
+            view           type=link
+            wc             
+            whoami         type=link
+            xargs          
+            zegrep         type=link
+            zfgrep         type=link
+            zgrep          type=link
+        ..
+
+
+        lib             type=dir
+        ..
+
+
+        libexec         type=dir
+            getty          
+            ld-elf.so.1     type=link
+            telnetd        
+
+            lpr             type=dir
+
+                ru              type=dir
+                ..
+
+            ..
+
+
+            sendmail        type=dir
+            ..
+
+
+            sm.bin          type=dir
+            ..
+
+        ..
+
+
+        local           type=dir
+        ..
+
+
+        sbin            type=dir
+            chroot         
+            cron           
+            gpioctl        
+            inetd          
+            ngctl          
+            nghook         
+            pwd_mkdb       
+            sshd           
+        ..
+
+    ..
+
+..
+

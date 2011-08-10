@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# $FreeBSD: src/etc/rc.d/sshd,v 1.14.2.1.2.1 2009/10/25 01:10:29 kensmith Exp $
+#
+
+# PROVIDE: sshd
+# REQUIRE: MAIN sshd_keys
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="sshd"
+rcvar=`set_rcvar`
+command="/usr/sbin/${name}"
+pidfile="/var/run/${name}.pid"
+extra_commands="reload"
+
+timeout=300
+
+load_rc_config $name
+run_rc_command "$1"
