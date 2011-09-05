@@ -65,7 +65,9 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
 	echo "machine	${KERNCONF_MACHINE}" >> ${KERNEL_CONFIG_FILE}
 	echo "ident	${KERNCONF_IDENT}" >> ${KERNEL_CONFIG_FILE}
-	echo "cpu	${KERNCONF_CPU}" >> ${KERNEL_CONFIG_FILE}
+.for cpu in ${KERNCONF_CPU}
+	echo "cpu	${cpu}" >> ${KERNEL_CONFIG_FILE}
+.endfor
 	echo "hints	\"${KERNEL_HINTS_FILE}\"" >> ${KERNEL_CONFIG_FILE}
 	echo "# makeoptions section" >> ${KERNEL_CONFIG_FILE}
 	if [ "x${KERNCONF_MODULES_OVERRIDE}" = "xnone" ] ; then \
@@ -450,9 +452,13 @@ rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
+.if ${TARGET_ARCH} == "armeb"
+ROOTFS_ENDIAN_FLAGS=-B big
+.endif
+
 rootfs.ffs ${NEW_ROOTFS}.ffs:	rootfs makefs_ffs
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} makefs -t ffs -d 255 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -s ${ROOTFS_MEDIA_SIZE} -o minfree=0,version=1 ${NEW_ROOTFS}.ffs ${NEW_ROOTFS}
+	PATH=${IMAGE_BUILD_PATHS} makefs -t ffs -d 255 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -s ${ROOTFS_MEDIA_SIZE} -o minfree=0,version=1 ${ROOTFS_ENDIAN_FLAGS} ${NEW_ROOTFS}.ffs ${NEW_ROOTFS}
 
 #	blocks=$(($ROOTFS_MEDIA_SIZE / ${BLOCKSIZE} + 256))
 #	dd if=/dev/zero of=${NEW_ROOTFS}.ffs bs=${BLOCKSIZE} count=${blocks}
