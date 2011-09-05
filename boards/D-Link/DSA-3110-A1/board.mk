@@ -28,7 +28,7 @@ WITH_USB=yes
 WITH_IPSEC=yes
 #WITH_WIRELESS=yes
 # Builded modules
-KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib atp8620
+KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/ucom zlib ata/atadisk ata/atapci/chipsets/ataatp8620
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
