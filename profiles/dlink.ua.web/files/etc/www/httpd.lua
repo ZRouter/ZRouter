@@ -71,81 +71,81 @@ mime = {};
 -- each given virtual host.
 --
 function start_server( c, config )
-    running = 1;
+	running = 1;
 
+	--
+	--  Bind a socket to the given port
+	-- c:getNode("http.host"):value();
+	s = socket.tcp();
+	assert(s:setoption("reuseaddr", true));
+	assert(s:bind("*", c:getNode("http.port"):value()));
+	assert(s:listen(8));
+	assert(s:settimeout(5));
+	config.listener = s;
 
-    --
-    --  Bind a socket to the given port
-    -- c:getNode("http.host"):value()
-    s = socket.tcp();
-    assert(s:setoption("reuseaddr", true));
-    assert(s:bind("*", c:getNode("http.port"):value()));
-    assert(s:listen(8));
-    assert(s:settimeout(5));
-    config.listener = s;
+	--
+	--   Print some status messages.
+	--
+	print( "\nListening upon:" );
+	print( "  http://" .. c:getNode("http.host"):value() .. ":" .. 
+			c:getNode("http.port"):value() .. "/" );
+	print( "\n\n");
+	--[[
+	table.insert(r.tasks.countdown, { count=25, task=
+			function()
+			print("task 0 ok"); 
+			return (true); 
+			end 
+			});
+	table.insert(r.tasks.countdown, { count=10, task=
+			function()
+			print("task 1 ok"); 
+			return (true); 
+			end 
+			});
+	table.insert(r.tasks.countdown, { count=15, task=
+			function()
+			print("task 2 ok"); 
+			return (true); 
+			end 
+			});
+	table.insert(r.tasks.countdown, { count=5, task=
+			function()
+			print("task 3 ok"); 
+			return (true); 
+			end 
+			});
+	]]
+	--
+	--  Loop accepting requests.
+	--
+	while ( running == 1 ) do
+	processConnection( c, config );
+	periodic_tasks(c);
+	end
 
-    --
-    --   Print some status messages.
-    -- 
-    print( "\nListening upon:" );
-    print( "  http://" .. c:getNode("http.host"):value() .. ":" .. c:getNode("http.port"):value() .. "/" );
-    print( "\n\n");
---[[
-    table.insert(r.tasks.countdown, { count=25, task=
-	function()
-	    print("task 0 ok"); 
-	    return (true); 
-	end 
-    });
-    table.insert(r.tasks.countdown, { count=10, task=
-	function()
-	    print("task 1 ok"); 
-	    return (true); 
-	end 
-    });
-    table.insert(r.tasks.countdown, { count=15, task=
-	function()
-	    print("task 2 ok"); 
-	    return (true); 
-	end 
-    });
-    table.insert(r.tasks.countdown, { count=5, task=
-	function()
-	    print("task 3 ok"); 
-	    return (true); 
-	end 
-    });
-]]
-    --
-    --  Loop accepting requests.
-    --
-    while ( running == 1 ) do
-        processConnection( c, config );
-        periodic_tasks(c);
-    end
-
-
-    --
-    -- Finished.
-    --
-    config.listener:close();
+	--
+	-- Finished.
+	--
+	config.listener:close();
 end
 
 function periodic_tasks(c)
-    -- fetch collector info
-    local i;
-    local n = #r.tasks.countdown;
+	-- fetch collector info
+	local i;
+	local n = #r.tasks.countdown;
 
-    for i = n,1,-1 do
-	r.tasks.countdown[i].count = r.tasks.countdown[i].count - r.tasks.step;
+	for i = n,1,-1 do
+		r.tasks.countdown[i].count = r.tasks.countdown[i].count -
+		    r.tasks.step;
 
-	if (r.tasks.countdown[i].count <= 0) then
-	    -- Task must return true, else run forever
-	    if r.tasks.countdown[i].task() then
-		table.remove(r.tasks.countdown, i);
-	    end
+		if (r.tasks.countdown[i].count <= 0) then
+			-- Task must return true, else run forever
+			if r.tasks.countdown[i].task() then
+				table.remove(r.tasks.countdown, i);
+			end
+		end
 	end
-    end
 end
 
 
@@ -153,354 +153,359 @@ end
 --
 --  Process a single incoming connection.
 --
-function processConnection( c, config ) 
-    --
-    --  Accept a new connection
-    --
-    config.listener:settimeout(r.tasks.step);
-    local client = config.listener:accept();
-    if (not client) then return (nil) end;
-    local ip, port = client:getpeername();
+function processConnection( c, config )
+	--
+	--  Accept a new connection
+	--
+	config.listener:settimeout(r.tasks.step);
+	local client = config.listener:accept();
+	if (not client) then return (nil) end;
+	local ip, port = client:getpeername();
 
-    if not client then
-	return (nil);
-    end
-
-    found   = 0;  -- Found the end of the HTTP headers?
-    chunk   = 0;  -- Count of data read from client socket
-    size    = 0;  -- Total size of incoming request.
-    code    = 0;  -- Status code we send to the client
-    request = ""; -- Request body read from client.
-    rq = {};
-    rq.ip = ip;
-    rq.port = port;
-
-
-    --
-    --  Read in a response from the client, terminating at the first
-    -- '\r\n\r\n' line - this is the end of the HTTP header request.
-    --
-    --  Also break out of this loop if we read ten packets of data
-    -- from the client but didn't manage to find a HTTP header end.
-    -- This should help protect us from DOSes.
-    --
-    -- client:settimeout(1);
---    while ( true ) do
---    	local data, err = client:receive("*l");
---
---	if not data then break end
---
---        request = request .. data .. "\r\n";
---
---	if data:len() <= 0 then break end
---    end
-
---    local request, err = client:receive("*a");
-
-
---    size = request:len();
---
---    print("Rq: \"" .. request .. "\"");
---
---    position,len = request:find("\r\n\r\n");
---    if ( position ~= nil )  then
---        rq.RequestHeader = request:sub(0, position);
---        rq.RequestBody   = request:sub(position+4);
---        rq.RequestBodyLength = len-4;
---    else
---	-- Maybe we need say ERROR!!!!
---	return (nil);
---    end
-
-    rq.ContentLength = -1;
-    rq.RequestHeader = "";
-    i = 1;
-    while ( true ) do
-    	local data, err = client:receive("*l");
-    	--print(i, data or "(no data)", err or " . ");
-    	i = i + 1;
-
-	if not data then break end
-
-	local match, _, len = data:find("Content%-Length: ([^:\r\n]+)");
-	if match then
-	    rq.ContentLength = tonumber(len);
+	if not client then
+		return (nil);
 	end
 
-        rq.RequestHeader = rq.RequestHeader .. data .. "\r\n";
-
-	if data:len() <= 0 then break end
-    end
-
-    if rq.ContentLength >= 0 then
-	rq.RequestBodyLength = rq.ContentLength;
-	rq.RequestBody, err = client:receive(rq.RequestBodyLength);
-    end
-
-    if err then
-	rq.RequestBodyLength = nil;
-	rq.RequestBody = nil;
-    end
-
-    --
-    --  OK We now have a complete HTTP request of 'size' bytes long
-    -- stored in 'rq.RequestHeader'.
-    --
-    
-    --
-    -- Find the requested path.
-    --
-    _, _, method, path, major, minor  = string.find(rq.RequestHeader, "([A-Z]+) (.+) HTTP/(%d).(%d)");
-
-    --
-    -- We only handle GET requests.
-    --
-    if ( method ~= "GET" ) and ( method ~= "POST" ) then
-        error = "Method not implemented";
-
-        if ( method == nil ) then
-            error = error .. ".";
-        else
-            error = error .. ": " .. urlEncode( method );
-        end
-
-        err = sendError(501, error);
-        client:send(err)
-        client:close();
-        return err:len(), "501";
-    end
+	found   = 0;  -- Found the end of the HTTP headers?
+	chunk   = 0;  -- Count of data read from client socket
+	size    = 0;  -- Total size of incoming request.
+	code    = 0;  -- Status code we send to the client
+	request = ""; -- Request body read from client.
+	rq = {};
+	rq.ip = ip;
+	rq.port = port;
 
 
-    --
-    -- Decode the requested path.
-    --
-    path = urlDecode( path );
+	--
+	--  Read in a response from the client, terminating at the first
+	-- '\r\n\r\n' line - this is the end of the HTTP header request.
+	--
+	--  Also break out of this loop if we read ten packets of data
+	-- from the client but didn't manage to find a HTTP header end.
+	-- This should help protect us from DOSes.
+	--
+	-- client:settimeout(1);
+	--    while ( true ) do
+	--    	local data, err = client:receive("*l");
+	--
+	--	if not data then break end
+	--
+	--        request = request .. data .. "\r\n";
+	--
+	--	if data:len() <= 0 then break end
+	--    end
 
-    --
-    -- find the Virtual Host which we need for serving, and find the
-    -- user agent and referer for logging purposes.
-    --
-    _, _, rq.Host           = rq.RequestHeader:find( "Host: (.-)\r?\n");
-    _, _, rq.Agent          = rq.RequestHeader:find( "Agent: (.-)\r?\n");
-    _, _, rq.Referer        = rq.RequestHeader:find( "Referer: (.-)\r?\n");
+	--    local request, err = client:receive("*a");
 
-    _, _, rq.Accept         = rq.RequestHeader:find( "Accept: (.-)\r?\n");
-    _, _, rq.AcceptLanguage = rq.RequestHeader:find( "Accept%-Language: ([^:\r\n]+)");
-    _, _, rq.AcceptEncoding = rq.RequestHeader:find( "Accept%-Encoding: ([^:\r\n]+)");
-    _, _, rq.AcceptCharset  = rq.RequestHeader:find( "Accept%-Charset: ([^:\r\n]+)");
-    _, _, rq.ContentType    = rq.RequestHeader:find( "Content%-Type: ([^:\r\n]+)");
-    _, _, rq.ContentLength  = rq.RequestHeader:find( "Content%-Length: ([^:\r\n]+)");
-    _, _, rq.Authorization  = rq.RequestHeader:find( "Authorization: ([^:\r\n]+)");
+	--    size = request:len();
+	--
+	--    print("Rq: \"" .. request .. "\"");
+	--
+	--    position,len = request:find("\r\n\r\n");
+	--    if ( position ~= nil )  then
+	--        rq.RequestHeader = request:sub(0, position);
+	--        rq.RequestBody   = request:sub(position+4);
+	--        rq.RequestBodyLength = len-4;
+	--    else
+	--	-- Maybe we need say ERROR!!!!
+	--	return (nil);
+	--    end
 
-    rq.UserName = nil;
-    rq.Password = nil;
-    rq.Group    = nil;
-    if rq.Authorization then
-        local BasicAuth = "";
-        _, _, BasicAuth = string.find(rq.RequestHeader, "Basic ([^:\r\n]+)");
-        if BasicAuth then
-            local pair = b64dec(BasicAuth);
-            _, _, _u, _p = string.find(pair, "(.-)%:(.*)");
+	rq.ContentLength = -1;
+	rq.RequestHeader = "";
+	i = 1;
+	while ( true ) do
+		local data, err = client:receive("*l");
+		--print(i, data or "(no data)", err or " . ");
+		i = i + 1;
 
-            for usr = 1, 8, 1 do
+		if not data then break end
 
-                local u = c:getNode(string.format("http.users.user[%d]", usr));
-                if u and (u:attr("username") == _u) and (u:attr("password") == _p) then
-                    rq.UserName = _u;
-                    rq.Password = _p;
-                    rq.Group    = u:attr("group");
-                end
-            end
-        end
-    end
+		local match, _, len = data:find("Content%-Length: ([^:\r\n]+)");
+		if match then
+			rq.ContentLength = tonumber(len);
+		end
 
-    if not rq.Group and rq.ip ~= "127.0.0.1" then
-        local message = "HTTP/1.1 401 Authorization Required\r\n" ;
-        message = message .. "Server: httpd\r\n";
-        message = message .. "WWW-Authenticate: Basic realm=\"Secure Area\"\n";
-        message = message .. "Content-type: text/html\r\n";
-        message = message .. "Connection: close\r\n\r\n" ;
-        message = message .. "<html><head><title>Error</title></head>" ;
-        message = message .. "<body><H1>401 Unauthorized.</H1></body></html>" ;
-        --Content-Length: 311
+		rq.RequestHeader = rq.RequestHeader .. data .. "\r\n";
 
-        size = string.len(message);
-        client:send(message);
-        client:close();
-        code = "401";
-    else
-        size, code = handleRequest( c, config, path, client, method, rq );
-    end
+		if data:len() <= 0 then break end
+	end
+
+	if rq.ContentLength >= 0 then
+		rq.RequestBodyLength = rq.ContentLength;
+		rq.RequestBody, err = client:receive(rq.RequestBodyLength);
+	end
+
+	if err then
+		rq.RequestBodyLength = nil;
+		rq.RequestBody = nil;
+	end
+
+	--
+	--  OK We now have a complete HTTP request of 'size' bytes long
+	-- stored in 'rq.RequestHeader'.
+	--
+
+	--
+	-- Find the requested path.
+	--
+	_, _, method, path, major, minor  =
+	    string.find(rq.RequestHeader, "([A-Z]+) (.+) HTTP/(%d).(%d)");
+
+	--
+	-- We only handle GET requests.
+	--
+	if ( method ~= "GET" ) and ( method ~= "POST" ) then
+		error = "Method not implemented";
+
+		if ( method == nil ) then
+			error = error .. ".";
+		else
+			error = error .. ": " .. urlEncode( method );
+		end
+
+		err = sendError(501, error);
+		client:send(err);
+		client:close();
+		return err:len(), "501";
+	end
 
 
-    if ( rq.Agent   == nil ) then rq.Agent   = "-" end;
-    if ( rq.Referer == nil ) then rq.Referer = "-" end;
-    if ( code       == nil ) then code       = 0 ; end;
+	--
+	-- Decode the requested path.
+	--
+	path = urlDecode( path );
 
---    logAccess( rq.UserName or "-", method, rq.Host, ip, path, code, size, rq.Agent, rq.Referer, major, minor );
+	--
+	-- find the Virtual Host which we need for serving, and find the
+	-- user agent and referer for logging purposes.
+	--
+	_, _, rq.Host           = rq.RequestHeader:find( "Host: (.-)\r?\n");
+	_, _, rq.Agent          = rq.RequestHeader:find( "Agent: (.-)\r?\n");
+	_, _, rq.Referer        = rq.RequestHeader:find( "Referer: (.-)\r?\n");
 
+	_, _, rq.Accept         = rq.RequestHeader:find( "Accept: (.-)\r?\n");
+	_, _, rq.AcceptLanguage = rq.RequestHeader:find( "Accept%-Language: ([^:\r\n]+)");
+	_, _, rq.AcceptEncoding = rq.RequestHeader:find( "Accept%-Encoding: ([^:\r\n]+)");
+	_, _, rq.AcceptCharset  = rq.RequestHeader:find( "Accept%-Charset: ([^:\r\n]+)");
+	_, _, rq.ContentType    = rq.RequestHeader:find( "Content%-Type: ([^:\r\n]+)");
+	_, _, rq.ContentLength  = rq.RequestHeader:find( "Content%-Length: ([^:\r\n]+)");
+	_, _, rq.Authorization  = rq.RequestHeader:find( "Authorization: ([^:\r\n]+)");
 
-    if ( running == 0 ) then
-        print( "Terminating as per request from " .. ip );
-    end
+	rq.UserName = nil;
+	rq.Password = nil;
+	rq.Group    = nil;
+	if rq.Authorization then
+		local BasicAuth = "";
+		_, _, BasicAuth = string.find(rq.RequestHeader,
+		    "Basic ([^:\r\n]+)");
+		if BasicAuth then
+			local pair = b64dec(BasicAuth);
+			_, _, _u, _p = string.find(pair, "(.-)%:(.*)");
 
-    --
-    --  Close the client connection.
-    --
-    client:close();
+			for usr = 1, 8, 1 do
+				local u = c:getNode(string.format(
+				    "http.users.user[%d]",
+				    usr));
+				if u and (u:attr("username") == _u) and
+				    (u:attr("password") == _p) then
+					rq.UserName = _u;
+					rq.Password = _p;
+					rq.Group    = u:attr("group");
+				end
+			end
+		end
+	end
+
+	if not rq.Group and rq.ip ~= "127.0.0.1" then
+		local message = "HTTP/1.1 401 Authorization Required\r\n" ;
+			message = message .. "Server: httpd\r\n";
+			message = message .. "WWW-Authenticate: Basic " ..
+			    "realm=\"Secure Area\"\n";
+			message = message .. "Content-type: text/html\r\n";
+			message = message .. "Connection: close\r\n\r\n" ;
+			message = message ..
+			    "<html>" ..
+				"<head><title>Error</title></head>" ..
+				"<body><H1>401 Unauthorized.</H1></body>" ..
+			    "</html>" ;
+		--Content-Length: 311
+
+		size = string.len(message);
+		client:send(message);
+		client:close();
+		code = "401";
+	else
+		size, code = handleRequest(c, config, path, client, method, rq);
+	end
+
+	if ( rq.Agent   == nil ) then rq.Agent   = "-" end;
+	if ( rq.Referer == nil ) then rq.Referer = "-" end;
+	if ( code       == nil ) then code       = 0 ; end;
+
+	if ( running == 0 ) then
+		print( "Terminating as per request from " .. ip );
+	end
+
+	--
+	--  Close the client connection.
+	--
+	client:close();
 end
 
 --
 --  Attempt to serve the given path to the given client
 --
 function handleRequest( c, config, path, client, method, rq )
-    --
-    -- Local file
-    --
-    local file = string.gsub(path, "%?.*", "");
-    local query_string = "";
-    if file ~= path then
-        query_string = string.gsub(path, ".*%?", "");
-    end
-    rq.ScriptName = file;
-    rq.QueryString = query_string;
-    rq.GET = parse_query(query_string);
-    -- TODO check request content type
-    if rq.RequestBody then
-        rq.POST = parse_query(rq.RequestBody);
-    end
+	--
+	-- Local file
+	--
+	local file = string.gsub(path, "%?.*", "");
+	local query_string = "";
+	if file ~= path then
+		query_string = string.gsub(path, ".*%?", "");
+	end
 
-    --
-    --  File must be beneath the vhost root.
-    --
-    file = "htdocs/" .. file ;
+	rq.ScriptName = file;
+	rq.QueryString = query_string;
+	rq.GET = parse_query(query_string);
+	-- TODO check request content type
+	if rq.RequestBody then
+		rq.POST = parse_query(rq.RequestBody);
+	end
 
-    --
-    --  Attempt to sanitize the input Virtual Host + requested path.
-    --
---    file = string.strip( file );
-    file = string.gsub (file, "//", "/") 
+	--
+	--  File must be beneath the vhost root.
+	--
+	file = "htdocs/" .. file ;
 
+	--
+	--  Attempt to sanitize the input Virtual Host + requested path.
+	--
+	--    file = string.strip( file );
+	file = string.gsub (file, "//", "/")
 
+	--
+	-- Add a trailing "index.html" to paths ending in / if such
+	-- a file exists.
+	--
+	-- Otherwise if it is a directory then serve it.
+	--
+	if ( string.endsWith( file, "/" ) ) then
+		tmp = file .. "index.html";
+		if ( fileExists( tmp ) ) then
+			file = tmp;
+		end
+	end
 
-    --
-    -- Add a trailing "index.html" to paths ending in / if such
-    -- a file exists.
-    --
-    -- Otherwise if it is a directory then serve it.
-    --
-    if ( string.endsWith( file, "/" ) ) then  
-        tmp = file .. "index.html";
-        if ( fileExists( tmp ) ) then
-           file = tmp;
-        end
-    end
+	--
+	-- Open the file and return an error if it fails.
+	--
 
+	if ( fileExists(file) == false ) then
+		err = sendError(404, "File not found " .. urlEncode(path));
+		size = string.len(err);
+		client:send(err)
+		client:close();
+		return size, "404";
+	end;
 
- 
+	--
+	-- Find the suffix to get the mime.type.
+	--
+	_, _, ext  = string.find( file, "\.([^\.]+)$" );
+	if ( ext == nil ) then
+		ext = "html";   -- HACK
+	end
 
-    --
-    -- Open the file and return an error if it fails.
-    --    
+	mimetype = mime[ext];
+	if ( mimetype == nil ) then mimetype = 'text/plain' ; end;
 
-    if ( fileExists(file) == false ) then 
-        err = sendError(404, "File not found " .. urlEncode(path));
-        size = string.len(err);
-        client:send(err)
-        client:close();
-        return size, "404";
-    end;
-
-
-    --
-    -- Find the suffix to get the mime.type.
-    --
-    _, _, ext  = string.find( file, "\.([^\.]+)$" );
-    if ( ext == nil ) then
-       ext = "html";   -- HACK
-    end
-    
-    mimetype = mime[ext];
-    if ( mimetype == nil ) then mimetype = 'text/plain' ; end;
-
-    --
-    -- Send out the header.
-    --
-    client:send(
-	"HTTP/1.0 200 OK\r\n" ..
-	"Server: httpd\r\n" ..
-	"Content-type: " .. mimetype  .. "\r\n" ..
-	"Connection: close\r\n\r\n" );
+	--
+	-- Send out the header.
+	--
+	client:send(
+			"HTTP/1.0 200 OK\r\n" ..
+			"Server: httpd\r\n" ..
+			"Content-type: " .. mimetype  .. "\r\n" ..
+			"Connection: close\r\n\r\n" );
 
 
-    --
-    -- Read the file, and then serve it.
-    --
-    f       = io.open( file, "rb" );
-    size    = fileSize( f );
-    local t = f:read("*all")
-    f:close();
+	--
+	-- Read the file, and then serve it.
+	--
+	f       = io.open( file, "rb" );
+	size    = fileSize( f );
+	local t = f:read("*all")
+	f:close();
 
-    local retcode = "200";
+	local retcode = "200";
 
-    -- Replace $$$ name $$$ variables
-    if (ext == "html") or (ext == "js") then
-        t = string.gsub(t, "%$%$%$(.-)%$%$%$", function (s) if not s then return; end return evalembeded(s) end);
+	-- Replace $$$ name $$$ variables
+	if (ext == "html") or (ext == "js") then
+		t = string.gsub(t, "%$%$%$(.-)%$%$%$",
+		    function (s)
+			if not s then return; end
+			return evalembeded(s)
+			end);
 
-    -- Eval Lua code
-    elseif (ext == "lua") or (ext == "xml") or (ext == "dat") then
-        code, err = assert(loadstring(t));
-        if not code then
-            t = sendError( 500, "Error \"".. err .."\" when parse " .. urlEncode(path));
-            retcode = "500";
-        else
-            t = code();
-        end
-    end
-    client:send(t);
-    client:close();
+	-- Eval Lua code
+	elseif (ext == "lua") or (ext == "xml") or (ext == "dat") then
+		code, err = assert(loadstring(t));
+		if not code then
+			t = sendError(500, "Error \""..err.."\" when parse"..
+			    " " .. urlEncode(path));
+			retcode = "500";
+		else
+			t = code();
+		end
+	end
+	client:send(t);
+	client:close();
 
-    return string.len(t), retcode;
+	return string.len(t), retcode;
 end
 
 function evalembeded(s)
-    if not s then
-        return "";
-    end
+	if not s then
+		return "";
+	end
 
-    match, _, code = string.find(s, "^code%:(.*)$");
-    if match then
-        local func, err = loadstring("return " .. code);
-        if not func then
-            return err;
-        end
-        return func();
-    else
-        return field(c:getNode(s):value());
-    end
+	match, _, code = string.find(s, "^code%:(.*)$");
+	if match then
+		local func, err = loadstring("return " .. code);
+		if not func then
+			return err;
+		end
+		return func();
+	else
+		return field(c:getNode(s):value());
+	end
 end
 
 function exec_output(cmd)
-        fp = io.popen(cmd, "r");
-        data = fp:read("*a");
-        fp:close();
-        return data;
+	fp = io.popen(cmd, "r");
+	data = fp:read("*a");
+	fp:close();
+	return data;
 end
 
 function queryData(rq)
-        if rq.POST["cmd"] then
-                cmd = rq.POST["cmd"];
-                if cmd == "get" then
-                        key = rq.POST["key"];
-                        if key == "datetime" then
-                                return os.date("%Y-%m-%d %H:%M:%S");
-                        end
-                        if key == "uptime" then
-                                return exec_output("sysctl -n kern.ident");
-                        end
-                end
-        end
-
+	if rq.POST["cmd"] then
+		cmd = rq.POST["cmd"];
+		if cmd == "get" then
+			key = rq.POST["key"];
+			if key == "datetime" then
+				return os.date("%Y-%m-%d %H:%M:%S");
+			end
+			if key == "uptime" then
+				return exec_output("sysctl -n kern.ident");
+			end
+		else
+			return ("Unknown command \"" .. cmd .. "\"");
+		end
+	end
+	return ("");
 end
 
 
