@@ -34,10 +34,21 @@ PREINSTALLDIRS=/lib
 .include "profiles/profiles.mk"
 #.endif
 
-.if !defined(TARGET) || !defined(TARGET_ARCH)
-.error "soc.mk must define both TARGET and TARGET_ARCH"
-.endif
 
+menu:
+	@/usr/bin/env ZROUTER_ROOT="${ZROUTER_ROOT}" ${ZROUTER_ROOT}/menu.sh
+
+build-verify:
+.if !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) || !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
+	@echo "Error: No board configuration for pair TARGET_VENDOR/TARGET_DEVICE \`\"${TARGET_VENDOR}\"/\"${TARGET_DEVICE}\"\`"
+	@echo "Possible pairs: ${TARGET_PAIRS}"
+	@exit 1
+.endif
+.if !defined(TARGET) || !defined(TARGET_ARCH) || !defined(TARGET_SOCDIR)
+	@echo "Error: No board configuration for pair SOC_VENDOR/SOC_CHIP \`\"${SOC_VENDOR}\"/\"${SOC_CHIP}\"\`"
+	@echo "Possible pairs: ${SOC_PAIRS}"
+	@exit 1
+.endif
 
 build-info:
 	@echo "++++++++++++++ Selected settings for building ++++++++++++++"
@@ -117,6 +128,7 @@ _KERNEL_BUILD_ENV= \
 	TARGET_CPUARCH=${TARGET} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
+	WITHOUT_CLANG=yes \
 	-DNO_CLEAN
 
 
@@ -135,8 +147,8 @@ _KERNEL_BUILD_ENV+=KMODOWN=${KMODOWN}
 _KERNEL_BUILD_ENV+=KMODGRP=${KMODGRP}
 #XXX_END Only for testing
 
-kernel:	kernel-toolchain kernel-build kernel-install-dir kernel-install
-.ORDER:	kernel-toolchain kernel-build kernel-install-dir kernel-install
+kernel:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
+.ORDER:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
 
 
 _WORLD_TCBUILD_ENV= \
@@ -153,6 +165,7 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
 	WITHOUT_CDDL=yes \
+	WITHOUT_CLANG=yes \
 	WITHOUT_CRYPTO=yes \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
@@ -165,6 +178,7 @@ _WORLD_BUILD_ENV= \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ASSERT_DEBUG=yes \
 	WITHOUT_ATM=yes \
+	WITHOUT_CLANG=yes \
 	WITHOUT_INFO=yes \
 	WITHOUT_INSTALLLIB=yes \
 	WITHOUT_IPX=yes \
@@ -193,8 +207,10 @@ _WORLD_BUILD_ENV+= WITHOUT_INFO=yes
 _WORLD_BUILD_ENV+= WITHOUT_NLS=yes
 .endif
 
+.if !defined(INSTALL_TOOLCHAIN)
 _WORLD_INSTALL_ENV+=NO_STATIC_LIB=yes
 _WORLD_INSTALL_ENV+=WITHOUT_TOOLCHAIN=yes
+.endif
 
 _WORLD_BUILD_ENV+=WITHOUT_CDDL=yes
 
@@ -299,8 +315,8 @@ world-fix-lib-links:
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	cd ${WORLDDESTDIR}/usr/lib/ && ${ZROUTER_ROOT}/tools/fix_lib_links.sh
 
-world:  world-toolchain world-build world-install world-fix-lib-links
-.ORDER: world-toolchain world-build world-install world-fix-lib-links
+world:  build-verify build-info world-toolchain world-build world-install world-fix-lib-links
+.ORDER: build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 
 .include "share/mk/zrouter.ports.mk"
 
@@ -344,7 +360,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
-all:	build-info world kernel ports
+all:	world kernel ports
 IMAGE_SUFFIX?=trx
 ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
@@ -429,7 +445,7 @@ rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	build-info kernel-build
+${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
 
@@ -452,9 +468,9 @@ rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
 
-.if ${TARGET_ARCH} == "armeb"
-ROOTFS_ENDIAN_FLAGS=-B big
-.endif
+#.if ${TARGET_ARCH} == "armeb"
+#ROOTFS_ENDIAN_FLAGS=-B big
+#.endif
 
 rootfs.ffs ${NEW_ROOTFS}.ffs:	rootfs makefs_ffs
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
