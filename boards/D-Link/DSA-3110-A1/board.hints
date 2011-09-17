@@ -61,19 +61,19 @@ hint.gpioled.0.pins="0x01"
 hint.gpioled.0.name="status"
 hint.gpioled.0.flags="0x0002"
 
-#hint.gpioiic.0.at="gpiobus0"
-#hint.gpioiic.0.pins="0xc0"
+hint.gpioiic.0.at="gpiobus0"
+hint.gpioiic.0.pins="0xc0"
 
 
 # Realtek RTL8367R switch
 #hint.switch.0.iface="npe0"
-hint.switch.0.at="iicbus0"
-hint.switch.0.addr=0xa8
-hint.switch.0.driver="rtl830x_switch"
+#hint.switch.0.at="iicbus0"
+#hint.switch.0.addr=0xa8
+#hint.switch.0.driver="rtl830x_switch"
 
 # Dallas Semiconductor DS1337S+ RTC
-hint.ds133x_rtc.0.at="iicbus0"
-hint.ds133x_rtc.0.addr=0xd0
+#hint.ds133x_rtc.0.at="iicbus0"
+#hint.ds133x_rtc.0.addr=0xd0
 
 
 

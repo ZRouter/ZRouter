@@ -17,8 +17,5 @@ ROOTFS_COPY_DIRS+=${TARGET_BOARDDIR}/files
 .endif
 
 .if !defined(TARGET_BOARDDIR)
-PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
-
-.warning "No board configuration for pair TARGET_VENDOR/TARGET_DEVICE `${TARGET_VENDOR}/${TARGET_DEVICE}`"
-.error "Posible pairs ${PAIRS}"
+TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
 .endif

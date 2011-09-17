@@ -56,7 +56,7 @@ main_menu() {
 # Provide a menu with every possible vendor/device pairs
 #
 get_target_device() {
-	TARGET_PAIRS=`ls -d boards/*/* 2> /dev/null | ${SED} 's/^.*boards\///'`
+	TARGET_PAIRS=`ls -d ${ZROUTER_ROOT}/boards/*/* 2> /dev/null | ${SED} 's/^.*boards\///'`
 	set -- ${TARGET_PAIRS} XXX
 	MENU_SIZE=${#}
 	if [ ${MENU_SIZE} -gt 1 ]; then
@@ -258,7 +258,7 @@ save_profile() {
 	if [ ${?} -ne 0 ]; then
 		return 1 
 	fi
-	PROFILE_CONF="${BUILD_PROFILES_DIR}/${NEW_PROFILE}.conf"
+	PROFILE_CONF="${ZROUTER_ROOT}/${BUILD_PROFILES_DIR}/${NEW_PROFILE}.conf"
 	PROFILE="${NEW_PROFILE}"
 
 	${CAT} << EOF > ${PROFILE_CONF}
@@ -279,7 +279,8 @@ EOF
 # Load a build profile
 #
 load_profile() {
-	BUILD_PROFILES=`ls ${BUILD_PROFILES_DIR}/*.conf 2> /dev/null`
+	ZROUTER_ROOT_ESCAPED=`echo "${ZROUTER_ROOT}" | ${SED} 's/\//\\\\\\//g'`
+	BUILD_PROFILES=`ls ${ZROUTER_ROOT}/${BUILD_PROFILES_DIR}/*.conf 2> /dev/null`
 	set -- ${BUILD_PROFILES} XXX
 	MENU_SIZE=${#}
 	if [ ${MENU_SIZE} -gt 1 ]; then
@@ -295,8 +296,11 @@ load_profile() {
 	fi
 	BOX_SIZE=$((${MENU_SIZE} + 7))
 	while [ ${#} -gt 1 ]; do
-		PROFILE_NAME=`echo "${1}" | ${SED} "s/${BUILD_PROFILES_DIR}\///" | ${SED} 's/\.conf//'`
-		DEFOPTIONS="${DEFOPTIONS} ${PROFILE_NAME} '${1}'"
+		PROFILE_NAME=`echo "${1}" | \
+		    ${SED} "s/${ZROUTER_ROOT_ESCAPED}\/${BUILD_PROFILES_DIR}\///" | \
+		    ${SED} 's/\.conf//'`
+		PROFILE_PATH=`echo "${1}" | ${SED} "s/${ZROUTER_ROOT_ESCAPED}\///"`
+		DEFOPTIONS="${DEFOPTIONS} ${PROFILE_NAME} '${PROFILE_PATH}'"
 		shift 1
 	done
 	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
@@ -313,7 +317,7 @@ load_profile() {
 	if [ -z "${LOAD_PROFILE}" -o "${LOAD_PROFILE}" = "*" ]; then
 		return 1
 	fi
-	LOAD_PROFILE="${BUILD_PROFILES_DIR}/${LOAD_PROFILE}.conf"
+	LOAD_PROFILE="${ZROUTER_ROOT}/${BUILD_PROFILES_DIR}/${LOAD_PROFILE}.conf"
 	if [ -f "${LOAD_PROFILE}" ]; then
 		. ${LOAD_PROFILE}
 	else
@@ -361,6 +365,9 @@ build_info() {
 : ${PROFILE:="NONE"}
 : ${TARGETS:="kernel.oldlzma.uboot rootfs.iso.ulzma"}
 PROFILE_NAME="(${PROFILE})"
+if [ -z "${ZROUTER_ROOT}" ]; then
+	ZROUTER_ROOT=`/bin/pwd`
+fi
 
 #
 # Tools paths
@@ -415,4 +422,5 @@ while [ 1 ]; do
 done
 
 echo "==> building zrouter !!!"
-make TARGET_PAIR=${TARGET_PAIR} FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR} ${TARGETS}
+make -C "${ZROUTER_ROOT}" TARGET_PAIR=${TARGET_PAIR} \
+	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR} ${TARGETS}

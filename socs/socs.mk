@@ -7,8 +7,5 @@ TARGET_SOCDIR= ${ZROUTER_ROOT}/socs/${SOC_VENDOR}/${SOC_CHIP}
 .endif
 
 .if !defined(TARGET_SOCDIR)
-PAIRS!=ls -d ${ZROUTER_ROOT}/socs/*/* | sed 's/^.*\/socs\///'
-
-.warning "No board configuration for pair SOC_VENDOR/SOC_CHIP `${SOC_VENDOR}/${SOC_CHIP}`"
-.error "Posible pairs ${PAIRS}"
+SOC_PAIRS!=ls -d ${ZROUTER_ROOT}/socs/*/* | sed 's/^.*\/socs\///'
 .endif
