@@ -18,6 +18,8 @@ KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
 
+TARGET_CPUARCH?=${TARGET}
+
 # XXX Need found something better or use per profile
 ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 
@@ -125,7 +127,7 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 _KERNEL_BUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET} \
+	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
 	WITHOUT_CLANG=yes \
@@ -154,7 +156,7 @@ kernel:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir
 _WORLD_TCBUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET} \
+	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ATM=yes \
 	WITHOUT_INFO=yes \
@@ -174,7 +176,7 @@ _WORLD_TCBUILD_ENV= \
 _WORLD_BUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET} \
+	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ASSERT_DEBUG=yes \
 	WITHOUT_ATM=yes \
@@ -320,9 +322,11 @@ world:  build-verify build-info world-toolchain world-build world-install world-
 
 .include "share/mk/zrouter.ports.mk"
 
-rootfs-dir:
+rootfs-dir!
 	mkdir -p ${WORLDDESTDIR}
-	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/
+	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/bin/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/sbin/ || true
 	for dir in ${PREINSTALLDIRS}; do mkdir -p ${WORLDDESTDIR}/$${dir}; done
 
 kernel-install-dir:
