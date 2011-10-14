@@ -1,0 +1,20 @@
+#!/bin/sh
+. /etc/rc.subr
+load_rc_config 'XXX'
+_start=quietstart
+/etc/rc.d/cdevd ${_start}
+/etc/rc.d/hostid ${_start}
+/etc/rc.d/hostname ${_start}
+/etc/rc.d/ipmon ${_start}
+/etc/rc.d/ipfilter ${_start}
+/etc/rc.d/ipnat ${_start}
+/etc/rc.d/ipfs ${_start}
+/etc/rc.d/netif ${_start}
+/etc/rc.d/ipsec ${_start}
+/etc/rc.d/dhclient ${_start}
+/etc/rc.d/ppp ${_start}
+/etc/rc.d/ipfw ${_start}
+/etc/rc.d/routing ${_start}
+/etc/rc.d/mrouted ${_start}
+/etc/rc.d/routed ${_start}
+exit 0
