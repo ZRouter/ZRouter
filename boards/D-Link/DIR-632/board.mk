@@ -25,7 +25,7 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 WITH_IPSEC=yes
-WITH_WIRELESS=yes
+#WITH_WIRELESS=yes
 # Builded modules
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
@@ -35,7 +35,11 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 KERNCONF_OPTIONS+=	ALT_BREAK_TO_DEBUGGER
 KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 
+KERNCONF_DEVICES+=	switch_rtl830x
+
+
 .if !defined(WITHOUT_WIRELESS)
+KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 KERNCONF_OPTIONS+=	IEEE80211_DEBUG
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_MESH
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_TDMA
@@ -47,13 +51,19 @@ KERNCONF_DEVICES+=	wlan_tkip
 
 KERNCONF_OPTIONS+=	AH_DEBUG
 KERNCONF_OPTIONS+=	ATH_DEBUG
+KERNCONF_OPTIONS+=	ATH_DIAGAPI
+KERNCONF_OPTIONS+=	ATH_ENABLE_11N
 KERNCONF_OPTIONS+=	AH_SUPPORT_AR5416
+#KERNCONF_OPTIONS+=	AH_SUPPORT_AR9130
 KERNCONF_OPTIONS+=	AH_RXCFG_SDMAMW_4BYTES
+# interrupt mitigation not possible on AR9130
+# option		AH_AR5416_INTERRUPT_MITIGATION
 KERNCONF_DEVICES+=	ath
 KERNCONF_DEVICES+=	ath_hal
 KERNCONF_DEVICES+=	ath_pci
 KERNCONF_DEVICES+=	ath_rate_sample
 .endif
+
 
 #.if !defined(WITHOUT_WIRELESS)
 #KERNCONF_OPTIONS+=	IEEE80211_DEBUG
@@ -95,7 +105,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp hostap
+TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp hostap ath
 # nfs_client
 
 KERNEL_COMPRESSION=oldlzma
