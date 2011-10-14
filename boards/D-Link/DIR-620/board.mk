@@ -22,6 +22,7 @@ BOARD_FLASH_SIZE=8388608
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
+
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 # Builded modules
