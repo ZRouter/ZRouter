@@ -2,3 +2,4 @@
 SOC_VENDOR=Ralink
 SOC_CHIP=RT3052F
 
+
