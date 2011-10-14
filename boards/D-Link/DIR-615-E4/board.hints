@@ -42,12 +42,27 @@ hint.arge.0.fduplex=1
 #hint.arge.0.phymask=0x00000001 # Limit to only PHY0 (RTL8309 switch)
 hint.arge.0.phymask=0xffffffff
 
+# Real value is 0x1f3f0000, but it will by found at address alias, so
+# 4M/8M/16M devices can have same address
+hint.arge.0.eeprommac=0x1fff0000
+
+hint.arge.1.at="nexus0"
+hint.arge.1.maddr=0x1a000000
+hint.arge.1.msize=0x1000
+hint.arge.1.irq=3
+hint.arge.1.media=100
+hint.arge.1.fduplex=1
+hint.arge.1.phymask=0xffffffff
+hint.arge.1.eeprommac=0x1fff0000
+
 #hint.nvram.0.base=0x1f030000
 #hint.nvram.0.maxsize=0x2000
 #hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
 
 hint.switch.0.iface="arge0"
 hint.switch.0.driver="ar8x16_switch"
+hint.switch.1.iface="arge1"
+hint.switch.1.driver="ar8x16_switch"
 
 # GPIO
 hint.gpio.0.at="apb0"
