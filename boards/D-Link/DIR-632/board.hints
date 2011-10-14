@@ -2,8 +2,6 @@
 hint.apb.0.at="nexus0"
 hint.apb.0.irq=4
 
-#hint.ath.0.at="apb0"
-
 # uart0
 hint.uart.0.at="apb0"
 # see atheros/uart_cpu_ar71xx.c why +3
@@ -48,7 +46,7 @@ hint.arge.1.at="nexus0"
 hint.arge.1.maddr=0x1a000000
 hint.arge.1.msize=0x1000
 hint.arge.1.irq=3
-hint.arge.1.media=100
+hint.arge.1.media=1000
 hint.arge.1.fduplex=1
 #hint.arge.1.phymask=0x00000001 # Limit to only PHY0 (internal S26 switch)
 hint.arge.1.phymask=0xffffffff
@@ -60,7 +58,7 @@ hint.arge.1.phymask=0xffffffff
 hint.switch.0.iface="arge0"
 hint.switch.0.driver="rtl830x_switch"
 hint.switch.1.iface="arge1"
-hint.switch.1.driver="ar724x_switch"
+hint.switch.1.driver="ar8x16_switch"
 
 # GPIO
 hint.gpio.0.at="apb0"
