@@ -1,0 +1,42 @@
+
+# ohci
+hint.ohci.0.at="apb0"
+hint.ohci.0.maddr=0x1c000000
+hint.ohci.0.msize=0x01000000
+hint.ohci.0.irq=6
+
+# ehci
+hint.ehci.0.at="nexus0"
+hint.ehci.0.maddr=0x1b000000
+hint.ehci.0.msize=0x01000000
+hint.ehci.0.irq=1
+
+# arge0
+hint.arge.0.at="nexus0"
+hint.arge.0.maddr=0x19000000
+hint.arge.0.msize=0x1000
+hint.arge.0.irq=2
+# PHY4 = 1 << 4
+hint.arge.0.phymask=0x10
+
+# arge1
+hint.arge.1.at="nexus0"
+hint.arge.1.maddr=0x1a000000
+hint.arge.1.msize=0x1000
+hint.arge.1.irq=3
+# PHY1, PHY2, PHY3 
+hint.arge.1.phymask=0x0e
+hint.arge.1.media=1000
+hint.arge.1.fduplex=1
+# RSPRO _really_ need the above two lines !
+
+# RTC shares the same bus with mx25l. 
+# CE low for flash, CE high for RTC
+#hint.rtc.0.at="spibus0"
+#hint.rtc.0.cs=0
+
+# RF led - pin 2
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="rfled"
+hint.gpioled.0.pins=0x0004
+
