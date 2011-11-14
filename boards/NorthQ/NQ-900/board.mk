@@ -96,3 +96,6 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007c0000
 TARGET_PROFILES+=SMALL_ mpd ssh hostap dhcp net_help nfs_client
 TARGET_PROFILES+=shttpd dlink.ua.web
 
+IMAGE_TYPE=trx
+IMAGE_SUFFIX=trx
+
