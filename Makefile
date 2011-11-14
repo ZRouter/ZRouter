@@ -34,7 +34,12 @@ PREINSTALLDIRS=/lib
 
 # Profiles - set of SUBDIRS that need to build
 .include "profiles/profiles.mk"
-#.endif
+
+.if defined(IMAGE_TYPE) && ${IMAGE_TYPE} == "trx"
+IMAGE_HEADER_EXTRA?=0x1c
+.else
+IMAGE_HEADER_EXTRA?=0
+.endif
 
 
 menu:
@@ -214,13 +219,20 @@ _WORLD_INSTALL_ENV+=NO_STATIC_LIB=yes
 _WORLD_INSTALL_ENV+=WITHOUT_TOOLCHAIN=yes
 .endif
 
+.if !defined(WITH_IPSEC)
+_WORLD_BUILD_ENV+=WITHOUT_IPSEC=yes
+_WORLD_INSTALL_ENV+=WITHOUT_IPSEC=yes
+.endif
+
 _WORLD_BUILD_ENV+=WITHOUT_CDDL=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_NIS=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_BLUETOOTH=yes
 
+.if !defined(WITH_WIDEC) && ${WITH_WIDEC} == "yes"
 _WORLD_BUILD_ENV+=NOENABLE_WIDEC=yes -DNOENABLE_WIDEC
+.endif
 
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS=yes
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS_SUPPORT=yes
@@ -608,7 +620,11 @@ kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/
 
 ${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	dd if=${NEW_KERNEL}.bin.gz of=${NEW_KERNEL}.bin.gz.sync bs=64k conv=sync
+	KERNEL_BIN_GZ_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz`; \
+	IMAGE_KERNEL_SYNC_SIZE=$$(( ((( KERNEL_BIN_GZ_SIZE + ${IMAGE_HEADER_EXTRA}) + 0xffff ) & 0xffff0000) - ${IMAGE_HEADER_EXTRA} )); \
+	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync; \
+	echo "Old size $${KERNEL_BIN_GZ_SIZE} New size $${IMAGE_KERNEL_SYNC_SIZE}"; \
+	truncate -s $${IMAGE_KERNEL_SYNC_SIZE} ${NEW_KERNEL}.bin.gz.sync
 
 fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
