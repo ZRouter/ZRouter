@@ -45,6 +45,9 @@ IMAGE_HEADER_EXTRA?=0
 menu:
 	@/usr/bin/env ZROUTER_ROOT="${ZROUTER_ROOT}" ${ZROUTER_ROOT}/menu.sh
 
+show-target-pairs:
+	@echo "${TARGET_PAIRS}"
+
 build-verify:
 .if !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) || !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
 	@echo "Error: No board configuration for pair TARGET_VENDOR/TARGET_DEVICE \`\"${TARGET_VENDOR}\"/\"${TARGET_DEVICE}\"\`"
