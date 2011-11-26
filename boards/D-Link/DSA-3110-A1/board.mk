@@ -31,7 +31,7 @@ WITH_IPSEC=yes
 NFS_KERNEL_MODULES=nfscl nfsd nfslock nfssvc krpc nfscommon
 USB_KERNEL_MODULES=usb/uplcom usb/u3g usb/umodem usb/ucom
 ATA_KERNEL_MODULES=ata/atadisk ata/atapci/chipsets/ataatp8620 
-I2C_KERNEL_MODULES=i2c/iictest i2c/ds133x
+#I2C_KERNEL_MODULES=i2c/iictest i2c/ds133x
 KERNCONF_MODULES_OVERRIDE+=${USB_KERNEL_MODULES} ${ATA_KERNEL_MODULES} ${I2C_KERNEL_MODULES} ${NFS_KERNEL_MODULES} zlib libiconv ext2fs
 
 # Additional utilities
