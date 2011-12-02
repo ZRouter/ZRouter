@@ -17,6 +17,7 @@ hint.rt.0.maddr=0x10100000
 hint.rt.0.msize=0x10000
 hint.rt.0.irq=3
 
+hint.uart.0.flags="0x30"
 hint.uart.1.flags="0x30"
 
 # bit2 must be low - give SPI pins[GP3-6] to controller
