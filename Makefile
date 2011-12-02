@@ -530,7 +530,7 @@ MKULZMA_BLOCKSIZE?=131072
 oldlzma:	${ZTOOLS_PATH}/oldlzma
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
-rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso
+rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso ${ZTOOLS_PATH}/mkulzma
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
 
