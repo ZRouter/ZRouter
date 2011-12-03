@@ -1,8 +1,25 @@
 
 .include <bsd.own.mk>
 
+#
+# Defaults
+#
 FREEBSD_SRC_TREE?=/usr/src
 OBJ_DIR?=/usr/obj
+
+#
+# Check access to FreeBSD source tree and fetch version variables
+#
+.if exists(${FREEBSD_SRC_TREE}/sys/conf/newvers.sh)
+FREEBSD_VERSION_VARS!=grep -E '(TYPE|REVISION|BRANCH)=\"' \
+	${FREEBSD_SRC_TREE}/sys/conf/newvers.sh | sed 's/\"//g'
+.for var in ${FREEBSD_VERSION_VARS}
+FREEBSD_${var}
+.endfor
+FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
+.else
+.error "missing FreeBSD source tree: FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}"
+.endif
 
 # ZROUTER_ROOT can be set in environment
 .if !defined(ZROUTER_ROOT)
