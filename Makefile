@@ -49,6 +49,15 @@ PREINSTALLDIRS=/lib
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
 .include "socs/socs.mk"
 
+.if !defined(TARGET_PROFILES) || empty(TARGET_PROFILES)
+# if we have flash and it size less than 8M assign profile xSMALL_
+.if defined(BOARD_FLASH_SIZE) && !empty(BOARD_FLASH_SIZE) && ${BOARD_FLASH_SIZE} < 8388608
+TARGET_PROFILES=xSMALL_
+.else
+TARGET_PROFILES=SMALL_
+.endif
+.endif # !defined(TARGET_PROFILES) || empty(TARGET_PROFILES)
+
 # Profiles - set of SUBDIRS that need to build
 .include "profiles/profiles.mk"
 
@@ -312,12 +321,7 @@ WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
-#.warning ${FREEBSD_BUILD_ENV_VARS}
-#FREEBSD_BUILD_ENV_VARS_SECOND!=${FREEBSD_BUILD_ENV_VARS}
-#.warning ${FREEBSD_BUILD_ENV_VARS_SECOND}
-
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
-#.for var in ${FREEBSD_BUILD_ENV_VARS_SECOND}
 .for var in ${FREEBSD_BUILD_ENV_VARS}
 FREEBSD_BUILD_ENV_${var}
 .endfor
