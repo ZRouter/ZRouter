@@ -435,7 +435,10 @@ ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
 
 # Move kernel out of rootfs
 #		world kernel ports
-rootfs:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
+rootfs:		${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
+
+
+${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	for d in ${ROOTFS_COPY_DIRS} ; do \
 		for f in `( cd $${d} ; find . -type f )` ; do \
 			mkdir -p `dirname ${WORLDDESTDIR}/$${f}` ; \
@@ -504,172 +507,33 @@ ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 	rm -f ${NEW_KERNEL}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 
-rootfs.iso ${NEW_ROOTFS}.iso:	rootfs makefs_cd9660
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} makefs -d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge" ${NEW_ROOTFS}.iso ${NEW_ROOTFS}
-
-#.if ${TARGET_ARCH} == "armeb"
-#ROOTFS_ENDIAN_FLAGS=-B big
-#.endif
-
-rootfs.ffs ${NEW_ROOTFS}.ffs:	rootfs makefs_ffs
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} makefs -t ffs -d 255 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -s ${ROOTFS_MEDIA_SIZE} -o minfree=0,version=1 ${ROOTFS_ENDIAN_FLAGS} ${NEW_ROOTFS}.ffs ${NEW_ROOTFS}
-
-#	blocks=$(($ROOTFS_MEDIA_SIZE / ${BLOCKSIZE} + 256))
-#	dd if=/dev/zero of=${NEW_ROOTFS}.ffs bs=${BLOCKSIZE} count=${blocks}
-#	if [ $? -ne 0 ]; then
-#	  echo "creation of image file failed"
-#	  exit 1
-#	fi
-#
-#	unit=`mdconfig -a -t vnode -f ${NEW_ROOTFS}.ffs`
-#	if [ $? -ne 0 ]; then
-#	  echo "mdconfig failed"
-#	  exit 1
-#	fi
-#
-#	gpart create -s GPT ${unit}
-#	gpart add -t freebsd-boot -s 64K ${unit}
-#	gpart bootcode -b ${NEW_ROOTFS}/boot/pmbr -p ${NEW_ROOTFS}/boot/gptboot -i 1 ${unit}
-#	gpart add -t freebsd-ufs -l FreeBSD_Install ${unit}
-#
-#	dd if=${tempfile} of=/dev/${unit}p2 bs=$BLOCKSIZE conv=sync
-#	if [ $? -ne 0 ]; then
-#	  echo "copying filesystem into image file failed"
-#	  exit 1
-#	fi
-#
-#	mdconfig -d -u ${unit}
-
-
-
-
 MKULZMA_FLAGS?=-v
 MKULZMA_BLOCKSIZE?=131072
-
-oldlzma:	${ZTOOLS_PATH}/oldlzma
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-
-rootfs.iso.ulzma ${NEW_ROOTFS}.iso.ulzma:	rootfs.iso ${ZTOOLS_PATH}/mkulzma
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} mkulzma ${MKULZMA_FLAGS} -s ${MKULZMA_BLOCKSIZE} -o ${NEW_ROOTFS}.iso.ulzma ${NEW_ROOTFS}.iso
-
-#
-# Convert kernel from ELF to BIN
-#
-#kernel_bin 
-${NEW_KERNEL}.bin:	${NEW_KERNEL}
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} objcopy -S -O binary ${NEW_KERNEL} ${NEW_KERNEL}.bin
-	@if [ -n "${KERNEL_SIZE_MAX}" -a $$(stat -f %z ${NEW_KERNEL}.bin) -ge ${KERNEL_SIZE_MAX} ] ; then \
-		echo "${NEW_KERNEL}.bin size ($$(stat -f %z ${NEW_KERNEL}.bin)) greater than KERNEL_SIZE_MAX (${KERNEL_SIZE_MAX}), will delete it"; \
-		rm -f ${NEW_KERNEL}.bin ; \
-		exit 1; \
-	fi
-
-#
-# Compress kernel with oldlzma
-#
-kernel_bin_oldlzma:	${NEW_KERNEL}.bin.oldlzma
-
-${NEW_KERNEL}.bin.oldlzma:	${NEW_KERNEL}.bin	${ZTOOLS_PATH}/oldlzma
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL}.bin ${NEW_KERNEL}.bin.oldlzma
-
-kernel_oldlzma:		${NEW_KERNEL}.oldlzma
-
-${NEW_KERNEL}.oldlzma:		${NEW_KERNEL}	${ZTOOLS_PATH}/oldlzma
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} oldlzma e ${OLDLZMA_COMPRESS_FLAGS} ${NEW_KERNEL} ${NEW_KERNEL}.oldlzma
-
-#
-# Compress kernel with xz
-#
-kernel_bin_xz ${NEW_KERNEL}.bin.xz:		${NEW_KERNEL}.bin
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.xz
-
-kernel_xz ${NEW_KERNEL}.xz:		${NEW_KERNEL}
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} xz --stdout ${XZ_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.xz
-
-#
-# Compress kernel with bz2
-#
-kernel_bin_bz2 ${NEW_KERNEL}.bin.bz2:		${NEW_KERNEL}.bin
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.bz2
-
-kernel_bz2 ${NEW_KERNEL}.bz2:		${NEW_KERNEL}
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} bzip2 --stdout ${BZIP2_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.bz2
-
-#
-# Compress kernel with gz
-#
-kernel_bin_gz ${NEW_KERNEL}.bin.gz:		${NEW_KERNEL}.bin
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL}.bin > ${NEW_KERNEL}.bin.gz
-
-kernel_gz ${NEW_KERNEL}.gz:		${NEW_KERNEL}
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} gzip --stdout ${GZIP_COMPRESS_FLAGS} ${NEW_KERNEL} > ${NEW_KERNEL}.gz
 
 UBOOT_KERNEL_LOAD_ADDRESS?=80001000
 UBOOT_KERNEL_ENTRY_POINT?=${UBOOT_KERNEL_LOAD_ADDRESS}
 
-kernel.${KERNEL_COMPRESSION_TYPE}.uboot:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
+ZROUTER_VERSION?=0.1-ALPHA
 
-${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot: ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE}
+PACKING_TARGET_LIST:=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_KERNEL_IMAGE} \
+    ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_ROOTFS_IMAGE}
+.warning "PACKING_KERNEL_IMAGE=${PACKING_TARGET_LIST}"
+.include "share/mk/zrouter.packing.mk"
+
+
+
+
+fwimage ${NEW_IMAGE}:  ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_KERNEL_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_ROOTFS_IMAGE}	${ZTOOLS_PATH}/asustrx
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	uboot_mkimage -A ${TARGET} -O linux -T kernel \
-	    -C ${UBOOT_KERNEL_COMPRESSION_TYPE} \
-	    -a ${UBOOT_KERNEL_LOAD_ADDRESS} \
-	    -e ${UBOOT_KERNEL_ENTRY_POINT} \
-	    -n 'FreeBSD Kernel Image' \
-	    -d ${NEW_KERNEL}.bin.${KERNEL_COMPRESSION_TYPE} \
-	    ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
-
-#	${ZTOOLS_PATH}/packimage
-
-kernel.${KERNEL_COMPRESSION_TYPE}.trx: kernel.${KERNEL_COMPRESSION_TYPE}	${ZTOOLS_PATH}/trx
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} trx -o kernel.${KERNEL_COMPRESSION_TYPE}.trx kernel.${KERNEL_COMPRESSION_TYPE}
-
-# XXX: temporary
-kernel_bin_gz_trx ${NEW_KERNEL}.bin.gz.trx: ${NEW_KERNEL}.bin.gz	${ZTOOLS_PATH}/trx
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} trx -o ${NEW_KERNEL}.bin.gz.trx ${NEW_KERNEL}.bin.gz
-
-${NEW_KERNEL}.bin.gz.sync:	${NEW_KERNEL}.bin.gz
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	KERNEL_BIN_GZ_SIZE=`stat -f %z ${NEW_KERNEL}.bin.gz`; \
-	IMAGE_KERNEL_SYNC_SIZE=$$(( ((( KERNEL_BIN_GZ_SIZE + ${IMAGE_HEADER_EXTRA}) + 0xffff ) & 0xffff0000) - ${IMAGE_HEADER_EXTRA} )); \
-	cp ${NEW_KERNEL}.bin.gz ${NEW_KERNEL}.bin.gz.sync; \
-	echo "Old size $${KERNEL_BIN_GZ_SIZE} New size $${IMAGE_KERNEL_SYNC_SIZE}"; \
-	truncate -s $${IMAGE_KERNEL_SYNC_SIZE} ${NEW_KERNEL}.bin.gz.sync
-
-fwimage ${NEW_IMAGE}:  ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma	${ZTOOLS_PATH}/asustrx
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${NEW_KERNEL}.bin.gz.sync ${NEW_ROOTFS}.iso.ulzma
+	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${PACKING_KERNEL_IMAGE} ${PACKING_ROOTFS_IMAGE}
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
-ZROUTER_VERSION?=0.1-ALPHA
 
-zimage:		${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync ${NEW_ROOTFS}.iso.ulzma
-	cat ${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync ${NEW_ROOTFS}.iso.ulzma > ${NEW_IMAGE}
+zimage:		${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_KERNEL_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_ROOTFS_IMAGE}
+	cat ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_KERNEL_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_ROOTFS_IMAGE} > ${NEW_IMAGE}
 	IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
 	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX}
-
-${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync:	${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot
-	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	dd if=${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot of=${NEW_KERNEL}.${KERNEL_COMPRESSION_TYPE}.uboot.sync bs=64k conv=sync
-
-# Howto
-# PACKING_KERNEL_ROUND=0x10000
-# echo $(( (${KERNEL_SIZE} + ${PACKING_KERNEL_ROUND}) & ~(${PACKING_KERNEL_ROUND} - 1) ))
 
 .include <bsd.obj.mk>
 
