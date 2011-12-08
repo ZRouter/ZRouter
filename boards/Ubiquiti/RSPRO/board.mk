@@ -77,13 +77,9 @@ KERNEL_COMPRESSION_TYPE=oldlzma
 
 MKULZMA_BLOCKSIZE=65536
 
-PACKING_KERNEL_IMAGE?=kernel.gz
-PACKING_ROOTFS_IMAGE?=rootfs.iso.ulzma
-
-# 64k
-PACKING_KERNEL_ROUND?=0x10000
-
-PACKING_ROOTFS_METHOD?= tar.gz
+# XXX: Here is must be Redboot packer, but not defined yet
+PACKING_KERNEL_IMAGE?=kernel.kbin.gz.uboot.sync
+PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
 

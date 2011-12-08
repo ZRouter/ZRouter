@@ -60,10 +60,7 @@ UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
 MKULZMA_BLOCKSIZE=65536
 
-PACKING_KERNEL_IMAGE?=kernel.oldlzma.uboot
-PACKING_ROOTFS_IMAGE?=rootfs.iso.ulzma
-
-# 64k
-PACKING_KERNEL_ROUND?=0x10000
+PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
+PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 
