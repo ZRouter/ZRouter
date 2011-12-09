@@ -15,15 +15,29 @@ CURRENT_PACKING_FILE_NAME:=${CURRENT_PACKING_FILE}
 NEW_CURRENT_PACKING_FILE_NAME:=${CURRENT_PACKING_FILE_NAME:R}
 # Get last suffix
 CURRENT_PACKING_FILE_SUFFIX:=${CURRENT_PACKING_FILE_NAME:E}
+
+# Check if we try split dir path intead of filename only
+_DIR!=dirname ${CURRENT_PACKING_FILE_NAME}
+_NEW_DIR!=dirname ${NEW_CURRENT_PACKING_FILE_NAME}
+.if !empty(_DIR) && !empty(_NEW_DIR) && ${_DIR} != ${_NEW_DIR}
+.warning "${_DIR}" != "${_NEW_DIR}"
+# Reset CURRENT_PACKING_FILE_SUFFIX to break loop
+CURRENT_PACKING_FILE_SUFFIX=
+.endif
+
 .if !empty(CURRENT_PACKING_FILE_SUFFIX) && ${CURRENT_PACKING_FILE_SUFFIX} != ""
+
 #.warning From file ${NEW_CURRENT_PACKING_FILE_NAME}, to file ${CURRENT_PACKING_FILE_NAME}, with converter "${CURRENT_PACKING_FILE_SUFFIX}".
 .if exists(${ZROUTER_ROOT}/share/mk/converters/${CURRENT_PACKING_FILE_SUFFIX}.mk)
+
 .warning Will convert file ${NEW_CURRENT_PACKING_FILE_NAME}, with converter "${CURRENT_PACKING_FILE_SUFFIX}".
 # Invoke converter for that suffix
 .include "${ZROUTER_ROOT}/share/mk/converters/${CURRENT_PACKING_FILE_SUFFIX}.mk"
+
 .else
 .error "Converter for suffix '${CURRENT_PACKING_FILE_SUFFIX}' undefined"
 .endif
+
 CURRENT_PACKING_FILE_NAME:=${NEW_CURRENT_PACKING_FILE_NAME}
 .endif
 .endfor # CURRENT_ITEM in ${LIST}
