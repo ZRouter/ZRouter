@@ -49,7 +49,7 @@ typedef struct part_data {
 #define DEFAULT_OUTPUT_FILE 	"firmware-image.bin"
 #define DEFAULT_VERSION		"UNKNOWN"
 
-#define OPTIONS "e:hk:m:o:r:s:v:"
+#define OPTIONS "e:hk:l:m:o:r:s:v:"
 
 static int debug = 1;
 
@@ -135,7 +135,8 @@ static void usage(const char* progname)
 	     "\t-k <kernel file>\t - kernel file\n"
 	     "\t-r <rootfs file>\t - rootfs file\n"
 	     "\t-s <fw flash base>\t - image location in flash\n"
-	     "\t-e <kernel entry point>\t - kernel load/start address\n"
+	     "\t-e <kernel load address>\t - kernel load address\n"
+	     "\t-e <kernel entry point>\t - kernel start address\n"
 	     "\t-m <max fw size>\t - maximum firmware size\n"
 	     "\t-h\t\t\t - this help\n", VERSION,
 	     progname, DEFAULT_VERSION, DEFAULT_OUTPUT_FILE);
@@ -180,7 +181,7 @@ static u_int32_t filelength(const char* file)
 
 static int
 create_image_layout(const char* kernelfile, const char* rootfsfile,
-    uint32_t kern_start, uint32_t kern_entry, uint32_t firmware_max_length,
+    uint32_t kern_start, uint32_t kern_load, uint32_t kern_entry, uint32_t firmware_max_length,
     image_info_t* im)
 {
 	part_data_t* kernel = &im->parts[0];
@@ -191,7 +192,7 @@ create_image_layout(const char* kernelfile, const char* rootfsfile,
 	kernel->partition_baseaddr = kern_start;
 	if ( (kernel->partition_length = filelength(kernelfile)) < 0)
 	    return (-1);
-	kernel->partition_memaddr = kern_entry;
+	kernel->partition_memaddr = kern_load;
 	kernel->partition_entryaddr = kern_entry;
 	strncpy(kernel->filename, kernelfile, sizeof(kernel->filename));
 
@@ -332,7 +333,7 @@ int main(int argc, char* argv[])
 {
 	char kernelfile[PATH_MAX];
 	char rootfsfile[PATH_MAX];
-	uint32_t kern_start, kern_entry, firmware_max_length;
+	uint32_t kern_start, kern_load, kern_entry, firmware_max_length;
 	int o, rc;
 	image_info_t im;
 
@@ -340,7 +341,7 @@ int main(int argc, char* argv[])
 	memset(kernelfile, 0, sizeof(kernelfile));
 	memset(rootfsfile, 0, sizeof(rootfsfile));
 	kern_start = 0;
-	kern_entry = 0;
+	kern_load = 0;
 	firmware_max_length = 0;
 
 	strcpy(im.outputfile, DEFAULT_OUTPUT_FILE);
@@ -375,38 +376,32 @@ int main(int argc, char* argv[])
 		case 's':
 			if (optarg)
 				kern_start = strtoul(optarg, NULL, 0);
-			else {
-				ERROR("kern_start can not be 0, use -s "
-				    "0xbfc30000 set\n");
-				return (-1);
-			}
 			break;
 		case 'e':
 			if (optarg)
 				kern_entry = strtoul(optarg, NULL, 0);
-			else {
-				ERROR("kern_entry can not be 0, use -e "
-				    "0x80041000 to set\n");
-				return (-1);
-			}
+			break;
+		case 'l':
+			if (optarg)
+				kern_load = strtoul(optarg, NULL, 0);
 			break;
 		case 'm':
 			if (optarg)
 				firmware_max_length = strtoul(optarg, NULL, 0);
-			else {
-				ERROR("firmware_max_length can not be 0,"
-				    " use -m 0x00390000 to set\n");
-				return (-1);
-			}
 			break;
 		}
 	}
 
-	if (strlen(kernelfile) == 0) {
-		ERROR("Kernel file is not specified, cannot continue\n");
+	if ((kern_start == 0) || (kern_load == 0) ||
+	    (firmware_max_length == 0)) {
+		ERROR("kern_start,kern_load,firmware_max_length required\n");
 		usage(argv[0]);
 		return (-2);
 	}
+
+	if (kern_entry == 0)
+		kern_entry = kern_load;
+
 
 	if (strlen(rootfsfile) == 0) {
 		ERROR("Root FS file is not specified, cannot continue\n");
@@ -415,7 +410,7 @@ int main(int argc, char* argv[])
 	}
 
 	if ((rc = create_image_layout(kernelfile, rootfsfile, kern_start,
-	    kern_entry, firmware_max_length, &im)) != 0) {
+	    kern_load, kern_entry, firmware_max_length, &im)) != 0) {
 		ERROR("Failed creating firmware layout description - error "
 		    "code: %d\n", rc);
 		return (-3);
