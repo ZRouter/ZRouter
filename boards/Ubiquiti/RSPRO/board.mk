@@ -62,7 +62,7 @@ KERNCONF_DEVICES+=	ath_rate_sample
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x00B00000
 
 ###################################################
 #
@@ -78,9 +78,11 @@ KERNEL_COMPRESSION_TYPE=oldlzma
 MKULZMA_BLOCKSIZE=65536
 
 # XXX: Here is must be Redboot packer, but not defined yet
-PACKING_KERNEL_IMAGE?=kernel.kbin.gz.uboot.sync
+PACKING_KERNEL_IMAGE?=kernel.kbin.gz
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
+
+UBNT_VERSION?=RSPRO.ar7100pro.V1
 
 
