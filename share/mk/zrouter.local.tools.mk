@@ -28,4 +28,8 @@ ${ZTOOLS_PATH}/make_dlink_dsr_image:	${ZTOOLS_PATH}_dir
 	cd ${ZROUTER_ROOT}/tools/make_dlink_dsr_image; \
 	    MAKEOBJDIRPREFIX=/usr/obj/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
 
+${ZTOOLS_PATH}/ubnt-mkfwimage:	${ZTOOLS_PATH}_dir
+	cd ${ZROUTER_ROOT}/tools/ubnt-mkfwimage; \
+	    MAKEOBJDIRPREFIX=/usr/obj/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
+
 
