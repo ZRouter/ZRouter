@@ -49,6 +49,8 @@ PREINSTALLDIRS=/lib
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
 .include "socs/socs.mk"
 
+KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
+
 .if !defined(TARGET_PROFILES) || empty(TARGET_PROFILES)
 # if we have flash and it size less than 8M assign profile xSMALL_
 .if defined(BOARD_FLASH_SIZE) && !empty(BOARD_FLASH_SIZE) && ${BOARD_FLASH_SIZE} < 8388608
@@ -535,6 +537,24 @@ zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 	cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} > ${NEW_IMAGE}
 	IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
 	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX}
+
+.if !defined(UBNT_VERSION) || empty(UBNT_VERSION)
+.error Specify UBNT_VERSION or device will not accept firmware
+.endif
+UBNT_FIRMWARE_IMAGE_SIZE_MAX?=${FIRMWARE_IMAGE_SIZE_MAX}
+UBNT_KERNEL_ENTRY?=${KERNCONF_KERNLOADADDR}
+UBNT_KERNEL_FLASH_BASE?=0xbf030000
+
+ubntimage:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ubnt-mkfwimage
+	@echo "++++++++++++++ Making $@ ++++++++++++++"
+	PATH=${IMAGE_BUILD_PATHS} ubnt-mkfwimage	\
+	    -v "${UBNT_VERSION}"			\
+	    -s "${UBNT_KERNEL_FLASH_BASE}"		\
+	    -e "${UBNT_KERNEL_ENTRY}"		\
+	    -m "${UBNT_FIRMWARE_IMAGE_SIZE_MAX}"	\
+	    -k "${KERNEL_PACKED_NAME}"			\
+	    -r "${ROOTFS_PACKED_NAME}"			\
+	    -o "${NEW_IMAGE}"
 
 .include <bsd.obj.mk>
 
