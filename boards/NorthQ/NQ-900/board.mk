@@ -99,3 +99,6 @@ TARGET_PROFILES+=shttpd dlink.ua.web
 IMAGE_TYPE=trx
 IMAGE_SUFFIX=trx
 
+PACKING_KERNEL_IMAGE?=kernel.kbin.gz.sync
+PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
+
