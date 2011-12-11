@@ -36,7 +36,6 @@ adapt_prestart()
 	switchctl /dev/switch0 set port 2 pvid 1 flags Untag
 	switchctl /dev/switch0 set port 3 pvid 1 flags Untag
 	switchctl /dev/switch0 set port 4 pvid 2 flags Untag
-
 	switchctl /dev/switch0 set port 5 pvid 1 flags Tag
 	switchctl /dev/switch0 set port 6 pvid 1 flags Tag
 
