@@ -78,6 +78,7 @@ KERNEL_COMPRESSION_TYPE=oldlzma
 MKULZMA_BLOCKSIZE=65536
 
 # XXX: Here is must be Redboot packer, but not defined yet
+KERNCONF_KERNLOADADDR?=0x80050000
 PACKING_KERNEL_IMAGE?=kernel.kbin.gz
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
