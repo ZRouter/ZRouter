@@ -7,9 +7,9 @@ hint.obio.0.msize=0x10000000
 hint.nvram.0.base=0x1f030000
 hint.nvram.0.maxsize=0x2000
 hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
-hint.nvram.1.base=0x1f032000
-hint.nvram.1.maxsize=0x4000
-hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
+#hint.nvram.1.base=0x1f032000
+#hint.nvram.1.maxsize=0x4000
+#hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
 
 # on-board Ralink Frame Engine
 hint.rt.0.at="nexus0"
