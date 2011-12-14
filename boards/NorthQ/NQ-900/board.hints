@@ -60,9 +60,9 @@ hint.spi.0.cs0="5"
 
 # MCU reset at gpio0:pin6
 
-hint.mx25l.0.at="spibus0"
-hint.mx25l.0.cs=0
-hint.mx25l.0.chipname="at25128"
+#hint.mx25l.0.at="spibus0"
+#hint.mx25l.0.cs=0
+#hint.mx25l.0.chipname="at25128"
 
 
 hint.cfi.0.width=2
