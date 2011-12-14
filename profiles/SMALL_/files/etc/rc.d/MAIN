@@ -37,6 +37,11 @@ main_prestart()
 	if [ -c /dev/map/config ]; then 
 		dd if=/dev/map/config of=/tmp/etc.tar.gz;
 		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
+	else
+		if [ -c /dev/redboot/config ]; then 
+			dd if=/dev/redboot/config of=/tmp/etc.tar.gz;
+			cd /tmp/ && tar xvzf /tmp/etc.tar.gz
+		fi
 	fi
 
 	kldload ipfw
