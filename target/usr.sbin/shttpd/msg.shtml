@@ -1,0 +1,38 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title><!--#sysctl "kern.ident" --></title>
+ </head>
+ <body>
+ kern.msgbuf
+ <pre>
+  <!--#sysctl "kern.msgbuf" -->
+ </pre>
+  <br/>
+  <hr/>
+
+  smbios.system.maker<br/>
+  <pre>
+  <!--#kenv "smbios.system.maker" -->
+  </pre>
+  <br/>
+  <hr/>
+
+  <pre>
+  <!--#sysctl "kern.sched.topology_spec" -->
+  </pre>
+  <br/>
+  <hr/>
+
+  VM total<br/>
+  <pre>
+  <!--#sysctl "vm.vmtotal" -->
+  </pre>
+  <hr/>
+
+  vm.phys_free<br/>
+  <pre>
+  <!--#sysctl "vm.phys_free" -->
+  </pre>
+  <br/>
+ </body>
+</html>

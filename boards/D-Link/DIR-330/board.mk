@@ -1,0 +1,5 @@
+
+
+SOC_VENDOR=Broadcom
+SOC_CHIP=BCM5836
+

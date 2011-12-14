@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+
+use strict;
+
+=item
+     -b      Back up any existing files 
+     -B suffix     Use suffix as the backup suffix if -b is given.
+     -C      Copy the file.
+     -c      Copy the file.
+     -d      Create directories.
+     -f      chflags(1)
+     -g      Specify a group.
+     -M      Disable all use of mmap(2).
+     -m      Specify an alternate mode.
+     -o      Specify an owner.  A numeric UID is allowed.
+     -p      Preserve the access and modification times.
+     -S      Safe copy.  Normally, install unlinks an existing target before
+             installing the new file.  With the -S flag a temporary file is
+             used and then renamed to be the target.  The reason this is safer
+             is that if the copy or rename fails, the existing target is left
+             untouched.
+     -s      install exec's the command strip(1) to strip binaries
+     -v      Cause install to be verbose
+=cut
+
+# We need skip -f flags and -o/-g and filter -m for s-bits
+
+my $install = "install";
+my $installpath = "";
+
+$install 	= $ENV{'ZROUTER_INSTALL'} 
+	if ($ENV{'ZROUTER_INSTALL'});
+$installpath 	= $ENV{'ZROUTER_WORLD_INSTALL_PATH'} 
+	if ($ENV{'ZROUTER_WORLD_INSTALL_PATH'});
+
+#die "environment variable ZROUTER_WORLD_INSTALL_PATH required to detect installation onto FS image or image dir" if ($installpath eq "");
+
+my (@keys, @skeys, @srcs, @dirs) = ();
+my ($v, $dirmode, $keylist) = (0, 0, 1);
+for (my $i = 0; $i <= $#ARGV; $i ++ ) {
+	if (!$keylist) {
+		unless ($i == $#ARGV) {
+			push @srcs, $ARGV[$i] ;
+		} else {
+			push @dirs, $ARGV[$i] ;
+		}
+	}
+	if ( $ARGV[$i] =~ /-[bCcMpSsv]/) {
+		$v = 1 if ($ARGV[$i] eq '-v');
+		push @keys, $ARGV[$i];
+	} elsif ($ARGV[$i] eq '-d') {
+		$dirmode = 1;
+		push @keys, $ARGV[$i];
+	} elsif ( $ARGV[$i] =~ /^(-[Bfgmo])(\S+)?$/ ) {
+		my $arg = "";
+		my $key = $1;
+		if ( $2 ne "" ) {
+			$arg = $2;
+		} else {
+			$arg = $ARGV[++$i];
+		}
+		if ($key =~ /-[fog]/) {
+			push @skeys, "$key$arg";
+			next;
+		} elsif ($key eq '-m') {
+			# Drop special flags
+			if ($arg =~ /^\d+$/) {
+				$arg = sprintf("%lo", (oct($arg) & 01777));
+			} else {
+				$arg =~ s/s/x/g;
+			}
+			push @keys, "$key$arg";
+			next;
+		} 
+	} else {
+		$keylist = 0;
+		if ($dirmode) {
+			push @dirs, @ARGV[$i..$#ARGV];
+			last;
+		}
+	}
+}
+
+print "Drop flags ".join(" ", @skeys). "\n" if ($v);
+print "Keys: "     .join(" ", @keys ). "\n" if ($v);
+print "Files: "    .join(" ", @srcs ). "\n" if ($v);
+print "Dirs: "     .join(" ", @dirs ). "\n" if ($v);
+
+my $cmdline = "$install ". join(" ", @keys, @srcs, @dirs);
+print "$cmdline\n";# if ($v);
+
+# Call install
+print `$cmdline`;
+
+# or use mkimage to store into ISO
+
+exit 0;
+

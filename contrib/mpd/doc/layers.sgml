@@ -1,0 +1,95 @@
+<!-- $Id: layers.sgml,v 1.9 2007/10/27 11:55:46 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Mpd Layers<label id="layers"></heading>
+
+      <p>
+	Mpd consists of several <bf>layers</bf>, corresponding
+	to the layered nature of the PPP protocol. There are two
+	types of layers hierarchy connected with two different 
+	operation modes as "ppp terminator" and "ppp repeater".
+	Operation mode is getting chosen dynamically depending on link
+	configuration and user auth name (see 'set link action ...' command).
+	
+	In "ppp terminator" mode such hierarchy used:
+	<bf><ref id="interface" name="Interface"></bf> ->
+	<bf><ref id="ipcp" name="NCPs"></bf> ->
+	<bf><ref id="compression" name="Compression"></bf> ->
+	<bf><ref id="encryption" name="Encryption"></bf> ->
+	<bf><ref id="bundle" name="Bundle"></bf> -> 
+	<bf><ref id="links" name="Links"></bf>
+	
+	In "ppp repeater" mode different hierarchy used:
+	<bf><ref id="links" name="Link1"></bf> ->
+	<bf>Repeater</bf> -> 
+	<bf><ref id="links" name="Link2"></bf>
+	
+	A <bf><ref id="links" name="link"></bf> is a single point-to-point
+	connection between the local machine and a remote peer machine, 
+	implemented by some kind of physical device, 
+	such as a serial modem connection or a virtual PPTP connection.
+	
+	Link parameters include whether authentication is enabled in
+	either direction, the authentication type (PAP or CHAP)
+	used, keep-alive packets, multilink negotiation options
+	and various other link specific parameters.
+
+	Lower half of the link layer is the physical devices layer.
+	Configuration of device type specific parameters happens at this layer. 
+	Each device has a specific <em>type</em>
+	corresponding to one of the supported device types in mpd.
+	The type dictates how the device dependent part
+	is configured and what it's capabilities are.
+
+	A <bf><ref id="bundle" name="bundle"></bf> is a collection 
+	of one or more links, all connecting
+	to the same remote peer, that together form a single
+	multi-link PPP connection whose effective bandwidth is
+	the sum of the bandwidths of the individual links.
+
+	The bundle layer in effect lies just above the link layer.
+	The bundle layer handles the task of making multiple 
+	physical links appear as a single virtual link.
+
+	At the bundle layer you configure multi-link
+	PPP settings and the link management policy. The link management
+	policy determines whether mpd tries to keep all the links
+	connected all the time, or whether it adds and subtracts
+	links depending on demand, and if so, according to what parameters.
+
+	With each bundle is a corresponding 
+	<bf><ref id="interface" name="interface"></bf> layer,
+	which corresponds directly to a system network interface
+	accessible via <tt>ifconfig(8)</tt>, such as <tt>ng0</tt>.
+	The interface layer handles configuring the interface,
+	bringing it up or down as appropriate, assigning
+	IP addresses, setting up static routes and configuring proxy-ARP.
+	The interface layer is also responsible for implementing
+	Dial-on-Demand and idle timeout functionality.
+
+	Each bundle has several corresponding NCP layers as
+	<bf><ref id="ipcp" name="IP Control Protocol (IPCP)"></bf> and
+	<bf><ref id="ipv6cp" name="IPv6 Control Protocol (IPv6CP)"></bf>,
+	which manages the protocol specific configuration of the interface.
+	This layers handle the negotiation of local and remote addresses
+	and TCP header compression, as well as other optional 
+	IP related information such as DNS servers and NBNS servers.
+
+	Each bundle also has corresponding
+	<bf><ref id="compression" name="compression (CCP)"></bf> and
+	<bf><ref id="encryption" name="encryption (ECP)"></bf> layers, which
+	allow you to enable and configure compression and encryption
+	for data sent and received over the bundle.
+
+	A <bf>repeater</bf> is a collection of two physical devices 
+	(links). It is getting created when there is need to forward 
+	connection coming from one physical device to another without
+	modification. This technology is also known as LAC 
+	(L2TP Access Concentrator) and PAC (PPTP Access Concentrator).
+
+	While the combination of all the various layers presents
+	a large number of configuration options, mpd tries to
+	have reasonable defaults for everything.
+

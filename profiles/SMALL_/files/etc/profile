@@ -1,0 +1,5 @@
+
+set -o emacs 2>/dev/null
+
+
+

@@ -1,0 +1,123 @@
++nvram2env0  at   on nexus0
++clock0  at   on nexus0
++uart0  at   on siba_cc0
++cfid0  at   on cfi0
++cfi0  at   on siba_cc0
++gpioc0  at   on gpio0
++gpioled0  at pins=?  on gpiobus0
++gpioled1  at pins=?  on gpiobus0
++gpioled2  at pins=?  on gpiobus0
++gpioled3  at pins=?  on gpiobus0
++gpioled4  at pins=?  on gpiobus0
++gpioled5  at pins=?  on gpiobus0
+? at pins=?  on gpiobus0
+? at pins=?  on gpiobus0
++gpiobus0  at   on gpio0
++gpio0  at   on siba_cc0
++siba_cc0  at   on siba0
++bfeswitch0 oui=0x1018 model=0x25 rev=0x0 at phyno=30 oui=0x1018 model=0x25 rev=0x0 on miibus0
++miibus0  at   on bfe0
+!system=IFNET subsystem=bfe0 type=ATTACH
++bfe0  at   on siba0
++siba_mips0  at   on siba0
++usbus0  at   on ehci0
++ehci0  at   on siba_usb0
++usbus1  at   on ohci0
++ohci0  at   on siba_usb0
++siba_usb0  at   on siba0
++siba_sdram0  at   on siba0
+? at   on siba0
+? at   on siba0
++siba0  at   on nexus0
++cryptosoft0  at   on nexus0
++nexus0  at   on root0
+!system=IFNET subsystem=lo0 type=ATTACH
+!system=IFNET subsystem=enc0 type=ATTACH
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usbctl
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.1.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen0.1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/1.1.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen1.1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.1.1
++ugen0.1 vendor=0x0000 product=0x0000 devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 at port=1 on ehci0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/1.1.1
++ugen1.1 vendor=0x0000 product=0x0000 devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 at port=1 on ohci0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=cfid0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/cfe
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/rgdb
++uhub1  at   on usbus1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/upgrade
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/nvram
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/bdcfg
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/kernel
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/rootfs
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/langpack
+!system=DEVFS subsystem=CDEV type=CREATE cdev=map/rootfs.ulzma
++uhub0  at   on usbus0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=iso9660/CDROM
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.2.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen0.2
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.2.1
++ugen0.2 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 at port=1 on ugen0.1
++uhub2 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 intclass=0x09 intsubclass=0x00 at port=1 interface=0 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 intclass=0x09 intsubclass=0x00 on uhub0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen0.3
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.2
++ugen0.3 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 at port=4 on ugen0.2
+? at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
+!system=IFNET subsystem=vlan0 type=ATTACH
+!system=IFNET subsystem=bfe0 type=LINK_UP
+? at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
+!system=DEVFS subsystem=CDEV type=CREATE cdev=tun0
+!system=IFNET subsystem=tun0 type=ATTACH
+!system=IFNET subsystem=tun0 type=LINK_UP
+!system=DEVFS subsystem=CDEV type=CREATE cdev=pts/0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=xpt0
+? at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
++umass0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
+!system=DEVFS subsystem=CDEV type=CREATE cdev=sg0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=sga
+!system=DEVFS subsystem=CDEV type=CREATE cdev=pass0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=da0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=da0s1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=msdosfs/KINGSTON
++ugen0.4 vendor=0x07d1 product=0xf101 devclass=0xe0 devsubclass=0x01 sernum="" release=0x0100 at port=1 on ugen0.2
+? at port=1 interface=0 vendor=0x07d1 product=0xf101 devclass=0xe0 devsubclass=0x01 sernum="" release=0x0100 intclass=0xe0 intsubclass=0x01 on uhub2
+-ugen0.4 vendor=0x07d1 product=0xf101 devclass=0xe0 devsubclass=0x01 sernum="" release=0x0100 at port=1 on ugen0.2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=ugen0.4
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.4.0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.4.4
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.4.3
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.4.2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.4.1
+-ugen0.2 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 at port=1 on ugen0.1
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=ugen0.2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.2.0
+-ugen0.3 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 at port=4 on ugen0.2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=ugen0.3
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.3.0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=pass0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=sga
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=sg0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=da0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=da0s1
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=msdosfs/KINGSTON
+-umass0  at   on uhub2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.3.2
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.3.1
+-uhub2  at   on uhub0
+!system=DEVFS subsystem=CDEV type=DESTROY cdev=usb/0.2.1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.2.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen0.2
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.2.1
++ugen0.2 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 at port=1 on ugen0.1
++uhub2 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 intclass=0x09 intsubclass=0x00 at port=1 interface=0 vendor=0x0409 product=0x005a devclass=0x09 devsubclass=0x00 sernum="" release=0x0100 intclass=0x09 intsubclass=0x00 on uhub0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.0
+!system=DEVFS subsystem=CDEV type=CREATE cdev=ugen0.3
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.1
+!system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.3.2
++ugen0.3 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 at port=4 on ugen0.2
+? at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
++umass0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 at port=4 interface=0 vendor=0x0951 product=0x1625 devclass=0x00 devsubclass=0x00 sernum="0019E00149F7B9B1E000010C" release=0x0110 intclass=0x08 intsubclass=0x06 on uhub2
+
