@@ -14,6 +14,10 @@ TARGET_BOARDDIR= ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}
 ROOTFS_COPY_DIRS+=${TARGET_BOARDDIR}/files
 .endif
 
+.if exists(${TARGET_BOARDDIR}/board_firmware.sig)
+BOARD_FIRMWARE_SIGNATURE_FILE=${TARGET_BOARDDIR}/board_firmware.sig
+.endif
+
 .endif
 
 .if !defined(TARGET_BOARDDIR)
