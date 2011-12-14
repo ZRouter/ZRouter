@@ -14,9 +14,8 @@ ROOTFS_COPY_DIRS+=${ZROUTER_ROOT}/profiles/${profile}/files
 
 .else
 .error "Profile ${profile} not found"
-.endif
+.endif # exists(${ZROUTER_ROOT}/profiles/${profile}/) && profile.mk
 
 .endfor
-
 
 .endif
