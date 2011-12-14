@@ -63,4 +63,4 @@ MKULZMA_BLOCKSIZE=65536
 PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
-
+NEW_IMAGE_TYPE=split_kernel_rootfs

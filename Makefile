@@ -402,7 +402,6 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
-all:	world kernel ports
 IMAGE_SUFFIX?=trx
 ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
@@ -534,14 +533,14 @@ PACKING_TARGET_LIST:=${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 #
 # TODO: comment here
 #
-fwimage ${NEW_IMAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH}/asustrx
+trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH}/asustrx
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
 zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
-	cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} > ${NEW_IMAGE}
+	cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
 	IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
 	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX}
 
@@ -562,6 +561,13 @@ ubntimage:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ubnt-mkfwi
 	    -k "${KERNEL_PACKED_NAME}"			\
 	    -r "${ROOTFS_PACKED_NAME}"			\
 	    -o "${NEW_IMAGE}"
+
+split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
+	touch "${NEW_IMAGE}"
+
+${NEW_IMAGE}:	${NEW_IMAGE_TYPE}
+
+all:	world kernel ports ${NEW_IMAGE}
 
 .include <bsd.obj.mk>
 

@@ -70,4 +70,4 @@ PACKING_ROOTFS_IMAGE?=rootfs
 
 
 IMAGE_SUFFIX=zimage
-
+NEW_IMAGE_TYPE=split_kernel_rootfs
