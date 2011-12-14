@@ -54,4 +54,4 @@ TARGET_PROFILES+=shttpd dlink.ua.web
 
 IMAGE_TYPE=trx
 IMAGE_SUFFIX=trx
-
+NEW_IMAGE_TYPE=trximage

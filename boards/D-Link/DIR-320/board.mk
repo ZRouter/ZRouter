@@ -90,3 +90,4 @@ KERNEL_SIZE_MAX=3145728
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
+NEW_IMAGE_TYPE=trximage

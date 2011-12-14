@@ -59,3 +59,4 @@ KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan
 # Image must not be biggest than GEOM_MAP_P4 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x007b0000
 
+NEW_IMAGE_TYPE=zimage

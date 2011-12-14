@@ -86,4 +86,4 @@ IMAGE_SUFFIX=zimage
 
 UBNT_VERSION?=RSPRO.ar7100pro.V1
 
-
+NEW_IMAGE_TYPE=ubntimage

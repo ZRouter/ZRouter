@@ -67,4 +67,4 @@ PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
-
+NEW_IMAGE_TYPE=zimage
