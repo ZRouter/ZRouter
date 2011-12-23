@@ -135,7 +135,7 @@ static void usage(const char* progname)
 	     "\t-k <kernel file>\t - kernel file\n"
 	     "\t-r <rootfs file>\t - rootfs file\n"
 	     "\t-s <fw flash base>\t - image location in flash\n"
-	     "\t-e <kernel load address>\t - kernel load address\n"
+	     "\t-l <kernel load address>\t - kernel load address\n"
 	     "\t-e <kernel entry point>\t - kernel start address\n"
 	     "\t-m <max fw size>\t - maximum firmware size\n"
 	     "\t-h\t\t\t - this help\n", VERSION,
