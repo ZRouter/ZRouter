@@ -7,8 +7,6 @@
 
 SOC_VENDOR=Cavium
 SOC_CHIP=CN5010
-# Maybe used for kernel config and maybe multiple e.g. "cfi nand"
-BOARD_FLASH_TYPE=cfi
 # TODO: size suffixes
 BOARD_FLASH_SIZE=33554432
 

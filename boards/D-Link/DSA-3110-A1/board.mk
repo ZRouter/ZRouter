@@ -8,8 +8,6 @@
 
 SOC_VENDOR=Intel
 SOC_CHIP=ixp435
-# Maybe used for kernel config and maybe multiple e.g. "cfi nand"
-BOARD_FLASH_TYPE=cfi
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
