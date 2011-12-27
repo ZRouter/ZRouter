@@ -8,8 +8,6 @@
 
 SOC_VENDOR=Ralink
 SOC_CHIP=RT3052F
-# Maybe used for kernel config and maybe multiple e.g. "cfi nand"
-BOARD_FLASH_TYPE=cfi
 # TODO: size suffixes
 BOARD_FLASH_SIZE=8388608
 

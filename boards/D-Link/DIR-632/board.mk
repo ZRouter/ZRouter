@@ -8,8 +8,6 @@
 
 SOC_VENDOR=Atheros
 SOC_CHIP=AR7242
-# Maybe used for kernel config and maybe multiple e.g. "cfi nand"
-BOARD_FLASH_TYPE=spi
 # TODO: size suffixes
 BOARD_FLASH_SIZE=8388608
 
