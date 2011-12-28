@@ -51,6 +51,12 @@ PREINSTALLDIRS=/lib
 
 KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
 
+# resolve board flash size with trailing M or K
+.if defined(BOARD_FLASH_SIZE)
+BOARD_FLASH_SIZE!=echo "${BOARD_FLASH_SIZE}" | \
+    sed -e 's/0x/ibase=16; /' -e 's/K/ * 1024/' -e 's/M/ * 1024 * 1024/' | bc
+.endif
+
 .if !defined(TARGET_PROFILES) || empty(TARGET_PROFILES)
 # if we have flash and it size less than 8M assign profile xSMALL_
 .if defined(BOARD_FLASH_SIZE) && !empty(BOARD_FLASH_SIZE) && ${BOARD_FLASH_SIZE} < 8388608
