@@ -17,7 +17,6 @@ main_prestart()
 	stty status '^T'
 	sysctl kern.coredump=0
 	sysctl net.inet.ip.forwarding=1
-	kldload random
 
 	md=`/sbin/mdconfig -a -t malloc -s 10m`
 	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
