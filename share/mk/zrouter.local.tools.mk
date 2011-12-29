@@ -36,3 +36,7 @@ ${ZTOOLS_PATH}/uboot_mkimage:	${ZTOOLS_PATH}_dir
 	cd ${ZROUTER_ROOT}/tools/uboot_mkimage; \
 	    MAKEOBJDIRPREFIX=/usr/obj/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
 
+${ZTOOLS_PATH}/mktplinkfw:	${ZTOOLS_PATH}_dir
+	cd ${ZROUTER_ROOT}/tools/mktplinkfw; \
+	    MAKEOBJDIRPREFIX=/usr/obj/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
+
