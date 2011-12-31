@@ -3,9 +3,10 @@ CDIR=${.CURDIR}/../../contrib/mktplinkfw
 .PATH: ${CDIR}
 
 PROG=mktplinkfw
-LDADD=-lz -lcrypto
-DPADD=${LIBZ}
+LDADD=-lz -lmd
+DPADD=${LIBZ} ${LIBMD}
 NO_MAN=
+CSTD=gnu89
 
 SRCS=mktplinkfw.c
 
