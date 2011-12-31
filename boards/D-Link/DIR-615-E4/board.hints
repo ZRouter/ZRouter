@@ -39,7 +39,7 @@ hint.arge.0.msize=0x1000
 hint.arge.0.irq=2
 hint.arge.0.media=100
 hint.arge.0.fduplex=1
-hint.arge.0.phymask=0xffffffff
+#hint.arge.0.phymask=0xffffffff
 # Real value is 0x1f3f0000, but it will by found at address alias, so
 # 4M/8M/16M devices can have same address
 hint.arge.0.eeprommac=0x1fff0000
@@ -50,7 +50,7 @@ hint.arge.1.msize=0x1000
 hint.arge.1.irq=3
 hint.arge.1.media=1000
 hint.arge.1.fduplex=1
-hint.arge.1.phymask=0xffffffff
+#hint.arge.1.phymask=0xffffffff
 hint.arge.1.eeprommac=0x1fff0000
 
 #hint.nvram.0.base=0x1f030000
@@ -58,11 +58,21 @@ hint.arge.1.eeprommac=0x1fff0000
 #hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
 
 hint.miibus.0.phymask="0x00000001"
-hint.miibus.0.phy0="plumbphy"
-hint.plumbphy.0.master="ar8x16_switch0"
-hint.plumbphy.0.port=4
 hint.miibus.1.phymask="0x00000001"
-hint.miibus.1.phy0="switch"
+
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.id1=0xffff
+hint.floatphy.0.id2=0x0000 # Float PHY
+
+hint.switch.0.at="miibus1"
+hint.switch.0.phyno=0
+hint.switch.0.id1=0xffff
+hint.switch.0.id2=0x0080 # AR8x16 switch
+
+
+#hint.plumbphy.0.master="ar8x16_switch0"
+#hint.plumbphy.0.port=4
 
 #hint.switch.0.iface="arge0"
 #hint.switch.0.driver="ar8x16_switch"
@@ -136,39 +146,34 @@ hint.map.0.readonly=1
 
 hint.map.1.at="flash/spi0"
 hint.map.1.start=0x00040000
-hint.map.1.end=0x00050000
-hint.map.1.name="nvram"
+hint.map.1.end=0x003b0000
+hint.map.1.name="upgrade"
 
 hint.map.2.at="flash/spi0"
-hint.map.2.start=0x00050000
-hint.map.2.end=0x007e0000
-hint.map.2.name="upgrade"
+hint.map.2.start=0x00040000
+hint.map.2.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.2.name="kernel"
 
 hint.map.3.at="flash/spi0"
-hint.map.3.start=0x00050000
-hint.map.3.end="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.3.name="kernel"
+hint.map.3.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.3.end=0x003b0000
+hint.map.3.name="rootfs"
 
 hint.map.4.at="flash/spi0"
-hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.4.end=0x007b0000
-hint.map.4.name="rootfs"
+hint.map.4.start=0x003b0000
+hint.map.4.end=0x003c0000
+hint.map.4.name="MAC"
+#hint.map.4.readonly=1
 
 hint.map.5.at="flash/spi0"
-hint.map.5.start=0x007b0000
-hint.map.5.end=0x007c0000
-hint.map.5.name="MAC"
+hint.map.5.start=0x003c0000
+hint.map.5.end=0x003f0000
+hint.map.5.name="config"
 #hint.map.5.readonly=1
 
 hint.map.6.at="flash/spi0"
-hint.map.6.start=0x007c0000
-hint.map.6.end=0x007f0000
-hint.map.6.name="config"
+hint.map.6.start=0x003f0000
+hint.map.6.end=0x00400000
+hint.map.6.name="ART"
 #hint.map.6.readonly=1
-
-hint.map.7.at="flash/spi0"
-hint.map.7.start=0x007f0000
-hint.map.7.end=0x00800000
-hint.map.7.name="ART"
-#hint.map.7.readonly=1
 
