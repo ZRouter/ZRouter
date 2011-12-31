@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include "md5.h"
+#include <md5.h>
 
 #define	HOST_TO_BE32(x)		htonl(x)
 #define	BE32_TO_HOST(x)		ntohl(x)
@@ -346,9 +346,9 @@ static int get_md5(char *data, int size, char *md5)
 {
 	MD5_CTX ctx;
 
-	MD5_Init(&ctx);
-	MD5_Update(&ctx, data, size);
-	MD5_Final(md5, &ctx);
+	MD5Init(&ctx);
+	MD5Update(&ctx, data, size);
+	MD5Final(md5, &ctx);
 }
 
 static int get_file_stat(struct file_info *fdata)
