@@ -6,7 +6,7 @@ CONVERTER_FFS?=makefs
 CONVERTER_FFS_FLAGS?=-t ffs -d 255 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -s \
     ${ROOTFS_MEDIA_SIZE} -o minfree=0,version=1 ${ROOTFS_ENDIAN_FLAGS}
 
-${CONVERT_TO_FFS}:		${CONVERT_FROM_FFS}
+${CONVERT_TO_FFS}:		${ZTOOLS_PATH}/makefs ${CONVERT_FROM_FFS}
 	@echo -n "========== Convert ${CONVERT_FROM_FFS} to ${CONVERT_TO_FFS}"
 	@echo " with ${CONVERTER_FFS} ============"
 	PATH=${IMAGE_BUILD_PATHS} ${CONVERTER_FFS} ${CONVERTER_FFS_FLAGS} "${CONVERT_TO_FFS}" "${CONVERT_FROM_FFS}"
