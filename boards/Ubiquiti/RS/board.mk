@@ -76,7 +76,8 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 ###################################################
 
 TARGET_PROFILES+=SMALL_ ath dnsmasq mpd ssh shttpd dlink.ua.web hostap dhcp \
-  racoon ntpdate pf
+  racoon ntpdate
+# pf
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
