@@ -201,6 +201,7 @@ _WORLD_TCBUILD_ENV= \
 	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ATM=yes \
+	WITHOUT_AUDIT=yes \
 	WITHOUT_INFO=yes \
 	WITHOUT_IPX=yes \
 	WITHOUT_LOCALES=yes \
@@ -222,6 +223,7 @@ _WORLD_BUILD_ENV= \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ASSERT_DEBUG=yes \
 	WITHOUT_ATM=yes \
+	WITHOUT_AUDIT=yes \
 	WITHOUT_CLANG=yes \
 	WITHOUT_INFO=yes \
 	WITHOUT_INSTALLLIB=yes \
@@ -444,6 +446,7 @@ ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
 #		world kernel ports
 rootfs:		${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
+ROOTFS_CLEAN_MTREE_FILE=    ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean.mtree
 
 ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
 	for d in ${ROOTFS_COPY_DIRS} ; do \
@@ -489,7 +492,13 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	 ln -sf vi nview
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
-	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; find ./usr/ -type d -empty -delete
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
+	    find ./usr/ -type d -empty -delete
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
+	    mtree -c -i -n -k uname,gname,mode,nochange | \
+		sed -E 's/uname=[[:alnum:]]+/uname=root/' | \
+		sed -E 's/gname=[[:alnum:]]+/gname=wheel/' > \
+		    ${ROOTFS_CLEAN_MTREE_FILE}
 
 #${ROOTFS_DEPTEST}:
 ${ROOTFS_DEPTEST}:		world	ports
