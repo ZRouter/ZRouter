@@ -3,7 +3,7 @@ CONVERT_TO_ISO:=${CURRENT_PACKING_FILE_NAME}
 
 # Let user to override
 CONVERTER_ISO?=makefs
-CONVERTER_ISO_FLAGS?=-d 255 -t cd9660 -F ${ZROUTER_ROOT}/tools/rootfs.mtree -o "rockridge"
+CONVERTER_ISO_FLAGS?=-d 255 -t cd9660 -F ${ROOTFS_CLEAN_MTREE_FILE} -o "rockridge"
 
 ${CONVERT_TO_ISO}:		${ZTOOLS_PATH}/makefs ${CONVERT_FROM_ISO}
 	@echo -n "========== Convert ${CONVERT_FROM_ISO} to ${CONVERT_TO_ISO}"
