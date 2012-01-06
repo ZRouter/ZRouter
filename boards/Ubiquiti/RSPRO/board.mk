@@ -27,6 +27,9 @@ WITH_USB=yes
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 #KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
+# Define empty LDSCRIPT_NAME, FreeBSD kernel make process will use his default
+KERNCONF_KERN_LDSCRIPT_NAME=
+
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 

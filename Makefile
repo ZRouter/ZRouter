@@ -50,6 +50,11 @@ PREINSTALLDIRS=/lib
 .include "socs/socs.mk"
 
 KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
+# Allow to undefine LDSCRIPT_NAME if (board|soc).mk was set it to ""
+.if !empty(KERNCONF_KERN_LDSCRIPT_NAME)
+KERNCONF_MAKEOPTIONS+=	"LDSCRIPT_NAME=${KERNCONF_KERN_LDSCRIPT_NAME}"
+.endif
+
 
 # resolve board flash size with trailing M or K
 .if defined(BOARD_FLASH_SIZE)
