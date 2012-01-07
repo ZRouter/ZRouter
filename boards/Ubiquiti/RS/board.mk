@@ -20,7 +20,9 @@ BOARD_FLASH_SIZE=16777216
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
-KERNCONF_KERNLOADADDR?=0x80050100
+KERNCONF_KERNLOADADDR?=0x80050000
+# Define empty LDSCRIPT_NAME, FreeBSD kernel make process will use his default
+KERNCONF_KERN_LDSCRIPT_NAME=
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
