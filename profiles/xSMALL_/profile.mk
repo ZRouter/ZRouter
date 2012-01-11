@@ -1,5 +1,5 @@
 
-
+WORLD_BUILD_ENV_EXTRA+=WITHOUT_OPENSSL=yes
 
 
 
@@ -141,13 +141,13 @@ sockstat \
 tail \
 tar \
 tee \
-telnet \
 touch \
 uname \
 vi \
 wc \
 xargs
 
+#telnet \
 #netstat \
 
 WORLD_SUBDIRS_GNU_USR_BIN+= \
