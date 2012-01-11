@@ -57,27 +57,30 @@ hint.arge.1.eeprommac=0x1fff0000
 #hint.nvram.0.maxsize=0x2000
 #hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
 
-hint.miibus.0.phymask="0x00000001"
-hint.miibus.1.phymask="0x00000001"
+# No probe at all
+hint.miibus.0.phymask="0x00000000"
+hint.miibus.1.phymask="0x00000000"
 
 hint.floatphy.0.at="miibus0"
 hint.floatphy.0.phyno=0
-hint.floatphy.0.id1=0xffff
-hint.floatphy.0.id2=0x0000 # Float PHY
+hint.floatphy.0.master="switch"
+hint.floatphy.0.master_unit=0
+hint.floatphy.0.master_phys=0x00000010 # Sense PHY4
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=100
 
-hint.switch.0.at="miibus1"
-hint.switch.0.phyno=0
-hint.switch.0.id1=0xffff
-hint.switch.0.id2=0x0080 # AR8x16 switch
+# Switch attached to MDIO bus on arge0
+hint.switch.0.at="miibus0"
+hint.switch.0.phyno=1
+hint.ar8x16_switch.0.mii_mode=0x012603e2
 
-
-#hint.plumbphy.0.master="ar8x16_switch0"
-#hint.plumbphy.0.port=4
-
-#hint.switch.0.iface="arge0"
-#hint.switch.0.driver="ar8x16_switch"
-#hint.switch.1.iface="arge1"
-#hint.switch.1.driver="ar8x16_switch"
+hint.floatphy.1.at="miibus1"
+hint.floatphy.1.phyno=0
+hint.floatphy.1.master="switch"
+hint.floatphy.1.master_unit=0
+hint.floatphy.1.master_phys=0x0000000f # Link Sensing PHY0-PHY3
+hint.floatphy.1.flags=0x00000004 # "Link on any PHYs" | "Static link speed"
+hint.floatphy.1.speed=1000
 
 # GPIO
 hint.gpio.0.at="apb0"
