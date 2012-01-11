@@ -280,6 +280,7 @@ _WORLD_BUILD_ENV+=NOENABLE_WIDEC=yes -DNOENABLE_WIDEC
 
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS=yes
 _WORLD_BUILD_ENV+=WITHOUT_KERBEROS_SUPPORT=yes
+_WORLD_BUILD_ENV+=${WORLD_BUILD_ENV_EXTRA}
 
 
 #XXX_BEGIN Only for testing
@@ -489,6 +490,12 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	 ln -sf bsdgrep zgrep ; \
 	 ln -sf bsdgrep zegrep ; \
 	 ln -sf bsdgrep zfgrep ; \
+	 ln -sf bsdgrep lzegrep ; \
+	 ln -sf bsdgrep lzfgrep ; \
+	 ln -sf bsdgrep lzgrep ; \
+	 ln -sf bsdgrep xzegrep ; \
+	 ln -sf bsdgrep xzfgrep ; \
+	 ln -sf bsdgrep xzgrep ; \
 	 ln -sf ssh slogin ; \
 	 ln -sf vi nvi ; \
 	 ln -sf vi ex ; \
