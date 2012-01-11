@@ -9,7 +9,8 @@
 SOC_VENDOR=Atheros
 SOC_CHIP=AR7240
 # TODO: size suffixes
-BOARD_FLASH_SIZE=4194304
+BOARD_FLASH_SIZE=4M
+#4194304
 
 
 ###################################################
@@ -71,7 +72,6 @@ KERNCONF_DEVICES+=	ath_rate_sample
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 # 3538944
 FIRMWARE_IMAGE_SIZE_MAX=0x00360000
-
 
 ###################################################
 #
