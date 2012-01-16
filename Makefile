@@ -1,6 +1,16 @@
 
 .include <bsd.own.mk>
 
+# ZROUTER_ROOT can be set in environment
+.if !defined(ZROUTER_ROOT)
+ZROUTER_ROOT=${.CURDIR}
+.endif
+
+.if exists(${ZROUTER_ROOT}/Makefile.local.opts)
+.warning Using options from ${ZROUTER_ROOT}/Makefile.local.opts
+.include "${ZROUTER_ROOT}/Makefile.local.opts"
+.endif
+
 #
 # Defaults
 #
@@ -19,11 +29,6 @@ FREEBSD_${var}
 FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
 .else
 .error "missing FreeBSD source tree: FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}"
-.endif
-
-# ZROUTER_ROOT can be set in environment
-.if !defined(ZROUTER_ROOT)
-ZROUTER_ROOT=${.CURDIR}
 .endif
 
 # ZROUTER_OBJ can be set in environment
