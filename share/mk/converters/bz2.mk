@@ -3,7 +3,7 @@ CONVERT_TO_BZ2:=${CURRENT_PACKING_FILE_NAME}
 
 # Let user to override
 CONVERTER_BZ2?=bzip2
-CONVERTER_BZ2_FLAGS?=--stdout
+CONVERTER_BZ2_FLAGS?=--stdout --best
 
 ${CONVERT_TO_BZ2}:		${CONVERT_FROM_BZ2}
 	@echo ========== Convert ${CONVERT_FROM_BZ2} to ${CONVERT_TO_BZ2} with ${CONVERTER_BZ2} ============
