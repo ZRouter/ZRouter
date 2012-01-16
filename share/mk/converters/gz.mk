@@ -3,7 +3,7 @@ CONVERT_TO_GZ:=${CURRENT_PACKING_FILE_NAME}
 
 # Let user to override
 CONVERTER_GZ?=gzip
-CONVERTER_GZ_FLAGS?=--stdout
+CONVERTER_GZ_FLAGS?=--stdout --best
 
 ${CONVERT_TO_GZ}:		${CONVERT_FROM_GZ}
 	@echo ========== Convert ${CONVERT_FROM_GZ} to ${CONVERT_TO_GZ} with ${CONVERTER_GZ} ============
