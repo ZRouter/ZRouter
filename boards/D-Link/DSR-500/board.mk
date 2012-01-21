@@ -20,6 +20,7 @@ BOARD_FLASH_SIZE=33554432
 KERNCONF_OPTIONS+=	OCTEON_VENDOR_D_LINK
 KERNCONF_OPTIONS+=	OCTEON_BOARD_DSR_1000N
 
+KERNCONF_DEVICES+=	brgphy
 KERNCONF_DEVICES+=	switch
 KERNCONF_DEVICES+=	switch_bcm5325
 
@@ -29,7 +30,9 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 WITH_USB=yes
 WITH_IPSEC=yes
 # Builded modules
-KERNCONF_MODULES_OVERRIDE+=ipfw usb/umass usb/uplcom usb/u3g dummynet
+KERNCONF_MODULES_OVERRIDE+=ipfw dummynet zlib
+KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/ucom
+KERNCONF_MODULES_OVERRIDE+=usb/umass cam
 
 # Additional utilities ????
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
@@ -58,7 +61,10 @@ UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
 MKULZMA_BLOCKSIZE=65536
 
-PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
+# 256K block
+PACKING_KERNEL_ROUND=0x40000
+PACKING_KERNEL_IMAGE?=kernel.strip.gz.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
-NEW_IMAGE_TYPE=split_kernel_rootfs
+NEW_IMAGE_TYPE?=zimage
+#NEW_IMAGE_TYPE=split_kernel_rootfs
