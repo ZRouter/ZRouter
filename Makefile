@@ -555,7 +555,6 @@ UBNT_KERNEL_LOAD_ADDRESS?=	${KERNCONF_KERNLOADADDR}
 UBNT_KERNEL_ENTRY_POINT?=	${KERNCONF_KERNENTRYPOINT}
 UBNT_KERNEL_FLASH_BASE?=	0xbf030000
 
-TPLINK_ROOTFS_START?=	XXX_TODO
 TPLINK_KERN_LOADADDR?=	${KERNCONF_KERNLOADADDR}
 TPLINK_KERN_STARTADDR?=	${KERNCONF_KERNENTRYPOINT}
 TPLINK_IMG_NAME?=	ZRouter.org
@@ -604,20 +603,28 @@ ubntimage:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ubnt-mkfwi
 # and need "mktplinkfw" for building the firmware
 tplink_image: ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/mktplinkfw
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	if [ "x${TPLINK_BOARDTYPE}" = "x" ] ; then \
+	@if [ "x${TPLINK_BOARDTYPE}" = "x" ] ; then \
 		echo "TPLINK_BOARDTYPE must be defined"; \
 		exit 1; \
 	fi
+	@if [ "x${KERNEL_MAP_START}" = "x" ] ; then \
+		echo "KERNEL_MAP_START must be defined, this is the hint.map.?.start ";\
+		echo "address from board.hints where hint.map.?.name='kernel'"; \
+		exit 1; \
+	fi
+	KERNEL_PACKED_SIZE=`stat -f %z "${KERNEL_PACKED_NAME}"`; \
+	TPLINK_ROOTFS_START=`printf "%#x" $$(( ${KERNEL_MAP_START} + $${KERNEL_PACKED_SIZE} ))`; \
 	PATH=${IMAGE_BUILD_PATHS} mktplinkfw \
 	    -B ${TPLINK_BOARDTYPE} \
-	    -R ${TPLINK_ROOTFS_START} \
+	    -R $${TPLINK_ROOTFS_START} \
 	    -L ${TPLINK_KERN_LOADADDR} \
 	    -E ${TPLINK_KERN_STARTADDR} \
 	    -k "${KERNEL_PACKED_NAME}" \
 	    -N ${TPLINK_IMG_NAME} \
 	    -V ${TPLINK_IMG_VERSION} \
 	    -r "${ROOTFS_PACKED_NAME}" \
-	    -o "${NEW_IMAGE}"
+	    -o "${NEW_IMAGE}" && \
+	PATH=${IMAGE_BUILD_PATHS} mktplinkfw -i "${NEW_IMAGE}"
 
 
 split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
