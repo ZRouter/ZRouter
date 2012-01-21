@@ -1,0 +1,413 @@
+#################################################################
+#
+#	MPD configuration file
+#
+# This file defines the configuration for mpd: what the
+# bundles are, what the links are in those bundles, how
+# the interface should be configured, various PPP parameters,
+# etc. It contains commands just as you would type them
+# in at the console. Lines without padding are labels. Lines
+# starting with a "#" are comments.
+#
+# $Id: mpd.conf.sample,v 1.46 2009/04/29 11:04:17 amotin Exp $
+#
+#################################################################
+
+startup:
+	# configure mpd users
+	set user foo bar admin
+	set user foo1 bar1
+	# configure the console
+	set console self 127.0.0.1 5005
+	set console open
+	# configure the web server
+	set web self 0.0.0.0 5006
+	set web open
+
+#
+# Default configuration is "dialup"
+
+default:
+	load dialup
+
+dialup:
+#
+# Example of a simple PPP dialup account using modem device.
+# This will connect whenever there is outgoing demand (DoD), and hangup
+# after a 15 minute idle time. It also connects and disconnects
+# when signals SIGUSR1 and SIGUSR2 are received, respectively.
+#
+# Note the "set iface addrs ..." is needed because we're doing
+# dial-on-demand and therefore can't wait for the peer to assign
+# us IP addresses for the interface. These can be completely phoney
+# IP addresses.
+#
+# We also enable the idle-script "Ringback", which means if we're
+# not connected and we detect an incoming call, we don't answer it
+# BUT we do initiate a call to the ISP to get connected. This is
+# nice to connect yourself when you're away from home, etc.
+#
+
+# Create static modem link named L1
+	create link static L1 modem
+# Configure modem
+	set modem device /dev/cuad0
+	set modem var $DialPrefix "DT"
+	set modem var $Telephone "1-415-555-1212"
+	set modem script DialPeer
+	set modem idle-script Ringback
+# We expect to be authenticated by peer using any protocol.
+	set link disable chap pap
+	set link accept chap pap
+# Configure the account name. Password will be taken from mpd.secret.
+	set auth authname MyLogin
+# To make Ringback work we should specify how to handle "incoming"
+# calls originated by it.
+	set link action bundle B1
+	set link enable incoming
+
+# Create static bundle named B1
+	create bundle static B1
+# Enumerate links participating in DoD
+	set bundle links L1
+# Configure the interface: dial on demand, default route, idle timeout.
+	set iface addrs 1.1.1.1 2.2.2.2
+	set iface route default
+	set iface enable on-demand
+	set iface idle 900
+
+# "Open" interface (but don't actually dial until there's demand)
+	open iface
+
+dialin:
+#
+# This setup answers incoming calls from a remote peer,
+# but is not intended for dialing out.
+#
+# The local IP address is 1.1.1.1 and the remote is 2.2.2.2.
+#
+
+	create bundle static B1
+	set iface idle 900
+	set ipcp ranges 1.1.1.1/32 2.2.2.2/32
+
+	create link static L1 modem
+# Set bundle to use
+	set link action bundle B1
+# Authenticate peer with chap-md5
+	set link no pap chap eap
+	set link enable chap-md5
+# Configure modem
+	set modem device /dev/cuad0
+	set modem var $DialPrefix "DT"
+	set modem idle-script AnswerCall
+# Permit incoming calls using this link
+	set link enable incoming
+
+multi_dialup:
+#
+# Example of a multi-link dialup setup, using links "usr1" and "usr2"
+# Similar to the first example, but uses two links together, and
+# does not do dial-on-demand.
+#
+
+# Create clonable bundle template
+	create bundle template B
+	set iface route default
+	set iface idle 900
+
+# Create links and open them
+	create link static L1 modem
+	load common
+	set modem device /dev/cuad0
+	open
+
+	create link static L2 modem
+	load common
+	set modem device /dev/cuad1
+	open
+
+common:
+# Enable multilink protocol
+	set link enable multilink
+# Set bundle template to use
+	set link action bundle B
+# Allow peer to authenticate us
+	set link disable chap pap
+	set link accept chap pap
+	set auth authname MyLogin
+# Set inifinite redial attempts
+	set link max-redial 0
+	set modem var $DialPrefix "DT"
+	set modem var $Telephone "1-415-555-1212"
+	set modem script DialPeer
+
+sync:
+#
+# Dedicated synchronous line using netgraph link.
+# The remote router is connected to the 192.168.2.0/24 subnet.
+# No authentication required.
+#
+
+	create bundle static B1
+	set iface route 192.168.2.0/24
+	set ipcp ranges 192.168.1.153/32 192.168.2.1/24
+
+	create link static L1 ng
+	set link action bundle B1
+	set link max-redial 0
+	set link no pap chap eap
+	set ng node sr0:
+	set ng hook rawdata
+	open
+
+pptp_server:
+#
+# Mpd as a PPTP server compatible with Microsoft Dial-Up Networking clients.
+#
+# Suppose you have a private Office LAN numbered 192.168.1.0/24 and the
+# machine running mpd is at 192.168.1.1, and also has an externally visible
+# IP address of 1.2.3.4.
+#
+# We want to allow a client to connect to 1.2.3.4 from out on the Internet
+# via PPTP.  We will assign that client the address 192.168.1.50 and proxy-ARP
+# for that address, so the virtual PPP link will be numbered 192.168.1.1 local
+# and 192.168.1.50 remote.  From the client machine's perspective, it will
+# appear as if it is actually on the 192.168.1.0/24 network, even though in
+# reality it is somewhere far away out on the Internet.
+#
+# Our DNS server is at 192.168.1.3 and our NBNS (WINS server) is at 192.168.1.4.
+# If you don't have an NBNS server, leave that line out.
+#
+
+# Define dynamic IP address pool.
+	set ippool add pool1 192.168.1.50 192.168.1.99
+
+# Create clonable bundle template named B
+	create bundle template B
+	set iface enable proxy-arp
+	set iface idle 1800
+	set iface enable tcpmssfix
+	set ipcp yes vjcomp
+# Specify IP address pool for dynamic assigment.
+	set ipcp ranges 192.168.1.1/32 ippool pool1
+	set ipcp dns 192.168.1.3
+	set ipcp nbns 192.168.1.4
+# The five lines below enable Microsoft Point-to-Point encryption
+# (MPPE) using the ng_mppc(8) netgraph node type.
+	set bundle enable compression
+	set ccp yes mppc
+	set mppc yes e40
+	set mppc yes e128
+	set mppc yes stateless
+
+# Create clonable link template named L
+	create link template L pptp
+# Set bundle template to use
+	set link action bundle B
+# Multilink adds some overhead, but gives full 1500 MTU.
+	set link enable multilink
+	set link yes acfcomp protocomp
+	set link no pap chap eap
+	set link enable chap
+# We can use use RADIUS authentication/accounting by including
+# another config section with label 'radius'.
+#	load radius
+	set link keep-alive 10 60
+# We reducing link mtu to avoid GRE packet fragmentation.
+	set link mtu 1460
+# Configure PPTP
+        set pptp self 1.2.3.4
+# Allow to accept calls
+        set link enable incoming
+
+pptp_vpn:
+#
+# Mpd using PPTP for LAN to LAN VPN, always connected.
+#
+# Suppose you have a private Office LAN numbered 192.168.1.0/24 and another
+# remote private Office LAN numbered 192.168.2.0/24, and you wanted to route
+# between these two private networks using a PPTP VPN over the Internet.
+#
+# You run mpd on dual-homed machines on either end. Say the local machine
+# has internal address 192.168.1.1 and externally visible address 1.2.3.4,
+# and the remote machine has internal address 192.168.2.1 and externally
+# visible address 2.3.4.5.
+#
+# Note: mpd does not support the peer's "inside" IP address being the same
+# as its "outside" IP address. In the above example, this means that
+# 192.168.2.1 != 2.3.4.5.
+#
+# The "inside" IP addresses are configured by "set ipcp ranges ..."
+# (in mpd.conf) while the "outside" IP addreses are configured by
+# "set pptp self ..." and "set pptp peer ...".
+#
+
+	create bundle static B1
+	set ipcp ranges 192.168.1.1/32 192.168.2.1/32
+	set iface route 192.168.2.0/24
+# Enable Microsoft Point-to-Point encryption (MPPE)
+	set bundle enable compression
+	set ccp yes mppc
+	set mppc yes e40
+	set mppc yes e128
+	set bundle enable crypt-reqd
+	set mppc yes stateless
+	
+	create link static L1 pptp
+	set link action bundle B1
+# Enable both sides to authenticat each other with CHAP
+	set link no pap chap eap
+	set link yes chap
+	set auth authname "VpnLogin"
+	set auth password "VpnPassword"
+	set link mtu 1460
+	set link keep-alive 10 75
+	set link max-redial 0
+# Configure PPTP and open link
+	set pptp self 1.2.3.4
+	set pptp peer 2.3.4.5
+	set link enable incoming
+	open
+
+pptp_client:
+#
+# PPTP client: only outgoing calls, auto reconnect,
+# ipcp-negotiated address, one-sided authentication,
+# default route points on ISP's end
+#
+
+	create bundle static B1
+	set iface route default
+	set ipcp ranges 0.0.0.0/0 0.0.0.0/0
+	
+	create link static L1 pptp
+	set link action bundle B1
+	set auth authname MyLogin
+	set auth password MyPass
+	set link max-redial 0
+	set link mtu 1460
+	set link keep-alive 20 75
+	set pptp peer 1.2.3.4
+	set pptp disable windowing
+	open
+
+pppoe_server:
+#
+# Multihomed multilink PPPoE server
+#
+
+# Create clonable bundle template
+	create bundle template B
+# Set IP addresses. Peer address will be later replaced by RADIUS.
+	set ipcp ranges 192.168.0.1/32 127.0.0.2/32
+
+# Create link template with common info
+	create link template common pppoe
+# Enable multilink protocol
+	set link enable multilink
+# Set bundle template to use
+	set link action bundle B
+# Enable peer authentication
+	set link disable chap pap eap
+	set link enable pap
+	load radius
+	set pppoe service "superisp"
+
+# Create templates for ifaces to listen using 'common' template and let them go
+	create link template fxp0 common
+	set link max-children 1000
+	set pppoe iface fxp0
+	set link enable incoming
+
+	create link template fxp1 common
+	set link max-children 500
+	set pppoe iface fxp1
+	set link enable incoming
+
+pppoe_client:
+#
+# PPPoE client: only outgoing calls, auto reconnect,
+# ipcp-negotiated address, one-sided authentication,
+# default route points on ISP's end
+#
+
+	create bundle static B1
+	set iface route default
+	set ipcp ranges 0.0.0.0/0 0.0.0.0/0
+	
+	create link static L1 pppoe
+	set link action bundle B1
+	set auth authname MyLogin
+	set auth password MyPass
+	set link max-redial 0
+	set link mtu 1460
+	set link keep-alive 10 60
+	set pppoe iface fxp0
+	set pppoe service ""
+	open
+
+radius:
+# You can use radius.conf(5), its useful, because you can share the
+# same config with userland-ppp and other apps.
+	set radius config /etc/radius.conf
+# or specify the server directly here
+	set radius server localhost testing123 1812 1813
+	set radius retries 3
+	set radius timeout 3
+# send the given IP in the RAD_NAS_IP_ADDRESS attribute to the server.
+	set radius me 1.1.1.1
+# send accounting updates every 5 minutes
+	set auth acct-update 300
+# enable RADIUS, and fallback to mpd.secret, if RADIUS auth failed
+	set auth enable radius-auth
+# enable RADIUS accounting
+	set auth enable radius-acct
+# protect our requests with the message-authenticator
+	set radius enable message-authentic
+
+simple_lac:
+#
+# This is a simple L2TP access concentrator which receives PPPoE calls
+# and forwards them to LNS on 1.2.3.4
+#
+
+	create link template L1 pppoe
+	set pppoe iface fxp0
+	set link action forward L2
+	set link enable incoming
+
+	create link template L2 l2tp
+	set l2tp peer 1.2.3.4
+
+complete_lac:
+#
+# This is more complicated L2TP access concentrator which receives PPPoE calls
+# and if peer auth name includes @corp1.net forwards them to LNS on 1.2.3.4,
+# if peer auth name includes @corp2.net forwards them to LNS on 2.3.4.5
+# all other connections processes itself localy using internal auth and
+# assigning dynamic IP from specified pool.
+#
+
+	set ippool add pool1 192.168.1.50 192.168.1.99
+
+	create link template L1 pppoe
+	set pppoe iface fxp0
+# We must ask authentication to get peer login
+	set link no pap chap eap
+	set link enable pap
+	set link action forward L2 "@corp1\\.net$"
+	set link action forward L3 "@corp2\\.net$"
+	set link action bundle B1
+	set link enable incoming
+
+	create link template L2 l2tp
+	set l2tp peer 1.2.3.4
+	set l2tp secret corp1secret
+
+	create link template L3 l2tp
+	set l2tp peer 2.3.4.5
+	set l2tp secret corp2secret
+
+	create bundle template B1
+	set ipcp ranges 192.168.1.1/32 ippool pool1

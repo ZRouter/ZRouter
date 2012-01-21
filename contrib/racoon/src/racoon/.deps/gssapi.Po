@@ -1,0 +1,3 @@
+gssapi.o gssapi.o: gssapi.c ../../config.h
+
+../../config.h:

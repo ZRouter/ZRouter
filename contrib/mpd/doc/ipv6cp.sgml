@@ -1,0 +1,16 @@
+<!-- $Id: ipv6cp.sgml,v 1.1 2007/11/06 11:42:13 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>IPv6CP layer<label id="ipv6cp"></heading>
+
+<p>
+  Mpd implements IPv6 Control Protocol (IPv6CP) for IPv6 link level
+  addresses negotiation. To enable IPv6CP, <tt>ipv6cp</tt> option should be
+  enabled at the bundle layer.
+  
+  Now there is no additional configuration options present at this layer.
+</p>
+
+

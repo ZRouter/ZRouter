@@ -1,0 +1,53 @@
+lzo2a_d2.lo lzo2a_d2.o: lzo2a_d2.c config2a.h lzo_conf.h \
+  ../include/lzo/lzoconf.h ../config.h /usr/include/limits.h \
+  /usr/include/sys/cdefs.h /usr/include/sys/limits.h \
+  /usr/include/machine/_limits.h /usr/include/sys/syslimits.h \
+  /usr/include/stddef.h /usr/include/sys/_null.h \
+  /usr/include/sys/_types.h /usr/include/machine/_types.h \
+  ../include/lzo/lzodefs.h /usr/include/string.h /usr/include/strings.h \
+  miniacc.h /usr/include/assert.h lzo_ptr.h ../include/lzo/lzo2a.h \
+  lzo2a_d.ch lzo1_d.ch
+
+config2a.h:
+
+lzo_conf.h:
+
+../include/lzo/lzoconf.h:
+
+../config.h:
+
+/usr/include/limits.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/sys/limits.h:
+
+/usr/include/machine/_limits.h:
+
+/usr/include/sys/syslimits.h:
+
+/usr/include/stddef.h:
+
+/usr/include/sys/_null.h:
+
+/usr/include/sys/_types.h:
+
+/usr/include/machine/_types.h:
+
+../include/lzo/lzodefs.h:
+
+/usr/include/string.h:
+
+/usr/include/strings.h:
+
+miniacc.h:
+
+/usr/include/assert.h:
+
+lzo_ptr.h:
+
+../include/lzo/lzo2a.h:
+
+lzo2a_d.ch:
+
+lzo1_d.ch:

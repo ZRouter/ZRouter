@@ -1,0 +1,46 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>Internet connections configuration</h1>
+
+$$$code:conf_table("Static", "Ethernet Interface", "interfaces.wan0.Static", 
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Automatic (DHCP)",	type = "attr", htmltype = "checkbox", 	node = "dhcp:enable" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
+
+$$$code:conf_table("PPPoE", "PPPoE", "interfaces.wan0.PPPoE", 
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},
+    { label = "Password", 		type = "node", htmltype = "text", 	node = "password" 	},
+    { label = "Service name", 		type = "node", htmltype = "text", 	node = "service_name" 	},
+    { label = "Device", 		type = "node", htmltype = "text", 	node = "device" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
+
+$$$code:conf_table("PPP", "PPP (3G)", "interfaces.wan0.PPP", 
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},
+    { label = "Password", 		type = "node", htmltype = "text", 	node = "password" 	},
+    { label = "Phone", 			type = "node", htmltype = "text", 	node = "phone" 		},
+    { label = "Init String",		type = "node", htmltype = "text", 	node = "init_string"	},
+    { label = "Device", 		type = "node", htmltype = "text", 	node = "device" 	},
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+    { label = "Gateway Address", 	type = "node", htmltype = "text", 	node = "gateway" 	},
+    { label = "DNS Primary", 		type = "node", htmltype = "text", 	node = "dns1" 		},
+    { label = "DNS Secondary", 		type = "node", htmltype = "text", 	node = "dns2" 		},
+    { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
+})$$$
+
+$$$code:inc("htdocs/footer.html")$$$
+
+

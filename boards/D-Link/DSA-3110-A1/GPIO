@@ -1,0 +1,59 @@
+12 	BUTTON	Reset
+
+
+
+
+Read GPIO 0 = 1 . OUT - STATUS LED
+Read GPIO 1 = 1 .
+Read GPIO 2 = 0 . BOARD_ID0
+Read GPIO 3 = 0 . BOARD_ID1
+Read GPIO 4 = 1 . SWITCH_IRQ
+Read GPIO 5 = 1 . RTC_IRQ
+Read GPIO 6 = 1 . RTC_SCL
+Read GPIO 7 = 1 . RTC_SDA
+Read GPIO 8 = 1 . DMZ_IRQ / PCI-A
+Read GPIO 9 = 1 . WAN_IRQ / PCI-B
+Read GPIO 10 = 1 . TP7
+Read GPIO 11 = 1 . ATA_IRQ / PCI-D
+Read GPIO 12 = 1 . IN RESET BATTON
+Read GPIO 13 = 1 . PCI+Switch RESET
+Read GPIO 14 = 0 . PCI clock
+Read GPIO 15 = 1 . EXT clock
+
+
+pin 00: 1       GPIO0<IN>
+pin 01: 1       GPIO1<IN>
+pin 02: 0       GPIO2<OUT>
+pin 03: 0       GPIO3<OUT>
+pin 04: 1       GPIO4<IN>
+pin 05: 1       SER_ENA<IN>
+pin 06: 0       I2C_SCL<OUT>
+pin 07: 1       I2C_SDA<IN>
+pin 08: 1       PCI_INTD<IN>
+pin 09: 1       PCI_INTC<IN>
+pin 10: 1       PCI_INTB<IN>
+pin 11: 1       PCI_INTA<IN>
+pin 12: 1       ATA_INT<IN>
+pin 13: 1       PCI_RST<IN>
+pin 14: 0       PCI_CLK<OUT>
+pin 15: 1       EX_CLK<OUT>
+
+GPOUTR 0000300c GPINR  00003f33 GPOER  00001f3f GPISR 000030d6
+GPIT1R 0000b441 GPIT2R 00000249 GPCLKR 01ff01ff
+[ 0] out 0 in 1 in  irq  6 act-low
+[ 1] out 0 in 1 in  irq  7 act-high
+[ 2] out 1 in 0 in  irq 19 act-low
+[ 3] out 1 in 0 in  irq 20 edge-rising
+[ 4] out 0 in 1 in  irq 21 edge-falling
+[ 5] out 0 in 1 in  irq 22 act-low
+[ 6] out 0 in 0 out irq 23 act-high
+[ 7] out 0 in 0 out irq 24 act-high
+[ 8] out 0 in 1 in  irq 25 act-low
+[ 9] out 0 in 1 in  irq 26 act-low
+[10] out 0 in 1 in  irq 27 act-low
+[11] out 0 in 1 in  irq 28 act-low
+[12] out 1 in 1 in  irq 29 act-high
+[13] out 1 in 1 out
+[14] out 0 in 0 out
+[15] out 0 in 0 out
+

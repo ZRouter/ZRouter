@@ -1,0 +1,160 @@
+
+/*
+ * Copyright (c) 2001-2002 Packet Design, LLC.
+ * All rights reserved.
+ * 
+ * Subject to the following obligations and disclaimer of warranty,
+ * use and redistribution of this software, in source or object code
+ * forms, with or without modifications are expressly permitted by
+ * Packet Design; provided, however, that:
+ * 
+ *    (i)  Any and all reproductions of the source or object code
+ *         must include the copyright notice above and the following
+ *         disclaimer of warranties; and
+ *    (ii) No rights are granted, in any manner or form, to use
+ *         Packet Design trademarks, including the mark "PACKET DESIGN"
+ *         on advertising, endorsements, or otherwise except as such
+ *         appears in the above copyright notice or in the software.
+ * 
+ * THIS SOFTWARE IS BEING PROVIDED BY PACKET DESIGN "AS IS", AND
+ * TO THE MAXIMUM EXTENT PERMITTED BY LAW, PACKET DESIGN MAKES NO
+ * REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, REGARDING
+ * THIS SOFTWARE, INCLUDING WITHOUT LIMITATION, ANY AND ALL IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+ * OR NON-INFRINGEMENT.  PACKET DESIGN DOES NOT WARRANT, GUARANTEE,
+ * OR MAKE ANY REPRESENTATIONS REGARDING THE USE OF, OR THE RESULTS
+ * OF THE USE OF THIS SOFTWARE IN TERMS OF ITS CORRECTNESS, ACCURACY,
+ * RELIABILITY OR OTHERWISE.  IN NO EVENT SHALL PACKET DESIGN BE
+ * LIABLE FOR ANY DAMAGES RESULTING FROM OR ARISING OUT OF ANY USE
+ * OF THIS SOFTWARE, INCLUDING WITHOUT LIMITATION, ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL
+ * DAMAGES, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF
+ * USE, DATA OR PROFITS, HOWEVER CAUSED AND UNDER ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF PACKET DESIGN IS ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Author: Archie Cobbs <archie@freebsd.org>
+ */
+
+#ifndef _PDEL_HTTP_HTTP_DEFS_H_
+#define _PDEL_HTTP_HTTP_DEFS_H_
+
+/*
+ * HTTP ports
+ */
+#define HTTP_PORT		80
+#define HTTPS_PORT		443
+#define PROXY_PORT		3128
+
+/*
+ * HTTP time format for "Date" header
+ */
+#define HTTP_TIME_FMT_RFC1123	"%a, %d %b %Y %H:%M:%S GMT"
+#define HTTP_TIME_FMT_RFC850	"%A, %d-%b-%y %H:%M:%S GMT"	/* obsolete */
+#define HTTP_TIME_FMT_CTIME	"%c"				/* obsolete */
+
+/*
+ * Known HTTP protocol versions
+ */
+#define HTTP_PROTO_0_9		"HTTP/0.9"
+#define HTTP_PROTO_1_0		"HTTP/1.0"
+#define HTTP_PROTO_1_1		"HTTP/1.1"
+
+/*
+ * HTTP methods
+ */
+#define HTTP_METHOD_OPTIONS	"OPTIONS"
+#define HTTP_METHOD_GET		"GET"
+#define HTTP_METHOD_HEAD	"HEAD"
+#define HTTP_METHOD_POST	"POST"
+#define HTTP_METHOD_PUT		"PUT"
+#define HTTP_METHOD_DELETE	"DELETE"
+#define HTTP_METHOD_TRACE	"TRACE"
+#define HTTP_METHOD_CONNECT	"CONNECT"
+
+/*
+ * HTTP headers
+ */
+#define HTTP_HEADER_ACCEPT		"Accept"
+#define HTTP_HEADER_ACCEPT_CHARSET	"Accept-Charset"
+#define HTTP_HEADER_ACCEPT_ENCODING	"Accept-Encoding"
+#define HTTP_HEADER_ACCEPT_LANGUAGE	"Accept-Language"
+#define HTTP_HEADER_AUTHORIZATION	"Authorization"
+#define HTTP_HEADER_CACHE_CONTROL	"Cache-Control"
+#define HTTP_HEADER_CONNECTION		"Connection"
+#define HTTP_HEADER_CONTENT_DISPOSITION	"Content-Disposition"
+#define HTTP_HEADER_CONTENT_ENCODING	"Content-Encoding"
+#define HTTP_HEADER_CONTENT_LENGTH	"Content-Length"
+#define HTTP_HEADER_CONTENT_TYPE	"Content-Type"
+#define HTTP_HEADER_COOKIE		"Cookie"
+#define HTTP_HEADER_DATE		"Date"
+#define HTTP_HEADER_EXPIRES		"Expires"
+#define HTTP_HEADER_HOST		"Host"
+#define HTTP_HEADER_IF_MODIFIED_SINCE	"If-Modified-Since"
+#define HTTP_HEADER_KEEP_ALIVE		"Keep-Alive"
+#define HTTP_HEADER_LAST_MODIFIED	"Last-Modified"
+#define HTTP_HEADER_LOCATION		"Location"
+#define HTTP_HEADER_PRAGMA		"Pragma"
+#define HTTP_HEADER_PROXY_AUTHENTICATE	"Proxy-Authenticate"
+#define HTTP_HEADER_PROXY_AUTHORIZATION	"Proxy-Authorization"
+#define HTTP_HEADER_PROXY_CONNECTION	"Proxy-Connection"
+#define HTTP_HEADER_SERVER		"Server"
+#define HTTP_HEADER_SET_COOKIE		"Set-Cookie"
+#define HTTP_HEADER_TRANSFER_ENCODING	"Transfer-Encoding"
+#define HTTP_HEADER_USER_AGENT		"User-Agent"
+#define HTTP_HEADER_WWW_AUTHENTICATE	"WWW-Authenticate"
+
+/*
+ * MIME content types
+ */
+#define HTTP_CTYPE_FORM_URLENCODED	"application/x-www-form-urlencoded"
+#define HTTP_CTYPE_MULTIPART_FORMDATA	"multipart/form-data"
+#define HTTP_CTYPE_APPLICATION_OCTETS	"application/octet-stream"
+
+/*
+ * HTTP status codes
+ */
+#define	HTTP_STATUS_CONTINUE				100
+#define	HTTP_STATUS_SWITCHING_PROTOCOLS			101
+#define	HTTP_STATUS_OK					200
+#define	HTTP_STATUS_CREATED				201
+#define	HTTP_STATUS_ACCEPTED				202
+#define	HTTP_STATUS_NON_AUTHORITATIVE_INFORMATION	203
+#define	HTTP_STATUS_NO_CONTENT				204
+#define	HTTP_STATUS_RESET_CONTENT			205
+#define	HTTP_STATUS_PARTIAL_CONTENT			206
+#define	HTTP_STATUS_MULTIPLE_CHOICES			300
+#define	HTTP_STATUS_MOVED_PERMANENTLY			301
+#define	HTTP_STATUS_FOUND				302
+#define	HTTP_STATUS_SEE_OTHER				303
+#define	HTTP_STATUS_NOT_MODIFIED			304
+#define	HTTP_STATUS_USE_PROXY				305
+#define	HTTP_STATUS_TEMPORARY_REDIRECT			307
+#define	HTTP_STATUS_BAD_REQUEST				400
+#define	HTTP_STATUS_UNAUTHORIZED			401
+#define	HTTP_STATUS_PAYMENT_REQUIRED			402
+#define	HTTP_STATUS_FORBIDDEN				403
+#define	HTTP_STATUS_NOT_FOUND				404
+#define	HTTP_STATUS_METHOD_NOT_ALLOWED			405
+#define	HTTP_STATUS_NOT_ACCEPTABLE			406
+#define	HTTP_STATUS_PROXY_AUTHENTICATION_REQUIRED	407
+#define	HTTP_STATUS_REQUEST_TIME_OUT			408
+#define	HTTP_STATUS_CONFLICT				409
+#define	HTTP_STATUS_GONE				410
+#define	HTTP_STATUS_LENGTH_REQUIRED			411
+#define	HTTP_STATUS_PRECONDITION_FAILED			412
+#define	HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE		413
+#define	HTTP_STATUS_REQUEST_URI_TOO_LARGE		414
+#define	HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE		415
+#define	HTTP_STATUS_REQUESTED_RANGE_NOT_SATISFIABLE	416
+#define	HTTP_STATUS_EXPECTATION_FAILED			417
+#define	HTTP_STATUS_INTERNAL_SERVER_ERROR		500
+#define	HTTP_STATUS_NOT_IMPLEMENTED			501
+#define	HTTP_STATUS_BAD_GATEWAY				502
+#define	HTTP_STATUS_SERVICE_UNAVAILABLE			503
+#define	HTTP_STATUS_GATEWAY_TIME_OUT			504
+#define	HTTP_STATUS_HTTP_VERSION_NOT_SUPPORTED		505
+
+#endif	/* _PDEL_HTTP_HTTP_DEFS_H_ */

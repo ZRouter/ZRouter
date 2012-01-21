@@ -1,0 +1,507 @@
+<!-- $Id: chat.sgml,v 1.5 2007/10/11 20:49:39 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <chapt><heading>Chat Scripting<label id="chat"></heading>
+
+  <p>
+  Mpd includes a powerful chat scripting language for use with
+  links of type <bf>modem</bf>, i.e., asynchronous serial ports.
+  The language is interpreted and executed dynamically
+  and supports fully event driven processing with timeouts and
+  regular expression pattern matching.
+
+  Much of what is described below is more readily understood by
+  looking at the <tt>mpd.script</tt> file that is included with mpd.
+
+  <sect><heading>Script file format and execution</heading>
+
+  <p>
+  The syntax for <tt>mpd.script</tt> is similar to the other mpd
+  configuration files. Lines beginning with a hash sign are ignored.
+  A <bf>label</bf> sits on its own line, starting in the first
+  column and ends with a colon character.
+
+  <bf>Chat commands</bf> are indented with tab characters and written
+  one per line.
+
+  Commands are executed sequentially.
+  Execution continues without stopping until there is an error or
+  one of the following commands is encountered:
+  <itemize>
+  <item><bf><tt>success</tt></bf> The script returns success.
+  <item><bf><tt>failure</tt></bf> The script returns failure.
+  <item><bf><tt>wait</tt></bf> Execution of the script is halted
+	until an <bf>event</bf> occurs.
+  </itemize>
+  Events are described in the next section.
+
+  <sect><heading>Events</heading>
+
+  <p>
+  An <bf>event</bf> is either the expiration of a timer, or the matching
+  of some pattern in the input.  Events that haven't happened yet are
+  <bf>pending events</bf>. Pending events are created with the
+  <tt>timer</tt> and <tt>match</tt> commands, respectively.
+
+  Each pending event has an associated label (called the <bf>target
+  label</bf>) of the event. When and if the event occurs, execution
+  resumes starting at the target label. Events only occur during
+  the execution of a <tt>wait</tt> command.
+
+  Events are grouped into named <bf>sets</bf>. Events in the same
+  set are usually related, in the sense that they represent alternate
+  outcomes to the same situation.
+
+  A set of pending events may be explicitly <bf>cancelled</bf>
+  (i.e., forgotten) before they occur with the <bf><tt>cancel</tt></bf>
+  command. All events in the set are cancelled.
+
+  The other way a set of pending events may be cancelled is
+  implicitly, when any event in the set occurs. Execution resumes
+  at the target label associated with the event that occurred, and
+  all other events in that set are immediately cancelled.
+
+  <sect1><heading>Timer events</heading>
+
+  <p>
+  Timer events are created with the <tt>timer</tt> command.  The
+  timer event occurs when the designated time has elapsed, starting
+  from the time at which the <tt>timer</tt> statement was executed.
+  Further execution continues starting with the target label
+  specified by the <tt>timer</tt> command.
+
+  Timer events (like all events) can only occur during the execution
+  of a <tt>wait</tt> command.
+
+  <sect1><heading>Match events</heading>
+
+  <p>
+  Match events are created with the <tt>match</tt> and <tt>regex</tt>
+  commands.  A match event occurs when the pattern specified in
+  the <tt>match</tt> or <tt>regex</tt> command has been matched in
+  the input. Characters are only input during the execution of
+  <tt>wait</tt> commands. In order for a pattern to match, the
+  first matching character of the pattern must be read
+  <em>after</em> the event is created (i.e., during a subsequent
+  <tt>wait</tt> command).
+
+  When the pattern is matched, chat script execution continues
+  starting at the target label. When multiple patterns match on
+  the same input character, mpd chooses the first one defined to
+  be the one that matches.
+
+  The pattern is either plain text or an extended regular
+  expression (see below).
+
+  <sect><heading>Sets</heading>
+
+  <p>
+  A set is a collection of pending timer and/or match events. When
+  any one event occurs, or upon execution of the appropriate <tt>cancel</tt>
+  command, all events in the set are cancelled.
+
+  Multiple sets may be active at any time. The occurrence of an event
+  from one set has no effect on events in other sets.
+
+  <sect1><heading>Special sets and targets</heading>
+
+  <p>
+  The <tt>timer</tt>, <tt>match</tt> and <tt>regex</tt> commands
+  may specify (by omission) the <bf>default set</bf>. This set is
+  exactly like any other set, except that it is automatically
+  cancelled after the occurrence of <em>any</em> event. It may be
+  explicitly named by using the empty string, (ie, <tt>""</tt>).
+
+  The <tt>timer</tt>, <tt>match</tt> and <tt>regex</tt> commands
+  may also specify (by omission) the <bf>default target</bf>. This
+  target, whose name is also the empty string, has the special
+  propery that it always refers to ``the statement immediately
+  following the next wait statement.''  That is, if the target of
+  any event is the default target, the occurrence of that event
+  just causes execution to continue starting with the statement
+  following the wait statement.
+
+  Finally, when <bf><tt>all</tt></bf> is used with the ``cancel''
+  command, <em>all</em> sets (i.e., all pending events) are cancelled.
+
+  <sect><heading>Variables</heading>
+
+  <p>
+  <bf>Variables</bf> hold simple strings. They are global and come
+  in two types: <bf>temporary</bf> and <bf>permanent</bf>. Permanent
+  variables persist over multiple invocations of the chat script,
+  while temporary variables are forgotten each time the script
+  completes.
+
+  Variables are specified with a dollar sign, then a letter, followed
+  by letters, digits, and underscores. If the first letter is upper
+  case the variable is permanent; otherwise it is temporary. The
+  variable name may be optionally enclosed in curly braces.
+
+  Examples:
+<tscreen><verb>
+$initString
+$My_variable_234
+${i_am_safely_followed_by_a_letter}
+</verb></tscreen>
+
+  <sect1><heading>Special variables</heading>
+
+  <p>
+  These variables have special meaning in chat scripts:
+
+  <descrip>
+
+    <tag><tt>$Login</tt></tag>
+
+    Authorization login name as set by <tt>set auth authname</tt>.
+
+    <tag><tt>$Password</tt></tag>
+
+    The password corresponding to <tt>$Login</tt>.
+
+    <tag><tt>$modemDevice</tt></tag>
+
+    The serial port device in use as set by the
+    <tt>set modem device</tt> command, e.g., <tt>/dev/cuad0</tt>.
+    Changing this string does not change the port being used.
+
+    <tag><tt>$Baudrate</tt></tag>
+
+    Always equals the current baudrate (e.g., ``57600''). This
+    is a read/write variable; setting it changes the baudrate.
+    Attempting to set an invalid baudrate causes the script to fail.
+
+    <tag><tt>$matchedString</tt></tag>
+
+    When a <tt>match</tt> event occurs this string contains
+    the input string that matched the pattern.
+
+    <tag><tt>$matchedString0 </tt></tag><p>
+    <tag><tt>$matchedString1 </tt></tag><p>
+    <tag><tt>$matchedString2 </tt></tag><p>
+    <tag><tt>... </tt></tag><p>
+
+    When a <tt>regex</tt> event occurs or the <tt>if match</tt> or
+    <tt>if !match</tt> commands are executed, and the regular
+    expression pattern contains parenthesized subexpressions, these
+    strings will be equal to the substrings matching each subexpression.
+    <tt>$matchedString0</tt> is equal to the entire string, while
+    <tt>$matchedString1</tt> equals the first subexpression match,
+    <tt>$matchedString2</tt> the second, etc.
+
+    <tag><tt>$IdleResult</tt></tag>
+
+    This variable is used to return the result of an <bf>idle
+    script</bf>; If the value is <tt>answer</tt>, mpd assumes an
+    incoming call has been answered. If the value is <tt>ringback</tt>,
+    mpd will initiate an outgoing connection.  See the chapter on
+    <ref id="modem" name="Modem type commands"> for more information.
+
+    <tag><tt>$$</tt></tag>
+
+    Always expands to a single dollar sign.
+
+  </descrip>
+
+  <sect><heading>Script commands</heading>
+
+  <p>
+  <descrip>
+
+  <tag><tt>set $<em>variable-name</em> <em>string</em> </tt></tag>
+
+    Set the <tt>$<em>variable-name</em></tt> equal to
+    <tt><em>string</em></tt>. The <tt><em>string</em></tt> is
+    variable expanded first.
+
+  <tag><tt>match <em>name</em> <em>string</em> <em>label</em> </tt></tag><p>
+  <tag><tt>match <em>string</em> <em>label</em> </tt></tag><p>
+  <tag><tt>match <em>string</em> </tt></tag><p>
+
+    Add a new pending event to event set <tt><em>name</em></tt>
+    such that when <tt><em>string</em></tt> is seen in the input,
+    resume execution at <tt><em>label</em></tt>. The match must
+    be exact. All arguments are variable expanded.
+
+    If no <tt><em>name</em></tt> is given, or if <tt><em>name</em></tt>
+    is the empty string, add the new event to the default set.
+
+    If no <tt><em>label</em></tt> is given, or if <tt><em>label</em></tt>
+    is the empty string, the event causes execution to resume
+    starting with the statement following the <tt>wait</tt> command
+    (i.e., use the default target).
+
+  <tag><tt>regex <em>name</em> <em>pattern</em> <em>label</em> </tt></tag><p>
+  <tag><tt>regex <em>pattern</em> <em>label</em> </tt></tag><p>
+  <tag><tt>regex <em>pattern</em> </tt></tag><p>
+
+    Same as the <tt>match</tt> command, but matches an extended
+    regular expression instead of an exact string. If
+    <tt><em>pattern</em></tt> is not a valid extended regular
+    expression, the script fails.
+
+    Regular expressions are matched on a line-by-line basis; the
+    input matching the pattern cannot span more than one line.  A
+    line is terminated with either a newline or a carriage return-newline
+    pair (the latter is more common). An end-of-line should
+    be matched using a dollar sign rather than trying to match these
+    characters directly, as mpd elides them from the input when
+    testing the regular expression.
+
+    See <tt>re_format(7)</tt> for more information about extended
+    regular expressions.
+
+  <tag><tt>timer <em>name</em> <em>seconds</em> <em>label</em> </tt></tag><p>
+  <tag><tt>timer <em>seconds</em> <em>label</em> </tt></tag><p>
+  <tag><tt>timer <em>seconds</em> </tt></tag><p>
+
+    Add a new pending event to set <tt><em>name</em></tt> such that
+    when <tt><em>seconds</em></tt> seconds have elapsed,
+    resume execution at <tt><em>label</em></tt>.
+    All arguments are variable expanded.
+
+    If no <tt><em>name</em></tt> is given, or if <tt><em>name</em></tt>
+    is the empty string, add the new event to the default set.
+
+    If no <tt><em>label</em></tt> is given, or if <tt><em>label</em></tt>
+    is the empty string, the event causes execution to resume
+    starting with the statement following the <tt>wait</tt> command
+    (i.e., use the default target).
+
+  <tag><tt>wait </tt></tag><p>
+  <tag><tt>wait <em>seconds</em> </tt></tag><p>
+
+    In the first form, wait indefinitely for any event to happen.
+    When an event happens, continue execution starting at the target
+    label for that event.
+
+    The second form is equivalent to:
+
+<tscreen><tt>
+timer <em>seconds</em>
+<newline>wait</tt></tscreen>
+
+  <tag><tt>if <em>string1</em> == <em>string2</em>
+	<em>command</em> </tt></tag><p>
+  <tag><tt>if <em>string1</em> != <em>string2</em>
+	<em>command</em> </tt></tag><p>
+
+    Executes <tt><em>command</em></tt> if the two variable expanded
+    strings are equal or not equal.
+
+  <tag><tt>if <em>string</em> match <em>pattern</em>
+	<em>command</em> </tt></tag><p>
+  <tag><tt>if <em>string</em> !match <em>pattern</em>
+	<em>command</em> </tt></tag><p>
+
+    Tests <tt><em>string</em></tt> against the regular expression
+    <tt><em>pattern</em></tt> and executes <tt><em>command</em></tt>
+    if <tt><em>string</em></tt> matches or does not match.  Both
+    <tt><em>string</em></tt> and <tt><em>pattern</em></tt> are
+    variable expanded first.
+
+  <tag><tt>print <em>string</em> </tt></tag>
+
+    Ouput the <tt><em>string</em></tt> to the serial port.
+    Variables are expanded, and the normal mpd C-style character
+    escapes may be used.
+
+  <tag><tt>cancel <em>name1</em> [ <em>name2</em> ... ] </tt></tag>
+
+    Cancel all pending events in the sets <tt><em>name1</em></tt>,
+    <tt><em>name2</em></tt>, etc.
+    It is not an error to cancel a set which is already empty.
+
+  <tag><tt>goto <em>label</em> </tt></tag>
+
+    Jump to label <tt><em>label</em></tt>.
+
+  <tag><tt>call <em>label</em> </tt></tag>
+
+    Call a subroutine at <tt><em>label</em></tt>.
+
+  <tag><tt>return </tt></tag>
+
+    Return from subroutine.
+
+  <tag><tt>success </tt></tag>
+
+    Exit the script successfully.
+
+  <tag><tt>failure </tt></tag>
+
+    Exit the script unsuccessfully.
+
+  <tag><tt>log <em>string</em> </tt></tag>
+
+    Print <tt><em>string</em></tt>, variable expanded, to the log
+    file under logging level CHAT.
+
+  </descrip>
+
+  <sect><heading>Errors</heading>
+
+  <p>
+  Any errors in the script cause the script to exit unsuccessfully.
+  Examples of errors include:
+
+  <itemize>
+
+  <item> A <tt>call</tt> or <tt>goto</tt> to a non-existent label
+
+  <item> A <tt>return</tt> without a corresponding <tt>call</tt>
+
+  <item> Executing <tt>wait</tt> without any events pending
+
+  <item> Execution falling off the end of the script
+
+  <item> Trying to assign <tt>$Baudrate</tt> an invalid baudrate
+
+  <item> Trying to match with an invalid regular expression
+
+  </itemize>
+
+  <sect><heading>The included <tt>mpd.script</tt></heading>
+
+  <p>
+  The <tt>mpd.script</tt> that ships with mpd can usually be used
+  as it is without modification for typical PPP applications.
+  This script defines the following labels:
+
+  <descrip>
+
+  <tag><tt>DialPeer</tt></tag>
+
+  This script causes mpd to attempt to identify the attached modem
+  or ISDN Terminal Adapter device, configure the device, and dial
+  a remote peer. This the label you want to use for the
+  <tt>set modem script</tt> when acting as a dialup client.
+
+  The variables that are used by this script are:
+
+    <descrip>
+
+    <tag><tt>$Telephone</tt></tag>
+
+	The telephone number to dial.
+
+    <tag><tt>$DialPrefix</tt></tag>
+
+	Dialing prefix to get an outside line, if any.
+
+    <tag><tt>$ConnectTimeout</tt></tag>
+
+	Time in seconds to wait for the modems to connect.
+	Default 45 seconds.
+
+    <tag><tt>$SpeakerOff</tt></tag>
+
+	Set this to <tt>yes</tt> if you want to silence the modem speaker
+	while dialing.
+
+    <tag><tt>$Serial230K</tt></tag>
+
+	If your serial port is capable of running at 230K baud,
+	set this to <tt>yes</tt>. Note: normal PC hardware is
+	not capable of 230K.
+
+    </descrip>
+
+  In addition, the following variables are required to be set
+  for ISDN terminal adapters:
+
+    <descrip>
+
+    <tag><tt>$TA_Bonding</tt></tag>
+	If the terminal adapter should do 2 B-channel multi-link
+	PPP, set this to <tt>yes</tt>. Note: a terminal adapter
+	doing multi-link PPP still <em>appears</em> to mpd as a
+	single link PPP connection and should be configured as
+	such.
+
+    <tag><tt>$TA_NoDoubleTelno</tt></tag>
+	When <tt>$TA_Bonding</tt> is <tt>yes</tt>, don't double
+	the dialed number. Normally, in such situations mpd dials
+	using the command <tt>ATDT${Telephone}&${Telephone}</tt>.
+	If your <tt>$Telephone</tt> string already contains both
+	numbers, then set <tt>$TA_NoDoubleTelno</tt> to <tt>yes</tt>.
+
+    <tag><tt>$TA_56K</tt></tag>
+	If you need to restrict the B channels to to 56K, set this
+	to <tt>yes</tt>.
+	Only necessary for some North American ISDN lines.
+
+    <tag><tt>$TA_VoiceCall</tt></tag>
+	If you need to place a voice mode call, set this to <tt>yes</tt>.
+	Only necessary for some North American ISDN lines.
+	Not all terminal adapters support this.
+
+    <tag><tt>$TA_AuthChap</tt></tag>
+	Some older terminal adapters require you to specify <em>a priori</em>
+	whether CHAP or PAP authentication will be requested by the remote
+	side. Set to <tt>yes</tt> to tell the terminal adapter to use CHAP.
+
+    <tag><tt>$TA_SwitchType</tt></tag><p>
+	Set this to your ISDN line's switch type. Should be one
+	of <tt>NI-1</tt>, <tt>DMS-100</tt>, <tt>5ESS P2P</tt>,
+	or <tt>5ESS MP</tt>.
+	Only required for North American ISDN.
+
+    <tag><tt>$TA_Dirno1</tt></tag><p>
+    <tag><tt>$TA_Dirno2</tt></tag><p>
+    <tag><tt>$TA_SPID1</tt></tag><p>
+    <tag><tt>$TA_SPID2</tt></tag><p>
+	Set these to your ISDN line's directory numbers and SPID's
+	for both B channels.  Only required for North American ISDN.
+
+    </descrip>
+
+  <tag><tt>AnswerCall</tt></tag>
+
+  This is an <bf>idle script</bf> that waits for an incoming call
+  and then answers it. The variables that are used by this script are:
+
+    <descrip>
+
+    <tag><tt>$ConnectTimeout</tt></tag>
+
+	Time in seconds to wait for the modems to connect.
+	Default 45 seconds.
+
+    <tag><tt>$RingTimeout</tt></tag>
+
+	How long to wait for a RING before giving up and
+	trying again. Default 10 minutes.
+
+    </descrip>
+
+  <tag><tt>Ringback</tt></tag>
+
+  This is also an idle script that waits for an incoming call,
+  but instead of answering the call it ignores it and initiates
+  an outgoing connection. This is useful for remotely bringing
+  up a dialup client machine.
+
+    <descrip>
+
+    <tag><tt>$RingbackTimeout</tt></tag>
+
+	How long before giving up (reset and try again).
+	Default: 60 minutes.
+
+    <tag><tt>$RingStoppedTime</tt></tag>
+
+	For analog modems, we have to wait for the ringing to
+	stop before trying to dial out, otherwise we'll inadvertently
+	answer the incoming call. This value is set to the minimum
+	time to wait before declaring that the ringing has stopped.
+	Default: 8 seconds.
+
+    </descrip>
+
+  </descrip>
+
+

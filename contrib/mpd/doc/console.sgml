@@ -1,0 +1,64 @@
+<!-- $Id: console.sgml,v 1.9 2007/11/10 21:47:26 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Control console<label id="console"></heading>
+
+<p>
+
+  This chapter describes commands for configuring Mpd's console.
+  The console can be accessed via IPv4 or IPv6 using telnet.
+  Multiple telnet connections are allowed.
+
+<descrip>
+
+
+<tag><tt>
+set console open
+</tt></tag>
+
+Opens the console, i.e., creates the listening TCP socket.
+
+<tag><tt>
+set console close
+</tt></tag>
+
+Closes the console, i.e., closes the listening TCP socket.
+Only the listener is affected; active sessions are not closed.
+
+<tag><tt>
+set console self <em>ip</em> [ <em>port</em> ]
+</tt></tag>
+
+Sets the credentials for the console-listener. After changing one of these
+options, the console must be closed and re-opened for the changes to
+take effect.
+
+The default is '127.0.0.1 5005'.
+
+</descrip>
+
+<p>
+
+<descrip>
+
+<tag><tt>
+set console enable <em>option ...</em>
+<newline>set console disable <em>option ...</em>
+</tt></tag>
+
+These commands configure various console options.
+
+The options available for the console are:
+
+<tag><tt>logging</tt></tag>
+
+This options enables writing of logging messages to the current console.
+
+The default is enable for stdout and disable for the rest.
+
+</descrip>
+
+</p>
+

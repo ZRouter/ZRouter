@@ -1,0 +1,4 @@
+your-net	127				
+your-netmask	255.255.255			
+subnet1		127.0.1		alias1		
+subnet2		127.0.2		alias2		

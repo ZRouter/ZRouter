@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+
+<HTML XMLNS="http://www.w3.org/1999/xhtml">
+  <HEAD>
+    <LINK REL="stylesheet" HREF="index_files/router.css" TYPE="text/css">
+    <META http-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+    <TITLE>$$$info.model$$$</TITLE>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/ajax.js"></script>
+  </HEAD>
+  <BODY LEFTMARGIN="0" TOPMARGIN="0" STYLE="overflow:auto;" BGCOLOR="#ccdce2" MARGINHEIGHT="0" MARGINWIDTH="0">
+    <TABLE ID="table_frame" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+      <TBODY>
+        <TR>
+          <TD VALIGN="top">
+            <TABLE ID="table_header" CELLPADDING="0" CELLSPACING="0">
+              <TBODY>
+                <TR><TD ID="td_header" VALIGN="middle">System Information</TD></TR>
+              </TBODY>
+            </TABLE>
+            <TABLE ID="table_set_main" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+              <!-- ________________________________ Main Content Start ______________________________ -->
+              <TBODY>
+                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">Model Name</TD><TD ID="td_right">$$$info.model$$$&nbsp;&nbsp;&nbsp;$$$info.rev$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">Firmware Version</TD><TD ID="td_right">$$$info.firmware.version$$$&nbsp;&nbsp;&nbsp;$$$info.firmware.date$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">System Name</TD><TD ID="td_right">$$$info.hostname$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">Location</TD><TD ID="td_right">$$$info.location$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">System Time</TD><TD ID="td_right">$$$code:os.date("%Y-%m-%d %H:%M:%S")$$$</TD></TR>
+                <!--TR><TD ID="td_left" HEIGHT="25">Up Time</TD><TD ID="td_right"></TD></TR-->
+                <!-- TR><TD ID="td_left" HEIGHT="25">Operation Mode</TD><TD ID="td_right">Access Point</TD></TR -->
+                <!-- TR><TD ID="td_left" HEIGHT="25">MAC Address</TD><TD ID="td_right">00:21:91:5a:86:f2</TD></TR-->
+                <!-- TR><TD ID="td_left" HEIGHT="25">SSID 1~3</TD><TD ID="td_right">02:21:91:5a:86:f2 ~ 06:21:91:5a:86:f2</TD></TR-->
+                <TR><TD ID="td_left" HEIGHT="25">IP Address</TD><TD ID="td_right">$$$interfaces.bridge0.ipaddr$$$</TD></TR>
+              </TBODY>
+    	      <!-- ________________________________  Main Content End _______________________________ -->
+            </TABLE>
+          </TD>
+        </TR>
+      </TBODY>
+    </TABLE>
+  </BODY>
+</HTML>
