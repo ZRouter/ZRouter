@@ -39,8 +39,8 @@ KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 WORLDDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 SRCROOTUP!=${ZROUTER_ROOT}/tools/rootup.sh ${FREEBSD_SRC_TREE}
-
 TARGET_CPUARCH?=${TARGET}
+
 
 # XXX Need found something better or use per profile
 ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
@@ -53,6 +53,13 @@ PREINSTALLDIRS=/lib
 
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
 .include "socs/socs.mk"
+
+.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
+TARGET_ARCH_SUBDIR=	""
+.else
+TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
+.endif
+ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
 KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
 # Allow to undefine LDSCRIPT_NAME if (board|soc).mk was set it to ""
@@ -189,9 +196,9 @@ _KERNEL_BUILD_ENV= \
 kernel-toolchain:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 
-${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc:	kernel-toolchain
+${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
-kernel-build:	kernelconfig kernelhints ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
+kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
 
 #XXX_BEGIN Only for testing
@@ -341,34 +348,33 @@ WORLD_SUBDIRS+=gnu/usr.bin/${dir}
 WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
-FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
+FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} \
+    ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars)
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
 .for var in ${FREEBSD_BUILD_ENV_VARS}
 FREEBSD_BUILD_ENV_${var}
 .endfor
 
 
-.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
-TARGET_ARCH_SUBDIR=	""
-.else
-TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
-.endif
-
 
 #
 # World
 #
 world-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} -C ${FREEBSD_SRC_TREE} toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} \
+	    -C ${FREEBSD_SRC_TREE} toolchain
 
-world-build:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/tmp/usr/bin/cc
+world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 	@echo "XXX: need to find a way to install required includes correctly"
-	mkdir -p ${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}/tmp/usr/include/lzo
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} buildworld
+	mkdir -p ${ZROUTER_FREEBSD_OBJDIR=}/tmp/usr/include/lzo
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
+	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
+	    buildworld
 
 world-install: rootfs-dir
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
-		DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
+	    ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
+	    DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
 
 world-fix-lib-links:
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -521,13 +527,13 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
+${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	echo "XXXXXXXXXXXXX ${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel"
+	echo "XXXXXXXXXXXXX ${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel"
 
 kernel-install:				${KERNELDESTDIR}/boot/kernel/kernel
 
-${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}/${FREEBSD_SRC_TREE}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
+${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 .if !empty(KERNELDESTDIR)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
@@ -546,6 +552,8 @@ MKULZMA_BLOCKSIZE?=131072
 ZROUTER_VERSION?=		0.1-ALPHA
 
 KERNCONF_KERNENTRYPOINT?=	${KERNCONF_KERNLOADADDR}
+
+.warning	Load address: ${KERNCONF_KERNLOADADDR} Entry point: ${KERNCONF_KERNENTRYPOINT}
 
 UBOOT_KERNEL_LOAD_ADDRESS?=	${KERNCONF_KERNLOADADDR}
 UBOOT_KERNEL_ENTRY_POINT?=	${KERNCONF_KERNENTRYPOINT}
