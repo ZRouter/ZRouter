@@ -54,11 +54,6 @@ hint.floatphy.1.master_phys=0x0000000f # Link Sensing PHY0-PHY3
 hint.floatphy.1.flags=0x00000004 # "Link on any PHYs" | "Static link speed"
 hint.floatphy.1.speed=1000
 
-# This one only for test
-hint.switch.1.at="miibus1"
-hint.switch.1.phyno=1
-hint.ar8x16_switch.1.mii_mode=0x012603e2
-
 # RTC shares the same bus with mx25l. 
 # CE low for flash, CE high for RTC
 #hint.rtc.0.at="spibus0"
