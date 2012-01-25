@@ -10,8 +10,6 @@ SOC_CHIP=CN5010
 # TODO: size suffixes
 BOARD_FLASH_SIZE=33554432
 
-#?????KERNEL_COMPRESSION=lzma.4.17
-
 ###################################################
 #
 # Vars for kernel config 
@@ -26,6 +24,7 @@ KERNCONF_DEVICES+=	switch_bcm5325
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
+
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 WITH_IPSEC=yes
@@ -33,6 +32,10 @@ WITH_IPSEC=yes
 KERNCONF_MODULES_OVERRIDE+=ipfw dummynet zlib
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/ucom
 KERNCONF_MODULES_OVERRIDE+=usb/umass cam
+
+KERNCONF_MODULES_OVERRIDE+=usb/run usb/rum firmware
+KERNCONF_MODULES_OVERRIDE+=wlan wlan_xauth wlan_wep wlan_tkip wlan_acl \
+    wlan_amrr wlan_ccmp wlan_rssadapt
 
 # Additional utilities ????
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
@@ -53,7 +56,8 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp hostap ath nfs_client
+TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq \
+    racoon openvpn ppp hostap ath nfs_client
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
@@ -67,4 +71,4 @@ PACKING_KERNEL_IMAGE?=kernel.strip.gz.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 NEW_IMAGE_TYPE?=zimage
-#NEW_IMAGE_TYPE=split_kernel_rootfs
+
