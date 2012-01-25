@@ -19,9 +19,55 @@ hint.floatphy.0.speed=1000
 hint.switch.0.at="miibus1"
 hint.switch.0.phyno=30
 
+################## GPIO items ##################
+# Buttons
+# GPIO07 - Reset BTN	IN PU II INT
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x0080"
+hint.gpioreset.0.name="reset"
+hint.gpioreset.0.flags="0x04a1"
 
+## GPIO8  - WPS BTN	IN PU II INT
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x0100"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x04a1"
 
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins="0x0200"
+hint.gpioled.0.name="usb"	# Name of first unit w/o number,
+# to compatibility with devices which have only one
+hint.gpioled.0.flags="0x0040" # pulldown
 
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.pins="0x0400"
+hint.gpioled.1.name="usb2"
+hint.gpioled.1.flags="0x0040" # pulldown
+
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins="0x0800"
+hint.gpioled.2.name="wps"
+hint.gpioled.2.flags="0x0040" # pulldown
+
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x4000"
+hint.gpioled.3.name="status"	# Default for status
+hint.gpioled.3.flags="0x0040" # pulldown
+
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.pins="0x8000"
+hint.gpioled.4.name="status_orange"
+hint.gpioled.4.flags="0x0040" # pulldown
+
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.pins="0x20000"
+hint.gpioled.5.name="minipci"
+hint.gpioled.5.flags="0x0040" # pulldown
+
+hint.gpioled.6.at="gpiobus0"
+hint.gpioled.6.pins="0x40000"
+hint.gpioled.6.name="minipci2"
+hint.gpioled.6.flags="0x0040" # pulldown
 
 #phys_mapped_flash:
 #640k(bootloader)ro,
