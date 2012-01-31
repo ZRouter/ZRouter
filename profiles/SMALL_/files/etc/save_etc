@@ -1,6 +1,16 @@
 #!/bin/sh
 
-DEVCONFIG=/dev/map/config
+if [ -c /dev/map/config ]; then
+	DEVCONFIG=/dev/map/config
+fi
+if [ -c /dev/redboot/config ]; then
+	DEVCONFIG=/dev/reboot/config
+fi
+if [ "x${DEVCONFIG}" == "x" ]; then
+	echo "No config partiton found";
+	exit 1;
+fi
+
 BLOCK_SIZE=64
 GEOM_PART=`echo ${DEVCONFIG} | sed 's/\/dev\///; s!\/!\\\/!' `
 
@@ -30,7 +40,7 @@ fi
 
 echo "Saving /etc"
 sysctl hw.cfi.rdonly=0
-/bin/dd if=/tmp/etc.tar.gz of=/dev/map/config bs=${BLOCK_SIZE}k count=${DEVCONFIGBLKS} conv=sync
+/bin/dd if=/tmp/etc.tar.gz of=${DEVCONFIG} bs=${BLOCK_SIZE}k count=${DEVCONFIGBLKS} conv=sync
 echo '.'
 
 #echo f9 > /dev/led/status
