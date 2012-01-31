@@ -366,7 +366,7 @@ world-toolchain:
 
 world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 	@echo "XXX: need to find a way to install required includes correctly"
-	mkdir -p ${ZROUTER_FREEBSD_OBJDIR=}/tmp/usr/include/lzo
+	mkdir -p ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/include/lzo
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
 	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
 	    buildworld
