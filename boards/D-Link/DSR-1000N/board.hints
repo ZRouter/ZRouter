@@ -1,13 +1,73 @@
 # $FreeBSD$
 # device.hints
 
-hint.switch.0.iface="octe0"
-hint.switch.0.driver="bcm5325_switch"
-hint.switch.1.iface="octe1"
-hint.switch.1.driver="bcm5325_switch"
-hint.switch.2.iface="octe2"
-hint.switch.2.driver="bcm5325_switch"
+# No probe at all
+hint.miibus.0.phymask="0x00000000"
+hint.miibus.1.phymask="0x00000000"
+hint.miibus.3.phymask="0x00000100"
+# bgephy will attach here
 
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.master="switch"
+hint.floatphy.0.master_unit=0
+hint.floatphy.0.master_phys=0x0000001f # Sense PHY0
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=1000
+
+# Switch attached to MDIO bus on arge0
+hint.switch.0.at="miibus1"
+hint.switch.0.phyno=30
+
+################## GPIO items ##################
+# Buttons
+# GPIO07 - Reset BTN	IN PU II INT
+hint.gpioreset.0.at="gpiobus0"
+hint.gpioreset.0.pins="0x0080"
+hint.gpioreset.0.name="reset"
+hint.gpioreset.0.flags="0x04a1"
+
+## GPIO8  - WPS BTN	IN PU II INT
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x0100"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x04a1"
+
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins="0x0200"
+hint.gpioled.0.name="usb"	# Name of first unit w/o number,
+# to compatibility with devices which have only one
+hint.gpioled.0.flags="0x0140" # invout, pulldown
+
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.pins="0x0400"
+hint.gpioled.1.name="usb2"
+hint.gpioled.1.flags="0x0140" # invout, pulldown
+
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins="0x0800"
+hint.gpioled.2.name="wps"
+hint.gpioled.2.flags="0x0140" # invout, pulldown
+
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x4000"
+hint.gpioled.3.name="status"	# Default for status
+hint.gpioled.3.flags="0x0140" # invout, pulldown
+
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.pins="0x8000"
+hint.gpioled.4.name="status_orange"
+hint.gpioled.4.flags="0x0140" # invout, pulldown
+
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.pins="0x20000"
+hint.gpioled.5.name="minipci"
+hint.gpioled.5.flags="0x0140" # invout, pulldown
+
+hint.gpioled.6.at="gpiobus0"
+hint.gpioled.6.pins="0x40000"
+hint.gpioled.6.name="minipci2"
+hint.gpioled.6.flags="0x0140" # invout, pulldown
 
 #phys_mapped_flash:
 #640k(bootloader)ro,
@@ -24,11 +84,11 @@ hint.map.0.readonly=1
 
 hint.map.1.at="cfid0"
 hint.map.1.start=0x000a0000
-hint.map.1.end=0x009a0000
+hint.map.1.end="search:0x00100000:0x10000:.!/bin/sh"
 hint.map.1.name="kernel"
 
 hint.map.2.at="cfid0"
-hint.map.2.start=0x009a0000
+hint.map.2.start="search:0x00100000:0x10000:.!/bin/sh"
 hint.map.2.end=0x01da0000
 hint.map.2.name="rootfs"
 
@@ -51,4 +111,5 @@ hint.map.6.at="cfid0"
 hint.map.6.start=0x000a0000
 hint.map.6.end=0x01da0000
 hint.map.6.name="upgrade"
+
 
