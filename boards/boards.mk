@@ -20,6 +20,3 @@ BOARD_FIRMWARE_SIGNATURE_FILE=${TARGET_BOARDDIR}/board_firmware.sig
 
 .endif
 
-.if !defined(TARGET_BOARDDIR)
-TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
-.endif
