@@ -3,8 +3,8 @@
 LOG=/tmp/DHCLIENT-SCRIPT.log
 
 touch ${LOG}
-echo "DHCLIENT-SCRIPT: $*" >> ${LOG} 
-#set >> ${LOG} 
+echo "DHCLIENT-SCRIPT: $*" >> ${LOG}
+#set >> ${LOG}
 echo >>  ${LOG}
 
 case ${reason} in

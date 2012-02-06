@@ -1,7 +1,7 @@
 #!/bin/sh
 stty status '^T'
 trap : 2
-trap : 3	
+trap : 3
 HOME=/
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
 export HOME PATH

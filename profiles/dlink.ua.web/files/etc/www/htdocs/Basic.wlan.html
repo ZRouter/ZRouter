@@ -24,7 +24,7 @@
 	</tr>
 	<tr>
 		<td class="">Wireless Channel&nbsp;:</td>
-		<td> 
+		<td>
 		    <select name="channel">
 			<option value="1">2.412 GHz - CH 1</option>
 			<option value="2">2.417 GHz - CH 2</option>
@@ -43,7 +43,7 @@
 
 	<tr>
 		<td class="">802.11 Mode&nbsp;:</td>
-		<td> 
+		<td>
 			<select>
 				<option value="2">802.11g only</option>
 				<option value="3">Mixed 802.11g and 802.11b</option>
@@ -56,7 +56,7 @@
 
 	<tr>
 		<td class="">Channel Width&nbsp;:</td>
-		<td> 
+		<td>
 			<select>
 				<option value="0">20 MHz</option>
 				<option value="1">Auto 20/40 MHz</option>
@@ -65,7 +65,7 @@
 	</tr>
 	<tr>
 		<td class="">Transmission Rate&nbsp;:</td>
-		<td> 
+		<td>
 			<select>
 				<!-- Turbo rates in brackets. Rates are given in units of 500 kbits/s -->
 				<option value="0">Best (automatic)</option>
@@ -130,7 +130,7 @@ $$$code:dofile("htdocs/vaps.lua")$$$
 function updateSecurityMode(obj)
 {
     table = obj.parentNode.parentNode.parentNode;
-    trs = table.getElementsByTagName('tr'); 
+    trs = table.getElementsByTagName('tr');
     for (i = 0; i < trs.length; i ++) //>
     {
 	tr = trs[i];

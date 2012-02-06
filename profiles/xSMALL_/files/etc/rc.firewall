@@ -134,12 +134,12 @@ case ${firewall_type} in
 	  ${fwcmd} add deny { tcp or udp } from any to any $i in
 	done
 	${fwcmd} add deny ip  from any to 255.255.255.255
-	${fwcmd} add deny ip  from any to 224.0.0.0/24 in	
+	${fwcmd} add deny ip  from any to 224.0.0.0/24 in
 	${fwcmd} add deny udp from any to any 520 in
 	${fwcmd} add deny tcp from any 80,443 to any 1024-65535 in
 	log=""
 	if [ ${firewall_logdeny:-x} = "YES" -o ${firewall_logdeny:-x} = "yes" ] ; then
-	  log="log logamount 500"	
+	  log="log logamount 500"
 	  sysctl net.inet.ip.fw.verbose=1 >/dev/null
 	fi
 	${fwcmd} add deny $log ip from any to any

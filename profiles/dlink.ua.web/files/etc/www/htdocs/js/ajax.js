@@ -2,13 +2,13 @@
 function getXmlHttp()
 {
 	var xmlhttp;
-	try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); } 
+	try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
 	catch (e) {
-		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP.6.0"); } 
+		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP.6.0"); }
 		catch (E) { }
-		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP.3.0"); } 
+		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP.3.0"); }
 		catch (E) { }
-		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); } 
+		try {  xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
 		catch (E) { xmlhttp = false; }
 	}
 	if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
@@ -52,7 +52,7 @@ function getValuesAsArray(formRef)
 		var tag = els[no].tagName.toLowerCase();
 
 		switch(tag){
-			case "input": 
+			case "input":
 				var type = els[no].type.toLowerCase();
 
 				if(!type)

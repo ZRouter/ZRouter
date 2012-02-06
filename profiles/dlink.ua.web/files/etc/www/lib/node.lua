@@ -39,7 +39,7 @@ function Node:attr(attr, value)
 end
 
 function Node:value(_value)
-    if self.node._children and 
+    if self.node._children and
 	self.node._children[1] and
 	self.node._children[1]._text then
 

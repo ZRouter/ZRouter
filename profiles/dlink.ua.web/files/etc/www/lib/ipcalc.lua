@@ -37,7 +37,7 @@ function cidr_to_net(cidr)
     if r.bits then
 	r.ip = toint(i1, i2, i3, i4);
     else
-	local i1, i2, i3, i4, m1, m2, m3, m4 = string.match(cidr, 
+	local i1, i2, i3, i4, m1, m2, m3, m4 = string.match(cidr,
 	    "^(%d+)%.(%d+)%.(%d+)%.(%d+)%/(%d+)%.(%d+)%.(%d+)%.(%d+)$");
 	if m4 then
 	    r.ip  = toint(i1, i2, i3, i4);

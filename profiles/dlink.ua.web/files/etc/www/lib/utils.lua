@@ -110,7 +110,7 @@ function read_file(_file)
     local f, e = io.open(_file, "r")
     if f then
       xml = f:read("*a")
-    else 
+    else
       return ("Can't open file " .. _file);
     end
 
@@ -137,7 +137,7 @@ function save_file(_file, _data)
     if out then
         out:write(_data);
 	assert(out:close());
-    else 
+    else
         print(e);
         return (nil);
     end
@@ -161,7 +161,7 @@ end
 
 function conf_table(id, header, rootpath, fields)
 
-	local ret = 
+	local ret =
 		"<div id=\"" .. id .. "\" class=\"yui3-module boxitem\">\n" ..
 		"    <div class=\"yui3-hd\">\n" ..
 		"        <h4>" .. header .."</h4>\n" ..

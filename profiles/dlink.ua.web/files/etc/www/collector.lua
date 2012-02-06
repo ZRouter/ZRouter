@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
-package.cpath = 
+package.cpath =
 	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
 	"/lib/lua?.so;/usr/lib/lua?.so;/usr/lib/lua/lua?.so;" ..
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
@@ -13,7 +13,7 @@ port = port or "8";
 serverhost = serverhost or "127.0.0.1";
 serverport = serverport or "80";
 
--- Globals 
+-- Globals
 r = {};		-- Runtime varibles structure
 rquery = {};
 queue = {};
@@ -23,12 +23,12 @@ queue = {};
 --
 function urlEncode(str)
     if (str) then
-        str = string.gsub (str, "\n", "\r\n") 
+        str = string.gsub (str, "\n", "\r\n")
         str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end) 
-        str = string.gsub (str, " ", "+") 
-    end 
-    return str 
+            function (c) return string.format ("%%%02X", string.byte(c)) end)
+        str = string.gsub (str, " ", "+")
+    end
+    return str
 end
 
 
@@ -36,10 +36,10 @@ end
 -- Utility function:  URL decode function
 --
 function urlDecode(str)
-    str = string.gsub (str, "+", " ") 
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end) 
-    str = string.gsub (str, "\r\n", "\n") 
-    return str 
+    str = string.gsub (str, "+", " ")
+    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+    str = string.gsub (str, "\r\n", "\n")
+    return str
 end
 
 -- convert name1=value1&name2=val+ue%2F2
@@ -162,7 +162,7 @@ end
 
 function getopt(args, opts)
     i=1;
-    while i < table.getn(arg) do 
+    while i < table.getn(arg) do
 	if arg[i]:match("^-") then
 	    opts[arg[i]] = arg[i+1];
 	    i = i + 1;
@@ -198,7 +198,7 @@ while 1 do
     local control = server:accept();
 
     if control then
-	while 1 do 
+	while 1 do
     	    local data, err = control:receive();
     	    if not err then
     		local q;

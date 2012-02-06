@@ -66,7 +66,7 @@ fi
 if [ "x${fwURL}" != "x" ];  then
 	echo "Updating system image to type ${UPDATE_TYPE}, version ${fwExternal}.${fwInternal}"
 	fetch -o /tmp/fw.img "${fwURL}" || exit 1
-	upgrade -f /tmp/fw.img 
+	upgrade -f /tmp/fw.img
 fi
 
 
