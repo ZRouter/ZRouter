@@ -14,7 +14,9 @@ stop_cmd="adapt_stop"
 adapt_prestart()
 {
 	# Switch confugred by own EEPROM
-#	gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
+
+	# Example GPIO
+	#gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
 
 	# Import MAC addresses with known names
 #	kenv LAN_MAC_ADDR=`kenv ethaddr`

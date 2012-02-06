@@ -32,13 +32,8 @@ WITH_IPSEC=yes
 KERNCONF_MODULES_OVERRIDE+=ipfw dummynet zlib
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/ucom
 KERNCONF_MODULES_OVERRIDE+=usb/umass cam
-
-KERNCONF_MODULES_OVERRIDE+=usb/run usb/rum firmware
-KERNCONF_MODULES_OVERRIDE+=wlan wlan_xauth wlan_wep wlan_tkip wlan_acl \
-    wlan_amrr wlan_ccmp wlan_rssadapt
-
-# Additional utilities ????
-WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
+# TODO: enable it if someone require
+KERNCONF_MODULES_OVERRIDE+=firmware
 
 ###################################################
 #
@@ -47,9 +42,6 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 ###################################################
 
 
-# Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-#????## FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
-
 ###################################################
 #
 #       Firmware Image Options
@@ -57,11 +49,7 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 ###################################################
 
 TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq \
-    racoon openvpn ppp hostap ath nfs_client
-
-KERNEL_COMPRESSION=oldlzma
-KERNEL_COMPRESSION_TYPE=oldlzma
-UBOOT_KERNEL_COMPRESSION_TYPE=lzma
+    racoon openvpn ppp hostap ath nfs_client net_help
 
 MKULZMA_BLOCKSIZE=65536
 
