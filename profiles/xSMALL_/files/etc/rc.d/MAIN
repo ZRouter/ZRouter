@@ -38,8 +38,6 @@ main_prestart()
 		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
 	fi
 
-	kldload ipfw
-	ipfw add 65000 allow all from any to any
 	ifconfig lo0 127.0.0.1/8
 	#ifconfig rt0 192.168.0.28/24
 	mpd  --background
