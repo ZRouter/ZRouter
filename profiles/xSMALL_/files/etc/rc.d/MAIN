@@ -33,7 +33,7 @@ main_prestart()
 
 	mount_unionfs /tmp/etc /etc
 
-	if [ -c /dev/map/config ]; then 
+	if [ -c /dev/map/config ]; then
 		dd if=/dev/map/config of=/tmp/etc.tar.gz;
 		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
 	fi
@@ -58,7 +58,7 @@ main_poststart()
 
 main_stop()
 {
-	if [ -c /dev/map/config ]; then 
+	if [ -c /dev/map/config ]; then
 		cd /tmp/ && tar cvzf /tmp/etc.tar.gz etc/* ;
 		sysctl hw.cfi.rdonly=0
 		dd if=/tmp/etc.tar.gz of=/dev/map/config bs=64k conv=sync ;

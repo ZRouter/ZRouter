@@ -59,10 +59,10 @@ remote  10.0.0.2 [500]
                                 hash_algorithm          md5;
                                 authentication_method   pre_shared_key;
                                 dh_group                5;
-			} 
-} 
+			}
+}
 sainfo  (address 192.168.0.0/24 any address 192.168.2.0/24 any)
-{ 
+{
 	pfs_group			5;
 	lifetime			time 3600 sec;
 	encryption_algorithm		3des;
@@ -104,7 +104,7 @@ usage: racoon [-BdFv] [-a (port)] [-f (file)] [-l (file)] [-p (port)]
             <psk>pskpskpsk</psk>
 	</proposal>
     </remote>
-    <sainfo id="0" enable="true"> 
+    <sainfo id="0" enable="true">
 	<src>address 192.168.0.0/24 any</src>
 	<dst>address 192.168.2.0/24 any</dst>
 	<pfs_group>5</pfs_group>
@@ -223,7 +223,7 @@ function RACOON:make_conf()
 	    conf = conf .. "}\n";
 
 	    print("IPsec Remote config file " .. file .. ":\n" ..
-		conf .. 
+		conf ..
 		"=======================================\n");
 
 	    local f = assert(io.open(file, "w"));
@@ -258,7 +258,7 @@ function RACOON:make_conf()
 	    conf = conf .. "}\n";
 
 	    print("IPsec SA info config file " .. file .. ":\n" ..
-		conf .. 
+		conf ..
 		"=======================================\n");
 
 	    local f = assert(io.open(file, "w"));

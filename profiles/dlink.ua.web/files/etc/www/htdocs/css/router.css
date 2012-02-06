@@ -196,7 +196,7 @@ text-align:left;
 
 .menu li {
 	margin: 0px 0px 0px 0px;
-	padding: 2px 2px 2px 2px;	
+	padding: 2px 2px 2px 2px;
 }
 
 .menu a {
@@ -233,8 +233,8 @@ text-align:left;
 .banner{
 	font-family: Arial;
 	font-size: 12px;
-	cursor:pointer;	
-	color: #ffffff;	
+	cursor:pointer;
+	color: #ffffff;
 	padding: 0px 3px 0px 3px;
 	text-decoration: none;
 }
@@ -248,18 +248,18 @@ text-align:left;
 span.word{
 	vertical-align: 3px;
 	padding: 0px 3px 0px 3px;
-} 
+}
 
 span.img{
-	vertical-align: 5px;	
+	vertical-align: 5px;
 }
 
 a.logout{
 	font-family: Arial;
-	font-size: 11px;		
+	font-size: 11px;
 	margin: 0px 0px 0px 0px;
 	padding: 6px 8px 6px 8px;
-	width:200px;		
+	width:200px;
 }
 
 a.logout:link, a.logout:visited, a.logout:active{
@@ -275,24 +275,24 @@ a.logout:hover {
 
 .list_head{
 	background: #4D4D4D;
-	color: #FFFFFF;	
+	color: #FFFFFF;
 }
 
 .div_tab {
 	background: #ffffff;
 	border-color: #c0c0c0 #ffffff #ffffff #c0c0c0;
 	border-style: inset;
-	border-width: 2px;	
+	border-width: 2px;
 	overflow: auto;
-	height: 125px;	
+	height: 125px;
 }
 
 .div_tab td{
-	height: 20px;	
+	height: 20px;
 }
 
 .div_tab tr{
-	height: auto;	
+	height: auto;
 }
 
 .div_client_tab{
@@ -300,19 +300,19 @@ a.logout:hover {
 	border-color: #c0c0c0 #ffffff #ffffff #c0c0c0;
 	border-style: inset;
 	border-width: 1px;
-	overflow: auto;	
+	overflow: auto;
 }
 
 .div_client_tab td{
-	height: 20px;	
+	height: 20px;
 }
 
 .div_client_tab tr{
-	height: auto;	
+	height: auto;
 }
 
 .table_tool{
-	width: 99%;	
+	width: 99%;
 	background: #E4EAEB;
 	border: 1px solid #136393;
 
@@ -331,7 +331,7 @@ a.logout:hover {
 	padding: 3px;
 }
 
-.sec_n { 
+.sec_n {
   	background-color: #EEEEEE;
   	color: #000000;
   	border-left: 1px solid #FFFFFF;
@@ -340,13 +340,13 @@ a.logout:hover {
   	border-bottom: 1px solid #FFFFFF
 }
 
-.sec_s { 
+.sec_s {
   	background-color: #D4D0C8;
   	color: #000000;
-  	border-left: 1px solid #FFFFFF; 
-  	border-top: 1px solid #FFFFFF; 
- 	 border-right: 1px solid gray; 
- 	font-weight: bold; 
+  	border-left: 1px solid #FFFFFF;
+  	border-top: 1px solid #FFFFFF;
+ 	 border-right: 1px solid gray;
+ 	font-weight: bold;
 }
 
 .TabPane_body {
@@ -354,13 +354,13 @@ a.logout:hover {
   	color: #000000;
   	border-left:1px solid #FFFFFF;
   	border-right: 1px solid gray;
-  	border-bottom: 1px solid gray; 
+  	border-bottom: 1px solid gray;
   	width:99%;
   	height:350px;
 }
 
 .edit_vlan_table{
-	
+
 	background-color: #E4EAEB;
 	margin:20px 10px 0px 10px;
 	border: 1px solid #136393;
@@ -368,8 +368,8 @@ a.logout:hover {
 
 .help_title_td
 {
-	font-size: 14px;	
+	font-size: 14px;
 	text-decoration: underline;
 	font-weight:bold;
-	
+
 }

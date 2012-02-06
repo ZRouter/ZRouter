@@ -203,7 +203,7 @@
         <user username="admin" password="admin" group="admin"></user>
         <user username="user" password="123" group="stat"></user>
     </users>
-    <!-- host>192.168.0.1</host 
+    <!-- host>192.168.0.1</host
 	bind to all, because we need local access also.
 	XXX: we should take care about ipfw deny for that. -->
     <host>192.168.0.1</host>
@@ -229,7 +229,7 @@
             <psk>pskpskpsk</psk>
 	</proposal>
     </remote>
-    <sainfo id="0" enable="true"> 
+    <sainfo id="0" enable="true">
 	<src>address 192.168.0.0/24 any</src>
 	<dst>address 192.168.2.0/24 any</dst>
 	<pfs_group>5</pfs_group>

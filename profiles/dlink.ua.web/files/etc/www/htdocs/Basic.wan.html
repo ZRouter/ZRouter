@@ -1,7 +1,7 @@
 $$$code:inc("htdocs/header.html")$$$
     <h1>Internet connections configuration</h1>
 
-$$$code:conf_table("Static", "Ethernet Interface", "interfaces.wan0.Static", 
+$$$code:conf_table("Static", "Ethernet Interface", "interfaces.wan0.Static",
 {
     { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
     { label = "Automatic (DHCP)",	type = "attr", htmltype = "checkbox", 	node = "dhcp:enable" 	},
@@ -12,7 +12,7 @@ $$$code:conf_table("Static", "Ethernet Interface", "interfaces.wan0.Static",
     { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
 })$$$
 
-$$$code:conf_table("PPPoE", "PPPoE", "interfaces.wan0.PPPoE", 
+$$$code:conf_table("PPPoE", "PPPoE", "interfaces.wan0.PPPoE",
 {
     { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
     { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},
@@ -26,7 +26,7 @@ $$$code:conf_table("PPPoE", "PPPoE", "interfaces.wan0.PPPoE",
     { label = "NAT Enabled", 		type = "attr", htmltype = "checkbox", 	node = "nat:enable" 	}
 })$$$
 
-$$$code:conf_table("PPP", "PPP (3G)", "interfaces.wan0.PPP", 
+$$$code:conf_table("PPP", "PPP (3G)", "interfaces.wan0.PPP",
 {
     { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
     { label = "Username", 		type = "node", htmltype = "text", 	node = "username" 	},

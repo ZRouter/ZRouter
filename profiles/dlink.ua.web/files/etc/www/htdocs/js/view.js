@@ -23,7 +23,7 @@ config_list[1] = ["Restore Configuration",				"#", "tryget('restore=config')"];
 
 function tryget(msg)
 {
-	ajax("POST", "/cmd.xml", msg + "&r=" + encodeURIComponent(Math.random()), true, 
+	ajax("POST", "/cmd.xml", msg + "&r=" + encodeURIComponent(Math.random()), true,
 	    function (x) {
 		window.alert(x.responseXML.getElementsByTagName("data")[0].firstChild.nodeValue);
 	    }

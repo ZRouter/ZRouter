@@ -26,7 +26,7 @@ if [ ${size} -gt ${DEVCONFIGSIZE} ]; then
 	echo "etc.tar.gz too big ${size}, must be less than ${DEVCONFIGSIZE}"
 	echo "Please remove big files from /etc"
 	exit 1
-fi 
+fi
 
 echo "Saving /etc"
 sysctl hw.cfi.rdonly=0

@@ -125,7 +125,7 @@ function MPD:config_bundle(path, bundle)
 
     -- TODO
 --    local ip = c:getNode(path .. "." .. "ipaddr")
---    if ip then 
+--    if ip then
 --	string.match(ip:value(), "%d+%.%d+%.%d+%.%d+%/(%d+)")
 --    end
 
@@ -202,7 +202,7 @@ function MPD:config_link(path, link, bundle)
 	self:msg("set pppoe iface " .. self.c:getNode(path .. "." .. "interface"):value() .. "");
 	self:msg("set pppoe service \"" .. self.c:getNode(path .. "." .. "service"):value() .. "\"");
     elseif mpdtype == "pptp" then
-	-- TODO: 
+	-- TODO:
 	self:msg("set pptp self 10.1.3.3");
 	self:msg("set pptp peer 10.1.0.1");
 	self:msg("set pptp disable windowing");
@@ -252,7 +252,7 @@ mt.__index = MPD;
 
 --[[
 Bundle 'PPP' (static):
-	Links          : PPP[Opened/UP] 
+	Links          : PPP[Opened/UP]
 	Status         : OPEN
 	Session time   : 1119 seconds
 	MultiSession Id: 249-PPP
@@ -267,7 +267,7 @@ Configuration:
 	  High mark    : 80%
 	  Min conn     : 30 seconds
 	  Min disc     : 90 seconds
-	  Links        :                 
+	  Links        :
 Bundle level options:
 	ipcp      	enable
 	ipv6cp    	disable

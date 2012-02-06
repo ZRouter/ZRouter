@@ -146,17 +146,17 @@ function drawFolder(insertAtObj)
  	if (this.level>0)
   	if (this.isLastNode)
   		/* the last child in the children array */
-  		leftSide = leftSide + "<td valign=top>" + auxEv + 
-  		    "<img name='nodeIcon" + this.id + "' id='nodeIcon" + 
+  		leftSide = leftSide + "<td valign=top>" + auxEv +
+  		    "<img name='nodeIcon" + this.id + "' id='nodeIcon" +
   		    this.id + "' src='" + nodeName + "' height=16 border=0></span></td>";
   	else
-   		leftSide = leftSide + "<td valign=top background=" + ICONPATH + "line.gif>" + auxEv + 
-   		    "<img name='nodeIcon" + this.id + "' id='nodeIcon" + 
+   		leftSide = leftSide + "<td valign=top background=" + ICONPATH + "line.gif>" + auxEv +
+   		    "<img name='nodeIcon" + this.id + "' id='nodeIcon" +
    		    this.id + "' src='" + nodeName + "' height=16 border=0></span></td>";
 
  	this.isRendered = 1;
 
- 	if (browserVersion == 2) 
+ 	if (browserVersion == 2)
  	{
   	if (!doc.yPos)
    	doc.yPos=20;
@@ -189,13 +189,13 @@ function drawFolder(insertAtObj)
   	}
  	else
  	docW = docW + auxEv + this.desc + "</span>";
- 	
+
   	docW = docW + "</td>";
   	docW = docW + this.blockEndHTML();
 
   	if (insertAtObj == null)
   	{
-		if (supportsDeferral) 
+		if (supportsDeferral)
 		{
 			doc.write("<div id=domRoot></div>"); /* transition between regular flow HTML, and node-insert DOM DHTML */
 			insertAtObj = getElById("domRoot");
@@ -253,7 +253,7 @@ function setStateFolder(isOpen)
  	if (this.getID()!=foldersTree.getID() && PERSERVESTATE && !this.isOpen) /* closing */
  	{
  		currentOpen = GetCookie("clickedFolder");
-  		if (currentOpen != null) 
+  		if (currentOpen != null)
   		{
   			currentOpen = currentOpen.replace(this.getID()+cookieCutter, "");
    			SetCookie("clickedFolder", currentOpen);
@@ -306,7 +306,7 @@ function linkFolderHTML(isTextLink)
 		else
 	  		docW = docW + "<a href='" + this.hreference + "' TARGET=_top ";
 
- 	if (isTextLink) 
+ 	if (isTextLink)
  	{
  		docW += "id=\"itemTextLink"+this.id+"\" ";
  	}
@@ -345,7 +345,7 @@ function folderSubEntries()
   	return se;
 }
 
-function nodeImageSrc() 
+function nodeImageSrc()
 {
   	var srcStr = "";
   	if (this.isLastNode) /* the last child in the children array */
@@ -369,7 +369,7 @@ function nodeImageSrc()
   	return srcStr;
 }
 
-function iconImageSrc() 
+function iconImageSrc()
 {
   	if (this.isOpen)
  	return(this.iconSrc);
@@ -428,8 +428,8 @@ function drawItem(insertAtObj)
 
 	/*
 	 * In Netscape, it will calling onclick function first and open new window, but it's wrong!
-	 * We don't really know this onclick function use for what and remove it! 
-	 * var fullLink = "href=\""+this.link+"\" target=\""+this.target+"\" 
+	 * We don't really know this onclick function use for what and remove it!
+	 * var fullLink = "href=\""+this.link+"\" target=\""+this.target+"\"
 	 * onClick=\"clickOnLink('"+this.getID()+"\', '"+this.link+"','"+this.target+"');return false;\"";
 	 */
   	var fullLink = 'href=\"'+this.link+'\" target=\"'+this.target+'\"';
@@ -450,7 +450,7 @@ function drawItem(insertAtObj)
 
   	docW = docW + "<tr>" + leftSide + "<td valign=top>";
   	if (USEICONS)
- 		docW = docW + "<a " + fullLink  + " id=\"itemIconLink"+this.id+"\">" + 
+ 		docW = docW + "<a " + fullLink  + " id=\"itemIconLink"+this.id+"\">" +
  		    "<img id='itemIcon"+this.id+"' " + "src='"+this.iconSrc+"' border=0>" + "</a>";
   	else if (this.prependHTML == "")
     		docW = docW + "<img src=" + ICONPATH + "themespacer.gif height=2 width=3>";
@@ -478,14 +478,14 @@ function drawItem(insertAtObj)
  		insertAtObj.insertAdjacentHTML("afterEnd", docW);
   	}
 
-  	if (browserVersion == 2) 
+  	if (browserVersion == 2)
   	{
  		this.navObj = doc.layers["item"+this.id];
  		if (USEICONS)
  			this.iconImg = this.navObj.document.images["itemIcon"+this.id];
  		doc.yPos=doc.yPos+this.navObj.clip.height;
   	}
-  	else if (browserVersion != 0) 
+  	else if (browserVersion != 0)
   	{
  		this.navObj = getElById("item"+this.id);
  		if (USEICONS)
@@ -495,13 +495,13 @@ function drawItem(insertAtObj)
 
 
 /*
- * Methods common to both objects (pseudo-inheritance) 
+ * Methods common to both objects (pseudo-inheritance)
  */
-function forceOpeningOfAncestorFolders() 
+function forceOpeningOfAncestorFolders()
 {
   	if (this.parentObj == null || this.parentObj.isOpen)
  		return;
-  	else 
+  	else
   	{
  		this.parentObj.forceOpeningOfAncestorFolders();
  		clickOnNodeObj(this.parentObj);
@@ -510,13 +510,13 @@ function forceOpeningOfAncestorFolders()
 
 function escondeBlock()
 {
-  	if (browserVersion == 1 || browserVersion == 3) 
+  	if (browserVersion == 1 || browserVersion == 3)
   	{
  		if (this.navObj.style.display == "none")
    			return;
  		this.navObj.style.display = "none";
-  	} 
-  	else 
+  	}
+  	else
   	{
  		if (this.navObj.visibility == "hidden")
    			return;
@@ -526,7 +526,7 @@ function escondeBlock()
 
 function folderMstr(domObj)
 {
-  	if (browserVersion == 1 || browserVersion == 3) 
+  	if (browserVersion == 1 || browserVersion == 3)
   	{
    		if (t==-1)
    		return;
@@ -540,7 +540,7 @@ function folderMstr(domObj)
    		this.navObj.visibility = "show";
 }
 
-function blockStartHTML(idprefix) 
+function blockStartHTML(idprefix)
 {
   	var idParam = "id='" + idprefix + this.id + "'";
   	var docW = "";
@@ -555,7 +555,7 @@ function blockStartHTML(idprefix)
   	return docW;
 }
 
-function blockEndHTML() 
+function blockEndHTML()
 {
   	var docW = "";
 
@@ -592,7 +592,7 @@ function totalHeight() /* used with browserVersion == 2 */
 }
 
 
-function leftSideHTML(leftSideCoded) 
+function leftSideHTML(leftSideCoded)
 {
 	var i;
 	var retStr = "";
@@ -613,10 +613,10 @@ function leftSideHTML(leftSideCoded)
 
 function getID()
 {
-	/* 
+	/*
 	 * define a .xID in all nodes (folders and items) if you want to PERVESTATE that
-	 * work when the tree changes. The value eXternal value must be unique for each 
-	 * node and must node change when other nodes are added or removed 
+	 * work when the tree changes. The value eXternal value must be unique for each
+	 * node and must node change when other nodes are added or removed
 	 * The value may be numeric or string, but cannot have the same char used in cookieCutter */
 	if (typeof this.xID != "undefined")
  		return this.xID;
@@ -630,7 +630,7 @@ function clickOnFolder(folderId)
 {
 	var clicked = findObj(folderId);
 
-	if (!clicked.isOpen) 
+	if (!clicked.isOpen)
 	{
  		clickOnNodeObj(clicked);
 	}
@@ -638,13 +638,13 @@ function clickOnFolder(folderId)
 	if (lastOpenedFolder != null && lastOpenedFolder != folderId)
  		/* sets lastOpenedFolder to null */
  		clickOnNode(lastOpenedFolder);
-	if (clicked.nChildren==0) 
+	if (clicked.nChildren==0)
 	{
    		lastOpenedFolder = folderId;
    		clicked.isLastOpenedfolder = true;
 	}
 
-	if (isLinked(clicked.hreference)) 
+	if (isLinked(clicked.hreference))
 	{
 		highlightObjLink(clicked);
 	}
@@ -687,11 +687,11 @@ function clickOnNodeObj(folderObj)
   	}
 }
 
-function clickOnLink(clickedId, target, windowName) 
+function clickOnLink(clickedId, target, windowName)
 {
  	highlightObjLink(findObj(clickedId));
 
- 	if (isLinked(target)) 
+ 	if (isLinked(target))
  	{
   		window.open(target,windowName);
  	}
@@ -710,7 +710,7 @@ function findObj(id)
   	var i=0;
  	var nodeObj;
 
-  	if (typeof foldersTree.xID != "undefined") 
+  	if (typeof foldersTree.xID != "undefined")
   	{
  		nodeObj = indexOfEntries[i];
  		for(i=0;i<nEntries&&indexOfEntries[i].xID!=id;i++)
@@ -724,7 +724,7 @@ function findObj(id)
  		return indexOfEntries[id];
 }
 
-function isLinked(hrefText) 
+function isLinked(hrefText)
 {
 	var result = true;
 	result = (result && hrefText !=null);
@@ -735,20 +735,20 @@ function isLinked(hrefText)
 }
 
 /* Do highlighting by changing background and foreg. colors of folder or doc text */
-function highlightObjLink(nodeObj) 
+function highlightObjLink(nodeObj)
 {
-  	if (!HIGHLIGHT || nodeObj==null || nodeObj.maySelect==false) 
+  	if (!HIGHLIGHT || nodeObj==null || nodeObj.maySelect==false)
   	{
   		/* node deleted in DB */
   		return;
   	}
 
-  	if (browserVersion == 1 || browserVersion == 3) 
+  	if (browserVersion == 1 || browserVersion == 3)
   	{
  		var clickedDOMObj = getElById('itemTextLink'+nodeObj.id);
- 		if (clickedDOMObj != null) 
+ 		if (clickedDOMObj != null)
  		{
-  			if (lastClicked != null) 
+  			if (lastClicked != null)
   			{
      				var prevClickedDOMObj = getElById('itemTextLink'+lastClicked.id);
    				prevClickedDOMObj.style.color=lastClickedColor;
@@ -804,7 +804,7 @@ function gLnk(optionFlags, description, linkData)
   	if (targetFlag=="T")
  		target = "_top";
 
-  	if (optionFlags.length > 1) 
+  	if (optionFlags.length > 1)
   	{
  		protocolFlag = optionFlags.charAt(1);
  		if (protocolFlag=="h")
@@ -873,7 +873,7 @@ function insDoc(parentFolder, document)
   	return parentFolder.addChild(document);
 }
 
-function preLoadIcons() 
+function preLoadIcons()
 {
 	var auxImg;
 	var ICONPATH = "";
@@ -892,7 +892,7 @@ function preLoadIcons()
 }
 
 /* Open some folders for initial layout, if necessary */
-function setInitialLayout() 
+function setInitialLayout()
 {
   	if (browserVersion > 0 && !STARTALLOPEN)
  		clickOnNodeObj(foldersTree);
@@ -902,7 +902,7 @@ function setInitialLayout()
 }
 
 /* Used with NS4 and STARTALLOPEN */
-function renderAllTree(nodeObj, parent) 
+function renderAllTree(nodeObj, parent)
 {
   	var i=0;
   	nodeObj.renderOb(parent);
@@ -914,7 +914,7 @@ function renderAllTree(nodeObj, parent)
    		renderAllTree(nodeObj.children[i], null);
 }
 
-function hideWholeTree(nodeObj, hideThisOne, nodeObjMove) 
+function hideWholeTree(nodeObj, hideThisOne, nodeObjMove)
 {
   	var i=0;
   	var heightContained=0;
@@ -926,10 +926,10 @@ function hideWholeTree(nodeObj, hideThisOne, nodeObjMove)
   	if (browserVersion == 2)
  	nodeObj.navObj.moveBy(0, 0-nodeObjMove);
 
-  	for (i=0 ; i < nodeObj.nChildren; i++) 
+  	for (i=0 ; i < nodeObj.nChildren; i++)
   	{
  	heightContainedInChild = hideWholeTree(nodeObj.children[i], true, childrenMove)
- 	if (browserVersion == 2) 
+ 	if (browserVersion == 2)
  	{
    		heightContained = heightContained + heightContainedInChild + nodeObj.children[i].navObj.clip.height;
    		childrenMove = childrenMove + heightContainedInChild;
@@ -939,7 +939,7 @@ function hideWholeTree(nodeObj, hideThisOne, nodeObjMove)
   	return heightContained;
 }
 
-/* 
+/*
  *	Simulating inserAdjacentHTML on NS6
  *	Code by thor@jscript.dk
  */
@@ -962,7 +962,7 @@ if(typeof HTMLElement!="undefined" && !HTMLElement.prototype.insertAdjacentEleme
 			case 'afterEnd':
 				if (this.nextSibling)
 					this.parentNode.insertBefore(parsedNode,this.nextSibling);
-				else 
+				else
 					this.parentNode.appendChild(parsedNode);
 			break;
 		}
@@ -977,7 +977,7 @@ if(typeof HTMLElement!="undefined" && !HTMLElement.prototype.insertAdjacentEleme
 	}
 }
 
-function getElById(idVal) 
+function getElById(idVal)
 {
   	if (document.getElementById != null)
  	return document.getElementById(idVal);
@@ -1012,11 +1012,11 @@ function PersistentFolderOpening()
  		for (fldPos=0; fldPos<fldArr.length; fldPos++)
  		{
    			fldStr=fldArr[fldPos];
-   			if (fldStr != "") 
+   			if (fldStr != "")
    			{
     		 		nodeObj = findObj(fldStr);
   				if (nodeObj!=null) /* may have been deleted */
-  					if (nodeObj.setState) 
+  					if (nodeObj.setState)
     					{
    						nodeObj.forceOpeningOfAncestorFolders();
    						clickOnNodeObj(nodeObj);
@@ -1047,7 +1047,7 @@ function storeAllNodesInClickCookie(treeNodeObj)
   	}
 }
 
-function CookieBranding(name) 
+function CookieBranding(name)
 {
   	if (typeof foldersTree.treeID != "undefined")
   		 /* needed for multi-tree sites. make sure treeId does not contain cookieCutter; */
@@ -1065,19 +1065,19 @@ function GetCookie(name)
 	var clen = document.cookie.length;
 	var i = 0;
 
-	while (i < clen) 
+	while (i < clen)
 	{
 		var j = i + alen;
 		if (document.cookie.substring(i, j) == arg)
 			return getCookieVal (j);
 		i = document.cookie.indexOf(" ", i) + 1;
-		if (i == 0) 
+		if (i == 0)
 			break;
 	}
 	return null;
 }
 
-function getCookieVal(offset) 
+function getCookieVal(offset)
 {
 	var endstr = document.cookie.indexOf (";", offset);
 	if (endstr == -1)
@@ -1146,7 +1146,7 @@ doc.yPos = 0;
 /*
  * Main function
  *
- * This function uses an object (navigator) defined in 
+ * This function uses an object (navigator) defined in
  * ua.js, imported in the main html page (left frame).
  */
 function initializeDocument()
@@ -1199,7 +1199,7 @@ function initializeDocument()
   	if (supportsDeferral && !STARTALLOPEN)
 	  	foldersTree.renderOb(null);
 	  	/* delay construction of nodes */
-	else 
+	else
   	{
  		renderAllTree(foldersTree, null);
 
@@ -1216,7 +1216,7 @@ function initializeDocument()
 
   	setInitialLayout();
 
-  	if (PERSERVESTATE && GetCookie('highlightedTreeviewLink')!=null  && GetCookie('highlightedTreeviewLink')!="") 
+  	if (PERSERVESTATE && GetCookie('highlightedTreeviewLink')!=null  && GetCookie('highlightedTreeviewLink')!="")
   	{
  		var nodeObj = findObj(GetCookie('highlightedTreeviewLink'));
  		if (nodeObj!=null)
@@ -1237,8 +1237,8 @@ function showCursor(targetObj)
  		targetObj.style.cursor = "pointer";
 
 }
- 
- 
+
+
 function xbDetectBrowser()
 {
     if (window.hasOwnProperty("onerror"))
@@ -1320,8 +1320,8 @@ function xbDetectBrowser()
  		else
    			navigator.org = 'mozilla';
   	}
-  	else if ((ua.indexOf('mozilla') !=-1) && (ua.indexOf('spoofer')==-1) && 
-  		(ua.indexOf('compatible') == -1) && (ua.indexOf('opera')==-1) && 
+  	else if ((ua.indexOf('mozilla') !=-1) && (ua.indexOf('spoofer')==-1) &&
+  		(ua.indexOf('compatible') == -1) && (ua.indexOf('opera')==-1) &&
   		(ua.indexOf('webtv')==-1) && (ua.indexOf('hotjava')==-1))
   	{
  		var is_major = parseFloat(navigator.appVersion);

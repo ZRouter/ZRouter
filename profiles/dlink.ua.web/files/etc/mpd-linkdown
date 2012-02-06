@@ -3,8 +3,8 @@
 LOG=/tmp/mpd-linkdown.log
 
 touch ${LOG}
-echo "mpd-linkdown $*" >> ${LOG} 
-#set >> ${LOG} 
+echo "mpd-linkdown $*" >> ${LOG}
+#set >> ${LOG}
 echo >>  ${LOG}
 
 interface=$1

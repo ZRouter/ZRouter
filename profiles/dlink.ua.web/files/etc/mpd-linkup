@@ -7,8 +7,8 @@
 LOG=/tmp/mpd-linkup.log
 
 touch ${LOG}
-echo "mpd-linkup $*" >> ${LOG} 
-#set >> ${LOG} 
+echo "mpd-linkup $*" >> ${LOG}
+#set >> ${LOG}
 echo >>  ${LOG}
 
 interface=$1

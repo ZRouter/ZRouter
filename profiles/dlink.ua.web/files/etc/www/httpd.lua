@@ -17,7 +17,7 @@
 -- load the socket library
 --
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
-package.cpath = 
+package.cpath =
 	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
 	"/lib/lua?.so;/usr/lib/lua?.so;/usr/lib/lua/lua?.so;" ..
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
@@ -54,7 +54,7 @@ dofile("lib/hostapd.lua");
 
 
 --
---  A table of MIME types.  
+--  A table of MIME types.
 --  These values will be loaded from /etc/mime.types if available, otherwise
 -- a minimum set of defaults will be used.
 --
@@ -87,33 +87,33 @@ function start_server( c, config )
 	--   Print some status messages.
 	--
 	print( "\nListening upon:" );
-	print( "  http://" .. c:getNode("http.host"):value() .. ":" .. 
+	print( "  http://" .. c:getNode("http.host"):value() .. ":" ..
 			c:getNode("http.port"):value() .. "/" );
 	print( "\n\n");
 	--[[
 	table.insert(r.tasks.countdown, { count=25, task=
 			function()
-			print("task 0 ok"); 
-			return (true); 
-			end 
+			print("task 0 ok");
+			return (true);
+			end
 			});
 	table.insert(r.tasks.countdown, { count=10, task=
 			function()
-			print("task 1 ok"); 
-			return (true); 
-			end 
+			print("task 1 ok");
+			return (true);
+			end
 			});
 	table.insert(r.tasks.countdown, { count=15, task=
 			function()
-			print("task 2 ok"); 
-			return (true); 
-			end 
+			print("task 2 ok");
+			return (true);
+			end
 			});
 	table.insert(r.tasks.countdown, { count=5, task=
 			function()
-			print("task 3 ok"); 
-			return (true); 
-			end 
+			print("task 3 ok");
+			return (true);
+			end
 			});
 	]]
 	--
@@ -623,12 +623,12 @@ end
 --
 function urlEncode(str)
     if (str) then
-        str = string.gsub (str, "\n", "\r\n") 
+        str = string.gsub (str, "\n", "\r\n")
         str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end) 
-        str = string.gsub (str, " ", "+") 
-    end 
-    return str 
+            function (c) return string.format ("%%%02X", string.byte(c)) end)
+        str = string.gsub (str, " ", "+")
+    end
+    return str
 end
 
 
@@ -636,10 +636,10 @@ end
 -- Utility function:  URL decode function
 --
 function urlDecode(str)
-    str = string.gsub (str, "+", " ") 
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end) 
-    str = string.gsub (str, "\r\n", "\n") 
-    return str 
+    str = string.gsub (str, "+", " ")
+    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+    str = string.gsub (str, "\r\n", "\n")
+    return str
 end
 
 
@@ -692,7 +692,7 @@ end
 --
 if ( fileExists( "/etc/mime.types" ) ) then
     loadMimeFile( "/etc/mime.types",  mime );
-else 
+else
     --
     --  The global MIME types file does not exist.
     --  Setup minimal defaults.
@@ -920,7 +920,7 @@ end
 
 function getopt(args, opts)
     i=1;
-    while i < table.getn(arg) do 
+    while i < table.getn(arg) do
 	if arg[i]:match("^-") then
 	    opts[arg[i]] = arg[i+1];
 	    i = i + 1;
@@ -935,7 +935,7 @@ end
 
 
 
--- Globals 
+-- Globals
 config = {};	-- Unused now
 c = {}; 	-- XML tree from config.xml
 r = {};		-- Runtime varibles structure
@@ -1007,8 +1007,8 @@ table.insert(r.tasks.countdown, { count=2, task=
 	    print("Init WAN links");
 	    os.execute("echo 'Init WAN links ...' > /dev/console");
 	    configure_wan(c);
-	    return (true); 
-	end 
+	    return (true);
+	end
     });
 -- IPSec links tasks
 table.insert(r.tasks.countdown, { count=10, task=
@@ -1016,8 +1016,8 @@ table.insert(r.tasks.countdown, { count=10, task=
 	    print("Run racoon");
 	    os.execute("echo 'Run racoon ...' > /dev/console");
 	    racoon:run();
-	    return (true); 
-	end 
+	    return (true);
+	end
     });
 
 print("Run server ...");

@@ -4,7 +4,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 LOG=/tmp/racoon-phase1-up.log
 
 touch ${LOG}
-echo "phase1-up.sh $*" >> ${LOG} 
+echo "phase1-up.sh $*" >> ${LOG}
 
 
 echo $@  >>  ${LOG}

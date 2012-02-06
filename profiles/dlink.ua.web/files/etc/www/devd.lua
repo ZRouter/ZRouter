@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 package.path = "./?.lua;/etc/www/lib/?.lua;./lib/?.lua";
-package.cpath = 
+package.cpath =
 	"/lib/?.so;/usr/lib/?.so;/usr/lib/lua/?.so;" ..
 	"/lib/lua?.so;/usr/lib/lua?.so;/usr/lib/lua/lua?.so;" ..
 	"/lib/?-core.so;/usr/lib/?-core.so;/usr/lib/lua/?-core.so;" ..
@@ -15,12 +15,12 @@ serverport = serverport or "80";
 --
 function urlEncode(str)
     if (str) then
-        str = string.gsub (str, "\n", "\r\n") 
+        str = string.gsub (str, "\n", "\r\n")
         str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end) 
-        str = string.gsub (str, " ", "+") 
-    end 
-    return str 
+            function (c) return string.format ("%%%02X", string.byte(c)) end)
+        str = string.gsub (str, " ", "+")
+    end
+    return str
 end
 
 
@@ -28,10 +28,10 @@ end
 -- Utility function:  URL decode function
 --
 function urlDecode(str)
-    str = string.gsub (str, "+", " ") 
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end) 
-    str = string.gsub (str, "\r\n", "\n") 
-    return str 
+    str = string.gsub (str, "+", " ")
+    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+    str = string.gsub (str, "\r\n", "\n")
+    return str
 end
 
 function tab_to_query(t)

@@ -1,5 +1,5 @@
 /* You can find instructions for this file here:
-/ http://www.geocities.com/marcelino_martins/ftv2instructions.html 
+/ http://www.geocities.com/marcelino_martins/ftv2instructions.html
 */
 
 // Decide if the names are links or just the icons
@@ -8,7 +8,7 @@ var USETEXTLINKS = 1;  //replace 0 with 1 for hyperlinks
 // Decide if the tree is to start all open or just showing the root folders
 var STARTALLOPEN = 0; //replace 0 with 1 to show the whole tree
 
-var ICONPATH = 'img/'; 
+var ICONPATH = 'img/';
 
 var deviceType="Router";
 

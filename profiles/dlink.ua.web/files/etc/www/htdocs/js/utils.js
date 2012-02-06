@@ -470,7 +470,6 @@ function AdjustHeight()
 	}
 	*/
 	tmp = get_obj("table_frame").offsetHeight;
-	
 	if(tmp > h) h = tmp;
 	parent.ifrMain.height = h;
 }
