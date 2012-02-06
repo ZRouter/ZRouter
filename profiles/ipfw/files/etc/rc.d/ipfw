@@ -1,0 +1,6 @@
+# BEFORE: MAIN
+# PROVIDE: IPFW
+
+kldload ipfw
+ipfw add 65000 allow all from any to any
+

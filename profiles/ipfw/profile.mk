@@ -1,0 +1,4 @@
+WORLD_SUBDIRS_SBIN+= ipfw
+
+KERNCONF_MODULES_OVERRIDE+= ipfw dummynet
+
