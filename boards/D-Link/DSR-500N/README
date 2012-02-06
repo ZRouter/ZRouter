@@ -1,0 +1,32 @@
+# Setup
+setenv ipaddr 192.168.0.100
+setenv serverip 192.168.0.90
+
+setenv loadbsd 'tftp 0 DSR-500N/D-Link_DSR-500N.zimage'
+setenv flashbsd 'protect off $(linux_start) +$(filesize) ; erase $(linux_start) +$(filesize) ; cp.b $(fileaddr) $(linux_start) $(filesize)'
+setenv bootbsd 'gunzip $(linux_start) 0x300000 $(loadaddr) 0x1000000 ; bootoctlinux 0 numcores=1'
+
+setenv updatebsd 'run loadbsd ; run flashbsd'
+# Autoboot
+setenv bootcmd 'run bootbsd'
+
+saveenv
+
+# Update
+run updatebsd
+
+# Boot
+run bootbsd
+
+
+Switch configured by EEPROM as a portbased VLAN
+
+LAN1 - switch port 0
+LAN2 - switch port 1
+LAN3 - switch port 2
+LAN4 - switch port 3
+WAN1 - switch port 4 
+       switch port 5 - octe1 (name wan1)
+       switch port 8 - octe0 (name lan0)
+WAN2 - ------------- - octe2 (name wan0)
+
