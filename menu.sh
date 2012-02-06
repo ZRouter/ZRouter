@@ -34,7 +34,7 @@
 main_menu() {
 	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
-	${SH} -c "${DIALOG} --title \"ZRouter build menu ${PROFILE_NAME}\" --menu ' ' 13 60 6 \
+	${SH} -c "${DIALOG} --title \"ZRouter build menu ${PROFILE_NAME}\" --menu ' ' 13 60 7 \
 	    Device \"Select the target device\" \
 	    BaseProfile \"Select base profile\" \
 	    Profiles \"Select profiles to build\" \
