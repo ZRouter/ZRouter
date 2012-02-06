@@ -48,10 +48,24 @@ ROOTFS_DEPTEST?=${WORLDDESTDIR}/bin/sh
 KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
 PREINSTALLDIRS=/lib
 
+##############################################################################
 # Board configuration must define used SoC/CPU
+##############################################################################
 .include "boards/boards.mk"
 
+.if !defined(TARGET_BOARDDIR)
+TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
+.endif
+
+menu:
+	@/usr/bin/env ZROUTER_ROOT="${ZROUTER_ROOT}" ${ZROUTER_ROOT}/menu.sh
+
+show-target-pairs:
+	@echo "${TARGET_PAIRS}"
+
+##############################################################################
 # Set SoC defaults based on SOC_VENDOR/SOC_CHIP
+##############################################################################
 .include "socs/socs.mk"
 
 .if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
@@ -86,7 +100,9 @@ TARGET_PROFILES=SMALL_
 target-profiles-list:
 	@echo ${TARGET_PROFILES}
 
+##############################################################################
 # Profiles - set of SUBDIRS that need to build
+##############################################################################
 .include "profiles/profiles.mk"
 
 .if defined(IMAGE_TYPE) && ${IMAGE_TYPE} == "trx"
@@ -94,13 +110,6 @@ IMAGE_HEADER_EXTRA?=0x1c
 .else
 IMAGE_HEADER_EXTRA?=0
 .endif
-
-
-menu:
-	@/usr/bin/env ZROUTER_ROOT="${ZROUTER_ROOT}" ${ZROUTER_ROOT}/menu.sh
-
-show-target-pairs:
-	@echo "${TARGET_PAIRS}"
 
 build-verify:
 .if !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) || !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
@@ -120,6 +129,7 @@ build-info:
 	@echo "Vendor: ${TARGET_VENDOR}"
 	@echo "SoC Chip: ${SOC_CHIP}"
 	@echo "SoC Vendor: ${SOC_VENDOR}"
+	@echo "Enabled Profiles: ${TARGET_PROFILES}"
 	@echo
 
 basic-tools:
