@@ -1,7 +1,7 @@
 
 ###################################################
 #
-# Board used hardware/chip`s
+# Board used hardware/chip's
 #
 ###################################################
 
@@ -12,7 +12,7 @@ BOARD_FLASH_SIZE=33554432
 
 ###################################################
 #
-# Vars for kernel config 
+# Vars for kernel config
 #
 ###################################################
 KERNCONF_OPTIONS+=	OCTEON_VENDOR_D_LINK
@@ -22,14 +22,14 @@ KERNCONF_DEVICES+=	brgphy
 KERNCONF_DEVICES+=	switch
 KERNCONF_DEVICES+=	switch_bcm5325
 
-# ident 
+# ident
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
 WITH_IPSEC=yes
 # Builded modules
-KERNCONF_MODULES_OVERRIDE+=ipfw dummynet zlib
+KERNCONF_MODULES_OVERRIDE+=zlib
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/ucom
 KERNCONF_MODULES_OVERRIDE+=usb/umass cam
 # TODO: enable it if someone require
@@ -72,8 +72,8 @@ KERNCONF_DEVICES+=	ath_rate_sample
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq \
-    racoon openvpn ppp hostap ath nfs_client net_help
+TARGET_PROFILES+=SMALL_ ipfw mpd ssh dlink.ua.web dhcp mroute ntpdate \
+	dnsmasq racoon openvpn ppp hostap ath nfs_client net_help
 
 MKULZMA_BLOCKSIZE=65536
 
