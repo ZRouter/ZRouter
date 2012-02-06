@@ -76,7 +76,6 @@ WORLD_SUBDIRS_SBIN+= \
 dmesg \
 ifconfig \
 init \
-ipfw \
 kldload \
 kldstat \
 kldunload \
@@ -188,7 +187,7 @@ libusb
 .endif
 
 
-KERNCONF_MODULES_OVERRIDE+=if_bridge bridgestp ipfw dummynet
+KERNCONF_MODULES_OVERRIDE+=if_bridge bridgestp
 KERNCONF_MODULES_OVERRIDE+=libalias/libalias
 #KERNCONF_MODULES_OVERRIDE+=libalias/modules/cuseeme
 KERNCONF_MODULES_OVERRIDE+=libalias/modules/ftp
