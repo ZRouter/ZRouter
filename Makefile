@@ -83,6 +83,9 @@ TARGET_PROFILES=SMALL_
 .endif
 .endif # !defined(TARGET_PROFILES) || empty(TARGET_PROFILES)
 
+target-profiles-list:
+	@echo ${TARGET_PROFILES}
+
 # Profiles - set of SUBDIRS that need to build
 .include "profiles/profiles.mk"
 
