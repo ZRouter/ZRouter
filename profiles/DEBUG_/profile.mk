@@ -116,6 +116,7 @@ find \
 getopt \
 grep \
 head \
+hexdump \
 id \
 killall \
 login \
