@@ -21,9 +21,11 @@ hint.uart.1.maddr="0x18000400"
 hint.uart.1.msize="0x8"
 hint.uart.1.irq=0
 
+hint.miibus.0.phymask="0x00000000"
+hint.switch.0.at="miibus0"
+hint.switch.0.phyno=30
 
 # gpio at siba_cc0
-
 hint.gpio.0.at="siba_cc0"
 hint.gpio.0.maddr="0x18000060"
 hint.gpio.0.msize="0x18"
