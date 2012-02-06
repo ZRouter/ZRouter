@@ -36,7 +36,8 @@ main_menu() {
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"ZRouter build menu ${PROFILE_NAME}\" --menu ' ' 13 60 6 \
 	    Device \"Select the target device\" \
-	    Targets \"Select the build targets\" \
+	    BaseProfile \"Select base profile\" \
+	    Profiles \"Select profiles to build\" \
 	    Paths \"Set the paths of sources and build objects\" \
 	    Save \"Save build profile\" \
 	    Load \"Load build profile\" \
@@ -96,33 +97,97 @@ get_target_device() {
 	return 1
 }
 
-#
-# Provide a checklist menu with all possible build targets
-#
-select_build_targets() {
+select_base_profile() {
+	DEF_PROFILES=`${MAKE} TARGET_PAIR=${TARGET_PAIR} target-profiles-list`
+	PROFILES_LIST=`(cd profiles ; ls)`
+
+	PROFILES_MENU=""
+
+	for profile in ${PROFILES_LIST} ; do
+		if [ ! -d profiles/${profile} ]; then
+			continue;
+		fi
+
+		if [ ! -f "profiles/${profile}/files/etc/rc.d/MAIN" ]; then
+			continue;
+		fi
+
+		DESCR_FILE="profiles/${profile}/profile.descr"
+		if [ -f "${DESCR_FILE}" ]; then
+			SDESCR=`${SED} -n -e '1p' "${DESCR_FILE}"`;
+			LDESCR=`${SED} -n -e '2p' "${DESCR_FILE}"`;
+		else
+			SDESCR=${profile}
+			LDESCR=${profile}
+		fi
+		PROFILES_MENU="${PROFILES_MENU}	${profile} \"${SDESCR}\"";
+	done
+
 	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
-	${SH} -c "${DIALOG} --title \"Please, select the build target(s)\" --checklist ' ' \
+	${SH} -c "${DIALOG} --title \"Please, select base profile \" --menu ' ' \
 	    19 75 12 \
-	    kernel_xz \"Build a xz compressed kernel\" OFF \
-	    kernel_bin_xz \"Build a binary xz compressed kernel\" OFF \
-	    kernel.xz.uboot \"Build a xz compressed uboot kernel image\" OFF \
-	    kernel_bz2 \"Build a bzip2 compressed kernel\" OFF \
-	    kernel_bin_bz2 \"Build a binary bzip2 compressed kernel\" OFF \
-	    kernel.bz2.uboot \"Build a bzip2 compressed uboot kernel image\" OFF \
-	    kernel_oldlzma \"Build a LZMA compressed kernel\" OFF \
-	    kernel_bin_oldlzma \"Build a binary LZMA compressed kernel\" OFF \
-	    kernel.oldlzma.uboot \"Build a LZMA compressed uboot kernel image\" ON \
-	    fwimage \"Build a fwimage kernel\" OFF \
-	    zimage \"Build a zimage kernel\" OFF \
-	    rootfs.iso.ulzma \"Build the compressed root file system image\" ON \
+	    ${PROFILES_MENU} \
 	    2> ${TMPOPTIONSFILE}"
 	status=$?
 	if [ ${status} -ne 0 ] ; then
 		${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
 		return 1
 	fi
-	TARGETS=`${CAT} ${TMPOPTIONSFILE} 2> /dev/null | ${SED} 's/\"//g'`
+	TARGET_BASE_PROFILE=`${CAT} ${TMPOPTIONSFILE} 2> /dev/null | ${SED} 's/\"//g'`
+	${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
+	return 0
+}
+#
+# Provide a checklist menu with all possible build profiles
+#
+select_build_profiles() {
+	BASE_PROFILES=`ls profiles/*/files/etc/rc.d/MAIN | \
+	    ${SED} 's#profiles/\(.*\)/files/etc/rc.d/MAIN#\1#'`
+	DEF_PROFILES=`${MAKE} TARGET_PAIR=${TARGET_PAIR} target-profiles-list`
+	PROFILES_LIST=`(cd profiles ; ls)`
+
+	PROFILES_MENU=""
+
+	for profile in ${PROFILES_LIST} ; do
+		if [ ! -d profiles/${profile} ]; then
+			continue;
+		fi
+
+		if [ -f "profiles/${profile}/files/etc/rc.d/MAIN" ]; then
+			continue;
+		fi
+
+		DESCR_FILE="profiles/${profile}/profile.descr"
+		if [ -f "${DESCR_FILE}" ]; then
+			SDESCR=`${SED} -n -e '1p' "${DESCR_FILE}"`;
+			LDESCR=`${SED} -n -e '2p' "${DESCR_FILE}"`;
+		else
+			SDESCR=${profile}
+			LDESCR=${profile}
+		fi
+		ENABLED="OFF"
+		for enabled in ${DEF_PROFILES}; do
+			if [ "${enabled}" = "${profile}" ]; then
+				ENABLED="ON";
+				break;
+			fi
+		done
+		PROFILES_MENU="${PROFILES_MENU}	${profile} \"${SDESCR}\" ${ENABLED}";
+	done
+
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
+	${SH} -c "${DIALOG} --title \"Please, select profiles to build \" --checklist ' ' \
+	    19 75 12 \
+	    ${PROFILES_MENU} \
+	    2> ${TMPOPTIONSFILE}"
+	status=$?
+	if [ ${status} -ne 0 ] ; then
+		${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
+		return 1
+	fi
+	TARGET_PROFILES=`${CAT} ${TMPOPTIONSFILE} 2> /dev/null | ${SED} 's/\"//g'`
 	${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
 	return 0
 }
@@ -267,7 +332,8 @@ save_profile() {
 #
 PROFILE="${PROFILE}"
 TARGET_PAIR="${TARGET_PAIR}"
-TARGETS="${TARGETS}"
+TARGET_BASE_PROFILE="${TARGET_BASE_PROFILE}"
+TARGET_PROFILES="${TARGET_PROFILES}"
 FREEBSD_SRC_TREE="${FREEBSD_SRC_TREE}"
 OBJ_DIR="${OBJ_DIR}"
 EOF
@@ -341,7 +407,8 @@ build_info() {
 	${SH} -c "${DIALOG} --title \"ZRouter build settings ${PROFILE_NAME}\" --yesno \
 	    \"\nPROFILE: ${PROFILE} \
 	    \nTARGET_PAIR: ${TARGET_PAIR} \
-	    \nTARGETS: ${TARGETS} \
+	    \nTARGET_BASE_PROFILE: ${TARGET_BASE_PROFILE} \
+	    \nTARGET_PROFILES: ${TARGET_PROFILES} \
 	    \nFREEBSD_SRC_TREE: ${FREEBSD_SRC_TREE} \
 	    \nOBJ_DIR: ${OBJ_DIR} \
 	    \n\nContinue with build ?\" \
@@ -376,6 +443,7 @@ RM="/bin/rm"
 SH="/bin/sh"
 CAT="/bin/cat"
 SED="/usr/bin/sed"
+MAKE="/usr/bin/make"
 MKDIR="/bin/mkdir"
 DIALOG="/usr/bin/dialog"
 
@@ -392,8 +460,13 @@ while [ 1 ]; do
 	fi
 
 	# Select the build targets
-	if [ "${MENU_OPTION}" = "Targets" ]; then
-		select_build_targets
+	if [ "${MENU_OPTION}" = "BaseProfile" ]; then
+		select_base_profile
+	fi
+
+	# Select the build targets
+	if [ "${MENU_OPTION}" = "Profiles" ]; then
+		select_build_profiles
 	fi
 
 	# Select the sources and obj directory
@@ -423,4 +496,4 @@ done
 
 echo "==> building zrouter !!!"
 make -C "${ZROUTER_ROOT}" TARGET_PAIR=${TARGET_PAIR} \
-	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR} ${TARGETS}
+	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR} TARGET_PROFILES="${TARGET_BASE_PROFILE} ${TARGET_PROFILES}"
