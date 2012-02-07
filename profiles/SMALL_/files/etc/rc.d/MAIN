@@ -18,12 +18,6 @@ main_start()
 	# XXX: for debug, breakpoint on Break sequence
 	sysctl debug.kdb.break_to_debugger=1
 
-	# Load ipfw
-	# XXX: Should be separate script
-	kldload ipfw
-	# XXX: for debug only
-	ipfw add 65000 allow all from any to any
-
 	# Configure local interface
 	ifconfig lo0 127.0.0.1/8
 
