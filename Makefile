@@ -440,7 +440,7 @@ buildimage:	${BUILD_IMAGE_DEPEND}
 
 # XXX Must make makefs, mkulzma with [kernel-]toolchain + uboot_mkimage and old lzma ports 
 
-IMAGE_SUFFIX?=trx
+IMAGE_SUFFIX?=	${NEW_IMAGE_TYPE}
 ZTOOLS_PATH=${ZROUTER_OBJ}/ztools
 NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
@@ -536,7 +536,6 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 		sed -E 's/gname=[[:alnum:]]+/gname=wheel/' > \
 		    ${ROOTFS_CLEAN_MTREE_FILE}
 
-#${ROOTFS_DEPTEST}:
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
