@@ -1,0 +1,2 @@
+KERNCONF_MODULES_OVERRIDE+=	if_lagg
+

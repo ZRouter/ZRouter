@@ -1,0 +1,7 @@
+# BEFORE: MAIN
+# PROVIDE: lagg
+
+# XXX: make it rc.d like
+
+kldload lagg
+
