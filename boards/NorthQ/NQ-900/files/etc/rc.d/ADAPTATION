@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	# Import MAC addresses with known names
+	kenv LAN_MAC_ADDR=`kenv et0macaddr`
+	kenv WAN_MAC_ADDR=`kenv et0macaddr`
+	kenv WLAN_MAC_ADDR=`kenv il0macaddr`
+
+	ifconfig bfe0 name lan0
+	ifconfig vlan0 create vlandev lan0 vlan 1
+	ifconfig vlan0 name wan0
+
+	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+
+	hostname `sysctl -n kern.ident`
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
