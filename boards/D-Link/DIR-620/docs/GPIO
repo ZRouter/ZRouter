@@ -1,0 +1,11 @@
+WPS BTN		0
+RESET BTN 	10
+
+LEDS
+Power Yellow	8
+Power Green	9
+WAN Green	12
+WAN Yellow	14
+Orange WPS	11
+Blue WPS	13
+

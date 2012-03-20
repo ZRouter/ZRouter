@@ -1,0 +1,50 @@
+Two ways to build zrouter.org:
+
+FIRST WAY RUN menu.sh
+
+sh menu.sh
+
+It will display menu:
+
+Device		Select the target device
+BaseProfile	Select base profile
+Profiles	Select profiles to build
+Paths		Set the paths of sources and build obje
+Save		Save build profile
+Load		Load build profile
+Build		Build ZRouter !
+
+* Device		Select the target device
+Here you can select device for which to build firmware
+
+* BaseProfile	Select base profile
+Select base profile, which have basic set of tools (init, sh, ls, etc.) to
+start box.
+
+* Profiles	Select profiles to build
+Additional profiles, like firewall you want (ipfw or pf), IPSec tools, ppp or
+mpd to be able connect to 3G networks, ISP with PPPoE service, etc.
+
+* Paths		Set the paths of sources and build objects
+Since so many items still not in FreeBSD source tree, we need to use own tree,
+so here you need to set path to it tree copy.
+
+* Save		Save build profile
+Save things that you already configure with this menu.
+
+* Load		Load build profile
+Load previously configured and saved variables.
+
+* Build		Build ZRouter !
+Run ZRouter.org build.
+
+
+SECOND WAY RUN make
+
+make TARGET_PAIR=D-Link/DIR-615-E4 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}
+
+replace ${FREEBSD_SRC_TREE} with path to ZRouter.org copy of FreeBSD tree.
+replace D-Link/DIR-615-E4 with device for which you want to build FirmWare.
+List of devices you can get by:
+make
+

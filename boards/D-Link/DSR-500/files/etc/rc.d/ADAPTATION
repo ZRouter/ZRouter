@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	# Switch confugred by own EEPROM
+
+	# Example GPIO
+	#gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
+
+	# Import MAC addresses with known names
+#	kenv LAN_MAC_ADDR=`kenv ethaddr`
+#	kenv WAN_MAC_ADDR=`kenv wanmac`
+
+	ifconfig octe0 name lan0
+	ifconfig octe1 name wan1
+	ifconfig octe2 name wan0
+
+#	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+#	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+
+#	hostname `kenv HostName`
+	hostname DSR-500
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*

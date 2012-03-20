@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ -f /usr/local/etc/racoon2/spmd.pwd ]
+then
+	mv /usr/local/etc/racoon2/spmd.pwd /usr/local/etc/racoon2/spmd.pwd.bak
+fi
+
+if [ -x /usr/local/sbin/pskgen ]
+then
+	/usr/local/sbin/pskgen -r -o /usr/local/etc/racoon2/spmd.pwd
+fi

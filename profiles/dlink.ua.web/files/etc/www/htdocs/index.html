@@ -1,0 +1,117 @@
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+<link rel="stylesheet" href="css/router.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>$$$info.model$$$</title>
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/wizard.js"></script>
+<script type="text/javascript" src="js/tree.js"></script>
+<script type="text/javascript" src="js/view.js"></script>
+<script type="text/javascript" src="js/ajax.js"></script>
+</head>
+<body onload="init();" leftmargin="0" topmargin="0" style="overflow: auto;" bgcolor="#ccdce2" marginheight="0" marginwidth="0">
+  <form name="frm" id="frm" method="post" action="?page=main.html" onsubmit="return check();">
+    <input name="ACTION_POST" value="SOMETHING" type="hidden">
+    <input name="require_frame_name" value="" type="hidden">
+    <center>
+      <table id="MainTable" border="1" bordercolor="#1e4c7d" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td colspan="2" onmouseover="HideFrame();">
+              <table background="img/banner.jpg" border="0" cellpadding="0" cellspacing="0" height="56" width="786">
+                <tbody>
+                  <tr>
+                    <td align="right" valign="middle">
+   		      <font style="color: white; font-family: Arial; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">
+   		        <b>$$$info.model$$$&nbsp;&nbsp;&nbsp;$$$info.rev$$$</b>
+   		      </font>
+   		    </td>
+   		  </tr>
+   		</tbody>
+   	      </table>
+	    </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="" background="img/tool_bar.jpg">
+              <table border="0" cellpadding="0" cellspacing="0">
+                <tbody>
+                  <tr>
+<script type="text/javascript">
+    gen_banner_td("home", "a_href");
+    gen_banner_td("tool", "");
+    gen_banner_td("config", "");
+    gen_banner_td("sys", "a_href");
+    gen_banner_td("logout", "");
+    gen_banner_td("help", "a_href");
+</script>
+		  </tr>
+	        </tbody>
+	      </table>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td bordercolor="ccdce2" valign="top">
+	      <table onmouseover="HideFrame();" id="table_tree" border="1" cellpadding="0" cellspacing="0" frame="box" width="211">
+		<tbody>
+		  <tr>
+		    <td id="link_tree" valign="top">
+		      <iframe id="ifrMenu" class="ifrMenu" src="jstree_table.html" frameborder="0" height="100%" scrolling="no" width="100%"></iframe>
+                    </td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </td>
+	    <td bordercolor="ccdce2" valign="top">
+	      <table id="table_page" onmouseover="HideFrame();" border="0" cellpadding="0" cellspacing="0" frame="box" width="600%">
+		<tbody>
+		  <tr>
+		    <td>
+		      <iframe id="ifrMain" name="ifrMain" src="home_sys.html" onload="" frameborder="0" height="500" scrolling="auto" width="567"></iframe>
+		    </td>
+		  </tr>
+		</tbody>
+	      </table>
+	    </td>
+	  </tr>
+          <tr>
+            <td colspan="2" onmouseover="HideFrame();">
+              <table background="img/FreeBSD_logo.png" border="0" cellpadding="0" cellspacing="0" height="75" width="786">
+                <tbody>
+                  <tr>
+                    <td align="right" valign="middle">
+   		      &nbsp;
+   		    </td>
+   		  </tr>
+   		</tbody>
+   	      </table>
+	    </td>
+          </tr>
+	</tbody>
+      </table>
+    </center>
+    <script>
+<!--
+genVerticalMenu(90, 78, tool_list, "tool");
+genVerticalMenu(255,78, config_list, "config");
+genLogOutMenu(490, 78, "&nbsp;&nbsp;The current browser connection will<br>&nbsp;&nbsp;be disconnected if you click <b>here</b>.", "logout");
+
+function resize()
+{
+ 	var x = get_obj("MainTable").offsetLeft;
+ 	get_obj("tool").style.left= (x+90+"px");
+	get_obj("config").style.left= (x+255+"px");
+ 	get_obj("logout").style.left= (x+490+"px");
+}
+
+window.onresize = resize;
+
+var ifrMain = get_obj("ifrMain");
+
+
+-->
+    </script>
+  </form>
+</body>
+</html>

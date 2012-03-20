@@ -1,0 +1,157 @@
+#!/bin/sh
+if [ -z "${source_rc_confs_defined}" ]; then
+	if [ -r /etc/defaults/rc.conf ]; then
+		. /etc/defaults/rc.conf
+		source_rc_confs
+	elif [ -r /etc/rc.conf ]; then
+		. /etc/rc.conf
+	fi
+fi
+setup_loopback () {
+	${fwcmd} add 100 pass all from any to any via lo0
+	${fwcmd} add 200 deny all from any to 127.0.0.0/8
+	${fwcmd} add 300 deny ip from 127.0.0.0/8 to any
+}
+if [ -n "${1}" ]; then
+	firewall_type="${1}"
+fi
+. /etc/rc.subr
+. /etc/network.subr
+case ${firewall_quiet} in
+[Yy][Ee][Ss])
+	fwcmd="/sbin/ipfw -q"
+	;;
+*)
+	fwcmd="/sbin/ipfw"
+	;;
+esac
+${fwcmd} -f flush
+setup_loopback
+case ${firewall_type} in
+[Oo][Pp][Ee][Nn]|[Cc][Ll][Ii][Ee][Nn][Tt])
+	case ${natd_enable} in
+	[Yy][Ee][Ss])
+		if [ -n "${natd_interface}" ]; then
+			${fwcmd} add 50 divert natd ip4 from any to any via ${natd_interface}
+		fi
+		;;
+	esac
+	case ${firewall_nat_enable} in
+	[Yy][Ee][Ss])
+		if [ -n "${firewall_nat_interface}" ]; then
+			if echo "${firewall_nat_interface}" | \
+				grep -q -E '^[0-9]+(\.[0-9]+){0,3}$'; then
+				firewall_nat_flags="ip ${firewall_nat_interface} ${firewall_nat_flags}"
+			else
+				firewall_nat_flags="if ${firewall_nat_interface} ${firewall_nat_flags}"
+			fi
+			${fwcmd} nat 123 config log ${firewall_nat_flags}
+			${fwcmd} add 50 nat 123 ip4 from any to any via ${firewall_nat_interface}
+		fi
+		;;
+	esac
+esac
+case ${firewall_type} in
+[Oo][Pp][Ee][Nn])
+	${fwcmd} add 65000 pass all from any to any
+	;;
+[Cc][Ll][Ii][Ee][Nn][Tt])
+	net="$firewall_client_net"
+	${fwcmd} add pass all from ${net} to 255.255.255.255
+	${fwcmd} add pass all from me to ${net}
+	${fwcmd} add pass all from ${net} to me
+	${fwcmd} add pass tcp from any to any established
+	${fwcmd} add pass all from any to any frag
+	${fwcmd} add pass tcp from any to me 25 setup
+	${fwcmd} add pass tcp from me to any setup
+	${fwcmd} add deny tcp from any to any setup
+	${fwcmd} add pass udp from me to any 53 keep-state
+	${fwcmd} add pass udp from me to any 123 keep-state
+	;;
+[Ss][Ii][Mm][Pp][Ll][Ee])
+	oif="$firewall_simple_oif"
+	onet="$firewall_simple_onet"
+	iif="$firewall_simple_iif"
+	inet="$firewall_simple_inet"
+	${fwcmd} add deny all from ${inet} to any in via ${oif}
+	${fwcmd} add deny all from ${onet} to any in via ${iif}
+	${fwcmd} add deny all from any to 10.0.0.0/8 via ${oif}
+	${fwcmd} add deny all from any to 172.16.0.0/12 via ${oif}
+	${fwcmd} add deny all from any to 192.168.0.0/16 via ${oif}
+	${fwcmd} add deny all from any to 0.0.0.0/8 via ${oif}
+	${fwcmd} add deny all from any to 169.254.0.0/16 via ${oif}
+	${fwcmd} add deny all from any to 192.0.2.0/24 via ${oif}
+	${fwcmd} add deny all from any to 224.0.0.0/4 via ${oif}
+	${fwcmd} add deny all from any to 240.0.0.0/4 via ${oif}
+	case ${natd_enable} in
+	[Yy][Ee][Ss])
+		if [ -n "${natd_interface}" ]; then
+			${fwcmd} add divert natd ip4 from any to any via ${natd_interface}
+		fi
+		;;
+	esac
+	${fwcmd} add deny all from 10.0.0.0/8 to any via ${oif}
+	${fwcmd} add deny all from 172.16.0.0/12 to any via ${oif}
+	${fwcmd} add deny all from 192.168.0.0/16 to any via ${oif}
+	${fwcmd} add deny all from 0.0.0.0/8 to any via ${oif}
+	${fwcmd} add deny all from 169.254.0.0/16 to any via ${oif}
+	${fwcmd} add deny all from 192.0.2.0/24 to any via ${oif}
+	${fwcmd} add deny all from 224.0.0.0/4 to any via ${oif}
+	${fwcmd} add deny all from 240.0.0.0/4 to any via ${oif}
+	${fwcmd} add pass tcp from any to any established
+	${fwcmd} add pass all from any to any frag
+	${fwcmd} add pass tcp from any to me 25 setup
+	${fwcmd} add pass tcp from any to me 53 setup
+	${fwcmd} add pass udp from any to me 53
+	${fwcmd} add pass udp from me 53 to any
+	${fwcmd} add pass tcp from any to me 80 setup
+	${fwcmd} add deny log ip4 from any to any in via ${oif} setup proto tcp
+	${fwcmd} add pass tcp from any to any setup
+	${fwcmd} add pass udp from me to any 53 keep-state
+	${fwcmd} add pass udp from me to any 123 keep-state
+	;;
+[Ww][Oo][Rr][Kk][Ss][Tt][Aa][Tt][Ii][Oo][Nn])
+	${fwcmd} add check-state
+	${fwcmd} add pass tcp  from me to any established
+	${fwcmd} add pass tcp  from me to any setup keep-state
+	${fwcmd} add pass udp  from me to any       keep-state
+	${fwcmd} add pass icmp from me to any       keep-state
+	${fwcmd} add pass udp  from 0.0.0.0 68 to 255.255.255.255 67 out
+	${fwcmd} add pass udp  from any 67     to me 68 in
+	${fwcmd} add pass udp  from any 67     to 255.255.255.255 68 in
+	${fwcmd} add pass icmp from any to any icmptype 8
+	${fwcmd} add pass icmp from any to any icmptype 3,4,11
+	for i in ${firewall_allowservices} ; do
+	  for j in ${firewall_myservices} ; do
+	    ${fwcmd} add pass tcp from $i to me $j
+	  done
+	done
+	for i in ${firewall_trusted} ; do
+	  ${fwcmd} add pass ip from $i to me
+	done
+	${fwcmd} add 65000 count ip from any to any
+	for i in ${firewall_nologports} ; do
+	  ${fwcmd} add deny { tcp or udp } from any to any $i in
+	done
+	${fwcmd} add deny ip  from any to 255.255.255.255
+	${fwcmd} add deny ip  from any to 224.0.0.0/24 in
+	${fwcmd} add deny udp from any to any 520 in
+	${fwcmd} add deny tcp from any 80,443 to any 1024-65535 in
+	log=""
+	if [ ${firewall_logdeny:-x} = "YES" -o ${firewall_logdeny:-x} = "yes" ] ; then
+	  log="log logamount 500"
+	  sysctl net.inet.ip.fw.verbose=1 >/dev/null
+	fi
+	${fwcmd} add deny $log ip from any to any
+	;;
+[Cc][Ll][Oo][Ss][Ee][Dd])
+	${fwcmd} add 65000 deny ip from any to any
+	;;
+[Uu][Nn][Kk][Nn][Oo][Ww][Nn])
+	;;
+*)
+	if [ -r "${firewall_type}" ]; then
+		${fwcmd} ${firewall_flags} ${firewall_type}
+	fi
+	;;
+esac

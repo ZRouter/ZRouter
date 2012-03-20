@@ -1,0 +1,5 @@
+
+To get all files required to build U-Boot mkimage utility - run script:
+
+./extract_mkimage.sh ${Path to U-Boot sources}
+

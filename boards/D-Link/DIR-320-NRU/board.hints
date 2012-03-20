@@ -1,0 +1,139 @@
+# $FreeBSD$
+# device.hints
+hint.obio.0.at="nexus0"
+hint.obio.0.maddr=0x10000000
+hint.obio.0.msize=0x10000000
+
+#hint.nvram.0.base=0x1f030000
+#hint.nvram.0.maxsize=0x2000
+#hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
+#hint.nvram.1.base=0x1f032000
+#hint.nvram.1.maxsize=0x4000
+#hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
+
+# on-board Ralink Frame Engine
+hint.rt.0.at="nexus0"
+hint.rt.0.maddr=0x10100000
+hint.rt.0.msize=0x10000
+hint.rt.0.irq=3
+
+hint.uart.0.flags="0x30"
+hint.uart.1.flags="0x30"
+
+# bit2 must be low - give SPI pins[GP3-6] to controller
+hint.rt305x_sysctl.0.gpiomode=0x00029d
+
+hint.spi.0.at="obio0"
+hint.spi.0.maddr=0x10000b00
+hint.spi.0.msize=0x100
+
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+
+# gpio
+
+# Buttons
+# GPIO10 - Reset BTN	IN PU II INT
+#hint.gpioreset.0.at="gpiobus0"
+#hint.gpioreset.0.pins="0x0400"
+#hint.gpioreset.0.name="reset"
+#hint.gpioreset.0.flags="0x04a1"
+
+## GPIO0  - WPS BTN	IN PU II INT
+#hint.gpiobutton.0.at="gpiobus0"
+#hint.gpiobutton.0.pins="0x01"
+#hint.gpiobutton.0.name="wps"
+#hint.gpiobutton.0.flags="0x04a1"
+
+# LEDs
+# Power Yellow	8
+# Power Green	9
+# WAN Green	12
+# WAN Yellow	14
+# WPS Orange	11
+# WPS Blue	13
+#GPIO8  STATUS ?
+#hint.gpioled.0.at="gpiobus0"
+#hint.gpioled.0.pins="0x0100"
+#hint.gpioled.0.name="status_yellow"
+#hint.gpioled.0.flags="0x0102"
+
+#GPIO9  STATUS
+#hint.gpioled.1.at="gpiobus0"
+#hint.gpioled.1.pins="0x0200"
+#hint.gpioled.1.name="status"
+#hint.gpioled.1.flags="0x0102"
+
+#GPIO11 WPS Orange
+#hint.gpioled.2.at="gpiobus0"
+#hint.gpioled.2.pins="0x0800"
+#hint.gpioled.2.name="wps_orange"
+#hint.gpioled.2.flags="0x0002"
+
+#GPIO12 WAN Green
+#hint.gpioled.3.at="gpiobus0"
+#hint.gpioled.3.pins="0x1000"
+#hint.gpioled.3.name="wan"
+#hint.gpioled.3.flags="0x0102"
+
+#GPIO13 WPS Blue
+#hint.gpioled.4.at="gpiobus0"
+#hint.gpioled.4.pins="0x2000"
+#hint.gpioled.4.name="wps"
+#hint.gpioled.4.flags="0x0002"
+
+#GPIO14 WAN Yellow
+#hint.gpioled.5.at="gpiobus0"
+#hint.gpioled.5.pins="0x4000"
+#hint.gpioled.5.name="wan_yellow"
+#hint.gpioled.5.flags="0x0102"
+
+
+#0x00000000-0x00030000 : "Bootloader"
+#0x00030000-0x00040000 : "Factory"
+#0x00040000-0x00070000 : "Config"
+#0x00070000-0x000b0000 : "Language"
+#0x000b0000-0x001a0000 : "Kernel"
+#0x001a0000-0x01000000 : "RootFS"
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00030000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00030000
+hint.map.1.end=0x00040000
+hint.map.1.name="linuxconfig"
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00040000
+hint.map.2.end=0x00050000
+hint.map.2.name="factory"
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start=0x00050000
+hint.map.3.end=0x007e0000
+hint.map.3.name="upgrade"
+
+hint.map.4.at="flash/spi0"
+hint.map.4.name="kernel"
+hint.map.4.start=0x00050000
+hint.map.4.end="search:0x00100000:0x10000:.!/bin/sh"
+
+hint.map.5.at="flash/spi0"
+hint.map.5.name="rootfs"
+hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.5.end=0x007e0000
+
+hint.map.6.at="flash/spi0"
+hint.map.6.start=0x007e0000
+hint.map.6.end=0x00800000
+hint.map.6.name="config"
+
+
+hint.rt.0.phymask=0x1f
+hint.rt.0.media=100
+hint.rt.0.fduplex=1
+

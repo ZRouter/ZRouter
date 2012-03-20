@@ -1,0 +1,21 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>LAN configuration</h1>
+
+$$$code:conf_table("LAN", "LAN", "interfaces.bridge0",
+{
+    { label = "IP Address", 		type = "node", htmltype = "text", 	node = "ipaddr" 	},
+})$$$
+
+$$$code:conf_table("DHCPD", "DHCP server configuration", "dhcpd.instances.instance[1]",
+{
+    { label = "Enabled", 		type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "First IP Address", 	type = "node", htmltype = "text", 	node = "range.start" 	},
+    { label = "Last IP Address", 	type = "node", htmltype = "text", 	node = "range.end" 	},
+    { label = "Default Lease Time", 	type = "node", htmltype = "text", 	node = "default-lease-time"},
+    { label = "Max Lease Time", 	type = "node", htmltype = "text", 	node = "max-lease-time" },
+})$$$
+
+$$$code:inc("htdocs/footer.html")$$$
+
+
+

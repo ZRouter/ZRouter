@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# PROVIDE: MAIN
+# REQUIRE: ADAPTATION FILESYSTEMS
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="MAIN"
+start_cmd="main_start"
+
+main_start()
+{
+	# Disable saving core files
+	sysctl kern.coredump=0
+	# Allow routing/forwarding
+	sysctl net.inet.ip.forwarding=1
+	# XXX: for debug, breakpoint on Break sequence
+	sysctl debug.kdb.break_to_debugger=1
+
+	# Configure local interface
+	ifconfig lo0 127.0.0.1/8
+
+	# Run syslogd
+	syslogd -s
+
+	# Run empty MPD
+	mpd  --background
+
+	# Run inetd
+	inetd -wW
+}
+
+load_rc_config $name
+
+run_rc_command $*

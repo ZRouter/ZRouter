@@ -1,0 +1,6 @@
+
+
+SOC_VENDOR=Broadcom
+SOC_CHIP=BCM5836
+
+NEW_IMAGE_TYPE=trximage

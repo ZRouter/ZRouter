@@ -1,0 +1,51 @@
+CONVERT_FROM_UBOOT:=${NEW_CURRENT_PACKING_FILE_NAME}
+CONVERT_TO_UBOOT:=${CURRENT_PACKING_FILE_NAME}
+
+# Let user to override
+CONVERTER_UBOOT?=uboot_mkimage
+.if !defined(UBOOT_KERNEL_COMPRESSION_TYPE) || empty(UBOOT_KERNEL_COMPRESSION_TYPE)
+_SUFFIX:=${CONVERT_FROM_UBOOT:E}
+.if !empty(_SUFFIX)
+.if ${_SUFFIX} == "gz"
+UBOOT_KERNEL_COMPRESSION_TYPE=gzip
+.elif ${_SUFFIX} == "bz2"
+UBOOT_KERNEL_COMPRESSION_TYPE=bzip2
+.elif ${_SUFFIX} == "lzma" || ${_SUFFIX} == "oldlzma" || ${_SUFFIX} == "xz"
+UBOOT_KERNEL_COMPRESSION_TYPE=lzma
+.else
+UBOOT_KERNEL_COMPRESSION_TYPE=none
+.endif
+.else
+UBOOT_KERNEL_COMPRESSION_TYPE=none
+.endif
+.endif
+
+.if !defined(UBOOT_KERNEL_LOAD_ADDRESS) || empty(UBOOT_KERNEL_LOAD_ADDRESS)
+.error "UBOOT_KERNEL_LOAD_ADDRESS must be defined"
+.endif
+
+.if !defined(UBOOT_KERNEL_ENTRY_POINT) || empty(UBOOT_KERNEL_ENTRY_POINT)
+.error "UBOOT_KERNEL_ENTRY_POINT must be defined"
+.endif
+
+.warning "XXX: ${CONVERTER_UBOOT} will use compression type - ${UBOOT_KERNEL_COMPRESSION_TYPE}"
+
+CONVERTER_UBOOT_FLAGS?= 			\
+	-A ${TARGET} -O linux -T kernel		\
+	-C ${UBOOT_KERNEL_COMPRESSION_TYPE}	\
+	-a ${UBOOT_KERNEL_LOAD_ADDRESS}		\
+	-e ${UBOOT_KERNEL_ENTRY_POINT}		\
+	-n 'FreeBSD Kernel Image'
+
+# Failback to /usr/local/bin if not found
+CONVERTER_UBOOT_BUILD_PATHS=${IMAGE_BUILD_PATHS}:/usr/local/bin
+
+.warning ${CONVERT_TO_UBOOT}:		${CONVERT_FROM_UBOOT}
+${CONVERT_TO_UBOOT}:		${CONVERT_FROM_UBOOT} ${ZTOOLS_PATH}/uboot_mkimage
+	@echo -n "========== Convert ${CONVERT_FROM_UBOOT} to ${CONVERT_TO_UBOOT}"
+	@echo " with ${CONVERTER_UBOOT} ============"
+	PATH=${CONVERTER_UBOOT_BUILD_PATHS} ${CONVERTER_UBOOT} 		\
+	    ${CONVERTER_UBOOT_FLAGS} -d "${CONVERT_FROM_UBOOT}"		\
+	    "${CONVERT_TO_UBOOT}"
+
+
