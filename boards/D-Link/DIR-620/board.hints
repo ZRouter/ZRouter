@@ -7,9 +7,9 @@ hint.obio.0.msize=0x10000000
 hint.nvram.0.base=0x1f030000
 hint.nvram.0.maxsize=0x2000
 hint.nvram.0.flags=9 # 1 = No check, 2 = Format U-Boot
-hint.nvram.1.base=0x1f032000
-hint.nvram.1.maxsize=0x4000
-hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
+#hint.nvram.1.base=0x1f032000
+#hint.nvram.1.maxsize=0x4000
+#hint.nvram.1.flags=9 # 1 = No check, 2 = Format U-Boot
 
 # on-board Ralink Frame Engine
 hint.rt.0.at="nexus0"
@@ -50,12 +50,12 @@ hint.rt305x_sysctl.0.gpiomode=0x00029f
 # GPIO10 - Reset BTN	IN PU II INT
 hint.gpioreset.0.at="gpiobus0"
 hint.gpioreset.0.pins="0x0400"
-hint.gpioreset.0.name="wps"
+hint.gpioreset.0.name="reset"
 hint.gpioreset.0.flags="0x04a1"
 
 ## GPIO0  - WPS BTN	IN PU II INT
 hint.gpiobutton.0.at="gpiobus0"
-hint.gpiobutton.0.pins="0x01"
+hint.gpiobutton.0.pins="0x0001"
 hint.gpiobutton.0.name="wps"
 hint.gpiobutton.0.flags="0x04a1"
 

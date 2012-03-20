@@ -25,8 +25,10 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 WITH_USB=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
-KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
-KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
+KERNCONF_MODULES_OVERRIDE+=	wlan_xauth wlan_wep wlan_tkip wlan_acl \
+	wlan_amrr wlan_ccmp wlan_rssadapt
+KERNCONF_MODULES_OVERRIDE+=	usb/umass cam
+KERNCONF_MODULES_OVERRIDE+=	usb/uplcom usb/u3g usb/umodem usb/ucom zlib
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
@@ -50,10 +52,11 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq
-# hostap
+TARGET_PROFILES+=	SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate \
+    dnsmasq hostap ipfw net_help ppp
 # nfs_client
 # racoon
+ 
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
