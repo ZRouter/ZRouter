@@ -29,6 +29,8 @@ WITH_USB=yes
 
 # Define empty LDSCRIPT_NAME, FreeBSD kernel make process will use his default
 KERNCONF_KERN_LDSCRIPT_NAME=
+KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uncompress\\\"
+KERNCONF_DEVICES+=	geom_redboot
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade

@@ -1,29 +1,8 @@
-
-# ohci
-hint.ohci.0.at="apb0"
-hint.ohci.0.maddr=0x1c000000
-hint.ohci.0.msize=0x01000000
-hint.ohci.0.irq=6
-
-# ehci
-hint.ehci.0.at="nexus0"
-hint.ehci.0.maddr=0x1b000000
-hint.ehci.0.msize=0x01000000
-hint.ehci.0.irq=1
-
 # arge0
-hint.arge.0.at="nexus0"
-hint.arge.0.maddr=0x19000000
-hint.arge.0.msize=0x1000
-hint.arge.0.irq=2
 # PHY20 = 1 << 20
 hint.arge.0.phymask=0xffffffff
 
 # arge1
-hint.arge.1.at="nexus0"
-hint.arge.1.maddr=0x1a000000
-hint.arge.1.msize=0x1000
-hint.arge.1.irq=3
 # PHY1, PHY2, PHY3 
 hint.arge.1.phymask=0xffffffff
 hint.arge.1.media=100
