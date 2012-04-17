@@ -1,7 +1,7 @@
 
 
 TARGET=			mips
-TARGET_ARCH=		mipseb
+TARGET_ARCH=		mips
 
 KERNCONF_MACHINE=	${TARGET} ${TARGET_ARCH}
 KERNCONF_IDENT?=	AR7161
@@ -55,7 +55,7 @@ KERNCONF_OPTIONS+=		NO_SWAPPING
 #KERNCONF_OPTIONS+= 	BOOTP_COMPAT
 #KERNCONF_OPTIONS+=		ROOTDEVNAME=\"nfs:192.168.0.90:/usr/home/ray/Projects/MIPS/FreeBSD/rootfs-mips\"
 #KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uncompress\\\"
-KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uncompress\\\"
+#KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uncompress\\\"
 
 
 # Board definitions
@@ -64,7 +64,7 @@ KERNCONF_OPTIONS+= 	TMPFS
 KERNCONF_OPTIONS+= 	CD9660
 #KERNCONF_OPTIONS+= 	GEOM_LABEL
 #KERNCONF_DEVICES+=	geom_map
-KERNCONF_DEVICES+=	geom_redboot
+#KERNCONF_DEVICES+=	geom_redboot
 KERNCONF_DEVICES+=	geom_uncompress
 #KERNCONF_DEVICES+=	nvram2env
 
