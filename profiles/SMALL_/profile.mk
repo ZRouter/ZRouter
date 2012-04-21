@@ -109,6 +109,7 @@ WORLD_SUBDIRS_ZROUTER+=target/usr.bin/hex2bin
 
 WORLD_SUBDIRS_USR_BIN+= \
 basename \
+cap_mkdb \
 dirname \
 fetch \
 find \
