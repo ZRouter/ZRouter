@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+. /etc/rc.subr
+
+name="restore_config"
+load_rc_config "$name"
+
+CONFIG_PART=$( get_config_part )
+
+if [ "${CONFIG_PART}" ]; then
+	debug "Restoring config from ${CONFIG_PART}"
+
+	dd if=${CONFIG_PART} of=${zconfig_temp_file}
+	tar -C /tmp -xvzf ${zconfig_temp_file}
+	rm -f ${zconfig_temp_file}
+
+	debug "."
+fi
+
+pwd_mkdb /etc/master.passwd
+cap_mkdb /etc/login.conf
+

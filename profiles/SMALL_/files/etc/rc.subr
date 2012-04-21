@@ -1253,6 +1253,8 @@ check_required_after()
 	return 0
 }
 
+. /etc/rc.zsubr
+
 fi
 
 _echoonce()
