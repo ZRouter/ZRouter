@@ -43,19 +43,6 @@ if [ -n "$_rcshutdown_watchdog" ]; then
 	pkill -TERM -P $_rcshutdown_watchdog >/dev/null 2>&1
 fi
 
-/bin/rm -f /etc/pwd.db
-/bin/rm -f /etc/spwd.db
-/usr/bin/tar czf /tmp/etc.tar.gz etc/* -C /tmp
-#dd if=/dev/mtd/rgdb /tmp/rgdb bs=65536 count=1
-#md5etc=`md5 /tmp/etc.tar.gz`
-#md5mtdetc=`md5 /tmp/rgdb`
-#if [ ${md5etc} != ${md5mtdetc}]; then
-echo "Saving /etc"
-/bin/dd if=/tmp/etc.tar.gz of=/dev/mtd/rgdb bs=64k count=1 conv=sync
-echo '.'
-#fi
-
-
 echo '.'
 # Kill unbreakable oinit
 kill -INT 1

@@ -38,6 +38,8 @@ main_prestart()
 		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
 	fi
 
+	pwd_mkdb /etc/master.passwd
+
 	ifconfig lo0 127.0.0.1/8
 	#ifconfig rt0 192.168.0.28/24
 	mpd  --background
@@ -56,12 +58,7 @@ main_poststart()
 
 main_stop()
 {
-	if [ -c /dev/map/config ]; then
-		cd /tmp/ && tar cvzf /tmp/etc.tar.gz etc/* ;
-		sysctl hw.cfi.rdonly=0
-		dd if=/tmp/etc.tar.gz of=/dev/map/config bs=64k conv=sync ;
-		sysctl hw.cfi.rdonly=1
-	fi
+	/etc/rc.save_config
 }
 
 load_rc_config $name
