@@ -1,36 +1,4 @@
 #!/bin/sh
 
-DEVCONFIG=/dev/map/config
-BLOCK_SIZE=64
-GEOM_PART=`echo ${DEVCONFIG} | sed 's/\/dev\///; s!\/!\\\/!' `
+echo "Use /etc/rc.save_config instead"
 
-i=0
-for s in `sysctl kern.geom.conftxt | grep "${GEOM_PART}"` ; do
-	i=$(( ${i} + 1 )) ;
-	if [ ${i} == 4 ] ; then
-    		DEVCONFIGSIZE=${s} ;
-	fi ;
-done
-
-DEVCONFIGBLKS=$((${DEVCONFIGSIZE} / ${BLOCK_SIZE} / 1024))
-
-#echo f1 > /dev/led/status
-cd /tmp
-echo "Dumping etc to etc.tar.gz"
-/usr/bin/tar cv --exclude '*pwd.db' -zf /tmp/etc.tar.gz etc/* -C /tmp
-
-lsline=`ls -l /tmp/etc.tar.gz`
-script="arg5() echo \$5; arg5 ${lsline}"
-size=`sh -c "${script}"`
-if [ ${size} -gt ${DEVCONFIGSIZE} ]; then
-	echo "etc.tar.gz too big ${size}, must be less than ${DEVCONFIGSIZE}"
-	echo "Please remove big files from /etc"
-	exit 1
-fi
-
-echo "Saving /etc"
-sysctl hw.cfi.rdonly=0
-/bin/dd if=/tmp/etc.tar.gz of=/dev/map/config bs=${BLOCK_SIZE}k count=${DEVCONFIGBLKS} conv=sync
-echo '.'
-
-#echo f9 > /dev/led/status
