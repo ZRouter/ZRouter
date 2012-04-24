@@ -5,6 +5,7 @@
 #
 ###################################################
 
+BOARD_REVISION=A1
 
 SOC_VENDOR=Atheros
 SOC_CHIP=AR7242
@@ -33,6 +34,13 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 KERNCONF_OPTIONS+=	ALT_BREAK_TO_DEBUGGER
 KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 
+#KERNCONF_OPTIONS+=	KTR
+#KERNCONF_OPTIONS+=	KTR_ENTRIES=1024
+#KERNCONF_OPTIONS+=	KTR_COMPILE=(KTR_INTR)
+#KERNCONF_OPTIONS+=	KTR_MASK=KTR_INTR
+#KERNCONF_OPTIONS+=	ALQ
+#KERNCONF_OPTIONS+=	KTR_ALQ
+
 KERNCONF_DEVICES+=	switch_rtl830x
 
 
@@ -47,13 +55,17 @@ KERNCONF_DEVICES+=	wlan_wep
 KERNCONF_DEVICES+=	wlan_ccmp
 KERNCONF_DEVICES+=	wlan_tkip
 
+KERNCONF_OPTIONS+=	AR71XX_ATH_EEPROM
+KERNCONF_OPTIONS+=	ATH_EEPROM_FIRMWARE
+KERNCONF_DEVICES+=	firmware
+
 KERNCONF_OPTIONS+=	AH_DEBUG
 KERNCONF_OPTIONS+=	ATH_DEBUG
 KERNCONF_OPTIONS+=	ATH_DIAGAPI
 KERNCONF_OPTIONS+=	ATH_ENABLE_11N
 KERNCONF_OPTIONS+=	AH_SUPPORT_AR5416
 #KERNCONF_OPTIONS+=	AH_SUPPORT_AR9130
-KERNCONF_OPTIONS+=	AH_RXCFG_SDMAMW_4BYTES
+#KERNCONF_OPTIONS+=	AH_RXCFG_SDMAMW_4BYTES
 # interrupt mitigation not possible on AR9130
 # option		AH_AR5416_INTERRUPT_MITIGATION
 KERNCONF_DEVICES+=	ath
@@ -103,8 +115,22 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp hostap ath
-# nfs_client
+TARGET_PROFILES+= 	\
+	SMALL_		\
+	ath		\
+	dhclient	\
+	dlink.ua.web	\
+	dnsmasq		\
+	hostap		\
+	ipfw		\
+	mroute		\
+	mpd		\
+	net_help	\
+	nfs_client	\
+	ntpdate		\
+	ppp		\
+	racoon		\
+	ssh
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
