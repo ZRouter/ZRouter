@@ -22,6 +22,18 @@ hint.floatphy.1.speed=1000
 # location, because flash just aliased to upper segments
 hint.ath.0.eepromdata=0x1fff1000
 
+# ath0 - slot 17
+hint.pcib.0.bus.0.17.0.ath_fixup_addr=0x1fff1000
+hint.pcib.0.bus.0.17.0.ath_fixup_size=4096
+# ath1 - slot 18
+hint.pcib.0.bus.0.18.0.ath_fixup_addr=0x1fff5000
+hint.pcib.0.bus.0.18.0.ath_fixup_size=4096
+# .. and now, telling each ath(4) NIC where to find the firmware
+# image.
+hint.ath.0.eeprom_firmware="pcib.0.bus.0.17.0.eeprom_firmware"
+hint.ath.1.eeprom_firmware="pcib.0.bus.0.18.0.eeprom_firmware"
+
+
 # (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<13) | (1<<14) | (1<<15) | (1<<16)
 #  000011 11100000 11000011
 # Output: 0,1,6,7,13,14,15,16,17
