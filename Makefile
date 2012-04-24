@@ -75,6 +75,17 @@ TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
 .endif
 ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
+KERNCONF_OPTIONS+=	SOC_VENDOR=\\\"${SOC_VENDOR}\\\"
+KERNCONF_OPTIONS+=	SOC_MODEL=\\\"${SOC_CHIP}\\\"
+.if defined(SOC_REVISION)
+KERNCONF_OPTIONS+=	SOC_REV=\\\"${SOC_REVISION}\\\"
+.endif
+KERNCONF_OPTIONS+=	DEVICE_VENDOR=\\\"${TARGET_VENDOR}\\\"
+KERNCONF_OPTIONS+=	DEVICE_MODEL=\\\"${TARGET_DEVICE}\\\"
+.if defined(BOARD_REVISION)
+KERNCONF_OPTIONS+=	DEVICE_REV=\\\"${BOARD_REVISION}\\\"
+.endif
+
 KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
 # Allow to undefine LDSCRIPT_NAME if (board|soc).mk was set it to ""
 .if !empty(KERNCONF_KERN_LDSCRIPT_NAME)
@@ -212,7 +223,11 @@ kernel-toolchain:
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
+.if defined(WITH_KERNFAST)
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILE} buildkernel
+.else
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
+.endif
 
 #XXX_BEGIN Only for testing
 KMODOWN!=id -u -n
@@ -374,20 +389,26 @@ FREEBSD_BUILD_ENV_${var}
 # World
 #
 world-toolchain:
+.if !defined(SKIP_WORLD_INSTALL)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} \
 	    -C ${FREEBSD_SRC_TREE} toolchain
+.endif
 
 world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
+.if !defined(SKIP_WORLD_INSTALL)
 	@echo "XXX: need to find a way to install required includes correctly"
 	mkdir -p ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/include/lzo
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
 	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
 	    buildworld
+.endif
 
 world-install: rootfs-dir
+.if !defined(SKIP_WORLD_INSTALL)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
 	    ${_WORLD_INSTALL_ENV} SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" \
 	    DESTDIR=${WORLDDESTDIR} -C ${FREEBSD_SRC_TREE} installworld
+.endif
 
 world-fix-lib-links:
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -528,6 +549,9 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	 ln -sf vi nview
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
+	hg --repository "${ZROUTER_ROOT}" tip \
+	    --template 'revision="{rev}"\ntimestamp="{date|isodate}"\ndate="{date|isodate}"\n' > \
+	    "${NEW_ROOTFS}/etc/zrouter_version"
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
 	    find ./usr/ -type d -empty -delete
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
