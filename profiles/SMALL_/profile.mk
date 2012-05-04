@@ -199,5 +199,5 @@ KERNCONF_MODULES_OVERRIDE+=libalias/modules/pptp
 #KERNCONF_MODULES_OVERRIDE+=libalias/modules/nbt
 #KERNCONF_MODULES_OVERRIDE+=libalias/modules/skinny
 KERNCONF_MODULES_OVERRIDE+=geom/geom_label
-KERNCONF_MODULES_OVERRIDE+=md unionfs msdosfs ufs
+KERNCONF_MODULES_OVERRIDE+=md unionfs msdosfs ufs tmpfs
 
