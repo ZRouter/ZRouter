@@ -3,7 +3,7 @@
 # $FreeBSD$
 #
 
-# PROVIDE: FILESYSTEMS
+# PROVIDE: DAEMON
 # REQUIRE: root mountcritlocal MAIN
 
 #	This is a dummy dependency, for services which require file systems
