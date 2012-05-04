@@ -1,0 +1,2 @@
+watchdogd
+Include watchdogd and rc.d script. watchdogd periodically update SoC watchdog counter, if software freeze, then watchdog H/W reset system.
