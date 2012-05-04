@@ -132,7 +132,7 @@ hint.gpiobutton.0.flags="0x04a1"
 # SPI flash
 hint.spi.0.at="nexus0"
 hint.spi.0.maddr=0x1f000000
-hint.spi.0.msize=0x10
+hint.spi.0.msize=0x01000000
 
 hint.mx25l.0.at="spibus0"
 hint.mx25l.0.cs=0
