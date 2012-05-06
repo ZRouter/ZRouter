@@ -122,6 +122,21 @@ IMAGE_HEADER_EXTRA?=0x1c
 IMAGE_HEADER_EXTRA?=0
 .endif
 
+.if defined(BUILD_ZROUTER_WITH_CLANG)
+CLANG_TC_VARS?=			\
+	WITH_CLANG=yes
+CLANG_VARS?=			\
+	WITH_CLANG=yes		\
+	CC=clang		\
+	CXX=clang++		\
+	CPP=clang-cpp
+.else
+CLANG_TC_VARS?=			\
+	WITHOUT_CLANG=yes
+CLANG_VARS?=			\
+	WITHOUT_CLANG=yes
+.endif
+
 build-verify:
 .if !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/) || !exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/${TARGET_DEVICE}/)
 	@echo "Error: No board configuration for pair TARGET_VENDOR/TARGET_DEVICE \`\"${TARGET_VENDOR}\"/\"${TARGET_DEVICE}\"\`"
@@ -207,18 +222,27 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 # TODO: make dtd file for FDT
 #
 
+_KERNEL_TC_BUILD_ENV= \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET_CPUARCH} \
+	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	WITHOUT_RESCUE=yes \
+	${CLANG_TC_VARS} \
+	-DNO_CLEAN
+
 _KERNEL_BUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
 	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
-	WITHOUT_CLANG=yes \
+	${CLANG_VARS} \
 	-DNO_CLEAN
 
 
 kernel-toolchain:
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
@@ -239,7 +263,6 @@ _KERNEL_BUILD_ENV+=KMODGRP=${KMODGRP}
 kernel:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
 .ORDER:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
 
-
 _WORLD_TCBUILD_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
@@ -255,10 +278,11 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
 	WITHOUT_CDDL=yes \
-	WITHOUT_CLANG=yes \
+	${CLANG_TC_VARS} \
 	WITHOUT_CRYPTO=yes \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
+	MALLOC_PRODUCTION=yes \
 	-DNO_CLEAN
 
 _WORLD_BUILD_ENV= \
@@ -269,7 +293,7 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_ASSERT_DEBUG=yes \
 	WITHOUT_ATM=yes \
 	WITHOUT_AUDIT=yes \
-	WITHOUT_CLANG=yes \
+	${CLANG_VARS} \
 	WITHOUT_INFO=yes \
 	WITHOUT_INSTALLLIB=yes \
 	WITHOUT_IPX=yes \
@@ -279,6 +303,7 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
 	WITHOUT_SSP=yes \
+	MALLOC_PRODUCTION=yes \
 	-DNO_CLEAN
 
 
