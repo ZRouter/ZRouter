@@ -39,7 +39,7 @@ hint.arge.1.irq=3
 # ar71xx_spi
 hint.spi.0.at="nexus0"
 hint.spi.0.maddr=0x1f000000
-hint.spi.0.msize=0x10
+hint.spi.0.msize=0x01000000
 
 # Watchdog
 hint.ar71xx_wdog.0.at="nexus0"
