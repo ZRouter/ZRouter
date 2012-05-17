@@ -19,6 +19,11 @@ hint.ath.0.msize=0x30000
 hint.ath.0.irq=0
 hint.ath.0.eepromaddr=0x1fff1000
 
+# ar71xx_spi
+hint.spi.0.at="nexus0"
+hint.spi.0.maddr=0x1f000000
+hint.spi.0.msize=0x01000000
+
 # SYS led
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.name="sys"
