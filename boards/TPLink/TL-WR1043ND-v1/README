@@ -35,6 +35,13 @@ bootm 0xbf020000
 
 (hint: you can concatenate the commands by ";")
 
+
+How to boot kernel without flashing it
+--------------------------------------------------------------------------
+
+tftpboot 0x80040000 TPLink_TL-WR1043ND-v1_kernel; go 0x80050000
+
+
 TODO
 --------------------------------------------------------------------------
 
