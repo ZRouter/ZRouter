@@ -16,11 +16,6 @@ hint.ehci.0.maddr=0x1b000100
 hint.ehci.0.msize=0x00ffff00
 hint.ehci.0.irq=1
 
-# ar71xx_spi
-hint.spi.0.at="nexus0"
-hint.spi.0.maddr=0x1f000000
-hint.spi.0.msize=0x01000000
-
 # SPI flash
 hint.mx25l.0.at="spibus0"
 hint.mx25l.0.cs=0
