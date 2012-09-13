@@ -12,7 +12,7 @@ NO_MAN=		mpd.8
 
 PREFIX?=		/
 BINDIR?=		${PREFIX}/sbin
-VERSION=		5.6a1
+VERSION=		5.7a
 
 # Default configuration directory
 
