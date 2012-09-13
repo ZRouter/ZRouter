@@ -138,7 +138,7 @@ MsgSend(MsgHandler *m, int type, void *arg)
     SETOVERLOAD(QUEUELEN());
 
     if (!msgpipesent) {
-	char	buf[1];
+	char	buf[1] = { 0x2a };
 	if (write(msgpipe[PIPE_WRITE], buf, 1) > 0)
 	    msgpipesent = 1;
     }

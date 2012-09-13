@@ -1,4 +1,4 @@
-<!-- $Id: interface.sgml,v 1.27 2009/10/30 15:31:04 amotin Exp $ -->
+<!-- $Id: interface.sgml,v 1.29 2011/08/30 11:47:02 dmitryluhtionov Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -17,6 +17,26 @@
   name="IP Control Protocol (IPCP) layer"> which is specific to IP.
 
 <descrip>
+
+<tag><tt>
+set iface name [ <em>name</em> ]
+</tt></tag>
+
+This command changes interface name from default ngX to specified one.
+If name argument is not specified, original ngX name is restored.
+Note that inside Netgraph original ngX name is always used.
+
+<tag><tt>
+set iface description [ <em>description</em> ]
+</tt></tag>
+
+This command changes interface description.
+
+<tag><tt>
+set iface group [ <em>group</em> ]
+</tt></tag>
+
+This command add interface to specific group.
 
 <tag><tt>
 set iface addrs [!]<em>local-ip</em> [!]<em>remote-ip</em>

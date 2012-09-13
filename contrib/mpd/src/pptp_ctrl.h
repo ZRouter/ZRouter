@@ -193,8 +193,8 @@
     u_int16_t		serno;		/* call serial # */
     u_int32_t		minBps;		/* minimum BPS */
     u_int32_t		maxBps;		/* maximum BPS */
-    u_int32_t		frameType;	/* framing type */
     u_int32_t		bearType;	/* bearer type */
+    u_int32_t		frameType;	/* framing type */
     u_int16_t		recvWin;	/* pkt receive window size */
     u_int16_t		ppd;		/* pkt processing delay */
     u_int16_t		numLen;		/* phone number length */
@@ -205,7 +205,7 @@
 
 #else
   { { "cid", 2 }, { "serno", 2 }, { "minBPS", 4 }, { "maxBPS", 4 },
-    { "frameType", 4 }, { "bearType", 4 }, { "recvWin", 2 }, { "ppd", 2 },
+    { "bearType", 4 }, { "frameType", 4 },{ "recvWin", 2 }, { "ppd", 2 },
     { "numLen", 2 }, { PPTP_RESV_PREF "0", 2 },
     { "phone", PPTP_PHONE_LEN }, { "subaddr", PPTP_SUBADDR_LEN },
     { NULL, 0 } },

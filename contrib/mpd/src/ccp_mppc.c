@@ -191,8 +191,7 @@ MppcInit(Bund b, int dir)
     strcpy(mp.peerhook, mppchook);
     if (NgSendMsg(gCcpCsock, path,
 	    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("[%s] can't create %s node: %s",
-    	    b->name, mp.type, strerror(errno)));
+	Perror("[%s] can't create %s node", b->name, mp.type);
 	return(-1);
     }
 
@@ -209,8 +208,8 @@ MppcInit(Bund b, int dir)
     snprintf(path, sizeof(path), "[%x]:", id);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_MPPC_COOKIE, cmd, &conf, sizeof(conf)) < 0) {
-	Log(LG_ERR, ("[%s] can't config %s node at %s: %s",
-    	    b->name, NG_MPPC_NODE_TYPE, path, strerror(errno)));
+	Perror("[%s] can't config %s node at %s",
+    	    b->name, NG_MPPC_NODE_TYPE, path);
 	NgFuncShutdownNode(gCcpCsock, b->name, path);
 	return(-1);
     }
@@ -494,8 +493,7 @@ MppcRecvResetReq(Bund b, int id, Mbuf bp, int *noAck)
     snprintf(path, sizeof(path), "[%x]:", b->ccp.comp_node_id);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_MPPC_COOKIE, NGM_MPPC_RESETREQ, NULL, 0) < 0) {
-	Log(LG_ERR, ("[%s] reset-req to %s node: %s",
-    	    b->name, NG_MPPC_NODE_TYPE, strerror(errno)));
+	Perror("[%s] reset-req to %s node", b->name, NG_MPPC_NODE_TYPE);
     }
 
     /* No ResetAck required for MPPC */
@@ -754,8 +752,7 @@ MppcTestCap(void)
 
     /* Create a netgraph socket node */
     if (NgMkSockNode(NULL, &cs, &ds) < 0) {
-	Log(LG_ERR, ("MppcTestCap: can't create socket node: %s",
-    	    strerror(errno)));
+	Perror("MppcTestCap: can't create socket node");
     	return(-1);
     }
 
@@ -765,8 +762,7 @@ MppcTestCap(void)
     strcpy(mp.peerhook, NG_MPPC_HOOK_COMP);
     if (NgSendMsg(cs, ".",
       NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("MppcTestCap: can't create %s node: %s",
-    	    mp.type, strerror(errno)));
+	Perror("MppcTestCap: can't create %s node", mp.type);
 	goto done;
     }
 
@@ -779,8 +775,7 @@ MppcTestCap(void)
     if (NgSendMsg(cs, "mppc",
       NGM_MPPC_COOKIE, NGM_MPPC_CONFIG_COMP, &conf, sizeof(conf)) < 0) {
         if (errno != EPROTONOSUPPORT) {
-	    Log(LG_ERR, ("MppcTestCap: can't config %s node: %s",
-    		NG_MPPC_NODE_TYPE, strerror(errno)));
+	    Perror("MppcTestCap: can't config %s node", NG_MPPC_NODE_TYPE);
 	}
     } else 
 	MPPCPresent = 1;
@@ -791,8 +786,7 @@ MppcTestCap(void)
     if (NgSendMsg(cs, "mppc",
       NGM_MPPC_COOKIE, NGM_MPPC_CONFIG_COMP, &conf, sizeof(conf)) < 0) {
         if (errno != EPROTONOSUPPORT) {
-	    Log(LG_ERR, ("MppcTestCap: can't config %s node: %s",
-    		NG_MPPC_NODE_TYPE, strerror(errno)));
+	    Perror("MppcTestCap: can't config %s node", NG_MPPC_NODE_TYPE);
 	}
     } else 
 	MPPEPresent = 1;

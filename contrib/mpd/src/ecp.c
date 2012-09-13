@@ -171,8 +171,7 @@ EcpsInit(void)
     /* Create a netgraph socket node */
     snprintf(name, sizeof(name), "mpd%d-eso", gPid);
     if (NgMkSockNode(name, &gEcpCsock, &gEcpDsock) < 0) {
-	Log(LG_ERR, ("EcpsInit(): can't create %s node: %s",
-    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
+	Perror("EcpsInit(): can't create %s node", NG_SOCKET_NODE_TYPE);
 	return(-1);
     }
     (void) fcntl(gEcpCsock, F_SETFD, 1);
@@ -653,8 +652,8 @@ EcpLayerUp(Fsm fp)
     strcpy(cn.peerhook, NG_PPP_HOOK_DECRYPT);
     if (NgSendMsg(gEcpCsock, ".:",
 	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-        b->name, ".:", cn.ourhook, cn.path, cn.peerhook,  strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+          b->name, ".:", cn.ourhook, cn.path, cn.peerhook);
     }
   }
   if (ecp->xmit && ecp->xmit->Encrypt)
@@ -665,8 +664,8 @@ EcpLayerUp(Fsm fp)
     strcpy(cn.peerhook, NG_PPP_HOOK_ENCRYPT);
     if (NgSendMsg(gEcpCsock, ".:",
 	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-        b->name, ".:", cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+          b->name, ".:", cn.ourhook, cn.path, cn.peerhook);
     }
   }
 

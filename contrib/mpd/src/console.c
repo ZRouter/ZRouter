@@ -233,10 +233,13 @@ ConsoleConnect(int type, void *cookie)
   cs->write = ConsoleSessionWrite;
   cs->writev = ConsoleSessionWriteV;
   cs->prompt = ConsoleSessionShowPrompt;
-//  cs->state = STATE_USERNAME;
-  cs->state = STATE_AUTHENTIC;
+#ifdef WITH_CONSOLE_AUTH
+    cs->state = STATE_USERNAME;
+#else
+    cs->state = STATE_AUTHENTIC;
+    cs->context.priv = 2;
+#endif
   cs->context.cs = cs;
-  cs->context.priv = 2; //-
   RWLOCK_WRLOCK(c->lock);
   SLIST_INSERT_HEAD(&c->sessions, cs, next);
   RWLOCK_UNLOCK(c->lock);
@@ -301,7 +304,12 @@ StdConsoleConnect(Console c)
     cs->write = StdConsoleSessionWrite;
     cs->writev = StdConsoleSessionWriteV;
     cs->prompt = ConsoleSessionShowPrompt;
+#ifdef WITH_CONSOLE_AUTH
+    cs->state = STATE_USERNAME;
+#else
     cs->state = STATE_AUTHENTIC;
+    cs->context.priv = 2;
+#endif
     cs->context.cs = cs;
     strcpy(cs->user.username, "root");
     cs->context.priv = 2;
@@ -351,6 +359,7 @@ StdConsoleSessionClose(ConsoleSession cs)
     /* Restore original STDxxx flags. */
     if (gOrigFlags>=0)
 	fcntl(cs->fd, F_SETFL, gOrigFlags);
+    cs->close = NULL;
     return;
 }
 
@@ -375,9 +384,9 @@ ConsoleSessionReadEvent(int type, void *cookie)
       if (n < 0) {
 	if (errno == EAGAIN)
 	  goto out;
-	Log(LG_ERR, ("CONSOLE: Error while reading: %s", strerror(errno)));
+	Perror("CONSOLE: Error while reading");
       } else {
-        if (cs->fd == 0)
+        if (cs->fd == 0 && isatty(cs->fd))
 	  goto out;
 	Log(LG_ERR, ("CONSOLE: Connection closed by peer"));
       }
@@ -824,6 +833,21 @@ ConsoleSetCommand(Context ctx, int ac, char *av[], void *arg)
   }
 
   return 0;
+}
+
+/*
+ * ConsoleShutdown()
+ */
+
+void
+ConsoleShutdown(Console c)
+{
+    ConsoleSession s, tmp;
+
+    SLIST_FOREACH_SAFE(s, &c->sessions, next, tmp) {
+	if (s->close != NULL)
+		s->close(s);
+    }
 }
 
 /*

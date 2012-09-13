@@ -179,6 +179,10 @@ ACLDestroy(struct acl *acl)
 
 void	authparamsInit(struct authparams *ap) {
     memset(ap,0,sizeof(struct authparams));
+    ap->msdomain = NULL;
+#ifdef SIOCSIFDESCR
+    ap->ifdescr = NULL;
+#endif
     SLIST_INIT(&ap->routes);
 }
 
@@ -212,6 +216,9 @@ void	authparamsDestroy(struct authparams *ap) {
     }
 
     Freee(ap->msdomain);
+#ifdef SIOCSIFDESCR
+    Freee(ap->ifdescr);
+#endif
     
     memset(ap,0,sizeof(struct authparams));
 }
@@ -252,6 +259,10 @@ void	authparamsCopy(struct authparams *src, struct authparams *dst) {
 
     if (src->msdomain)
 	dst->msdomain = Mstrdup(MB_AUTH, src->msdomain);
+#ifdef SIOCSIFDESCR
+    if (src->ifdescr)
+	dst->ifdescr = Mstrdup(MB_AUTH, src->ifdescr);
+#endif
 }
 
 void	authparamsMove(struct authparams *src, struct authparams *dst)
@@ -709,6 +720,14 @@ AuthStat(Context ctx, int ac, char *av[], void *arg)
 
     Printf("Auth Data\r\n");
     Printf("\tPeer authname   : %s\r\n", au->params.authname);
+    Printf("\tInterface name  : %s\r\n", au->params.ifname);
+#ifdef SIOCSIFDESCR
+    Printf("\tInterface descr.: \"%s\"\r\n", 
+	au->params.ifdescr != NULL ? au->params.ifdescr : "<none>");
+#endif
+#ifdef SIOCAIFGROUP
+    Printf("\tInterface group : %s\r\n", au->params.ifgroup);
+#endif
     Printf("\tIP range        : %s\r\n", (au->params.range_valid)?
 	u_rangetoa(&au->params.range,buf,sizeof(buf)):"");
     Printf("\tIP pool         : %s\r\n", au->params.ippool);
@@ -1320,8 +1339,7 @@ AuthSystem(AuthData auth)
     err=errno;
     GIANT_MUTEX_UNLOCK(); /* We must release lock before Log() */
     if (err)
-      Log(LG_ERR, ("[%s] AUTH: Error retrieving passwd: %s",
-        auth->info.lnkname, strerror(errno)));
+      Perror("[%s] AUTH: Error retrieving passwd", auth->info.lnkname);
     else
       Log(LG_AUTH, ("[%s] AUTH: User \"%s\" not found in the systems database",
         auth->info.lnkname, auth->params.authname));
@@ -2274,6 +2292,18 @@ AuthExternal(AuthData auth)
     } else if (strcmp(attr, "MPD_ACTION") == 0) {
 	strlcpy(auth->params.action, val, sizeof(auth->params.action));
 
+    } else if (strcmp(attr, "MPD_IFACE_NAME") == 0) {
+	strlcpy(auth->params.ifname, val, sizeof(auth->params.ifname));
+
+#ifdef SIOCSIFDESCR
+    } else if (strcmp(attr, "MPD_IFACE_DESCR") == 0) {
+	Freee(auth->params.ifdescr);
+	auth->params.ifdescr = Mstrdup(MB_AUTH, val);
+#endif /* SIOCSIFDESCR */
+#ifdef SIOCAIFGROUP
+    } else if (strcmp(attr, "MPD_IFACE_GROUP") == 0) {
+	strlcpy(auth->params.ifgroup, val, sizeof(auth->params.ifgroup));
+#endif
 #if defined(USE_IPFW) || defined(USE_NG_BPF)
     } else if (strncmp(attr, "MPD_", 4) == 0) {
 	struct acl	**acls, *acls1;

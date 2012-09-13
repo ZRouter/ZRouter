@@ -156,6 +156,15 @@
     char		peermacaddr[32];	/* hr representation of the peer MAC address */
     char		peeriface[IFNAMSIZ];	/* hr representation of the peer interface */
 
+    /* Iface stuff */
+    char		ifname[IFNAMSIZ];	/* Interface name */
+#ifdef SIOCSIFDESCR
+    char		*ifdescr;		/* Interface description */
+#endif
+#ifdef SIOCAIFGROUP
+    char		ifgroup[IFNAMSIZ];	/* Interface group */
+#endif
+
     struct {
       int	policy;			/* MPPE_POLICY_* */
       int	types;			/* MPPE_TYPE_*BIT bitmask */

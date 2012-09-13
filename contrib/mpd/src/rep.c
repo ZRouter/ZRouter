@@ -40,8 +40,7 @@ RepIncoming(Link l)
     if (r->csock <= 0) {
 	/* Create a new netgraph node to control TCP ksocket node. */
 	if (NgMkSockNode(NULL, &r->csock, NULL) < 0) {
-    	    Log(LG_ERR, ("[%s] Rep: can't create control socket: %s",
-    		r->name, strerror(errno)));
+    	    Perror("[%s] Rep: can't create control socket", r->name);
     	    PhysClose(l);
 	    return;
 	}
@@ -53,8 +52,8 @@ RepIncoming(Link l)
     snprintf(mkp.peerhook, sizeof(mkp.peerhook), NG_TEE_HOOK_LEFT2RIGHT);
     if (NgSendMsg(r->csock, ".:", NGM_GENERIC_COOKIE,
         NGM_MKPEER, &mkp, sizeof(mkp)) < 0) {
-    	Log(LG_ERR, ("[%s] Rep: can't attach %s %s node: %s",
-    	    l->name, NG_TEE_NODE_TYPE, mkp.ourhook, strerror(errno)));
+    	Perror("[%s] Rep: can't attach %s %s node",
+    	    l->name, NG_TEE_NODE_TYPE, mkp.ourhook);
 	close(r->csock);
     	PhysClose(l);
 	return;
@@ -62,8 +61,7 @@ RepIncoming(Link l)
 
     /* Get tee node ID */
     if ((r->node_id = NgGetNodeID(r->csock, ".:tee")) == 0) {
-	Log(LG_ERR, ("[%s] Rep: Cannot get %s node id: %s",
-	    l->name, NG_TEE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] Rep: Cannot get %s node id", l->name, NG_TEE_NODE_TYPE);
 	close(r->csock);
     	PhysClose(l);
 	return;

@@ -185,8 +185,13 @@ static int
 UdpInst(Link l, Link lt)
 {
     UdpInfo	pi;
-    l->info = Mdup(MB_PHYS, lt->info, sizeof(struct udpinfo));
-    pi = (UdpInfo) l->info;
+    UdpInfo const pit = (UdpInfo) lt->info;
+
+    /* Initialize this link */
+    pi = (UdpInfo) (l->info = Mdup(MB_PHYS, lt->info, sizeof(*pi)));
+    if (pit->conf.fqdn_peer_addr != NULL)
+        pi->conf.fqdn_peer_addr =
+            Mstrdup(MB_PHYS, pit->conf.fqdn_peer_addr);
     
     if (pi->If)
 	pi->If->refs++;
@@ -216,8 +221,7 @@ UdpOpen(Link l)
 
 	/* Create a new netgraph node to control TCP ksocket node. */
 	if (NgMkSockNode(NULL, &csock, NULL) < 0) {
-		Log(LG_ERR, ("[%s] TCP can't create control socket: %s",
-		    l->name, strerror(errno)));
+		Perror("[%s] TCP can't create control socket", l->name);
 		goto fail;
 	}
 	(void)fcntl(csock, F_SETFD, 1);
@@ -228,6 +232,7 @@ UdpOpen(Link l)
         }
 
 	/* Attach ksocket node to PPP node */
+	memset(&mkp, 0, sizeof(mkp));
 	strcpy(mkp.type, NG_KSOCKET_NODE_TYPE);
 	strlcpy(mkp.ourhook, hook, sizeof(mkp.ourhook));
 	if ((pi->conf.self_addr.family==AF_INET6) || 
@@ -238,8 +243,8 @@ UdpOpen(Link l)
 	}
 	if (NgSendMsg(csock, path, NGM_GENERIC_COOKIE,
 	    NGM_MKPEER, &mkp, sizeof(mkp)) < 0) {
-	        Log(LG_ERR, ("[%s] can't attach %s node: %s",
-	    	    l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	        Perror("[%s] can't attach %s node",
+	    	    l->name, NG_KSOCKET_NODE_TYPE);
 		goto fail;
 	}
 
@@ -247,16 +252,15 @@ UdpOpen(Link l)
 	strlcat(path, hook, sizeof(path));
 
 	/* Give it a name */
+	memset(&nm, 0, sizeof(nm));
 	snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-kso", gPid, l->name);
 	if (NgSendMsg(csock, path,
 	    NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-		Log(LG_ERR, ("[%s] can't name %s node: %s",
-		    l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+		Perror("[%s] can't name %s node", l->name, NG_KSOCKET_NODE_TYPE);
 	}
 
 	if ((pi->node_id = NgGetNodeID(csock, path)) == 0) {
-	    Log(LG_ERR, ("[%s] Cannot get %s node id: %s",
-		l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] Cannot get %s node id", l->name, NG_KSOCKET_NODE_TYPE);
 	    goto fail;
 	};
 
@@ -267,8 +271,8 @@ UdpOpen(Link l)
 	((int *)(ksso->value))[0]=1;
 	if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
     	    NGM_KSOCKET_SETOPT, &u, sizeof(u)) < 0) {
-    	    Log(LG_ERR, ("[%s] can't setsockopt() %s node: %s",
-    		l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+    	    Perror("[%s] can't setsockopt() %s node",
+    		l->name, NG_KSOCKET_NODE_TYPE);
 	    goto fail;
 	}
 
@@ -283,8 +287,7 @@ UdpOpen(Link l)
 	u_addrtosockaddr(&pi->conf.self_addr, pi->conf.self_port, &addr);
 	if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
 	  NGM_KSOCKET_BIND, &addr, addr.ss_len) < 0) {
-	    Log(LG_ERR, ("[%s] can't bind() %s node: %s",
-    		l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] can't bind() %s node", l->name, NG_KSOCKET_NODE_TYPE);
 	    goto fail;
 	}
     }
@@ -303,8 +306,7 @@ UdpOpen(Link l)
     /* Connect socket if peer address and port is specified */
     if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
       NGM_KSOCKET_CONNECT, &addr, addr.ss_len) < 0) {
-	Log(LG_ERR, ("[%s] can't connect() %s node: %s",
-	    l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	Perror("[%s] can't connect() %s node", l->name, NG_KSOCKET_NODE_TYPE);
 	goto fail;
     }
   
@@ -378,7 +380,7 @@ UdpDoClose(Link l)
 
 	/* Get a temporary netgraph socket node */
 	if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-		Log(LG_ERR, ("UDP: NgMkSockNode: %s", strerror(errno)));
+		Perror("UDP: NgMkSockNode");
 		return;
 	}
 	
@@ -657,16 +659,14 @@ UdpListen(Link l)
 	/* Setsockopt socket. */
 	opt = 1;
 	if (setsockopt(pi->If->csock, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt))) {
-		Log(LG_ERR, ("UDP: can't setsockopt socket: %s",
-		    strerror(errno)));
+		Perror("UDP: can't setsockopt socket");
 		goto fail2;
 	};
 
 	/* Bind socket. */
 	u_addrtosockaddr(&pi->If->self_addr, pi->If->self_port, &addr);
 	if (bind(pi->If->csock, (struct sockaddr *)(&addr), addr.ss_len)) {
-		Log(LG_ERR, ("UDP: can't bind socket: %s",
-		    strerror(errno)));
+		Perror("UDP: can't bind socket");
 		goto fail2;
 	}
 

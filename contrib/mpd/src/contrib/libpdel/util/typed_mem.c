@@ -210,8 +210,10 @@ typed_mem_enable(void)
 	pthread_mutexattr_destroy(&mattr);
 
 	/* Fill in guard bytes */
-	for (i = 0; i < ALIGNMENT; i++)
-		typed_mem_guard[i] = typed_mem_guard_data[i % ALIGNMENT];
+	for (i = 0; i < ALIGNMENT; i++) {
+		typed_mem_guard[i] = typed_mem_guard_data[
+		    i % sizeof(typed_mem_guard_data)];
+	}
 
 	/* Done */
 	typed_mem_enabled = 1;
@@ -570,8 +572,12 @@ typed_mem_vasprintf(
 	char *s;
 	int r;
 
-	if ((r = vasprintf(ret, fmt, args)) == -1)
+	if ((r = vasprintf(ret, fmt, args)) == -1) {
+		*ret = NULL;
 		return (-1);
+	}
+	if (!typed_mem_enabled)
+		return r;
 	s = *ret;
 #if TYPED_MEM_TRACE
 	*ret = typed_mem_strdup(file, line, type, s);

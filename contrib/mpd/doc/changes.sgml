@@ -1,4 +1,4 @@
-<!-- $Id: changes.sgml,v 1.265 2011/04/15 19:01:36 amotin Exp $ -->
+<!-- $Id: changes.sgml,v 1.278 2012/03/19 08:30:45 amotin Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -6,10 +6,46 @@
   <sect><heading>Change history<label id="changes"></heading>
 
   <p>
+    Changes since version 5.6:
+    <itemize>
+	<item> New features:
+	<itemize>
+	  <item> Added `unset radius server ...` command.
+	  </item>
+	</itemize>
+	</item>
+	<item> Bugfixes:
+	<itemize>
+	  <item> Restore `show sessions` as unprivileged command.
+	  </item>
+	  <item> Fix infinite event loop when STDIN redirected to /dev/null
+		 after it recently got non-blocking mode support.
+	  </item>
+	</itemize>
+	</item>
+    </itemize>
+  </p>
+  <p>
     Changes since version 5.5:
     <itemize>
 	<item> New features:
 	<itemize>
+	  <item> Added `mpd-iface-name` RADIUS attribute.
+	  </item>
+	  <item> Added `mpd-iface-descr` RADIUS attribute.
+	  </item>
+	  <item> Added `mpd-iface-group` RADIUS attribute.
+	  </item>
+	  <item> Added `mpd-peer-ident` RADIUS attribute.
+	  </item>
+	  <item> Added `set iface name ...` command.
+	  </item>
+	  <item> Added `set iface description ...` command.
+	  </item>
+	  <item> Added `set iface group ...` command.
+	  </item>
+	  <item> Added support for NetFlow v9 export.
+	  </item>
 	  <item> Added `set l2tp|pptp|tcp|udp resolve-once ...` command.
 		They allow to resolve peer address every time on reconnect.
 	  </item>
@@ -24,6 +60,10 @@
 	</item>
 	<item> Bugfixes:
 	<itemize>
+	  <item> Fix invoke `set iface up|down-script` without arguments.
+	  </item>
+	  <item> Fix `show eap` command
+	  </item>
 	  <item> Fix build on older FreeBSD versions.
 	  </item>
 	  <item> Fix several memory leaks.
@@ -31,6 +71,8 @@
 	  <item> Fix building without SYSLOG_FACILITY option.
 	  </item>
 	  <item> Fix byte order in ports in `set nat red-port`.
+	  </item>
+	  <item> Fix some potential crashes because of NULL dereferences.
 	  </item>
 	</itemize>
 	</item>

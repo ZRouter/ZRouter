@@ -1,4 +1,4 @@
-<!-- $Id: gencmd.sgml,v 1.46 2009/07/17 12:37:01 amotin Exp $ -->
+<!-- $Id: gencmd.sgml,v 1.47 2012/03/19 08:30:45 amotin Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -323,6 +323,12 @@ Sets console specific configuration parameters
 <tag><tt>set web ...</tt></tag>
 Sets web server specific configuration parameters
 </descrip>
+
+<tag><tt>unset ...</tt></tag>
+
+<p>
+This command allows to unsets some of configuration information set using
+<tt>set</tt> command.
 
 <tag><tt>open [ <em>layer</em> ] </tt>
 </tag>

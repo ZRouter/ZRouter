@@ -241,8 +241,8 @@ WebShowSummary(FILE *f, int priv)
   fprintf(f, "<H2>Current status summary</H2>\n");
   fprintf(f, "<table>\n");
   fprintf(f, "<TR><TH>Bund</TH><TH colspan=2>Iface</TH><TH>IPCP</TH><TH>IPV6CP</TH><TH>CCP</TH><TH>ECP</TH>"
-	     "<TH>Link</TH><TH>LCP</TH><TH>User</TH><TH colspan=2>Device</TH><TH>Peer</TH><TH colspan=3></TH>%s</TR>",
-	     priv?"<TH></TH>":"");
+	     "<TH>Link</TH><TH>LCP</TH><TH>User</TH><TH colspan=2>Device</TH><TH>Peer</TH><TH>IP</TH><TH colspan=3></TH>%s</TR>",
+	     priv?"<TH>State</TH>":"");
 #define FSM_COLOR(s) (((s)==ST_OPENED)?"g":(((s)==ST_INITIAL)?"r":"y"))
 #define PHYS_COLOR(s) (((s)==PHYS_STATE_UP)?"g":(((s)==PHYS_STATE_DOWN)?"r":"y"))
     for (b = 0; b<gNumLinks; b++) {
@@ -262,6 +262,7 @@ WebShowSummary(FILE *f, int priv)
 	    if (L->state != PHYS_STATE_DOWN) {
 		PhysGetPeerAddr(L, buf, sizeof(buf));
 		fprintf(f, "<TD>%s</TD>\n", buf);
+		fprintf(f, "<TD></TD>\n");
 		PhysGetCallingNum(L, buf, sizeof(buf));
 		PhysGetCalledNum(L, buf2, sizeof(buf2));
 		if (PhysGetOriginate(L) == LINK_ORIGINATE_REMOTE) {
@@ -273,12 +274,24 @@ WebShowSummary(FILE *f, int priv)
 		}
 	    } else {
 	    	fprintf(f, "<TD></TD>\n");
+	    	fprintf(f, "<TD></TD>\n");
 	    	fprintf(f, "<TD colspan=3></TD>\n");
 	    }
 	    if (priv) {
 		if (!L->tmpl) {
-		    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a>&nbsp;<A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
-	    		L->name, L->name);
+		    switch (L->state) {
+			case PHYS_STATE_DOWN:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</A></TD>\n",
+				L->name);
+			    break;
+			case PHYS_STATE_UP:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;close\">[Close]</A></TD>\n",
+				L->name);
+			    break;
+			default:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a>&nbsp;<A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
+				L->name, L->name);
+		    }
 		} else {
 		    fprintf(f, "<TD></TD>\n");
 		}
@@ -306,7 +319,7 @@ WebShowSummary(FILE *f, int priv)
 	fprintf(f, "<TD rowspan=\"%d\" class=\"%s\"><A href=\"/cmd?bund%%20%s&amp;show%%20ecp\">%s</a></TD>\n", 
 	    rows, B->tmpl?"d":FSM_COLOR(B->ecp.fsm.state), B->name,FsmStateName(B->ecp.fsm.state));
 	if (B->n_links == 0) {
-	    fprintf(f, "<TD colspan=\"10\">&nbsp;</a></TD>\n</TR>\n");
+	    fprintf(f, "<TD colspan=\"11\">&nbsp;</a></TD>\n</TR>\n");
 	}
 	for (l = 0; l < NG_PPP_MAX_LINKS; l++) {
 	    if ((L=B->links[l]) != NULL) {
@@ -327,6 +340,10 @@ WebShowSummary(FILE *f, int priv)
 		if (L->state != PHYS_STATE_DOWN) {
 		    PhysGetPeerAddr(L, buf, sizeof(buf));
 		    fprintf(f, "<TD>%s</TD>\n", buf);
+		    if (L->bund != NULL)
+			fprintf(f, "<TD>%s</TD>\n", inet_ntoa(L->bund->ipcp.peer_addr));
+		    else
+			fprintf(f, "<TD></TD>\n");
 		    PhysGetCallingNum(L, buf, sizeof(buf));
 		    PhysGetCalledNum(L, buf2, sizeof(buf2));
 		    if (PhysGetOriginate(L) == LINK_ORIGINATE_REMOTE) {
@@ -338,11 +355,23 @@ WebShowSummary(FILE *f, int priv)
 		    }
 		} else {
 			fprintf(f, "<TD></TD>\n");
+			fprintf(f, "<TD></TD>\n");
 			fprintf(f, "<TD colspan=3></TD>\n");
 		}
 		if (priv) {
-		    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a><A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
-		    	L->name, L->name);
+		    switch (L->state) {
+			case PHYS_STATE_DOWN:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</A></TD>\n",
+				L->name);
+			    break;
+			case PHYS_STATE_UP:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;close\">[Close]</A></TD>\n",
+				L->name);
+			    break;
+			default:
+			    fprintf(f, "<TD><A href=\"/cmd?link%%20%s&amp;open\">[Open]</a>&nbsp;<A href=\"/cmd?link%%20%s&amp;close\">[Close]</a></TD>\n", 
+				L->name, L->name);
+		    }
 		}
 		fprintf(f, "</TR>\n");
 	    }
@@ -375,6 +404,10 @@ WebShowSummary(FILE *f, int priv)
 		if (L->state != PHYS_STATE_DOWN) {
 		    PhysGetPeerAddr(L, buf, sizeof(buf));
 		    fprintf(f, "<TD>%s</TD>\n", buf);
+		    if (L->bund != NULL)
+			fprintf(f, "<TD>%s</TD>\n", inet_ntoa(L->bund->ipcp.peer_addr));
+		    else
+			fprintf(f, "<TD></TD>\n");
 		    PhysGetCallingNum(L, buf, sizeof(buf));
 		    PhysGetCalledNum(L, buf2, sizeof(buf2));
 		    if (PhysGetOriginate(L) == LINK_ORIGINATE_REMOTE) {
@@ -386,6 +419,7 @@ WebShowSummary(FILE *f, int priv)
 		    }
 		} else {
 			fprintf(f, "<TD></TD>\n");
+			fprintf(f, "<TD></TD>\n");
 			fprintf(f, "<TD colspan=3></TD>\n");
 		}
 		fprintf(f, "<TD></TD>\n");
@@ -395,7 +429,7 @@ WebShowSummary(FILE *f, int priv)
 	    }
 	}
 	if (!shown) {
-	    fprintf(f, "<TD colspan = \"10\"></TD>\n");
+	    fprintf(f, "<TD colspan = \"11\"></TD>\n");
 	    fprintf(f, "</TR>\n");
 	}
     }

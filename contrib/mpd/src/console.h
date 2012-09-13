@@ -112,6 +112,7 @@
   extern int	ConsoleClose(Console c);
   extern int	ConsoleStat(Context ctx, int ac, char *av[], void *arg);
   extern Context	StdConsoleConnect(Console c);
+  extern void	ConsoleShutdown(Console c);
 
   extern int	UserCommand(Context ctx, int ac, char *av[], void *arg);
   extern int	UserStat(Context ctx, int ac, char *av[], void *arg);

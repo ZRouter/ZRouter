@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.102 2010/12/21 12:14:29 amotin Exp $
+# $Id: Makefile,v 1.107 2012/01/11 11:50:16 amotin Exp $
 #
 # Makefile for mpd, multi-link PPP daemon for FreeBSD
 #
@@ -10,7 +10,7 @@
 PROG?=			mpd5
 PREFIX?=		/usr/local
 BINDIR?=		${PREFIX}/sbin
-VERSION=		5.6a1
+VERSION=		5.7a
 NOMAN=
 NO_MAN=
 
@@ -60,6 +60,10 @@ USE_AUTH_SYSTEM=	yes
 # Build with builtin libpdel
 
 NOLIBPDEL=		yes
+
+# Build without builtin web server
+
+NOWEB=			yes
 
 # Set syslog logging facility. Change LOG_DAEMON to whatever you like.
 
@@ -138,15 +142,25 @@ STDSRCS=        assert.c auth.c bund.c rep.c ccp.c chap.c \
 		console.c command.c ecp.c event.c fsm.c iface.c input.c \
 		ip.c ipcp.c ipv6cp.c lcp.c link.c log.c main.c mbuf.c mp.c \
 		msg.c ngfunc.c pap.c phys.c proto.c radius.c radsrv.c timer.c \
-		util.c vars.c eap.c msoft.c web.c ippool.c
+		util.c vars.c eap.c msoft.c ippool.c
+
+.if defined ( NOWEB )
+COPTS+=		-DNOWEB
+.else
+STDSRCS+=	web.c
+.endif
 
 .if defined ( NOLIBPDEL )
 COPTS+=		-DNOLIBPDEL -I./contrib/libpdel
 PDPATH1=	contrib/libpdel/util:contrib/libpdel/structs
-PDPATH2=	contrib/libpdel/http:contrib/libpdel/http/servlet
-PDPATH3=	contrib/libpdel/sys:contrib/libpdel/io
-PDPATH4=	contrib/libpdel/structs/type
+PDPATH2=	contrib/libpdel/structs/type
+.if defined ( NOWEB )
+VPATH+=		$(PDPATH1):$(PDPATH2)
+.else
+PDPATH3=	contrib/libpdel/http:contrib/libpdel/http/servlet
+PDPATH4=	contrib/libpdel/io
 VPATH+=		$(PDPATH1):$(PDPATH2):$(PDPATH3):$(PDPATH4)
+.endif
 PDELSRCS=	typed_mem.c \
 		pevent.c \
 		paction.c \
@@ -158,8 +172,9 @@ PDELSRCS=	typed_mem.c \
 		structs_type_array.c \
 		structs_type_int.c \
 		structs_type_string.c \
-		structs_type_struct.c \
-		http_connection.c \
+		structs_type_struct.c
+.if !defined ( NOWEB )
+PDELSRCS+=	http_connection.c \
 		http_head.c \
 		http_message.c \
 		http_mime.c \
@@ -173,6 +188,7 @@ PDELSRCS=	typed_mem.c \
 		ssl_fp.c \
 		string_fp.c \
 		timeout_fp.c
+.endif
 .endif
 
 # Add sources and flags for the various physical layer types

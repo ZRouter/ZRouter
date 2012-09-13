@@ -1,4 +1,4 @@
-<!-- $Id: trafacct.sgml,v 1.6 2009/02/23 11:17:41 amotin Exp $ -->
+<!-- $Id: trafacct.sgml,v 1.8 2011/08/01 09:04:29 dmitryluhtionov Exp $ -->
 <!-- mpd netgraph enabled user mode PPP daemon -->
 
 <!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
@@ -22,7 +22,7 @@
   so it must be done before first bundle get connected.
 
   <bf>Note:</bf> This feature is available only on FreeBSD 6.0-RELEASE
-  and newer.
+  and newer. NetFlow v9 supprted only on FreeBSD 9.0-RELEASE and newer.
 
 <descrip>
 
@@ -39,6 +39,32 @@ set netflow self <em>ip</em> <em>port</em>
 
 Set optional local IP and port binding, to make NetFlow datagrams
 originate from a specific source.
+
+<tag><tt>
+set netflow version <em>ver</em>
+</tt></tag>
+
+Choose NetFlow version to export. Supported options are 5 or 9.
+
+Default is 5.
+
+<tag><tt>
+set netflow mtu <em>bytes</em>
+</tt></tag>
+
+Set export interface MTU to build packets of specified size (NetFlow
+v9-specific).
+
+Default is 1500.
+
+<tag><tt>
+set netflow template <em>time</em> <em>packets</em>
+</tt></tag>
+
+Modify time and packet timeouts to announce data flow templates (NetFlow
+v9-specific).
+
+Defaults are 600 and 500.
 
 <tag><tt>
 set netflow timeouts <em>inactive</em> <em>active</em>

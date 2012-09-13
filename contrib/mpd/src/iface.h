@@ -79,6 +79,13 @@
     u_char		peer_addr_force;
     u_char		self_ipv6_addr_force;
     u_char		peer_ipv6_addr_force;
+    char		ifname[IFNAMSIZ];	/* Name of my interface */
+#ifdef SIOCSIFDESCR
+    char		*ifdescr;		/* Interface description*/
+#endif
+#ifdef SIOCAIFGROUP
+    char		ifgroup[IFNAMSIZ];	/* Group of my interface */
+#endif
   };
 
   struct ifaceroute {
@@ -92,6 +99,9 @@
     char		ifname[IFNAMSIZ];	/* Name of my interface */
     char		ngname[IFNAMSIZ];	/* Name of my Netgraph node */
     uint		ifindex;		/* System interface index */
+#ifdef SIOCSIFDESCR
+    char		*ifdescr;		/* Interface description*/
+#endif
     struct ifaceconf	conf;
     u_char		traffic[IFACE_IDLE_SPLIT];	/* Mark any traffic */
     u_short		mtu;			/* Interface MTU */
@@ -173,6 +183,7 @@
 
   extern void	IfaceInit(Bund b);
   extern void	IfaceInst(Bund b, Bund bt);
+  extern void	IfaceDestroy(Bund b);
   extern void	IfaceOpen(Bund b);
   extern void	IfaceClose(Bund b);
   extern int	IfaceOpenCmd(Context ctx);

@@ -181,21 +181,21 @@
 
   static const struct cmdtab ShowSessCmds[] = {
     { "iface {name}",			"Filter by iface name",
-	ShowSessions, NULL, 2, (void *) SHOW_IFACE },
+	ShowSessions, NULL, 0, (void *) SHOW_IFACE },
     { "ip {ip}",			"Filter by IP address",
-	ShowSessions, NULL, 2, (void *) SHOW_IP },
+	ShowSessions, NULL, 0, (void *) SHOW_IP },
     { "user {name}",			"Filter by user name",
-	ShowSessions, NULL, 2, (void *) SHOW_USER },
+	ShowSessions, NULL, 0, (void *) SHOW_USER },
     { "session {ID}",			"Filter by session ID",
-	ShowSessions, NULL, 2, (void *) SHOW_SESSION },
+	ShowSessions, NULL, 0, (void *) SHOW_SESSION },
     { "msession {ID}",			"Filter by msession ID",
-	ShowSessions, NULL, 2, (void *) SHOW_MSESSION },
+	ShowSessions, NULL, 0, (void *) SHOW_MSESSION },
     { "bundle {name}",			"Filter by bundle name",
-	ShowSessions, NULL, 2, (void *) SHOW_BUNDLE },
+	ShowSessions, NULL, 0, (void *) SHOW_BUNDLE },
     { "link {name}",			"Filter by link name",
-	ShowSessions, NULL, 2, (void *) SHOW_LINK },
+	ShowSessions, NULL, 0, (void *) SHOW_LINK },
     { "peer {name}",			"Filter by peer name",
-	ShowSessions, NULL, 2, (void *) SHOW_PEER },
+	ShowSessions, NULL, 0, (void *) SHOW_PEER },
     { NULL },
   };
 
@@ -273,12 +273,18 @@
     { "version",			"Version string",
 	ShowVersion, NULL, 0, NULL },
     { "sessions [ {param} {value} ]",	"Active sessions",
-	CMD_SUBMENU, NULL, 2, (void *) ShowSessCmds},
+	CMD_SUBMENU, NULL, 0, (void *) ShowSessCmds},
     { "summary",			"Daemon status summary",
 	ShowSummary, NULL, 0, NULL },
     { NULL },
   };
 
+  static const struct cmdtab UnSetCommands[] = {
+   { "radius ...",			"RADIUS stuff",
+	CMD_SUBMENU, AdmitLink, 2, (void *) RadiusUnSetCmds },
+	{ NULL },
+  };
+  
   static const struct cmdtab SetCommands[] = {
     { "bundle ...",			"Bundle specific stuff",
 	CMD_SUBMENU, AdmitBund, 2, (void *) BundSetCmds },
@@ -370,6 +376,8 @@
 	SessionCommand, NULL, 0, NULL },
     { "set ...",			"Set parameters",
 	CMD_SUBMENU, NULL, 0, (void *) SetCommands },
+	{ "unset ...",			"Unset parameters",
+	CMD_SUBMENU, NULL, 0, (void *) UnSetCommands },
     { "show ...",			"Show status",
 	CMD_SUBMENU, NULL, 0, (void *) ShowCommands },
     { NULL },

@@ -20,6 +20,7 @@
 #include "util.h"
 
 #include <sys/sockio.h>
+#include <sys/sysctl.h>
 #include <net/if.h>
 #include <net/if_types.h>
 #include <net/if_dl.h>
@@ -71,6 +72,12 @@
     SET_ROUTE,
     SET_MTU,
     SET_NAME,
+#ifdef SIOCSIFDESCR
+    SET_DESCR,
+#endif
+#ifdef SIOCAIFGROUP
+    SET_GROUP,
+#endif
     SET_UP_SCRIPT,
     SET_DOWN_SCRIPT,
     SET_ENABLE,
@@ -131,7 +138,15 @@
   static int	IfaceFindACL (struct acl_pool *ap, char * ifname, int number);
   static char *	IFaceParseACL (char * src, char * ifname);
 #endif
-  
+
+  static int	IfaceSetName(Bund b, const char * ifname);
+#ifdef SIOCSIFDESCR
+  static int	IfaceSetDescr(Bund b, const char * ifdescr);
+#endif
+#ifdef SIOCAIFGROUP
+  static int	IfaceAddGroup(Bund b, const char * ifgroup);
+  static int	IfaceDelGroup(Bund b, const char * ifgroup);
+#endif
 /*
  * GLOBAL VARIABLES
  */
@@ -143,8 +158,16 @@
 	IfaceSetCommand, NULL, 2, (void *) SET_ROUTE },
     { "mtu {size}",			"Set max allowed interface MTU",
 	IfaceSetCommand, NULL, 2, (void *) SET_MTU },
-    { "name {name}",			"Set interface name",
+    { "name [{name}]",			"Set interface name",
 	IfaceSetCommand, NULL, 2, (void *) SET_NAME },
+#ifdef SIOCSIFDESCR
+    { "description [{descr}]",		"Set interface description",
+	IfaceSetCommand, NULL, 2, (void *) SET_DESCR },
+#endif
+#ifdef SIOCAIFGROUP
+    { "group [{group}]",		"Set interface group",
+	IfaceSetCommand, NULL, 2, (void *) SET_GROUP },
+#endif
     { "up-script [{progname}]",		"Interface up script",
 	IfaceSetCommand, NULL, 2, (void *) SET_UP_SCRIPT },
     { "down-script [{progname}]",	"Interface down script",
@@ -169,15 +192,23 @@
   static const struct confinfo	gConfList[] = {
     { 0,	IFACE_CONF_ONDEMAND,		"on-demand"	},
     { 0,	IFACE_CONF_PROXY,		"proxy-arp"	},
+#ifdef USE_NG_TCPMSS
     { 0,	IFACE_CONF_TCPMSSFIX,           "tcpmssfix"	},
+#endif
     { 0,	IFACE_CONF_TEE,			"tee"		},
+#ifdef USE_NG_NAT
     { 0,	IFACE_CONF_NAT,			"nat"		},
+#endif
+#ifdef USE_NG_NETFLOW
     { 0,	IFACE_CONF_NETFLOW_IN,		"netflow-in"	},
     { 0,	IFACE_CONF_NETFLOW_OUT,		"netflow-out"	},
 #ifdef NG_NETFLOW_CONF_ONCE
     { 0,	IFACE_CONF_NETFLOW_ONCE,	"netflow-once"	},
 #endif
+#endif
+#ifdef USE_NG_IPACCT
     { 0,	IFACE_CONF_IPACCT,		"ipacct"	},
+#endif
     { 0,	0,				NULL		},
   };
 
@@ -240,6 +271,10 @@ IfaceInit(Bund b)
   /* Default configuration */
   iface->mtu = NG_IFACE_MTU_DEFAULT;
   iface->max_mtu = NG_IFACE_MTU_DEFAULT;
+#ifdef SIOCSIFDESCR
+  iface->ifdescr = NULL;
+  iface->conf.ifdescr = NULL;
+#endif
   Disable(&iface->options, IFACE_CONF_ONDEMAND);
   Disable(&iface->options, IFACE_CONF_PROXY);
   Disable(&iface->options, IFACE_CONF_TCPMSSFIX);
@@ -262,6 +297,28 @@ IfaceInst(Bund b, Bund bt)
     IfaceState	const iface = &b->iface;
 
     memcpy(iface, &bt->iface, sizeof(*iface));
+
+    /* Copy interface name from template config to current */
+    if (bt->iface.conf.ifname[0] != 0 && b->tmpl == 0) {
+        snprintf(iface->conf.ifname, sizeof(iface->conf.ifname), "%s%d",
+             bt->iface.conf.ifname, b->id);
+        Log(LG_IFACE2, ("[%s] IFACE: Set conf.ifname to ", iface->conf.ifname));
+    }
+}
+
+/*
+ * IfaceDestroy()
+ */
+
+void
+IfaceDestroy(Bund b)
+{
+#ifdef SIOCSIFDESCR
+    IfaceState	const iface = &b->iface;
+
+    if (iface->conf.ifdescr != NULL)
+	Freee(iface->conf.ifdescr);
+#endif
 }
 
 /*
@@ -417,6 +474,37 @@ IfaceUp(Bund b, int ready)
 	memset(&iface->idleStats, 0, sizeof(iface->idleStats));
     }
 
+    /* Update interface name and description */
+    if (b->params.ifname[0] != 0) {
+       if (IfaceSetName(b, b->params.ifname) != -1)
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Rename interface %s to %s",
+		b->name, iface->ngname, b->params.ifname));
+    } else if (iface->conf.ifname[0] != 0) {
+       if (IfaceSetName(b, iface->conf.ifname) != -1)
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Rename interface %s to %s",
+		b->name, iface->ngname, iface->conf.ifname));
+    }
+#ifdef SIOCSIFDESCR
+    if (b->params.ifdescr != NULL) {
+       if (IfaceSetDescr(b, b->params.ifdescr) != -1) {
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Add description \"%s\"",
+		b->name, b->params.ifdescr));
+	    iface->ifdescr = b->params.ifdescr;
+	}
+    }
+#endif
+#ifdef SIOCAIFGROUP
+    if (iface->conf.ifgroup[0] != 0) {
+       if (IfaceAddGroup(b, iface->conf.ifgroup) != -1)
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Add group %s to %s",
+		b->name, iface->conf.ifgroup, iface->ngname));
+    }
+    if (b->params.ifgroup[0] != 0) {
+       if (IfaceAddGroup(b, b->params.ifgroup) != -1)
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Add group %s to %s",
+		b->name, b->params.ifgroup, iface->ngname));
+    }
+#endif
 #ifdef USE_IPFW
   /* Allocate ACLs */
   acls = b->params.acl_pipe;
@@ -477,7 +565,7 @@ IfaceUp(Bund b, int ready)
   }
   acls = b->params.acl_table;
   while (acls != NULL) {
-    acl = Mdup(MB_IFACE, acls, sizeof(struct acl) + strlen(acls->rule));
+    acl = Mdup(MB_IPFW, acls, sizeof(struct acl) + strlen(acls->rule));
     acl->next = iface->tables;
     iface->tables = acl;
     ExecCmd(LG_IFACE2, b->name, "%s table %d add %s", PATH_IPFW, acls->real_number, acls->rule);
@@ -600,6 +688,48 @@ IfaceDown(Bund b)
       PATH_IPFW, cb);
 #endif /* USE_IPFW */
 
+    /* Revert interface name and description */
+
+    if (strcmp(iface->ngname, iface->ifname) != 0) {
+	if (iface->conf.ifname[0] != 0) {
+	    /* Restore to config defined */
+	    if (IfaceSetName(b, iface->conf.ifname) != -1)
+		Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Rename interface %s to %s",
+		    b->name, iface->ifname, iface->conf.ifname));
+	} else {
+	    /* Restore to original interface name */
+	    if (IfaceSetName(b, iface->ngname) != -1)
+		Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Rename interface %s to %s",
+		    b->name, iface->ifname, iface->ngname));
+	}
+    }
+#ifdef SIOCSIFDESCR
+    if (iface->ifdescr != NULL) {
+	if (iface->conf.ifdescr != NULL) {
+	    /* Restore to config defined */
+	    if (IfaceSetDescr(b, iface->conf.ifdescr) != -1) {
+		Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Set description \"%s\"",
+		    b->name, iface->conf.ifdescr));
+		iface->ifdescr = iface->conf.ifdescr;
+	    } else
+		iface->ifdescr = NULL;
+	} else {
+	    /* Restore to original (empty) */
+	    if (IfaceSetDescr(b, "") != -1) {
+		Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Clear description",
+		    b->name));
+	    }
+	    iface->ifdescr = NULL;
+	}
+    }
+#endif
+#ifdef SIOCAIFGROUP
+    if (b->params.ifgroup[0] != 0) {
+       if (IfaceDelGroup(b, b->params.ifgroup) != -1)
+	    Log(LG_BUND|LG_IFACE, ("[%s] IFACE: Remove group %s from %s",
+		b->name, b->params.ifgroup, iface->ngname));
+    }
+#endif
 }
 
 /*
@@ -640,7 +770,7 @@ IfaceAllocACL(struct acl_pool ***ap, int start, char *ifname, int number)
     int	i;
     struct acl_pool **rp,*rp1;
 
-    rp1 = Malloc(MB_IFACE, sizeof(struct acl_pool));
+    rp1 = Malloc(MB_IPFW, sizeof(struct acl_pool));
     strlcpy(rp1->ifname, ifname, sizeof(rp1->ifname));
     rp1->acl_number = number;
 
@@ -701,8 +831,8 @@ IFaceParseACL (char * src, char * ifname)
     int num,real_number;
     struct acl_pool *ap;
     
-    buf = Malloc(MB_IFACE, ACL_LEN);
-    buf1 = Malloc(MB_IFACE, ACL_LEN);
+    buf = Malloc(MB_IPFW, ACL_LEN);
+    buf1 = Malloc(MB_IPFW, ACL_LEN);
 
     strlcpy(buf, src, ACL_LEN);
     do {
@@ -1153,8 +1283,7 @@ IfaceCacheSend(Bund b)
 	else {
     	    if (NgFuncWritePppFrame(b, NG_PPP_BUNDLE_LINKNUM,
 		    iface->dodCache.proto, iface->dodCache.pkt) < 0) {
-		Log(LG_ERR, ("[%s] can't write cached pkt: %s",
-	    	    b->name, strerror(errno)));
+		Perror("[%s] can't write cached pkt", b->name);
     	    }
 	}
 	iface->dodCache.pkt = NULL;
@@ -1250,8 +1379,23 @@ static int
 IfaceSetCommand(Context ctx, int ac, char *av[], void *arg)
 {
   IfaceState	const iface = &ctx->bund->iface;
+  int		empty_arg;
 
-  if (ac == 0)
+  switch ((intptr_t)arg) {
+    case SET_NAME:
+#ifdef SIOCSIFDESCR
+    case SET_DESCR:
+#endif
+    case SET_UP_SCRIPT:
+    case SET_DOWN_SCRIPT:
+      empty_arg = TRUE;
+      break;
+    default:
+      empty_arg = FALSE;
+      break;
+  }
+
+  if ((ac == 0) && (empty_arg == FALSE))
     return(-1);
   switch ((intptr_t)arg) {
     case SET_IDLE:
@@ -1329,6 +1473,10 @@ IfaceSetCommand(Context ctx, int ac, char *av[], void *arg)
       {
 	int	max_mtu;
 
+	/* Check */
+	if (ac != 1)
+	  return(-1);
+
 	max_mtu = atoi(av[0]);
 	if (max_mtu < IFACE_MIN_MTU || max_mtu > IFACE_MAX_MTU)
 	  Error("Invalid interface mtu %d", max_mtu);
@@ -1337,37 +1485,71 @@ IfaceSetCommand(Context ctx, int ac, char *av[], void *arg)
       break;
 
     case SET_NAME:
-      {
-	char *name = av[0];
-	struct ifreq ifr;
-	int s;
-
-	if (strlen(name) >= IF_NAMESIZE)
-	  Error("Interface name too long, >15 characters");
-
-	/* Get socket */
-	if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-	  Error("[%s] IFACE: Can't get socket to set name", ctx->bund->name);
+	switch (ac) {
+	  case 0:
+	    /* Restore original interface name */
+	    if (strcmp(iface->ifname, iface->ngname) != 0) {
+		iface->conf.ifname[0] = '\0';
+		return IfaceSetName(ctx->bund, iface->ngname);
+	    }
+	    break;
+	  case 1:
+	    if (strcmp(iface->ifname, av[0]) != 0) {
+		int ifmaxlen = IF_NAMESIZE - ctx->bund->tmpl * IFNUMLEN;
+		if (strlen(av[0]) >= ifmaxlen)
+		    Error("Interface name too long, >%d characters", ifmaxlen-1);
+		if ((strncmp(av[0], "ng", 2) == 0) &&
+		  ((ctx->bund->tmpl && av[0][2] == 0) ||
+		  (av[0][2] >= '0' && av[0][2] <= '9')))
+		    Error("This interface name is reserved");
+		strlcpy(iface->conf.ifname, av[0], sizeof(iface->conf.ifname));
+		return IfaceSetName(ctx->bund, av[0]);
+	    }
+	    break;
+	  default:
+	    return(-1);
 	}
-
-	/* Set name of interface */
-	memset(&ifr, 0, sizeof(ifr));
-	strlcpy(ifr.ifr_name, iface->ifname, sizeof(ifr.ifr_name));
-	ifr.ifr_data = (caddr_t)name;
-	Log(LG_IFACE2, ("[%s] IFACE: setting %s name to %s",
-	  ctx->bund->name, iface->ifname, name));
-	if (ioctl(s, SIOCSIFNAME, (char *)&ifr) != -1) {
-	  close(s);
-	  /* Save name */
-	  strlcpy(iface->ifname, name, sizeof(iface->ifname));
-	} else {
-	  close(s);
-	  Error("[%s] IFACE: ioctl(%s, %s)", ctx->bund->name,
-	    iface->ifname, "SIOCSIFNAME");
+	break;
+#ifdef SIOCSIFDESCR
+    case SET_DESCR:
+	if (ctx->bund->tmpl)
+	    Error("Impossible to apply on template");
+	if (iface->conf.ifdescr != NULL)
+	    Freee(iface->conf.ifdescr);
+	iface->conf.ifdescr = NULL;
+	iface->ifdescr = NULL;
+	switch (ac) {
+	  case 0:
+	    return IfaceSetDescr(ctx->bund, "");
+	    break;
+	  case 1:
+	    iface->conf.ifdescr = Mstrdup(MB_IFACE, av[0]);
+	    if (IfaceSetDescr(ctx->bund, av[0]) == 0) {
+		iface->ifdescr = iface->conf.ifdescr;
+		return(0);
+	    } else
+		return(-1);
+	    break;
+	  default:
+	    return(-1);
 	}
-      }
+	break;
+#endif
+#ifdef SIOCAIFGROUP
+    case SET_GROUP:
+	if (ac != 1)
+	  return(-1);
+
+	if (av[0][0] && isdigit(av[0][strlen(av[0]) - 1]))
+	    Error("Groupnames may not end in a digit");
+	if (strlen(av[0]) >= IFNAMSIZ)
+	    Error("Group name %s too long", av[0]);
+	if (iface->conf.ifgroup[0] != 0)
+	    IfaceDelGroup(ctx->bund, iface->conf.ifgroup);
+	strlcpy(iface->conf.ifgroup, av[0], IFNAMSIZ);
+	return IfaceAddGroup(ctx->bund, av[0]);
       break;
-
+#endif
     case SET_UP_SCRIPT:
       switch (ac) {
 	case 0:
@@ -1427,7 +1609,14 @@ IfaceStat(Context ctx, int ac, char *av[], void *arg)
 #endif
 
     Printf("Interface configuration:\r\n");
-    Printf("\tName            : %s\r\n", iface->ifname);
+    Printf("\tName            : %s\r\n", iface->conf.ifname);
+#ifdef SIOCSIFDESCR
+    Printf("\tDescription     : \"%s\"\r\n",
+	(iface->conf.ifdescr != NULL) ? iface->conf.ifdescr : "<none>");
+#endif
+#ifdef SIOCAIFGROUP
+    Printf("\tGroup           : %s\r\n", iface->conf.ifgroup);
+#endif
     Printf("\tMaximum MTU     : %d bytes\r\n", iface->max_mtu);
     Printf("\tIdle timeout    : %d seconds\r\n", iface->idle_timeout);
     Printf("\tSession timeout : %d seconds\r\n", iface->session_timeout);
@@ -1459,6 +1648,11 @@ IfaceStat(Context ctx, int ac, char *av[], void *arg)
     Printf("Interface status:\r\n");
     Printf("\tAdmin status    : %s\r\n", iface->open ? "OPEN" : "CLOSED");
     Printf("\tStatus          : %s\r\n", iface->up ? (iface->dod?"DoD":"UP") : "DOWN");
+    Printf("\tName            : %s\r\n", iface->ifname);
+#ifdef SIOCSIFDESCR
+    Printf("\tDescription     : \"%s\"\r\n",
+	(iface->ifdescr != NULL) ? iface->ifdescr : "<none>");
+#endif
     if (iface->up) {
 	Printf("\tSession time    : %ld seconds\r\n", (long int)(time(NULL) - iface->last_up));
 	if (b->params.idle_timeout || iface->idle_timeout)
@@ -1591,8 +1785,8 @@ IfaceChangeFlags(Bund b, int clear, int set)
     struct ifreq ifrq;
     int s, new_flags;
 
-    Log(LG_IFACE2, ("[%s] IFACE: Change interface flags: -%d +%d",
-	b->name, clear, set)); 
+    Log(LG_IFACE2, ("[%s] IFACE: Change interface %s flags: -%d +%d",
+	b->name, b->iface.ifname, clear, set));
 
     if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
 	Perror("[%s] IFACE: Can't get socket to change interface flags", b->name);
@@ -1601,9 +1795,8 @@ IfaceChangeFlags(Bund b, int clear, int set)
 
     memset(&ifrq, '\0', sizeof(ifrq));
     strlcpy(ifrq.ifr_name, b->iface.ifname, sizeof(ifrq.ifr_name));
-    ifrq.ifr_name[sizeof(ifrq.ifr_name) - 1] = '\0';
     if (ioctl(s, SIOCGIFFLAGS, &ifrq) < 0) {
-	Perror("[%s] IFACE: ioctl(%s, %s)", b->name, b->iface.ifname, "SIOCGIFFLAGS");
+	Perror("[%s] IFACE: ioctl(SIOCGIFFLAGS, %s)", b->name, b->iface.ifname);
 	close(s);
 	return;
     }
@@ -1616,7 +1809,7 @@ IfaceChangeFlags(Bund b, int clear, int set)
     ifrq.ifr_flagshigh = new_flags >> 16;
 
     if (ioctl(s, SIOCSIFFLAGS, &ifrq) < 0) {
-	Perror("[%s] IFACE: ioctl(%s, %s)", b->name, b->iface.ifname, "SIOCSIFFLAGS");
+	Perror("[%s] IFACE: ioctl(SIOCSIFFLAGS, %s)", b->name, b->iface.ifname);
 	close(s);
 	return;
     }
@@ -1708,8 +1901,14 @@ IfaceChangeAddr(Bund b, int add, struct u_range *self, struct u_addr *peer)
 
 	res = ioctl(s, add?SIOCAIFADDR_IN6:SIOCDIFADDR_IN6, &ifra6);
 	if (res == -1) {
-	    Perror("[%s] IFACE: %s IPv6 address %s %s failed", 
-		b->name, add?"Adding":"Removing", add?"to":"from", b->iface.ifname);
+		if (add && errno == EEXIST) {
+			/* this can happen if the kernel has already automatically added
+			   the same link-local address - ignore the error */
+			res = 0;
+		} else {
+			Perror("[%s] IFACE: %s IPv6 address %s %s failed", 
+				b->name, add?"Adding":"Removing", add?"to":"from", b->iface.ifname);
+		}
 	}
 	break;
 
@@ -1951,13 +2150,14 @@ IfaceNgIpInit(Bund b, int ready)
 #endif
 
     /* Connect graph to the iface node. */
+    memset(&cn, 0, sizeof(cn));
     strcpy(cn.ourhook, hook);
     snprintf(cn.path, sizeof(cn.path), "%s:", b->iface.ngname);
     strcpy(cn.peerhook, NG_IFACE_HOOK_INET);
     if (NgSendMsg(gLinksCsock, path,
     	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    b->name, path, cn.ourhook, cn.path, cn.peerhook);
 	goto fail;
     }
 
@@ -2076,8 +2276,8 @@ IfaceNgIpv6Init(Bund b, int ready)
     strcpy(cn.peerhook, NG_IFACE_HOOK_INET6);
     if (NgSendMsg(gLinksCsock, path,
     	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    b->name, path, cn.ourhook, cn.path, cn.peerhook);
 	goto fail;
     }
 
@@ -2126,8 +2326,8 @@ IfaceInitNAT(Bund b, char *path, char *hook)
     strcpy(mp.peerhook, NG_NAT_HOOK_IN);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-      Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-	b->name, NG_NAT_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+      Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+	b->name, NG_NAT_NODE_TYPE, path, mp.ourhook);
       return(-1);
     }
     strlcat(path, ".", NG_PATHSIZ);
@@ -2135,8 +2335,7 @@ IfaceInitNAT(Bund b, char *path, char *hook)
     snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-nat", gPid, b->name);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-      Log(LG_ERR, ("[%s] can't name %s node: %s",
-	b->name, NG_NAT_NODE_TYPE, strerror(errno)));
+      Perror("[%s] can't name %s node", b->name, NG_NAT_NODE_TYPE);
       return(-1);
     }
     strcpy(hook, NG_NAT_HOOK_OUT);
@@ -2148,10 +2347,8 @@ IfaceInitNAT(Bund b, char *path, char *hook)
 	ip = nat->alias_addr.u.ip4;
     }
     if (NgSendMsg(gLinksCsock, path,
-	    NGM_NAT_COOKIE, NGM_NAT_SET_IPADDR, &ip, sizeof(ip)) < 0) {
-	Log(LG_ERR, ("[%s] can't set NAT ip: %s",
-    	    b->name, strerror(errno)));
-    }
+	    NGM_NAT_COOKIE, NGM_NAT_SET_IPADDR, &ip, sizeof(ip)) < 0)
+	Perror("[%s] can't set NAT ip", b->name);
 
 #ifdef NG_NAT_LOG
     /* Set NAT mode */
@@ -2168,18 +2365,15 @@ IfaceInitNAT(Bund b, char *path, char *hook)
     mode.mask = NG_NAT_LOG | NG_NAT_DENY_INCOMING | 
 	NG_NAT_SAME_PORTS | NG_NAT_UNREGISTERED_ONLY;
     if (NgSendMsg(gLinksCsock, path,
-	    NGM_NAT_COOKIE, NGM_NAT_SET_MODE, &mode, sizeof(mode)) < 0) {
-	Log(LG_ERR, ("[%s] can't set NAT mode: %s",
-    	    b->name, strerror(errno)));
-    }
+	    NGM_NAT_COOKIE, NGM_NAT_SET_MODE, &mode, sizeof(mode)) < 0)
+	Perror("[%s] can't set NAT mode", b->name);
 
     /* Set NAT target IP */
     if (!u_addrempty(&nat->target_addr)) {
 	ip = nat->target_addr.u.ip4;
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_NAT_COOKIE, NGM_NAT_SET_IPADDR, &ip, sizeof(ip)) < 0) {
-	    Log(LG_ERR, ("[%s] can't set NAT target IP: %s",
-    		b->name, strerror(errno)));
+	    Perror("[%s] can't set NAT target IP", b->name);
 	}
     }
 #endif
@@ -2200,8 +2394,7 @@ IfaceSetupNAT(Bund b)
     		NGM_NAT_COOKIE, NGM_NAT_SET_IPADDR,
 		&b->iface.self_addr.addr.u.ip4,
 		sizeof(b->iface.self_addr.addr.u.ip4)) < 0) {
-	    Log(LG_ERR, ("[%s] can't set NAT ip: %s",
-    		b->name, strerror(errno)));
+	    Perror("[%s] can't set NAT ip", b->name);
 	    return (-1);
 	}
     }
@@ -2212,8 +2405,7 @@ IfaceSetupNAT(Bund b)
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_NAT_COOKIE, NGM_NAT_REDIRECT_PORT, &nat->nrpt[k],
 		sizeof(struct ng_nat_redirect_port)) < 0) {
-	    Log(LG_ERR, ("[%s] can't set NAT redirect-port: %s",
-		b->name, strerror(errno)));
+	    Perror("[%s] can't set NAT redirect-port", b->name);
 	}
       }
     }
@@ -2223,8 +2415,7 @@ IfaceSetupNAT(Bund b)
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_NAT_COOKIE, NGM_NAT_REDIRECT_ADDR, &nat->nrad[k],
 		sizeof(struct ng_nat_redirect_addr)) < 0) {
-	    Log(LG_ERR, ("[%s] can't set NAT redirect-addr: %s",
-		b->name, strerror(errno)));
+	    Perror("[%s] can't set NAT redirect-addr", b->name);
 	}
       }
     }
@@ -2234,8 +2425,7 @@ IfaceSetupNAT(Bund b)
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_NAT_COOKIE, NGM_NAT_REDIRECT_PROTO, &nat->nrpr[k],
 		sizeof(struct ng_nat_redirect_proto)) < 0) {
-	    Log(LG_ERR, ("[%s] can't set NAT redirect-proto: %s",
-		b->name, strerror(errno)));
+	    Perror("[%s] can't set NAT redirect-proto", b->name);
 	}
       }
     }
@@ -2266,8 +2456,8 @@ IfaceInitTee(Bund b, char *path, char *hook, int v6)
     strcpy(mp.peerhook, NG_TEE_HOOK_RIGHT);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-      Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-	b->name, NG_TEE_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+      Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+	b->name, NG_TEE_NODE_TYPE, path, mp.ourhook);
       return(-1);
     }
     strlcat(path, ".", NG_PATHSIZ);
@@ -2275,8 +2465,7 @@ IfaceInitTee(Bund b, char *path, char *hook, int v6)
     snprintf(nm.name, sizeof(nm.name), "%s-tee%s", b->iface.ifname, v6?"6":"");
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-      Log(LG_ERR, ("[%s] can't name %s node: %s",
-	b->name, NG_TEE_NODE_TYPE, strerror(errno)));
+      Perror("[%s] can't name %s node", b->name, NG_TEE_NODE_TYPE);
       return(-1);
     }
     strcpy(hook, NG_TEE_HOOK_LEFT);
@@ -2313,8 +2502,8 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     strcpy(mp.peerhook, NG_TEE_HOOK_RIGHT);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-      Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-	b->name, NG_TEE_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+      Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+	b->name, NG_TEE_NODE_TYPE, path, mp.ourhook);
       return(-1);
     }
     strlcat(path, ".", NG_PATHSIZ);
@@ -2322,8 +2511,7 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     snprintf(nm.name, sizeof(nm.name), "%s_acct_tee", b->iface.ifname);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-      Log(LG_ERR, ("[%s] can't name %s node: %s",
-	b->name, NG_TEE_NODE_TYPE, strerror(errno)));
+      Perror("[%s] can't name %s node", b->name, NG_TEE_NODE_TYPE);
       return(-1);
     }
     strcpy(hook, NG_TEE_HOOK_LEFT);
@@ -2333,16 +2521,15 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     snprintf(mp.peerhook, sizeof(mp.peerhook), "%s_in", b->iface.ifname);
     if (NgSendMsg(gLinksCsock, path,
 	NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-      Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-	b->name, NG_IPACCT_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+      Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+	b->name, NG_IPACCT_NODE_TYPE, path, mp.ourhook);
       return(-1);
     }
     snprintf(path1, sizeof(path1), "%s.%s", path, NG_TEE_HOOK_RIGHT2LEFT);
     snprintf(nm.name, sizeof(nm.name), "%s_ip_acct", b->iface.ifname);
     if (NgSendMsg(gLinksCsock, path1,
 	NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-      Log(LG_ERR, ("[%s] can't name %s node: %s",
-	b->name, NG_IPACCT_NODE_TYPE, strerror(errno)));
+      Perror("[%s] can't name %s node", b->name, NG_IPACCT_NODE_TYPE);
       return(-1);
     }
     strcpy(cn.ourhook, NG_TEE_HOOK_LEFT2RIGHT);
@@ -2350,8 +2537,8 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     snprintf(cn.peerhook, sizeof(cn.peerhook), "%s_out", b->iface.ifname);
     if (NgSendMsg(gLinksCsock, path, NGM_GENERIC_COOKIE, NGM_CONNECT, &cn,
 	sizeof(cn)) < 0) {
-      Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s", 
-        b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+      Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+        b->name, path, cn.ourhook, cn.path, cn.peerhook);
       return (-1);
     }
     
@@ -2359,15 +2546,13 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     ipam.data = DLT_RAW;
     if (NgSendMsg(gLinksCsock, path1, NGM_IPACCT_COOKIE, NGM_IPACCT_SETDLT, 
 	&ipam, sizeof(ipam)) < 0) {
-      Log(LG_ERR, ("[%s] can't set DLT \"%s\"->\"%s\": %s", 
-        b->name, path, ipam.m.hname, strerror(errno)));
+      Perror("[%s] can't set DLT \"%s\"->\"%s\"", b->name, path, ipam.m.hname);
       return (-1);
     }
     ipam.data = 10000;
     if (NgSendMsg(gLinksCsock, path1, NGM_IPACCT_COOKIE, NGM_IPACCT_STHRS, 
 	&ipam, sizeof(ipam)) < 0) {
-      Log(LG_ERR, ("[%s] can't set DLT \"%s\"->\"%s\": %s", 
-        b->name, path, ipam.m.hname, strerror(errno)));
+      Perror("[%s] can't set DLT \"%s\"->\"%s\"", b->name, path, ipam.m.hname);
       return (-1);
     }
     
@@ -2375,15 +2560,13 @@ IfaceInitIpacct(Bund b, char *path, char *hook)
     ipam.data = DLT_RAW;
     if (NgSendMsg(gLinksCsock, path1, NGM_IPACCT_COOKIE, NGM_IPACCT_SETDLT, 
 	&ipam, sizeof(ipam)) < 0) {
-      Log(LG_ERR, ("[%s] can't set DLT \"%s\"->\"%s\": %s", 
-        b->name, path, ipam.m.hname, strerror(errno)));
+      Perror("[%s] can't set DLT \"%s\"->\"%s\"", b->name, path, ipam.m.hname);
       return (-1);
     }
     ipam.data = 10000;
     if (NgSendMsg(gLinksCsock, path1, NGM_IPACCT_COOKIE, NGM_IPACCT_STHRS, 
 	&ipam, sizeof(ipam)) < 0) {
-      Log(LG_ERR, ("[%s] can't set DLT \"%s\"->\"%s\": %s", 
-        b->name, path, ipam.m.hname, strerror(errno)));
+      Perror("[%s] can't set DLT \"%s\"->\"%s\"", b->name, path, ipam.m.hname);
       return (-1);
     }
 
@@ -2437,8 +2620,8 @@ IfaceInitNetflow(Bund b, char *path, char *hook, char in, char out)
 #endif
     if (NgSendMsg(gLinksCsock, path, NGM_GENERIC_COOKIE, NGM_CONNECT, &cn,
 	sizeof(cn)) < 0) {
-      Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s", 
-        b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+      Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+        b->name, path, cn.ourhook, cn.path, cn.peerhook);
       return (-1);
     }
     strlcat(path, ".", NG_PATHSIZ);
@@ -2478,8 +2661,7 @@ IfaceSetupNetflow(Bund b, char in, char out)
     nf_setdlt.dlt = DLT_RAW;
     if (NgSendMsg(gLinksCsock, path, NGM_NETFLOW_COOKIE, NGM_NETFLOW_SETDLT,
 	&nf_setdlt, sizeof(nf_setdlt)) < 0) {
-      Log(LG_ERR, ("[%s] can't configure data link type on %s: %s", b->name,
-	path, strerror(errno)));
+      Perror("[%s] can't configure data link type on %s", b->name, path);
       goto fail;
     }
 #ifdef NG_NETFLOW_CONF_INGRESS
@@ -2490,8 +2672,7 @@ IfaceSetupNetflow(Bund b, char in, char out)
 	(Enabled(&b->iface.options, IFACE_CONF_NETFLOW_ONCE)?NG_NETFLOW_CONF_ONCE:0);
     if (NgSendMsg(gLinksCsock, path, NGM_NETFLOW_COOKIE, NGM_NETFLOW_SETCONFIG,
 	&nf_setconf, sizeof(nf_setconf)) < 0) {
-      Log(LG_ERR, ("[%s] can't set config on %s: %s", b->name,
-	path, strerror(errno)));
+      Perror("[%s] can't set config on %s", b->name, path);
       goto fail;
     }
 #endif
@@ -2502,8 +2683,7 @@ IfaceSetupNetflow(Bund b, char in, char out)
 	nf_setidx.index = if_nametoindex(b->iface.ifname);
 	if (NgSendMsg(gLinksCsock, path, NGM_NETFLOW_COOKIE, NGM_NETFLOW_SETIFINDEX,
 	    &nf_setidx, sizeof(nf_setidx)) < 0) {
-    	  Log(LG_ERR, ("[%s] can't configure interface index on %s: %s", b->name,
-	    path, strerror(errno)));
+    	  Perror("[%s] can't configure interface index on %s", b->name, path);
     	  goto fail;
 	}
 #ifndef NG_NETFLOW_CONF_INGRESS
@@ -2555,8 +2735,8 @@ IfaceInitMSS(Bund b, char *path, char *hook)
 	strcpy(mp.peerhook, "in");
 	if (NgSendMsg(gLinksCsock, path,
     		NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-    	    Log(LG_ERR, ("can't create %s node at \"%s\"->\"%s\": %s", 
-    		NG_TCPMSS_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+    	    Perror("can't create %s node at \"%s\"->\"%s\"",
+    		NG_TCPMSS_NODE_TYPE, path, mp.ourhook);
 	    goto fail;
 	}
 
@@ -2568,8 +2748,7 @@ IfaceInitMSS(Bund b, char *path, char *hook)
 	snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-mss", gPid, b->name);
 	if (NgSendMsg(gLinksCsock, path,
     		NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-    	    Log(LG_ERR, ("can't name %s node: %s", NG_TCPMSS_NODE_TYPE,
-    		strerror(errno)));
+    	    Perror("can't name %s node", NG_TCPMSS_NODE_TYPE);
 	    goto fail;
 	}
 
@@ -2580,8 +2759,8 @@ IfaceInitMSS(Bund b, char *path, char *hook)
     strcpy(mp.peerhook, "ppp");
     if (NgSendMsg(gLinksCsock, path,
 	    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-    	Log(LG_ERR, ("can't create %s node at \"%s\"->\"%s\": %s", 
-    	    NG_BPF_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+	Perror("can't create %s node at \"%s\"->\"%s\"",
+	    NG_BPF_NODE_TYPE, path, mp.ourhook);
 	goto fail;
     }
 
@@ -2593,8 +2772,7 @@ IfaceInitMSS(Bund b, char *path, char *hook)
     snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-mss", gPid, b->name);
     if (NgSendMsg(gLinksCsock, path,
 	    NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-    	Log(LG_ERR, ("can't name tcpmssfix %s node: %s", NG_BPF_NODE_TYPE,
-    	    strerror(errno)));
+	Perror("can't name tcpmssfix %s node", NG_BPF_NODE_TYPE);
 	goto fail;
     }
 
@@ -2604,8 +2782,8 @@ IfaceInitMSS(Bund b, char *path, char *hook)
     strcpy(cn.peerhook, MPD_HOOK_TCPMSS_IN);
     if (NgSendMsg(gLinksCsock, ".:", NGM_GENERIC_COOKIE, NGM_CONNECT, &cn,
     	    sizeof(cn)) < 0) {
-    	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s", 
-    	    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+    	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+    	    b->name, path, cn.ourhook, cn.path, cn.peerhook);
     	goto fail;
     }
 
@@ -2614,8 +2792,8 @@ IfaceInitMSS(Bund b, char *path, char *hook)
     strcpy(cn.peerhook, MPD_HOOK_TCPMSS_OUT);
     if (NgSendMsg(gLinksCsock, ".:", NGM_GENERIC_COOKIE, NGM_CONNECT, &cn,
     	    sizeof(cn)) < 0) {
-    	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s", 
-    	    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+    	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+    	    b->name, path, cn.ourhook, cn.path, cn.peerhook);
     	goto fail;
     }
 #endif /* USE_NG_TCPMSS */
@@ -2648,15 +2826,13 @@ IfaceSetupMSS(Bund b, uint16_t maxMSS)
   snprintf(tcpmsscfg.outHook, sizeof(tcpmsscfg.outHook), "out");
   if (NgSendMsg(gLinksCsock, path, NGM_TCPMSS_COOKIE, NGM_TCPMSS_CONFIG,
       &tcpmsscfg, sizeof(tcpmsscfg)) < 0) {
-    Log(LG_ERR, ("[%s] can't configure %s node program: %s", b->name,
-      NG_TCPMSS_NODE_TYPE, strerror(errno)));
+    Perror("[%s] can't configure %s node program", b->name, NG_TCPMSS_NODE_TYPE);
   }
   snprintf(tcpmsscfg.inHook, sizeof(tcpmsscfg.inHook), "out");
   snprintf(tcpmsscfg.outHook, sizeof(tcpmsscfg.outHook), "in");
   if (NgSendMsg(gLinksCsock, path, NGM_TCPMSS_COOKIE, NGM_TCPMSS_CONFIG,
       &tcpmsscfg, sizeof(tcpmsscfg)) < 0) {
-    Log(LG_ERR, ("[%s] can't configure %s node program: %s", b->name,
-      NG_TCPMSS_NODE_TYPE, strerror(errno)));
+    Perror("[%s] can't configure %s node program", b->name, NG_TCPMSS_NODE_TYPE);
   }
 #else
     union {
@@ -2678,10 +2854,8 @@ IfaceSetupMSS(Bund b, uint16_t maxMSS)
     strcpy(hp->ifNotMatch, "iface");
 
     if (NgSendMsg(gLinksCsock, hook, NGM_BPF_COOKIE,
-	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-	Log(LG_ERR, ("[%s] can't set %s node program: %s",
-    	    b->name, NG_BPF_NODE_TYPE, strerror(errno)));
-    }
+	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0)
+	Perror("[%s] can't set %s node program", b->name, NG_BPF_NODE_TYPE);
 
     memset(&u, 0, sizeof(u));
     strcpy(hp->thisHook, MPD_HOOK_TCPMSS_IN);
@@ -2692,10 +2866,8 @@ IfaceSetupMSS(Bund b, uint16_t maxMSS)
     strcpy(hp->ifNotMatch, "ppp");
 
     if (NgSendMsg(gLinksCsock, hook, NGM_BPF_COOKIE,
-	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-	Log(LG_ERR, ("[%s] can't set %s node program: %s",
-    	    b->name, NG_BPF_NODE_TYPE, strerror(errno)));
-    }
+	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0)
+	Perror("[%s] can't set %s node program", b->name, NG_BPF_NODE_TYPE);
 
     snprintf(hook, sizeof(hook), "o%d", b->id);
     memset(&u, 0, sizeof(u));
@@ -2707,10 +2879,8 @@ IfaceSetupMSS(Bund b, uint16_t maxMSS)
     strcpy(hp->ifNotMatch, "ppp");
 
     if (NgSendMsg(gLinksCsock, hook, NGM_BPF_COOKIE,
-	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-	Log(LG_ERR, ("[%s] can't set %s node program: %s",
-    	    b->name, NG_BPF_NODE_TYPE, strerror(errno)));
-    }
+	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0)
+	Perror("[%s] can't set %s node program", b->name, NG_BPF_NODE_TYPE);
 
     memset(&u, 0, sizeof(u));
     strcpy(hp->thisHook, MPD_HOOK_TCPMSS_OUT);
@@ -2721,10 +2891,8 @@ IfaceSetupMSS(Bund b, uint16_t maxMSS)
     strcpy(hp->ifNotMatch, "iface");
 
     if (NgSendMsg(gLinksCsock, hook, NGM_BPF_COOKIE,
-	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-	Log(LG_ERR, ("[%s] can't set %s node program: %s",
-    	    b->name, NG_BPF_NODE_TYPE, strerror(errno)));
-    }
+	    NGM_BPF_SET_PROGRAM, hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0)
+	Perror("[%s] can't set %s node program", b->name, NG_BPF_NODE_TYPE);
 
 #endif /* USE_NG_TCPMSS */
 }
@@ -2761,8 +2929,8 @@ IfaceInitLimits(Bund b, char *path, char *hook)
 	strcpy(mp.peerhook, "ppp");
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-    	    Log(LG_ERR, ("can't create %s node at \"%s\"->\"%s\": %s", 
-    		NG_BPF_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+	    Perror("can't create %s node at \"%s\"->\"%s\"",
+		NG_BPF_NODE_TYPE, path, mp.ourhook);
 	    goto fail;
 	}
 
@@ -2771,17 +2939,14 @@ IfaceInitLimits(Bund b, char *path, char *hook)
 	strcpy(hook, "iface");
 
 	b->iface.limitID = NgGetNodeID(gLinksCsock, path);
-	if (b->iface.limitID == 0) {
-    	    Log(LG_ERR, ("can't get limits %s node ID: %s", NG_BPF_NODE_TYPE,
-    		strerror(errno)));
-	}
+	if (b->iface.limitID == 0)
+	    Perror("can't get limits %s node ID", NG_BPF_NODE_TYPE);
 
 	/* Set the new node's name. */
 	snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-lim", gPid, b->name);
 	if (NgSendMsg(gLinksCsock, path,
 		NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-    	    Log(LG_ERR, ("can't name limits %s node: %s", NG_BPF_NODE_TYPE,
-    		strerror(errno)));
+	    Perror("can't name limits %s node", NG_BPF_NODE_TYPE);
 	    goto fail;
 	}
 
@@ -2810,7 +2975,7 @@ IfaceSetupLimits(Bund b)
     struct ngm_connect  cn;
     int			i;
     
-    hpu = Malloc(MB_IFACE, sizeof(*hpu));
+    hpu = Malloc(MB_ACL, sizeof(*hpu));
     hp = &hpu->hprog;
 
     if (b->params.acl_limits[0] || b->params.acl_limits[1]) {
@@ -2880,12 +3045,12 @@ IfaceSetupLimits(Bund b)
 		    	int		bufbraces;
 
 #define ACL_BUF_SIZE	256*1024
-			buf = Malloc(MB_IFACE, ACL_BUF_SIZE);
+			buf = Malloc(MB_ACL, ACL_BUF_SIZE);
 			buf[0] = 0;
 			bufbraces = 0;
 			while (f) {
 			    char	*b1, *b2, *sbuf;
-			    sbuf = Mstrdup(MB_IFACE, f->rule);
+			    sbuf = Mstrdup(MB_ACL, f->rule);
 			    b2 = sbuf;
 			    b1 = strsep(&b2, " ");
 			    if (b2 != NULL) {
@@ -2966,8 +3131,8 @@ IfaceSetupLimits(Bund b)
 			strcpy(cn.peerhook, inhookn[0]);
 			if (NgSendMsg(gLinksCsock, path,
 		        	NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-		    	    Log(LG_ERR, ("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-			        b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+			    Perror("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+			        b->name, path, cn.ourhook, cn.path, cn.peerhook);
 			}
 			strcpy(stathook, inhookn[0]);
 		    }
@@ -2991,9 +3156,9 @@ IfaceSetupLimits(Bund b)
 		    snprintf(mp.ourhook, sizeof(mp.ourhook), "%d-%d-m", dir, num);
 		    strcpy(mp.peerhook, ((dir == 0)?NG_CAR_HOOK_LOWER:NG_CAR_HOOK_UPPER));
 		    if (NgSendMsg(gLinksCsock, path,
-		    	    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-		    	Log(LG_ERR, ("[%s] IFACE: can't create %s node at \"%s\"->\"%s\": %s", 
-		    	    b->name, NG_CAR_NODE_TYPE, path, mp.ourhook, strerror(errno)));
+			    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
+			Perror("[%s] IFACE: can't create %s node at \"%s\"->\"%s\"", 
+			    b->name, NG_CAR_NODE_TYPE, path, mp.ourhook);
 		    }
 
 		    snprintf(tmppath, sizeof(tmppath), "%s%d-%d-m", path, dir, num);
@@ -3004,8 +3169,8 @@ IfaceSetupLimits(Bund b)
 		    strcpy(cn.peerhook, ((dir == 0)?NG_CAR_HOOK_UPPER:NG_CAR_HOOK_LOWER));
 		    if (NgSendMsg(gLinksCsock, path,
 		            NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-		        Log(LG_ERR, ("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-			    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+			Perror("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+			    b->name, path, cn.ourhook, cn.path, cn.peerhook);
 		    }
 			
 		    bzero(&car, sizeof(car));
@@ -3046,8 +3211,8 @@ IfaceSetupLimits(Bund b)
 						
 		    if (NgSendMsg(gLinksCsock, tmppath,
 		            NGM_CAR_COOKIE, NGM_CAR_SET_CONF, &car, sizeof(car)) < 0) {
-		        Log(LG_ERR, ("[%s] IFACE: can't set %s configuration: %s",
-			    b->name, NG_CAR_NODE_TYPE, strerror(errno)));
+		        Perror("[%s] IFACE: can't set %s configuration",
+			    b->name, NG_CAR_NODE_TYPE);
 		    }
 			
 		    if (ac > p) {
@@ -3067,8 +3232,8 @@ IfaceSetupLimits(Bund b)
 		    	    sprintf(hp1->thisHook, "%d-%d-mi", dir, num);
 			    if (NgSendMsg(gLinksCsock, path, NGM_BPF_COOKIE, NGM_BPF_SET_PROGRAM,
 			    	    hp1, NG_BPF_HOOKPROG_SIZE(hp1->bpf_prog_len)) < 0) {
-				Log(LG_ERR, ("[%s] IFACE: can't set %s node program: %s",
-	    			    b->name, NG_BPF_NODE_TYPE, strerror(errno)));
+				Perror("[%s] IFACE: can't set %s node program",
+	    			    b->name, NG_BPF_NODE_TYPE);
 			    }
 			    			    
 			    strcpy(stathook, hp1->thisHook);
@@ -3102,8 +3267,8 @@ IfaceSetupLimits(Bund b)
 		    strcpy(cn.peerhook, inhookn[1]);
 		    if (NgSendMsg(gLinksCsock, path,
 		            NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-		        Log(LG_ERR, ("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-			    b->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+			Perror("[%s] IFACE: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+			    b->name, path, cn.ourhook, cn.path, cn.peerhook);
 		    }
 		} else {
 		    /* There is no next limit, pass nomatch. */
@@ -3118,13 +3283,13 @@ IfaceSetupLimits(Bund b)
 			    break;
 		    }
 		    if (ss == NULL) {
-			ss = Malloc(MB_IFACE, sizeof(*ss));
+			ss = Malloc(MB_ACL, sizeof(*ss));
 			strlcpy(ss->name, l->name, sizeof(ss->name));
 			SLIST_INIT(&ss->src);
 			SLIST_INSERT_HEAD(&b->iface.ss[dir], ss, next);
 		    }
 		    if (stathook[0]) {
-			sss = Malloc(MB_IFACE, sizeof(*sss));
+			sss = Malloc(MB_ACL, sizeof(*sss));
 			strlcpy(sss->hook, stathook, sizeof(sss->hook));
 			sss->type = SSSS_IN;
 			SLIST_INSERT_HEAD(&ss->src, sss, next);
@@ -3134,7 +3299,7 @@ IfaceSetupLimits(Bund b)
 		for (i = 0; i < 2; i++) {
 		    if (inhook[i][0] != 0) {
 			if (l->name[0] && !stathook[0]) {
-			    sss = Malloc(MB_IFACE, sizeof(*sss));
+			    sss = Malloc(MB_ACL, sizeof(*sss));
 			    strlcpy(sss->hook, inhook[i], sizeof(sss->hook));
 			    sss->type = SSSS_MATCH;
 			    SLIST_INSERT_HEAD(&ss->src, sss, next);
@@ -3143,8 +3308,8 @@ IfaceSetupLimits(Bund b)
 		        strcpy(hp->thisHook, inhook[i]);
 		        if (NgSendMsg(gLinksCsock, path, NGM_BPF_COOKIE, NGM_BPF_SET_PROGRAM,
 		    		hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-			    Log(LG_ERR, ("[%s] IFACE: can't set %s node program: %s",
-	    		        b->name, NG_BPF_NODE_TYPE, strerror(errno)));
+			    Perror("[%s] IFACE: can't set %s node program",
+	    		        b->name, NG_BPF_NODE_TYPE);
 			}
 		    }
 		    strcpy(inhook[i], inhookn[i]);
@@ -3165,8 +3330,8 @@ IfaceSetupLimits(Bund b)
 		    strcpy(hp->ifNotMatch, outhook);
 		    if (NgSendMsg(gLinksCsock, path, NGM_BPF_COOKIE, NGM_BPF_SET_PROGRAM, 
 			    hp, NG_BPF_HOOKPROG_SIZE(hp->bpf_prog_len)) < 0) {
-			Log(LG_ERR, ("[%s] IFACE: can't set %s node %s %s program (2): %s",
-	    		    b->name, NG_BPF_NODE_TYPE, path, hp->thisHook, strerror(errno)));
+			Perror("[%s] IFACE: can't set %s node %s %s program (2)",
+			    b->name, NG_BPF_NODE_TYPE, path, hp->thisHook);
 		    }
 		}
 	    }
@@ -3232,7 +3397,7 @@ IfaceGetStats(Bund b, struct svcstat *stat)
 		    break;
 	    }
 	    if (!ssr) {
-		ssr = Malloc(MB_IFACE, sizeof(*ssr));
+		ssr = Malloc(MB_ACL, sizeof(*ssr));
 		strlcpy(ssr->name, ss->name, sizeof(ssr->name));
 		SLIST_INSERT_HEAD(&stat->stat[dir], ssr, next);
 	    }
@@ -3280,7 +3445,7 @@ IfaceAddStats(struct svcstat *stat1, struct svcstat *stat2)
 		    break;
 	    }
 	    if (!ssr1) {
-		ssr1 = Malloc(MB_IFACE, sizeof(*ssr1));
+		ssr1 = Malloc(MB_ACL, sizeof(*ssr1));
 		strlcpy(ssr1->name, ssr2->name, sizeof(ssr1->name));
 		SLIST_INSERT_HEAD(&stat1->stat[dir], ssr1, next);
 	    }
@@ -3304,3 +3469,195 @@ IfaceFreeStats(struct svcstat *stat)
     }
 }
 #endif /* USE_NG_BPF */
+
+/*
+ * IfaceSetName()
+ */
+
+int
+IfaceSetName(Bund b, const char * ifname)
+{
+    IfaceState	const iface = &b->iface;
+    struct ifreq ifr;
+    int s;
+
+    /* Do not rename interface on template */
+    if (b->tmpl)
+	return(0);
+
+    /* Do not wait ioctl error "file already exist" */
+    if (strncmp(iface->ifname, ifname, sizeof(iface->ifname)) == 0)
+	return(0);
+
+    /* Get socket */
+    if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	Log(LG_ERR, ("[%s] IFACE: Can't get socket to set name", b->name));
+	return(-1);
+    }
+
+    /* Set name of interface */
+    memset(&ifr, 0, sizeof(ifr));
+    strlcpy(ifr.ifr_name, iface->ifname, sizeof(ifr.ifr_name));
+    ifr.ifr_data = (caddr_t)ifname;
+    Log(LG_IFACE2, ("[%s] IFACE: setting \"%s\" name to \"%s\"",
+	b->name, iface->ifname, ifname));
+
+    if (ioctl(s, SIOCSIFNAME, (caddr_t)&ifr) < 0) {
+	Perror("[%s] IFACE: ioctl(%s, SIOCSIFNAME)", b->name, iface->ifname);
+	close(s);
+	return(-1);
+    }
+
+    close(s);
+    /* Save name */
+    strlcpy(iface->ifname, ifname, sizeof(iface->ifname));
+    return(0);
+}
+
+#ifdef SIOCSIFDESCR
+/*
+ * IfaceSetDescr()
+ */
+
+int
+IfaceSetDescr(Bund b, const char * ifdescr)
+{
+    IfaceState	const iface = &b->iface;
+    struct	ifreq ifr;
+    int		s, ifdescr_maxlen;
+    char	*newdescr;
+    size_t	sz = sizeof(int);
+
+    if (b->tmpl) {
+	Log(LG_ERR, ("Impossible ioctl(SIOCSIFDESCR) on template"));
+	return(-1);
+    }
+
+    if (sysctlbyname("net.ifdescr_maxlen", &ifdescr_maxlen, &sz, NULL, 0) < 0) {
+	Perror("[%s] IFACE: sysctl net.ifdescr_maxlen  failed", b->name);
+	return(-1);
+    }
+
+    if (ifdescr_maxlen < strlen(ifdescr) + 1) {
+	Log(LG_ERR, ("[%s] IFACE: Description too long, >%d characters",
+	    b->name, ifdescr_maxlen-1));
+	return(-1);
+    }
+
+    /* Get socket */
+    if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	Log(LG_ERR, ("[%s] IFACE: Can't get socket to set description", b->name));
+	return(-1);
+    }
+
+    /* Set description of interface */
+    memset(&ifr, 0, sizeof(ifr));
+    strlcpy(ifr.ifr_name, iface->ifname, sizeof(ifr.ifr_name));
+    ifr.ifr_buffer.length = strlen(ifdescr) + 1;
+    if (ifr.ifr_buffer.length == 1) {
+	ifr.ifr_buffer.buffer = newdescr = NULL;
+	ifr.ifr_buffer.length = 0;
+	Log(LG_IFACE2, ("[%s] IFACE: clearing \"%s\" description",
+	    b->name, iface->ifname));
+    } else {
+	newdescr = Mstrdup(MB_IFACE, ifdescr);
+	ifr.ifr_buffer.buffer = newdescr;
+	Log(LG_IFACE2, ("[%s] IFACE: setting \"%s\" description to \"%s\"",
+	    b->name, iface->ifname, ifdescr));
+    }
+
+    if (ioctl(s, SIOCSIFDESCR, (caddr_t)&ifr) < 0) {
+	Perror("[%s] IFACE: ioctl(%s, SIOCSIFDESCR)", b->name, iface->ifname);
+	Freee(newdescr);
+	close(s);
+	return(-1);
+    }
+    Freee(newdescr);
+    close(s);
+    return(0);
+}
+#endif /* SIOCSIFDESCR */
+#ifdef SIOCAIFGROUP
+/*
+ * IfaceAddGroup()
+ */
+
+int
+IfaceAddGroup(Bund b, const char * ifgroup)
+{
+    IfaceState	const iface = &b->iface;
+    struct ifgroupreq	ifgr;
+    int	s, i;
+
+    /* Do not add group on template */
+    if (b->tmpl)
+	return(0);
+
+    if (ifgroup[0] && isdigit(ifgroup[strlen(ifgroup) - 1])) {
+	Perror("[%s] IFACE: groupnames may not end in a digit", b->name);
+	return(-1);
+    }
+
+    /* Get socket */
+    if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	Perror("[%s] IFACE: Can't get socket to add group", b->name);
+	return(-1);
+    }
+
+    /* Add interface group */
+    memset(&ifgr, 0, sizeof(ifgr));
+    strlcpy(ifgr.ifgr_name, iface->ifname, sizeof(ifgr.ifgr_name));
+    strlcpy(ifgr.ifgr_group, ifgroup, sizeof(ifgr.ifgr_group));
+
+    Log(LG_IFACE2, ("[%s] IFACE: adding interface %s to group %s",
+	b->name, iface->ifname, ifgroup));
+
+    i = ioctl(s, SIOCAIFGROUP, (caddr_t)&ifgr);
+    if (i < 0 && i != EEXIST) {
+	Perror("[%s] IFACE: ioctl(%s, SIOCAIFGROUP)", b->name, iface->ifname);
+        close(s);
+        return(-1);
+    }
+
+    close(s);
+    return(0);
+}
+
+/*
+ * IfaceDelGroup()
+ */
+int
+IfaceDelGroup(Bund b, const char * ifgroup)
+{
+    IfaceState	const iface = &b->iface;
+    struct ifgroupreq	ifgr;
+    int	s;
+
+    /* Get socket */
+    if ((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+	Perror("[%s] IFACE: Can't get socket to delete from group", b->name);
+	return(-1);
+    }
+
+    if (ifgroup[0] && isdigit(ifgroup[strlen(ifgroup) - 1])) {
+	Perror("[%s] IFACE: groupnames may not end in a digit", b->name);
+	return(-1);
+    }
+
+    /* Set interface group */
+    memset(&ifgr, 0, sizeof(ifgr));
+    strlcpy(ifgr.ifgr_name, iface->ifname, sizeof(ifgr.ifgr_name));
+    strlcpy(ifgr.ifgr_group, ifgroup, sizeof(ifgr.ifgr_group));
+
+    Log(LG_IFACE2, ("[%s] IFACE: remove interface %s from group %s",
+	b->name, iface->ifname, ifgroup));
+
+    if (ioctl(s, SIOCDIFGROUP, (caddr_t)&ifgr) == -1) {
+	Perror("[%s] IFACE: ioctl(%s, SIOCDIFGROUP)", b->name, iface->ifname);
+	close(s);
+	return(-1);
+    }
+    close(s);
+    return(0);
+}
+#endif

@@ -379,7 +379,7 @@ ChatRead(int type, void *cookie)
     {
       if (errno == EAGAIN)
 	break;
-      Log(LG_ERR, ("[%s] CHAT: read: %s", l->name, strerror(errno)));
+      Perror("[%s] CHAT: read", l->name);
       goto die;
     }
     else if (nread == 0)
@@ -1205,7 +1205,7 @@ ChatWrite(int type, void *cookie)
   if ((nw = write(c->fd, c->out, c->outLen)) < 0) {
     if (errno == EAGAIN)
       return;
-    Log(LG_ERR, ("[%s] CHAT: write: %s", l->name, strerror(errno)));
+    Perror("[%s] CHAT: write", l->name);
     ChatFailure(c);
     return;
   }

@@ -117,16 +117,15 @@ NgOpen(Link l)
     
     /* Get a temporary netgraph socket node */
     if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-	Log(LG_ERR, ("[%s] NG: NgMkSockNode: %s", 
-	    l->name, strerror(errno)));
+	Perror("[%s] NG: NgMkSockNode", l->name);
 	goto fail;
     }
 
     strlcpy(cn.path, ng->path, sizeof(cn.path));
     strlcpy(cn.peerhook, ng->hook, sizeof(cn.peerhook));
     if (NgSendMsg(csock, path, NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] NG: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    l->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] NG: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    l->name, path, cn.ourhook, cn.path, cn.peerhook);
 	goto fail;
     }
     
@@ -156,8 +155,7 @@ NgClose(Link l)
 
     /* Get a temporary netgraph socket node */
     if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-	Log(LG_ERR, ("[%s] NG: NgMkSockNode: %s", 
-	    l->name, strerror(errno)));
+	Perror("[%s] NG: NgMkSockNode", l->name);
 	goto fail;
     }
 

@@ -296,7 +296,7 @@ PhysSetCalledNum(Link l, char *buf)
 }
 
 /*
- * PhysGetSelfAddr()
+ * PhysGetSelfName()
  */
 
 int
@@ -313,7 +313,7 @@ PhysGetSelfName(Link l, char *buf, size_t buf_len)
 }
 
 /*
- * PhysGetPeerAddr()
+ * PhysGetPeerName()
  */
 
 int
