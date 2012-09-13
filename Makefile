@@ -581,7 +581,9 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
 	hg --repository "${ZROUTER_ROOT}" tip \
-	    --template 'revision="{rev}"\ntimestamp="{date|isodate}"\ndate="{date|isodate}"\n' > \
+	    --template 'revision="{rev}"\ndate="{date|isodate}"\n' > \
+	    "${NEW_ROOTFS}/etc/zrouter_version"
+	LANG=C date '+build="%Y-%m-%d %H:%M:%S"' >> \
 	    "${NEW_ROOTFS}/etc/zrouter_version"
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
 	    find ./usr/ -type d -empty -delete
