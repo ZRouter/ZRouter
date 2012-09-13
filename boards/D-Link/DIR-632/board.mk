@@ -12,7 +12,6 @@ SOC_CHIP=AR7242
 # TODO: size suffixes
 BOARD_FLASH_SIZE=8388608
 
-
 ###################################################
 #
 # Vars for kernel config 
