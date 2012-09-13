@@ -1,7 +1,7 @@
 BINDIR?=/usr/bin/
 
-CFLAGS+= -ISRC
-CXXFLAGS+= -ISRC
+CFLAGS+= -I${.CURDIR}/SRC
+CXXFLAGS+= -I${.CURDIR}/SRC
 NO_MAN=
 PROG_CXX=oldlzma
 
