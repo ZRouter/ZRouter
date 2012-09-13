@@ -75,6 +75,8 @@ TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
 .endif
 ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
+# XXX bad idea, because require changes to system code
+# Better to define it in hints, then fetch by KENV
 KERNCONF_OPTIONS+=	SOC_VENDOR=\\\"${SOC_VENDOR}\\\"
 KERNCONF_OPTIONS+=	SOC_MODEL=\\\"${SOC_CHIP}\\\"
 .if defined(SOC_REVISION)
