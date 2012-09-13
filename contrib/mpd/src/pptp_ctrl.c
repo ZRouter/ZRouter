@@ -813,7 +813,7 @@ PptpCtrlListenEvent(int type, void *cookie)
     /* Get local IP address */
     addrLen = sizeof(selfst);
     if (getsockname(sock, (struct sockaddr *) &selfst, &addrLen) < 0) {
-	Log(LG_ERR, ("PPTP: %s getsockname(): %s", __func__, strerror(errno)));
+	Perror("PPTP: %s getsockname()", __func__);
 	u_addrclear(&self_addr);
 	self_port = 0;
     } else {

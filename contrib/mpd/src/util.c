@@ -688,8 +688,7 @@ OpenSerialDevice(const char *label, const char *path, int baudrate)
 
   if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
   {
-    Log(LG_ERR, ("[%s] can't set \"%s\" to non-blocking: %s",
-      label, path, strerror(errno)));
+    Perror("[%s] can't set \"%s\" to non-blocking", label, path);
     goto failed;
   }
 
@@ -697,8 +696,7 @@ OpenSerialDevice(const char *label, const char *path, int baudrate)
 
   if (tcgetattr(fd, &attr) < 0)
   {
-    Log(LG_ERR, ("[%s] can't tcgetattr \"%s\": %s",
-      label, path, strerror(errno)));
+    Perror("[%s] can't tcgetattr \"%s\"", label, path);
     goto failed;
   }
 
@@ -715,8 +713,7 @@ OpenSerialDevice(const char *label, const char *path, int baudrate)
 
   if (tcsetattr(fd, TCSANOW, &attr) < 0)
   {
-    Log(LG_ERR, ("[%s] can't tcsetattr \"%s\": %s",
-      label, path, strerror(errno)));
+    Perror("[%s] can't tcsetattr \"%s\"", label, path);
 failed:
     ExclusiveCloseDevice(label, fd, path);
     return(-1);
@@ -758,8 +755,7 @@ ExclusiveOpenDevice(const char *label, const char *pathname)
       && time(NULL) < startTime + MAX_OPEN_DELAY; )
     if (errno != EINTR)
     {
-      Log(LG_ERR, ("[%s] can't open %s: %s",
-	label, pathname, strerror(errno)));
+      Perror("[%s] can't open %s", label, pathname);
       if (locked)
 	UuUnlock(ttyname);
       return(-1);
@@ -799,8 +795,7 @@ ExclusiveCloseDevice(const char *label, int fd, const char *pathname)
       time(NULL) < startTime + MAX_OPEN_DELAY && (rtn = close(fd)) < 0; )
     if (errno != EINTR)
     {
-      Log(LG_ERR, ("[%s] can't close %s: %s",
-	label, pathname, strerror(errno)));
+      Perror("[%s] can't close %s", label, pathname);
       break;
     }
 
@@ -819,8 +814,7 @@ ExclusiveCloseDevice(const char *label, int fd, const char *pathname)
   {
     ttyname = pathname + 5;
     if (UuUnlock(ttyname) < 0)
-      Log(LG_ERR, ("[%s] can't unlock %s: %s",
-	label, ttyname, strerror(errno)));
+      Perror("[%s] can't unlock %s", label, ttyname);
   }
 }
 
@@ -1192,12 +1186,19 @@ Bin2Hex(const unsigned char *bin, size_t len)
   size_t	i, j;
   char		*buf;
   
-  buf = Malloc(MB_UTIL, len * 2 + 1);
-  for (i = j = 0; i < len; i++) {
-    buf[j++] = hexconvtab[bin[i] >> 4];
-    buf[j++] = hexconvtab[bin[i] & 15];
+  if (len > 0) {
+    buf = Malloc(MB_UTIL, len * 2 + 1);
+    for (i = j = 0; i < len; i++) {
+      buf[j++] = hexconvtab[bin[i] >> 4];
+      buf[j++] = hexconvtab[bin[i] & 15];
+    }
+    buf[j] = 0;
+  } else {
+    buf = Malloc(MB_UTIL, 3);
+    buf[0] = '0';
+    buf[1] = '0';
+    buf[2] = 0;
   }
-  buf[j] = 0;
   return buf;
 }
 

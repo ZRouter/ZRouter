@@ -58,6 +58,8 @@
 
   static const struct protoname protoNames[] = {
 #ifdef PROTO_NAME_LIST
+
+/* Network layer protocols */
     { 0x0001,	"Padding Protocol" },
     { 0x0021,	"Internet Protocol" },
     { 0x0023,	"OSI Network Layer" },
@@ -89,16 +91,18 @@
     { 0x0057,	"IPv6 over PPP" },
     { 0x0059,	"PPP Multiplexing (RFC 3153)" },
     { 0x005b,	"Vendor-Specific Network Protocol" },
+    { 0x005d,	"TRILL Network Protocol (TNP)" },
     { 0x0061,	"RTP IPHC Full Header" },
     { 0x0063,	"RTP IPHC Compressed TCP" },
     { 0x0065,	"RTP IPHC Compressed Non TCP" },
     { 0x0067,	"RTP IPHC Compressed UDP 8" },
-    { 0x0067,	"RTP IPHC Compressed RTP 8" },
+    { 0x0069,	"RTP IPHC Compressed RTP 8" },
     { 0x006f,	"Stampede Bridging" },
     { 0x0071,	"BAP Bandwidth Allocation Protocol" },
     { 0x0073,	"MP+ Protocol" },
-    { 0x007d,	"reserved (Control Escape)" },
+    { 0x007d,	"reserved (Control Escape) (RFC 1661)" },
     { 0x007f,	"reserved (compression inefficient) (RFC 1662)" },
+    { 0x00c1,	"NTCITS IPI" },
     { 0x00cf,	"reserved (PPP NLPID)" },
     { 0x00fb,	"compression on single link in multilink group" },
     { 0x00fd,	"1st choice compression (RFC 1962)" },
@@ -108,13 +112,28 @@
     { 0x0203,	"IBM Source Routing BPDU" },
     { 0x0205,	"DEC LANBridge100 Spanning Tree" },
     { 0x0207,	"Cisco Discovery Protocol" },
+    { 0x0209,	"Netcs Twin Routing" },
+    { 0x0211,	"Optical Supervisory Channel Protocol (OSCP)" },
+    { 0x0213,	"Optical Supervisory Channel Protocol (OSCP)" },
     { 0x0231,	"Luxcom" },
     { 0x0233,	"Sigma Network Systems" },
     { 0x0235,	"Apple Client Server Protocol" },
+    { 0x0281,	"MPLS Unicast" },
+    { 0x0283,	"MPLS Multicast" },
+    { 0x0285,	"IEEE p1284.4 standard - data packets" },
+    { 0x0287,	"ETSI TETRA Network Protocol Type 1" },
+    { 0x0289,	"Multichannel Flow Treatment Protocol" },
+
+    { 0x2063,	"RTP IPHC Compressed TCP No Delta" },
+    { 0x2065,	"RTP IPHC Context State" },
+    { 0x2067,	"RTP IPHC Compressed UDP 16" },
+    { 0x2069,	"RTP IPHC Compressed RTP 16" },
 
     { 0x4001,	"Cray Communications Control Protocol" },
     { 0x4003,	"CDPD Mobile Network Registration Protocol" },
     { 0x4021,	"Stacker LZS" },
+
+/* Network layer control protocols */
 
     { 0x8021,	"Internet Protocol Control Protocol" },
     { 0x8023,	"OSI Network Layer Control Protocol" },
@@ -148,6 +167,7 @@
     { 0x8071,	"BACP Bandwidth Allocation Control Protocol" },
     { 0x8073,	"MP+ Control Protocol" },
     { 0x807d,	"Not Used - reserved" },
+    { 0x80c1,	"NTCITS IPI Control Protocol" },
     { 0x80cf,	"Not Used - reserved" },
     { 0x80fb,	"compression on single link in multilink group control" },
     { 0x80fd,	"Compression Control Protocol" },
@@ -155,12 +175,16 @@
 
     { 0x8207,	"Cisco Discovery Protocol Control" },
     { 0x8209,	"Netcs Twin Routing" },
+    { 0x820b,	"STP - Control Protocol" },
+    { 0x820d,	"EDPCP - Extreme Discovery Protocol Ctrl Prtcl" },
     { 0x8235,	"Apple Client Server Protocol Control" },
     { 0x8281,	"MPLS Control Protocol (RFC 3032)" },
     { 0x8283,	"Tag Switching - Multicast" },
     { 0x8285,	"IEEE p1284.4 standard - Protocol Control" },
     { 0x8287,	"ETSI TETRA NSP1 Control Protocol" },
     { 0x8289,	"Multichannel Flow Treatment Protocol" },
+
+/* Link layer control protocols */
 
     { 0xc021,	"Link Control Protocol" },
     { 0xc023,	"Password Authentication Protocol" },

@@ -509,8 +509,7 @@ ppp_l2tp_ctrl_create(struct pevent_ctx *ctx, pthread_mutex_t *mutex,
 
 	/* Get l2tp node ID */
 	if ((ctrl->node_id = NgGetNodeID(ctrl->csock, NG_L2TP_HOOK_CTRL)) == 0) {
-	    Log(LG_ERR, ("L2TP: Cannot get %s node id: %s",
-		NG_L2TP_NODE_TYPE, strerror(errno)));
+	    Perror("L2TP: Cannot get %s node id", NG_L2TP_NODE_TYPE);
 	    goto fail;
 	};
 	snprintf(ctrl->path, sizeof(ctrl->path),
@@ -1142,7 +1141,7 @@ ppp_l2tp_ctrl_setup_2(struct ppp_l2tp_ctrl *ctrl,
 	if (pevent_register(ctrl->ctx, &ctrl->death_timer, 0,
 	    ctrl->mutex, ppp_l2tp_unused_timeout, ctrl,
 	    PEVENT_TIME, gL2TPto * 1000) == -1) {
-		Log(LOG_ERR, ("L2TP: error starting unused timer: %s", strerror(errno)));
+		Perror("L2TP: error starting unused timer");
 	}
 
 	/* Done */
@@ -1270,7 +1269,7 @@ ppp_l2tp_ctrl_send(struct ppp_l2tp_ctrl *ctrl, u_int16_t session_id,
 
 fail:
 	/* Close up shop */
-	Log(LOG_ERR, ("L2TP: error sending ctrl packet: %s", strerror(errno)));
+	Perror("L2TP: error sending ctrl packet");
 	ppp_l2tp_ctrl_close(ctrl, L2TP_RESULT_ERROR,
 	    L2TP_ERROR_GENERIC, strerror(errno));
 
@@ -1317,7 +1316,7 @@ ppp_l2tp_ctrl_close(struct ppp_l2tp_ctrl *ctrl,
 		value16 = htons(ctrl->config.tunnel_id);
 		if (ppp_l2tp_avp_list_append(avps, 1, 0,
 		    AVP_ASSIGNED_TUNNEL_ID, &value16, sizeof(value16)) == -1) {
-			Log(LOG_ERR, ("L2TP: %s: %s", "ppp_l2tp_avp_list_append", strerror(errno)));
+			Perror("L2TP: ppp_l2tp_avp_list_append");
 			goto notify_done;
 		}
 
@@ -1330,7 +1329,7 @@ ppp_l2tp_ctrl_close(struct ppp_l2tp_ctrl *ctrl,
 		memcpy(rbuf + 4, ctrl->errmsg, elen);
 		if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_RESULT_CODE,
 		    rbuf, 4 + elen) == -1) {
-			Log(LOG_ERR, ("L2TP: %s: %s", "ppp_l2tp_avp_list_append", strerror(errno)));
+			Perror("L2TP: ppp_l2tp_avp_list_append");
 			goto notify_done;
 		}
 
@@ -1357,7 +1356,7 @@ notify_done:
 	/* Start timer to call ppp_l2tp_ctrl_do_close() */
 	if (pevent_register(ctrl->ctx, &ctrl->close_timer, 0, ctrl->mutex,
 	    ppp_l2tp_ctrl_do_close, ctrl, PEVENT_TIME, 0) == -1)
-		Log(LOG_ERR, ("L2TP: error starting close timer: %s", strerror(errno)));
+		Perror("L2TP: error starting close timer");
 }
 
 /*
@@ -1435,7 +1434,7 @@ ppp_l2tp_ctrl_death_start(struct ppp_l2tp_ctrl *ctrl)
 	if (pevent_register(ctrl->ctx, &ctrl->death_timer, 0,
 	    ctrl->mutex, ppp_l2tp_ctrl_death_timeout, ctrl,
 	    PEVENT_TIME, L2TP_CTRL_DEATH_TIMEOUT * 1000) == -1)
-		Log(LOG_ERR, ("L2TP: error starting death timer: %s", strerror(errno)));
+		Perror("L2TP: error starting death timer");
 }
 
 /*
@@ -1453,7 +1452,7 @@ ppp_l2tp_idle_timeout(void *arg)
 	if (pevent_register(ctrl->ctx, &ctrl->idle_timer, 0,
 	    ctrl->mutex, ppp_l2tp_idle_timeout, ctrl, PEVENT_TIME,
 	    L2TP_IDLE_TIMEOUT * 1000) == -1)
-		Log(LOG_ERR, ("L2TP: error restarting idle timer: %s", strerror(errno)));
+		Perror("L2TP: error restarting idle timer");
 
 	/* Send a 'hello' packet */
 	ppp_l2tp_ctrl_send(ctrl, 0, HELLO, NULL);
@@ -1533,7 +1532,7 @@ ppp_l2tp_sess_setup(struct ppp_l2tp_sess *sess)
 		pevent_unregister(&sess->notify_timer);
 		if (pevent_register(ctrl->ctx, &sess->notify_timer, 0,
 		    ctrl->mutex, ppp_l2tp_sess_notify, sess, PEVENT_TIME, 0) == -1) {
-			Log(LOG_ERR, ("L2TP: error starting notify timer: %s", strerror(errno)));
+			Perror("L2TP: error starting notify timer");
 			goto fail;
 		}
 	}
@@ -1545,15 +1544,14 @@ ppp_l2tp_sess_setup(struct ppp_l2tp_sess *sess)
 	strlcpy(mkpeer.peerhook, NG_TEE_HOOK_LEFT, sizeof(mkpeer.peerhook));
 	if (NgSendMsg(ctrl->csock, NG_L2TP_HOOK_CTRL, NGM_GENERIC_COOKIE,
 	    NGM_MKPEER, &mkpeer, sizeof(mkpeer)) == -1) {
-		Log(LOG_ERR, ("L2TP: %s: %s", "mkpeer", strerror(errno)));
+		Perror("L2TP: mkpeer");
 		goto fail;
 	}
 
 	/* Get ng_tee node ID */
 	snprintf(path, sizeof(path), "%s.%s", NG_L2TP_HOOK_CTRL, sess->hook);
 	if ((sess->node_id = NgGetNodeID(ctrl->csock, path)) == 0) {
-	    Log(LG_ERR, ("L2TP: Cannot get %s node id: %s",
-		NG_TEE_NODE_TYPE, strerror(errno)));
+	    Perror("L2TP: Cannot get %s node id", NG_TEE_NODE_TYPE);
 	    goto fail;
 	};
 
@@ -1570,7 +1568,7 @@ ppp_l2tp_sess_setup(struct ppp_l2tp_sess *sess)
 	if (NgSendMsg(ctrl->csock, NG_L2TP_HOOK_CTRL, NGM_L2TP_COOKIE,
 	    NGM_L2TP_SET_SESS_CONFIG, &sess->config,
 	    sizeof(sess->config)) == -1) {
-		Log(LOG_ERR, ("L2TP: error configuring session hook: %s", strerror(errno)));
+		Perror("L2TP: error configuring session hook");
 		goto fail;
 	}
 
@@ -1620,7 +1618,7 @@ ppp_l2tp_sess_close(struct ppp_l2tp_sess *sess,
 		value16 = htons(sess->config.session_id);
 		if (ppp_l2tp_avp_list_append(avps, 1, 0,
 		    AVP_ASSIGNED_SESSION_ID, &value16, sizeof(value16)) == -1) {
-			Log(LOG_ERR, ("L2TP: %s: %s", "ppp_l2tp_avp_list_append", strerror(errno)));
+			Perror("L2TP: ppp_l2tp_avp_list_append");
 			goto notify_done;
 		}
 
@@ -1633,7 +1631,7 @@ ppp_l2tp_sess_close(struct ppp_l2tp_sess *sess,
 		memcpy(rbuf + 4, sess->errmsg, elen);
 		if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_RESULT_CODE,
 		    rbuf, 4 + elen) == -1) {
-			Log(LOG_ERR, ("L2TP: %s: %s", "ppp_l2tp_avp_list_append", strerror(errno)));
+			Perror("L2TP: ppp_l2tp_avp_list_append");
 			goto notify_done;
 		}
 
@@ -1655,7 +1653,7 @@ notify_done:
 	/* Start timer to call ppp_l2tp_sess_do_close() */
 	if (pevent_register(ctrl->ctx, &sess->close_timer, 0,
 	    ctrl->mutex, ppp_l2tp_sess_do_close, sess, PEVENT_TIME, 0) == -1)
-		Log(LOG_ERR, ("L2TP: error starting close timer: %s", strerror(errno)));
+		Perror("L2TP: error starting close timer");
 }
 
 /*
@@ -1678,7 +1676,7 @@ ppp_l2tp_sess_do_close(void *arg)
 	if (pevent_register(ctrl->ctx, &sess->death_timer, 0,
 	    ctrl->mutex, ppp_l2tp_sess_death_timeout, sess, PEVENT_TIME,
 	    L2TP_SESS_DEATH_TIMEOUT * 1000) == -1)
-		Log(LOG_ERR, ("L2TP: error starting death timer: %s", strerror(errno)));
+		Perror("L2TP: error starting death timer");
 
 	/* Notify link side about session if necessary */
 	if (!sess->link_notified) {
@@ -1694,7 +1692,7 @@ ppp_l2tp_sess_do_close(void *arg)
 		} else if (pevent_register(ctrl->ctx, &ctrl->death_timer, 0,
 		    ctrl->mutex, ppp_l2tp_unused_timeout, ctrl,
 		    PEVENT_TIME, gL2TPto * 1000) == -1) {
-			Log(LOG_ERR, ("L2TP: error starting unused timer: %s", strerror(errno)));
+			Perror("L2TP: error starting unused timer");
 		}
 	}
 }
@@ -1755,13 +1753,13 @@ ppp_l2tp_data_event(void *arg)
 	if (pevent_register(ctrl->ctx, &ctrl->idle_timer, 0,
 	    ctrl->mutex, ppp_l2tp_idle_timeout, ctrl, PEVENT_TIME,
 	    L2TP_IDLE_TIMEOUT * 1000) == -1) {
-		Log(LOG_ERR, ("L2TP: error restarting idle timer: %s", strerror(errno)));
+		Perror("L2TP: error restarting idle timer");
 		goto fail_errno;
 	}
 
 	/* Read packet */
 	if ((len = read(ctrl->dsock, buf, sizeof(buf))) == -1) {
-		Log(LOG_ERR, ("L2TP: error reading ctrl hook: %s", strerror(errno)));
+		Perror("L2TP: error reading ctrl hook");
 		goto fail_errno;
 	}
 
@@ -1790,7 +1788,7 @@ ppp_l2tp_data_event(void *arg)
 			    L2TP_ERROR_MANDATORY, NULL);
 			goto done;
 		default:
-			Log(LOG_ERR, ("L2TP: error decoding control message: %s", strerror(errno)));
+			Perror("L2TP: error decoding control message");
 			goto fail_errno;
 		}
 	}
@@ -1847,7 +1845,7 @@ ppp_l2tp_data_event(void *arg)
 
 	/* Convert AVP's to friendly form */
 	if ((ptrs = ppp_l2tp_avp_list2ptrs(avps)) == NULL) {
-		Log(LOG_ERR, ("L2TP: error decoding AVP list: %s", strerror(errno)));
+		Perror("L2TP: error decoding AVP list");
 		goto fail_errno;
 	}
 
@@ -1991,7 +1989,7 @@ ppp_l2tp_ctrl_event(void *arg)
 
 	/* Read netgraph control message */
 	if (NgRecvMsg(ctrl->csock, msg, sizeof(buf), raddr) < 0) {
-		Log(LOG_ERR, ("L2TP: error reading control message: %s", strerror(errno)));
+		Perror("L2TP: error reading control message");
 		ppp_l2tp_ctrl_close(ctrl, L2TP_RESULT_ERROR,
 		    L2TP_ERROR_GENERIC, strerror(errno));
 		return;
@@ -2322,7 +2320,7 @@ ppp_l2tp_ctrl_check_reply(struct ppp_l2tp_ctrl *ctrl)
 		if (pevent_register(ctrl->ctx, &ctrl->reply_timer, 0,
 		    ctrl->mutex, ppp_l2tp_ctrl_reply_timeout, ctrl, PEVENT_TIME,
 		    L2TP_REPLY_TIMEOUT * 1000) == -1)
-			Log(LOG_ERR, ("L2TP: error starting reply timer: %s", strerror(errno)));
+			Perror("L2TP: error starting reply timer");
 		break;
 	default:
 		break;
@@ -2341,7 +2339,7 @@ ppp_l2tp_sess_check_reply(struct ppp_l2tp_sess *sess)
 		if (pevent_register(ctrl->ctx, &sess->reply_timer, 0,
 		    ctrl->mutex, ppp_l2tp_sess_reply_timeout, sess, PEVENT_TIME,
 		    L2TP_REPLY_TIMEOUT * 1000) == -1)
-			Log(LOG_ERR, ("L2TP: error starting reply timer: %s", strerror(errno)));
+			Perror("L2TP: error starting reply timer");
 		break;
 	default:
 		break;
@@ -2450,7 +2448,7 @@ ppp_l2tp_sess_destroy(struct ppp_l2tp_sess **sessp)
 			} else if (pevent_register(ctrl->ctx, &ctrl->death_timer, 0,
 			    ctrl->mutex, ppp_l2tp_unused_timeout, ctrl,
 			    PEVENT_TIME, gL2TPto * 1000) == -1) {
-				Log(LOG_ERR, ("L2TP: error starting unused timer: %s", strerror(errno)));
+				Perror("L2TP: error starting unused timer");
 			}
 		}
 	}

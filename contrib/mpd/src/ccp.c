@@ -168,8 +168,7 @@ CcpsInit(void)
     /* Create a netgraph socket node */
     snprintf(name, sizeof(name), "mpd%d-cso", gPid);
     if (NgMkSockNode(name, &gCcpCsock, &gCcpDsock) < 0) {
-	Log(LG_ERR, ("CcpsInit(): can't create %s node: %s",
-    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
+	Perror("CcpsInit(): can't create %s node", NG_SOCKET_NODE_TYPE);
 	return(-1);
     }
     (void) fcntl(gCcpCsock, F_SETFD, 1);
@@ -318,8 +317,7 @@ CcpNgCtrlEvent(int type, void *cookie)
 
     /* Read message */
     if ((len = NgRecvMsg(gCcpCsock, &u.msg, sizeof(u), raddr)) < 0) {
-	Log(LG_ERR, ("CcpNgCtrlEvent: can't read message: %s",
-    	    strerror(errno)));
+	Perror("CcpNgCtrlEvent: can't read message");
 	return;
     }
     
@@ -811,8 +809,8 @@ CcpLayerUp(Fsm fp)
     strcpy(cn.peerhook, NG_PPP_HOOK_COMPRESS);
     if (NgSendMsg(gCcpCsock, ".:",
 	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    b->name, ".:", cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+    	    b->name, ".:", cn.ourhook, cn.path, cn.peerhook);
     }
   }
 
@@ -823,8 +821,8 @@ CcpLayerUp(Fsm fp)
     strcpy(cn.peerhook, NG_PPP_HOOK_DECOMPRESS);
     if (NgSendMsg(gCcpCsock, ".:",
 	    NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    b->name, ".:", cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+    	    b->name, ".:", cn.ourhook, cn.path, cn.peerhook);
     }
   }
 

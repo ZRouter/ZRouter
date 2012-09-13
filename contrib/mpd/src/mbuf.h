@@ -55,6 +55,8 @@
   #define MB_PPTP	"PPTP"
   #define MB_RADIUS	"RADIUS"
   #define MB_RADSRV	"RADSRV"
+  #define MB_ACL	"ACL_BPF"
+  #define MB_IPFW	"ACL_IPFW"
   #define MB_UTIL	"UTIL"
   #define MB_VJCOMP	"VJCOMP"
   #define MB_IPPOOL	"IPPOOL"

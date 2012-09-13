@@ -44,6 +44,10 @@
 #endif
 #ifdef USE_NG_NETFLOW
 #include <netgraph/netflow/ng_netflow.h>
+#if NGM_NETFLOW_COOKIE >= 1309868867
+#include <netgraph/netflow/netflow.h>
+#include <netgraph/netflow/netflow_v9.h>
+#endif
 #endif
 #ifdef USE_NG_PRED1
 #include <netgraph/ng_pred1.h>
@@ -64,6 +68,11 @@
     SET_PEER,
     SET_SELF,
     SET_TIMEOUTS,
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    SET_TEMPLATE,
+    SET_MTU,
+    SET_VERSION,
+#endif
     SET_NODE,
     SET_HOOK
   };
@@ -88,6 +97,14 @@
         NetflowSetCommand, NULL, 2, (void *) SET_SELF },
     { "timeouts {inactive} {active}", "Set NetFlow timeouts" ,
         NetflowSetCommand, NULL, 2, (void *) SET_TIMEOUTS },
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    { "template {time} {packets}", "Set NetFlow v9 template" ,
+        NetflowSetCommand, NULL, 2, (void *) SET_TEMPLATE },
+    { "mtu {mtu}", "Set NetFlow v9 MTU" ,
+        NetflowSetCommand, NULL, 2, (void *) SET_MTU },
+    { "version {version}", "Set version to export" ,
+        NetflowSetCommand, NULL, 2, (void *) SET_VERSION },
+#endif
     { "node {name}", "Set node name to use" ,
         NetflowSetCommand, NULL, 2, (void *) SET_NODE },
     { "hook {number}", "Set initial hook number" ,
@@ -113,6 +130,12 @@
   struct sockaddr_storage gNetflowSource;
   uint32_t gNetflowInactive = 0;
   uint32_t gNetflowActive = 0;
+#if NGM_NETFLOW_COOKIE >= 1309868867
+  uint16_t gNetflowTime = 0;
+  uint16_t gNetflowPackets = 0;
+  uint16_t gNetflowMTU = 0;
+  u_int gNetflowVer = 5;
+#endif
 #endif
   
   static int	gNgStatSock=0;
@@ -130,8 +153,7 @@ NgFuncInitGlobalNetflow(void)
 
     /* Create a netgraph socket node */
     if (NgMkSockNode(NULL, &csock, NULL) < 0) {
-	Log(LG_ERR, ("NETFLOW: Can't create %s node: %s",
-    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
+	Perror("NETFLOW: Can't create %s node", NG_SOCKET_NODE_TYPE);
         return (-1);
     }
 
@@ -151,8 +173,8 @@ NgFuncInitGlobalNetflow(void)
     strcpy(mp.peerhook, NG_NETFLOW_HOOK_DATA "0");
     if (NgSendMsg(csock, ".:",
       NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("NETFLOW: Can't create %s node at \"%s\"->\"%s\": %s", 
-	    mp.type, ".:", mp.ourhook, strerror(errno)));
+	Perror("NETFLOW: Can't create %s node at \"%s\"->\"%s\"", 
+	    mp.type, ".:", mp.ourhook);
 	goto fail;
     }
     
@@ -163,14 +185,21 @@ NgFuncInitGlobalNetflow(void)
     strcpy(nm.name, gNetflowNodeName);
     if (NgSendMsg(csock, TEMPHOOK,
       NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-	Log(LG_ERR, ("NETFLOW: Can't name %s node: %s", NG_NETFLOW_NODE_TYPE,
-            strerror(errno)));
+	Perror("NETFLOW: Can't name %s node", NG_NETFLOW_NODE_TYPE);
 	goto fail;
     }
 
     /* Connect ng_ksocket(4) node for export. */
     strcpy(mp.type, NG_KSOCKET_NODE_TYPE);
-    strcpy(mp.ourhook, NG_NETFLOW_HOOK_EXPORT);
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    if (gNetflowVer == 5) {
+#endif
+	strcpy(mp.ourhook, NG_NETFLOW_HOOK_EXPORT);
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    } else {
+	strcpy(mp.ourhook, NG_NETFLOW_HOOK_EXPORT9);
+    }
+#endif
     if (gNetflowExport.ss_family==AF_INET6) {
 	snprintf(mp.peerhook, sizeof(mp.peerhook), "%d/%d/%d", PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     } else {
@@ -179,8 +208,8 @@ NgFuncInitGlobalNetflow(void)
     snprintf(path, sizeof(path), "[%x]:", gNetflowNodeID);
     if (NgSendMsg(csock, path,
       NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("NETFLOW: Can't create %s node at \"%s\"->\"%s\": %s", 
-	    mp.type, path, mp.ourhook, strerror(errno)));
+	Perror("NETFLOW: Can't create %s node at \"%s\"->\"%s\"",
+	    mp.type, path, mp.ourhook);
 	goto fail;
     }
 
@@ -193,27 +222,60 @@ NgFuncInitGlobalNetflow(void)
 
 	if (NgSendMsg(csock, path, NGM_NETFLOW_COOKIE,
 	  NGM_NETFLOW_SETTIMEOUTS, &nf_settime, sizeof(nf_settime)) < 0) {
-	    Log(LG_ERR, ("NETFLOW: Can't set timeouts on netflow %s node: %s",
-		NG_NETFLOW_NODE_TYPE, strerror(errno)));
+	    Perror("NETFLOW: Can't set timeouts on netflow %s node",
+		NG_NETFLOW_NODE_TYPE);
 	    goto fail2;
 	}
     }
 
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    if (gNetflowTime != 0 && gNetflowPackets != 0) {
+	struct ng_netflow_settemplate nf_settempl;
+
+	nf_settempl.time = gNetflowTime;
+	nf_settempl.packets = gNetflowPackets;
+	if (NgSendMsg(csock, path, NGM_NETFLOW_COOKIE,
+	  NGM_NETFLOW_SETTEMPLATE, &nf_settempl, sizeof(nf_settempl)) < 0) {
+	    Perror("NETFLOW: Can't set NetFlow v9 template on netflow %s node",
+		NG_NETFLOW_NODE_TYPE);
+	    goto fail2;
+	}
+    }
+
+    if (gNetflowMTU != 0) {
+	struct ng_netflow_setmtu nf_setmtu;
+
+	nf_setmtu.mtu = gNetflowMTU;
+	if (NgSendMsg(csock, path, NGM_NETFLOW_COOKIE,
+	  NGM_NETFLOW_SETMTU, &nf_setmtu, sizeof(nf_setmtu)) < 0) {
+	    Perror("NETFLOW: Can't set NetFlow v9 MTU on netflow %s node",
+		NG_NETFLOW_NODE_TYPE);
+	  goto fail2;
+	}
+    }
+#endif
+
     /* Configure export destination and source on ng_ksocket(4). */
-    strlcat(path, NG_NETFLOW_HOOK_EXPORT, sizeof(path));
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    if (gNetflowVer == 5) {
+#endif
+	strlcat(path, NG_NETFLOW_HOOK_EXPORT, sizeof(path));
+#if NGM_NETFLOW_COOKIE >= 1309868867
+    } else {
+	strlcat(path, NG_NETFLOW_HOOK_EXPORT9, sizeof(path));
+    }
+#endif
     if (gNetflowSource.ss_len != 0) {
 	if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
 	  NGM_KSOCKET_BIND, &gNetflowSource, sizeof(gNetflowSource)) < 0) {
-	    Log(LG_ERR, ("NETFLOW: Can't bind export %s node: %s",
-		NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("NETFLOW: Can't bind export %s node", NG_KSOCKET_NODE_TYPE);
 	    goto fail2;
 	}
     }
     if (gNetflowExport.ss_len != 0) {
 	if (NgSendMsg(csock, path, NGM_KSOCKET_COOKIE,
 	  NGM_KSOCKET_CONNECT, &gNetflowExport, sizeof(gNetflowExport)) < 0) {
-	    Log(LG_ERR, ("NETFLOW: Can't connect export %s node: %s",
-		NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("NETFLOW: Can't connect export %s node", NG_KSOCKET_NODE_TYPE);
 	    goto fail2;
 	}
     }
@@ -222,16 +284,16 @@ NgFuncInitGlobalNetflow(void)
     snprintf(nm.name, sizeof(nm.name), "mpd%d-nfso", gPid);
     if (NgSendMsg(csock, path,
       NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-	Log(LG_ERR, ("NETFLOW: Can't name %s node: %s", NG_KSOCKET_NODE_TYPE,
-            strerror(errno)));
+	Perror("NETFLOW: Can't name %s node", NG_KSOCKET_NODE_TYPE);
 	goto fail2;
     }
 
     /* Disconnect temporary hook. */
-    strcpy(rm.ourhook, TEMPHOOK);
+    memset(&rm, 0, sizeof(rm));
+    strncpy(rm.ourhook, TEMPHOOK, sizeof(rm.ourhook));
     if (NgSendMsg(csock, ".:",
       NGM_GENERIC_COOKIE, NGM_RMHOOK, &rm, sizeof(rm)) < 0) {
-	Log(LG_ERR, ("can't remove hook %s: %s", TEMPHOOK, strerror(errno)));
+	Perror("can't remove hook %s", TEMPHOOK);
 	goto fail2;
     }
     gNetflowNode = TRUE;
@@ -280,13 +342,12 @@ NgFuncCreateIface(Bund b, char *buf, int max)
     /* Get the new node's name */
     if (NgSendMsg(gLinksCsock, TEMPHOOK,
       NGM_GENERIC_COOKIE, NGM_NODEINFO, NULL, 0) < 0) {
-	Log(LG_ERR, ("[%s] %s: %s", b->name, "NGM_NODEINFO", strerror(errno)));
+	Perror("[%s] %s", b->name, "NGM_NODEINFO");
 	rtn = -1;
 	goto done;
     }
     if (NgRecvMsg(gLinksCsock, &u.reply, sizeof(u), NULL) < 0) {
-	Log(LG_ERR, ("[%s] reply from %s: %s",
-    	    b->name, NG_IFACE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] reply from %s", b->name, NG_IFACE_NODE_TYPE);
 	rtn = -1;
 	goto done;
     }
@@ -297,8 +358,7 @@ done:
     strcpy(rm.ourhook, TEMPHOOK);
     if (NgSendMsg(gLinksCsock, ".:",
       NGM_GENERIC_COOKIE, NGM_RMHOOK, &rm, sizeof(rm)) < 0) {
-	Log(LG_ERR, ("[%s] can't remove hook %s: %s",
-    	    b->name, TEMPHOOK, strerror(errno)));
+	Perror("[%s] can't remove hook %s", b->name, TEMPHOOK);
 	rtn = -1;
     }
 
@@ -324,9 +384,8 @@ NgFuncShutdownGlobal(void)
 
     /* Create a netgraph socket node */
     if (NgMkSockNode(NULL, &csock, NULL) < 0) {
-	Log(LG_ERR, ("NgFuncShutdownGlobal: can't create %s node: %s",
-    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
-        return;
+	Perror("NgFuncShutdownGlobal: can't create %s node", NG_SOCKET_NODE_TYPE);
+	return;
     }
 
     snprintf(path, sizeof(path), "[%x]:", gNetflowNodeID);
@@ -357,8 +416,7 @@ retry:
 	    goto retry;
 	}
 	if (errno != ENOENT) {
-    	    Log(LG_ERR, ("[%s] can't shutdown \"%s\": %s",
-	      label, path, strerror(errno)));
+	    Perror("[%s] can't shutdown \"%s\"", label, path);
 	}
     }
     return(rtn);
@@ -375,8 +433,7 @@ NgFuncSetConfig(Bund b)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     if (NgSendMsg(gLinksCsock, path, NGM_PPP_COOKIE,
     	    NGM_PPP_SET_CONFIG, &b->pppConfig, sizeof(b->pppConfig)) < 0) {
-	Log(LG_ERR, ("[%s] can't config %s: %s",
-    	    b->name, path, strerror(errno)));
+	Perror("[%s] can't config %s", b->name, path);
 	DoExit(EX_ERRDEAD);
     }
 }
@@ -396,9 +453,8 @@ NgFuncSendQuery(const char *path, int cookie, int cmd, const void *args,
 	/* Create a netgraph socket node */
 	snprintf(name, sizeof(name), "mpd%d-stats", gPid);
 	if (NgMkSockNode(name, &gNgStatSock, NULL) < 0) {
-    	    Log(LG_ERR, ("NgFuncSendQuery: can't create %s node: %s",
-    		NG_SOCKET_NODE_TYPE, strerror(errno)));
-    	    return(-1);
+	    Perror("NgFuncSendQuery: can't create %s node", NG_SOCKET_NODE_TYPE);
+	    return(-1);
 	}
 	(void) fcntl(gNgStatSock, F_SETFD, 1);
     }
@@ -409,8 +465,7 @@ NgFuncSendQuery(const char *path, int cookie, int cmd, const void *args,
 
     /* Read message */
     if (NgRecvMsg(gNgStatSock, rbuf, replen, raddr) < 0) {
-	Log(LG_ERR, ("NgFuncSendQuery: can't read unexpected message: %s",
-    	    strerror(errno)));
+	Perror("NgFuncSendQuery: can't read unexpected message");
 	return (-1);
     }
 
@@ -432,8 +487,8 @@ NgFuncConnect(int csock, char *label, const char *path, const char *hook,
     strlcpy(cn.peerhook, hook2, sizeof(cn.peerhook));
     if (NgSendMsg(csock, path,
       NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-        Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    label, path, hook, path2, hook2, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    label, path, hook, path2, hook2);
 	return(-1);
     }
     return(0);
@@ -450,6 +505,7 @@ NgFuncDisconnect(int csock, char *label, const char *path, const char *hook)
     int		retry = 10, delay = 1000;
 
     /* Disconnect hook */
+    memset(&rm, 0, sizeof(rm));
     strlcpy(rm.ourhook, hook, sizeof(rm.ourhook));
 retry:
     if (NgSendMsg(csock, path,
@@ -462,8 +518,7 @@ retry:
 	    delay *= 2;
 	    goto retry;
 	}
-	Log(LG_ERR, ("[%s] can't remove hook %s from node \"%s\": %s",
-    	  label, hook, path, strerror(errno)));
+	Perror("[%s] can't remove hook %s from node \"%s\"", label, hook, path);
 	return(-1);
     }
     return(0);
@@ -571,8 +626,8 @@ NgFuncWriteFrame(int dsock, const char *hookname, const char *label, Mbuf bp)
 
     /* ENOBUFS can be expected on some links, e.g., ng_pptpgre(4) */
     if (rtn < 0 && errno != ENOBUFS) {
-	Log(LG_ERR, ("[%s] error writing len %d frame to %s: %s",
-    	    label, MBLEN(bp), hookname, strerror(errno)));
+	Perror("[%s] error writing len %d frame to %s",
+	    label, MBLEN(bp), hookname);
     }
     mbfree(bp);
     return (rtn);
@@ -593,8 +648,7 @@ NgFuncClrStats(Bund b, u_int16_t linkNum)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     if (NgSendMsg(gLinksCsock, path, 
 	NGM_PPP_COOKIE, NGM_PPP_CLR_LINK_STATS, &linkNum, sizeof(linkNum)) < 0) {
-	    Log(LG_ERR, ("[%s] can't clear stats, link=%d: %s",
-    		b->name, linkNum, strerror(errno)));
+	    Perror("[%s] can't clear stats, link=%d", b->name, linkNum);
 	    return (-1);
     }
     return(0);
@@ -620,8 +674,7 @@ NgFuncGetStats(Bund b, u_int16_t linkNum, struct ng_ppp_link_stat *statp)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     if (NgFuncSendQuery(path, NGM_PPP_COOKIE, NGM_PPP_GET_LINK_STATS,
       &linkNum, sizeof(linkNum), &u.reply, sizeof(u), NULL) < 0) {
-	Log(LG_ERR, ("[%s] can't get stats, link=%d: %s",
-    	    b->name, linkNum, strerror(errno)));
+	Perror("[%s] can't get stats, link=%d", b->name, linkNum);
 	return -1;
     }
     if (statp != NULL)
@@ -650,8 +703,7 @@ NgFuncGetStats64(Bund b, u_int16_t linkNum, struct ng_ppp_link_stat64 *statp)
     snprintf(path, sizeof(path), "[%x]:", b->nodeID);
     if (NgFuncSendQuery(path, NGM_PPP_COOKIE, NGM_PPP_GET_LINK_STATS64,
       &linkNum, sizeof(linkNum), &u.reply, sizeof(u), NULL) < 0) {
-	Log(LG_ERR, ("[%s] can't get stats, link=%d: %s",
-    	    b->name, linkNum, strerror(errno)));
+	Perror("[%s] can't get stats, link=%d", b->name, linkNum);
 	return -1;
     }
     if (statp != NULL)
@@ -689,7 +741,7 @@ NgFuncErr(const char *fmt, ...)
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-    Log(LG_ERR, ("netgraph: %s: %s", buf, strerror(errno)));
+    Perror("netgraph: %s", buf);
 }
 
 #ifdef USE_NG_NETFLOW
@@ -723,6 +775,34 @@ NetflowSetCommand(Context ctx, int ac, char *av[], void *arg)
     	    gNetflowInactive = atoi(av[0]);
     	    gNetflowActive = atoi(av[1]);
     	    break;
+#if NGM_NETFLOW_COOKIE >= 1309868867
+	case SET_TEMPLATE:
+    	    if (ac != 2)
+		return (-1);
+	    /*
+	     * RFC 3954 clause 7.3
+	     * "Both options MUST be configurable by the user on the Exporter."
+	     */
+    	    if (atoi(av[0]) <= 0 || atoi(av[1]) <= 0)
+		Error("Bad netflow v9 template values \"%s %s\"", av[0], av[1]);
+    	    gNetflowTime = atoi(av[0]);		/* Default 600 */
+    	    gNetflowPackets = atoi(av[1]);	/* Default 500 */
+    	    break;
+	case SET_MTU:
+    	    if (ac != 1)
+		return (-1);
+    	    if (atoi(av[0]) < MIN_MTU || atoi(av[0]) > MAX_MTU)
+		Error("Bad netflow v9 MTU \"%s\"", av[0]);
+    	    gNetflowMTU = atoi(av[0]);		/* Default 1500 */
+    	    break;
+	case SET_VERSION:
+    	    if (ac != 1)
+		return (-1);
+    	    if (atoi(av[0]) != 5 && atoi(av[0]) != 9)
+		Error("Bad netflow export version \"%s\"", av[0]);
+    	    gNetflowVer = atoi(av[0]);		/* Default 5 */
+    	    break;
+#endif
 	case SET_NODE:
     	    if (ac != 1)
 		return (-1);
@@ -764,8 +844,7 @@ NgGetNodeID(int csock, const char *path)
 	    /* Create a netgraph socket node */
 	    snprintf(name, sizeof(name), "mpd%d-stats", gPid);
 	    if (NgMkSockNode(name, &gNgStatSock, NULL) < 0) {
-    		Log(LG_ERR, ("NgFuncSendQuery: can't create %s node: %s",
-    	    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
+    		Perror("NgFuncSendQuery: can't create %s node", NG_SOCKET_NODE_TYPE);
     		return(-1);
 	    }
 	    (void) fcntl(gNgStatSock, F_SETFD, 1);

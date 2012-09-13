@@ -312,9 +312,13 @@ static int
 L2tpInst(Link l, Link lt)
 {
 	L2tpInfo pi;
-	l->info = Mdup(MB_PHYS, lt->info, sizeof(struct l2tpinfo));
-	pi = (L2tpInfo) l->info;
-    
+	L2tpInfo	const pit = (L2tpInfo) lt->info;
+
+	/* Initialize this link */
+	pi = (L2tpInfo) (l->info = Mdup(MB_PHYS, lt->info, sizeof(*pit)));
+	if (pit->conf.fqdn_peer_addr != NULL)
+	    pi->conf.fqdn_peer_addr =
+	        Mstrdup(MB_PHYS, pit->conf.fqdn_peer_addr);
 	if (pi->server)
 	    pi->server->refs++;
 	
@@ -344,7 +348,6 @@ L2tpOpen(Link l)
 	} ugetsas;
 	struct sockaddr_storage	*const getsas = (struct sockaddr_storage *)(void *)ugetsas.reply.data;
 	struct ngm_mkpeer mkpeer;
-	struct sockaddr_storage peer_sas;
 	struct sockaddr_storage sas;
 	char hook[NG_HOOKSIZ];
 	char namebuf[64];
@@ -376,8 +379,8 @@ L2tpOpen(Link l)
 			    }
 			    if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_FRAMING_TYPE,
 	        	        &fr, sizeof(fr)) == -1) {
-			    	    Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-				        l->name, strerror(errno)));
+				    Perror("[%s] ppp_l2tp_avp_list_append",
+				        l->name);
 			    }
 			} else {
 			    avps = NULL;
@@ -427,15 +430,13 @@ L2tpOpen(Link l)
 			if (pi->conf.callingnum[0]) {
 			  if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_CALLING_NUMBER,
 	        	    pi->conf.callingnum, strlen(pi->conf.callingnum)) == -1) {
-				Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-				    l->name, strerror(errno)));
+				Perror("[%s] ppp_l2tp_avp_list_append", l->name);
 			  }
 			}
 			if (pi->conf.callednum[0]) {
 			  if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_CALLED_NUMBER,
 	        	    pi->conf.callednum, strlen(pi->conf.callednum)) == -1) {
-				Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-				    l->name, strerror(errno)));
+				Perror("[%s] ppp_l2tp_avp_list_append", l->name);
 			  }
 			}
 			if ((sess = ppp_l2tp_initiate(tun->ctrl, 
@@ -443,8 +444,7 @@ L2tpOpen(Link l)
 				Enabled(&pi->conf.options, L2TP_CONF_LENGTH)?1:0,
 				Enabled(&pi->conf.options, L2TP_CONF_DATASEQ)?1:0,
 				avps)) == NULL) {
-			    Log(LG_ERR, ("[%s] ppp_l2tp_initiate: %s", 
-				l->name, strerror(errno)));
+			    Perror("[%s] ppp_l2tp_initiate", l->name);
 			    ppp_l2tp_avp_list_destroy(&avps);
 			    pi->sess = NULL;
 			    pi->tun = NULL;
@@ -473,8 +473,8 @@ L2tpOpen(Link l)
 				}
 				if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_FRAMING_TYPE,
 	        		    &fr, sizeof(fr)) == -1) {
-				        Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-				    	    l->name, strerror(errno)));
+					Perror("[%s] ppp_l2tp_avp_list_append",
+					    l->name);
 				}
 			    } else {
 				avps = NULL;
@@ -490,7 +490,7 @@ L2tpOpen(Link l)
 
 	/* There is no tun which we need. Create a new one. */
 	tun = Malloc(MB_PHYS, sizeof(*tun));
-	sockaddrtou_addr(&peer_sas,&tun->peer_addr,&tun->peer_port);
+	memset(tun, 0, sizeof(*tun));
 	u_addrcopy(&pi->conf.peer_addr.addr, &tun->peer_addr);
 	tun->peer_port = pi->conf.peer_port?pi->conf.peer_port:L2TP_PORT;
 	u_addrcopy(&pi->conf.self_addr, &tun->self_addr);
@@ -517,7 +517,7 @@ L2tpOpen(Link l)
 	      &cap, sizeof(cap)) == -1) ||
 	    (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_RECEIVE_WINDOW_SIZE,
 	      &win, sizeof(win)) == -1)) {
-		Log(LG_ERR, ("L2TP: ppp_l2tp_avp_list_append: %s", strerror(errno)));
+		Perror("L2TP: ppp_l2tp_avp_list_append");
 		goto fail;
 	}
 
@@ -527,8 +527,7 @@ L2tpOpen(Link l)
 	    &node_id, hook, avps, 
 	    pi->conf.secret, strlen(pi->conf.secret),
 	    Enabled(&pi->conf.options, L2TP_CONF_HIDDEN))) == NULL) {
-		Log(LG_ERR, ("[%s] ppp_l2tp_ctrl_create: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] ppp_l2tp_ctrl_create", l->name);
 		goto fail;
 	}
 	ppp_l2tp_ctrl_set_cookie(tun->ctrl, tun);
@@ -539,9 +538,8 @@ L2tpOpen(Link l)
 
 	/* Get a temporary netgraph socket node */
 	if (NgMkSockNode(NULL, &csock, &dsock) == -1) {
-		Log(LG_ERR, ("[%s] NgMkSockNode: %s", 
-		    l->name, strerror(errno)));
-		goto fail;
+	    Perror("[%s] NgMkSockNode", l->name);
+	    goto fail;
 	}
 
 	/* Attach a new UDP socket to "lower" hook */
@@ -556,8 +554,7 @@ L2tpOpen(Link l)
 	}
 	if (NgSendMsg(csock, namebuf, NGM_GENERIC_COOKIE,
 	    NGM_MKPEER, &mkpeer, sizeof(mkpeer)) == -1) {
-		Log(LG_ERR, ("[%s] mkpeer: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] mkpeer", l->name);
 		goto fail;
 	}
 
@@ -571,15 +568,13 @@ L2tpOpen(Link l)
 	memcpy(sockopt->value, &one, sizeof(int));
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_SETOPT, sockopt, sizeof(sockopt_buf)) == -1) {
-		Log(LG_ERR, ("[%s] setsockopt: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] setsockopt", l->name);
 		goto fail;
 	}
 	sockopt->name = SO_REUSEPORT;
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_SETOPT, sockopt, sizeof(sockopt_buf)) == -1) {
-		Log(LG_ERR, ("[%s] setsockopt: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] setsockopt", l->name);
 		goto fail;
 	}
 
@@ -588,8 +583,7 @@ L2tpOpen(Link l)
 	    u_addrtosockaddr(&tun->self_addr,tun->self_port,&sas);
 	    if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 		NGM_KSOCKET_BIND, &sas, sas.ss_len) == -1) {
-		    Log(LG_ERR, ("[%s] bind: %s", 
-			l->name, strerror(errno)));
+		    Perror("[%s] bind", l->name);
 		    goto fail;
 	    }
 	}
@@ -598,27 +592,23 @@ L2tpOpen(Link l)
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	      NGM_KSOCKET_CONNECT, &sas, sas.ss_len) == -1
 	    && errno != EINPROGRESS) {
-		Log(LG_ERR, ("[%s] connect: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] connect", l->name);
 		goto fail;
 	}
 
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_GETNAME, NULL, 0) == -1) {
-		Log(LG_ERR, ("[%s] getname send: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] getname send", l->name);
 	} else 
 	if (NgRecvMsg(csock, &ugetsas.reply, sizeof(ugetsas), NULL) == -1) {
-		Log(LG_ERR, ("[%s] getname recv: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] getname recv", l->name);
 	} else {
 	    sockaddrtou_addr(getsas,&tun->self_addr,&tun->self_port);
 	}
 
 	/* Add peer to our hash table */
 	if (ghash_put(gL2tpTuns, tun) == -1) {
-		Log(LG_ERR, ("[%s] ghash_put: %s", 
-		    l->name, strerror(errno)));
+		Perror("[%s] ghash_put", l->name);
 		goto fail;
 	}
 	pi->tun = tun;
@@ -716,7 +706,7 @@ L2tpUnhook(Link l)
 
 	    /* Get a temporary netgraph socket node */
 	    if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-		Log(LG_ERR, ("L2TP: NgMkSockNode: %s", strerror(errno)));
+		Perror("L2TP: NgMkSockNode");
 		return;
 	    }
 	
@@ -997,15 +987,13 @@ ppp_l2tp_ctrl_connected_cb(struct ppp_l2tp_ctrl *ctrl)
 		if (pi->conf.callingnum[0]) {
 		   if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_CALLING_NUMBER,
 	            pi->conf.callingnum, strlen(pi->conf.callingnum)) == -1) {
-			Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-			    l->name, strerror(errno)));
+			Perror("[%s] ppp_l2tp_avp_list_append", l->name);
 		   }
 		}
 		if (pi->conf.callednum[0]) {
 		   if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_CALLED_NUMBER,
 	            pi->conf.callednum, strlen(pi->conf.callednum)) == -1) {
-			Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-			    l->name, strerror(errno)));
+			Perror("[%s] ppp_l2tp_avp_list_append", l->name);
 		   }
 		}
 		if ((sess = ppp_l2tp_initiate(tun->ctrl,
@@ -1013,7 +1001,7 @@ ppp_l2tp_ctrl_connected_cb(struct ppp_l2tp_ctrl *ctrl)
 			    Enabled(&pi->conf.options, L2TP_CONF_LENGTH)?1:0,
 			    Enabled(&pi->conf.options, L2TP_CONF_DATASEQ)?1:0,
 			    avps)) == NULL) {
-			Log(LG_ERR, ("ppp_l2tp_initiate: %s", strerror(errno)));
+			Perror("ppp_l2tp_initiate");
 			pi->sess = NULL;
 			pi->tun = NULL;
 			tun->active_sessions--;
@@ -1041,8 +1029,7 @@ ppp_l2tp_ctrl_connected_cb(struct ppp_l2tp_ctrl *ctrl)
 			}
 			if (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_FRAMING_TYPE,
 	        	    &fr, sizeof(fr)) == -1) {
-			        Log(LG_ERR, ("[%s] ppp_l2tp_avp_list_append: %s", 
-			    	    l->name, strerror(errno)));
+			        Perror("[%s] ppp_l2tp_avp_list_append", l->name);
 			}
 		    } else {
 			avps = NULL;
@@ -1128,7 +1115,7 @@ ppp_l2tp_initiated_cb(struct ppp_l2tp_ctrl *ctrl,
 
 	/* Convert AVP's to friendly form */
 	if ((ptrs = ppp_l2tp_avp_list2ptrs(avps)) == NULL) {
-		Log(LG_ERR, ("L2TP: error decoding AVP list: %s", strerror(errno)));
+		Perror("L2TP: error decoding AVP list");
 		ppp_l2tp_terminate(sess, L2TP_RESULT_ERROR,
 		    L2TP_ERROR_GENERIC, strerror(errno));
 		return;
@@ -1236,7 +1223,7 @@ ppp_l2tp_connected_cb(struct ppp_l2tp_sess *sess,
 	if ((pi->incoming != pi->outcall) && avps != NULL) {
 		/* Convert AVP's to friendly form */
 		if ((ptrs = ppp_l2tp_avp_list2ptrs(avps)) == NULL) {
-			Log(LG_ERR, ("L2TP: error decoding AVP list: %s", strerror(errno)));
+			Perror("L2TP: error decoding AVP list");
 		} else {
 			if (ptrs->framing && ptrs->framing->sync) {
 				pi->sync = 1;
@@ -1320,12 +1307,15 @@ L2tpHookUp(Link l)
 
 	/* Get a temporary netgraph socket node */
 	if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-		Log(LG_ERR, ("L2TP: NgMkSockNode: %s", strerror(errno)));
+		Perror("L2TP: NgMkSockNode");
 		goto fail;
 	}
 
 	/* Get this link's node and hook */
 	ppp_l2tp_sess_get_hook(pi->sess, &node_id, &hook);
+
+	/* Initialize cn */
+	memset(&cn, 0, sizeof(cn));
 
 	/* Connect our ng_ppp(4) node link hook and ng_l2tp(4) node. */
 	if (!PhysGetUpperHook(l, cn.path, cn.peerhook)) {
@@ -1336,8 +1326,8 @@ L2tpHookUp(Link l)
 	strlcpy(cn.ourhook, hook, sizeof(cn.ourhook));
 	if (NgSendMsg(csock, path, NGM_GENERIC_COOKIE, NGM_CONNECT, 
 	    &cn, sizeof(cn)) < 0) {
-		Log(LG_ERR, ("[%s] L2TP: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    		    l->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+		Perror("[%s] L2TP: can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+    		    l->name, path, cn.ourhook, cn.path, cn.peerhook);
 		goto fail;
 	}
 	ppp_l2tp_sess_hooked(pi->sess);
@@ -1348,6 +1338,7 @@ fail:
 	/* Clean up after failure */
 	ppp_l2tp_terminate(pi->sess, L2TP_RESULT_ERROR,
 	    L2TP_ERROR_GENERIC, strerror(errno));
+	pi->sess = NULL;
 	if (csock != -1)
 		(void)close(csock);
 }
@@ -1395,7 +1386,7 @@ L2tpServerEvent(int type, void *arg)
 	sas_len = sizeof(peer_sas);
 	if ((len = recvfrom(s->sock, buf, bufsize, 0,
 	    (struct sockaddr *)&peer_sas, &sas_len)) == -1) {
-		Log(LG_ERR, ("L2TP: recvfrom: %s", strerror(errno)));
+		Perror("L2TP: recvfrom");
 		goto fail;
 	}
 
@@ -1466,7 +1457,7 @@ L2tpServerEvent(int type, void *arg)
 	      &cap, sizeof(cap)) == -1) ||
 	    (ppp_l2tp_avp_list_append(avps, 1, 0, AVP_RECEIVE_WINDOW_SIZE,
 	      &win, sizeof(win)) == -1)) {
-		Log(LG_ERR, ("L2TP: ppp_l2tp_avp_list_append: %s", strerror(errno)));
+		Perror("L2TP: ppp_l2tp_avp_list_append");
 		goto fail;
 	}
 
@@ -1476,14 +1467,14 @@ L2tpServerEvent(int type, void *arg)
 	    &node_id, hook, avps, 
 	    pi->conf.secret, strlen(pi->conf.secret),
 	    Enabled(&pi->conf.options, L2TP_CONF_HIDDEN))) == NULL) {
-		Log(LG_ERR, ("L2TP: ppp_l2tp_ctrl_create: %s", strerror(errno)));
+		Perror("L2TP: ppp_l2tp_ctrl_create");
 		goto fail;
 	}
 	ppp_l2tp_ctrl_set_cookie(tun->ctrl, tun);
 
 	/* Get a temporary netgraph socket node */
 	if (NgMkSockNode(NULL, &csock, &dsock) == -1) {
-		Log(LG_ERR, ("L2TP: NgMkSockNode: %s", strerror(errno)));
+		Perror("L2TP: NgMkSockNode");
 		goto fail;
 	}
 
@@ -1495,13 +1486,13 @@ L2tpServerEvent(int type, void *arg)
 	strlcpy(connect.peerhook, hook, sizeof(connect.peerhook));
 	if (NgSendMsg(csock, ".:", NGM_GENERIC_COOKIE,
 	    NGM_CONNECT, &connect, sizeof(connect)) == -1) {
-		Log(LG_ERR, ("L2TP: %s: %s", "connect", strerror(errno)));
+		Perror("L2TP: connect");
 		goto fail;
 	}
 
 	/* Write the received packet to the node */
 	if (NgSendData(dsock, hook, (u_char *)buf, len) == -1) {
-		Log(LG_ERR, ("L2TP: %s: %s", "NgSendData", strerror(errno)));
+		Perror("L2TP: NgSendData");
 		goto fail;
 	}
 
@@ -1510,7 +1501,7 @@ L2tpServerEvent(int type, void *arg)
 	strlcpy(rmhook.ourhook, hook, sizeof(rmhook.ourhook));
 	if (NgSendMsg(csock, ".:", NGM_GENERIC_COOKIE,
 	    NGM_RMHOOK, &rmhook, sizeof(rmhook)) == -1) {
-		Log(LG_ERR, ("L2TP: %s: %s", "rmhook", strerror(errno)));
+		Perror("L2TP: rmhook");
 		goto fail;
 	}
 
@@ -1525,7 +1516,7 @@ L2tpServerEvent(int type, void *arg)
 	}
 	if (NgSendMsg(csock, namebuf, NGM_GENERIC_COOKIE,
 	    NGM_MKPEER, &mkpeer, sizeof(mkpeer)) == -1) {
-		Log(LG_ERR, ("L2TP: %s: %s", "mkpeer", strerror(errno)));
+		Perror("L2TP: mkpeer");
 		goto fail;
 	}
 
@@ -1539,13 +1530,13 @@ L2tpServerEvent(int type, void *arg)
 	memcpy(sockopt->value, &one, sizeof(int));
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_SETOPT, sockopt, sizeof(sockopt_buf)) == -1) {
-		Log(LG_ERR, ("L2TP: setsockopt: %s", strerror(errno)));
+		Perror("L2TP: setsockopt");
 		goto fail;
 	}
 	sockopt->name = SO_REUSEPORT;
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_SETOPT, sockopt, sizeof(sockopt_buf)) == -1) {
-		Log(LG_ERR, ("L2TP: setsockopt: %s", strerror(errno)));
+		Perror("L2TP: setsockopt");
 		goto fail;
 	}
 
@@ -1553,7 +1544,7 @@ L2tpServerEvent(int type, void *arg)
 	u_addrtosockaddr(&s->self_addr,s->self_port,&sas);
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_BIND, &sas, sas.ss_len) == -1) {
-		Log(LG_ERR, ("L2TP: bind: %s", strerror(errno)));
+		Perror("L2TP: bind");
 		goto fail;
 	}
 
@@ -1561,13 +1552,13 @@ L2tpServerEvent(int type, void *arg)
 	if (NgSendMsg(csock, namebuf, NGM_KSOCKET_COOKIE,
 	      NGM_KSOCKET_CONNECT, &peer_sas, peer_sas.ss_len) == -1
 	    && errno != EINPROGRESS) {
-		Log(LG_ERR, ("L2TP: connect: %s", strerror(errno)));
+		Perror("L2TP: connect");
 		goto fail;
 	}
 
 	/* Add peer to our hash table */
 	if (ghash_put(gL2tpTuns, tun) == -1) {
-		Log(LG_ERR, ("L2TP: %s: %s", "ghash_put", strerror(errno)));
+		Perror("L2TP: ghash_put");
 		goto fail;
 	}
 
@@ -1635,22 +1626,22 @@ L2tpListen(Link l)
 		s->sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	}
 	if (s->sock == -1) {
-		Log(LG_ERR, ("L2TP: socket: %s", strerror(errno)));
+		Perror("L2TP: socket");
 		goto fail;
 	}
 	if (setsockopt(s->sock, SOL_SOCKET,
 	    SO_REUSEADDR, &one, sizeof(one)) == -1) {
-		Log(LG_ERR, ("L2TP: setsockopt: %s", strerror(errno)));
+		Perror("L2TP: setsockopt");
 		goto fail;
 	}
 	if (setsockopt(s->sock, SOL_SOCKET,
 	    SO_REUSEPORT, &one, sizeof(one)) == -1) {
-		Log(LG_ERR, ("L2TP: setsockopt: %s", strerror(errno)));
+		Perror("L2TP: setsockopt");
 		goto fail;
 	}
 	u_addrtosockaddr(&s->self_addr, s->self_port, &sa);
 	if (bind(s->sock, (struct sockaddr *)&sa, sa.ss_len) == -1) {
-		Log(LG_ERR, ("L2TP: bind: %s", strerror(errno)));
+		Perror("L2TP: bind");
 		goto fail;
 	}
 

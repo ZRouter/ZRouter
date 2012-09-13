@@ -628,7 +628,7 @@ RadsrvOpen(Radsrv w)
     }
 
     if ((w->fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-	Log(LG_ERR, ("%s: Cannot create socket: %s", __FUNCTION__, strerror(errno)));
+	Perror("%s: Cannot create socket", __FUNCTION__);
 	return (-1);
     }
     memset(&sin, 0, sizeof sin);

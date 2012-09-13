@@ -210,13 +210,13 @@ pevent_ctx_create(const char *mtype, const pthread_attr_t *attr)
 		if ((errno = pthread_attr_init(&ctx->attr)) != 0)
 			goto fail;
 		ctx->has_attr = 1;
-		pthread_attr_getinheritsched(attr, &value);
+		pthread_attr_getinheritsched((pthread_attr_t *) attr, &value);
 		pthread_attr_setinheritsched(&ctx->attr, value);
-		pthread_attr_getschedparam(attr, &param);
+		pthread_attr_getschedparam((pthread_attr_t *) attr, &param);
 		pthread_attr_setschedparam(&ctx->attr, &param);
-		pthread_attr_getschedpolicy(attr, &value);
+		pthread_attr_getschedpolicy((pthread_attr_t *) attr, &value);
 		pthread_attr_setschedpolicy(&ctx->attr, value);
-		pthread_attr_getscope(attr, &value);
+		pthread_attr_getscope((pthread_attr_t *) attr, &value);
 		pthread_attr_setscope(&ctx->attr, value);
 	}
 

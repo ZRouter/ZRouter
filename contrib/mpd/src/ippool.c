@@ -43,7 +43,7 @@ static int	IPPoolSetCommand(Context ctx, int ac, char *av[], void *arg);
 void
 IPPoolInit(void)
 {
-    int ret = pthread_mutex_init (&gGiantMutex, NULL);
+    int ret = pthread_mutex_init (&gIPPoolMutex, NULL);
     if (ret != 0) {
 	Log(LG_ERR, ("Could not create IP pool mutex: %d", ret));
 	exit(EX_UNAVAILABLE);

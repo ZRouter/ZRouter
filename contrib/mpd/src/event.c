@@ -1,7 +1,7 @@
 /*
  * See ``COPYRIGHT.mpd''
  *
- * $Id: event.c,v 1.20 2011/06/30 09:17:28 dmitryluhtionov Exp $
+ * $Id: event.c,v 1.21 2011/07/11 09:09:22 dmitryluhtionov Exp $
  *
  */
 
@@ -84,7 +84,7 @@ EventRegister2(EventRef *refp, int type, int val, int flags,
 
     if (pevent_register(gPeventCtx, &refp->pe, flags, &gGiantMutex, EventHandler,
 	    refp, type, val) == -1) {
-        Log(LG_ERR, ("%s: error pevent_register: %s", __FUNCTION__, strerror(errno)));
+        Perror("%s: error pevent_register", __FUNCTION__);
         return(-1);
     }
   

@@ -907,6 +907,7 @@ BundUpdateParams(Bund b)
 
     /* Update interface MTU */
     IfaceSetMTU(b, mtu);
+ 
 }
 
 /*
@@ -1071,7 +1072,7 @@ BundCreate(Context ctx, int ac, char *av[], void *arg)
     if (ac - stay < 1 || ac - stay > 2)
 	return(-1);
 
-    if (strlen(av[0 + stay]) >= (LINK_MAX_NAME - tmpl * 5))
+    if (strlen(av[0 + stay]) >= (LINK_MAX_NAME - tmpl * (IFNUMLEN + 1)))
 	Error("Bundle name \"%s\" is too long", av[0 + stay]);
 
     /* See if bundle name already taken */
@@ -1247,9 +1248,14 @@ BundShutdown(Bund b)
 
     Log(LG_BUND, ("[%s] Bundle: Shutdown", b->name));
     for (k = 0; k < NG_PPP_MAX_LINKS; k++) {
-	if ((l = b->links[k]) != NULL)
+	if ((l = b->links[k]) != NULL) {
 	    if (!l->stay)
 		LinkShutdown(l);
+	    else {
+		l->bund = NULL;
+		b->links[k] = NULL;
+	    }
+	}
     }
 
     if (b->hook[0])
@@ -1257,6 +1263,7 @@ BundShutdown(Bund b)
     gBundles[b->id] = NULL;
     MsgUnRegister(&b->msgs);
     b->dead = 1;
+    IfaceDestroy(b);
     UNREF(b);
 }
 
@@ -1673,17 +1680,17 @@ BundNgInit(Bund b)
     b->iface.ifindex = if_nametoindex(b->iface.ifname);
     Log(LG_BUND|LG_IFACE, ("[%s] Bundle: Interface %s created",
 	b->name, b->iface.ifname));
- 
+
     /* Create new PPP node */
     snprintf(b->hook, sizeof(b->hook), "b%d", b->id);
-
+    memset(&mp, 0, sizeof(mp));
     strcpy(mp.type, NG_PPP_NODE_TYPE);
     strcpy(mp.ourhook, b->hook);
     strcpy(mp.peerhook, NG_PPP_HOOK_BYPASS);
     if (NgSendMsg(gLinksCsock, ".:",
     	    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-    	    b->name, mp.type, ".:", mp.ourhook, strerror(errno)));
+	Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+    	    b->name, mp.type, ".:", mp.ourhook);
 	goto fail;
     }
     newPpp = 1;
@@ -1692,11 +1699,12 @@ BundNgInit(Bund b)
     b->nodeID = NgGetNodeID(gLinksCsock, b->hook);
 
     /* Give it a name */
+    memset(&nm, 0, sizeof(nm));
     snprintf(nm.name, sizeof(nm.name), "mpd%d-%s", gPid, b->name);
     if (NgSendMsg(gLinksCsock, b->hook,
     	    NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-	Log(LG_ERR, ("[%s] can't name %s node \"%s\": %s",
-    	    b->name, NG_PPP_NODE_TYPE, b->hook, strerror(errno)));
+	Perror("[%s] can't name %s node \"%s\"",
+    	    b->name, NG_PPP_NODE_TYPE, b->hook);
 	goto fail;
     }
 

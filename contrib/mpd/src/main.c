@@ -233,9 +233,8 @@ main(int ac, char *av[])
 #ifdef CCP_MPPC
     MppcTestCap();
 #endif
-    LinksInit();
-    CcpsInit();
-    EcpsInit();
+    if ((LinksInit() != 0) || (CcpsInit() != 0) || (EcpsInit() != 0))
+	exit(EX_UNAVAILABLE);
     
     /* Init device types. */
     for (k = 0; (pt = gPhysTypes[k]); k++) {
@@ -397,6 +396,7 @@ DoExit(int code)
     LinksShutdown();
 
     /* Remove our PID file and exit */
+    ConsoleShutdown(&gConsole);
     Log(LG_ALWAYS, ("process %d terminated", gPid));
     LogClose();
     (void) unlink(gPidFile);
@@ -660,7 +660,7 @@ Usage(int ex)
     char		buf[100];
     size_t		k;
 
-    fprintf(stderr, "Usage: mpd %s\n", UsageStr);
+    fprintf(stderr, "Usage: mpd5 %s\n", UsageStr);
     fprintf(stderr, "Options:\n");
     for (k = 0; k < OPTLIST_SIZE; k++) {
 	opt = OptList + k;

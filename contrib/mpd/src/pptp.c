@@ -268,9 +268,13 @@ static int
 PptpInst(Link l, Link lt)
 {
     PptpInfo	pptp;
+    PptpInfo	const pptpt = (PptpInfo) lt->info;
 
     /* Initialize this link */
     pptp = (PptpInfo) (l->info = Mdup(MB_PHYS, lt->info, sizeof(*pptp)));
+    if (pptpt->conf.fqdn_peer_addr != NULL)
+        pptp->conf.fqdn_peer_addr =
+            Mstrdup(MB_PHYS, pptpt->conf.fqdn_peer_addr);
     pptp->listener = NULL;
 
     return(0);
@@ -448,7 +452,7 @@ PptpUnhook(Link l)
 
 	/* Get a temporary netgraph socket node */
 	if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-		Log(LG_ERR, ("PPTP: NgMkSockNode: %s", strerror(errno)));
+		Perror("PPTP: NgMkSockNode");
 		return;
 	}
 	
@@ -840,7 +844,7 @@ PptpHookUp(Link l)
     
     /* Get a temporary netgraph socket node */
     if (NgMkSockNode(NULL, &csock, NULL) == -1) {
-	Log(LG_ERR, ("PPTP: NgMkSockNode: %s", strerror(errno)));
+	Perror("PPTP: NgMkSockNode");
 	return(-1);
     }
 
@@ -859,7 +863,7 @@ PptpHookUp(Link l)
 	tun->self_addr = u_self_addr;
 	tun->peer_addr = u_peer_addr;
 	if (ghash_put(gPptpTuns, tun) == -1) {
-	    Log(LG_ERR, ("[%s] PPTP: ghash_put: %s", l->name, strerror(errno)));
+	    Perror("[%s] PPTP: ghash_put", l->name);
 	    Freee(tun);
 	    close(csock);
 	    return(-1);
@@ -875,8 +879,7 @@ PptpHookUp(Link l)
 #endif
 	if (NgSendMsg(csock, path, NGM_GENERIC_COOKIE,
           NGM_MKPEER, &mkp, sizeof(mkp)) < 0) {
-	    Log(LG_ERR, ("[%s] PPTP: can't attach %s node: %s",
-    		l->name, NG_PPTPGRE_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] PPTP: can't attach %s node", l->name, NG_PPTPGRE_NODE_TYPE);
 	    ghash_remove(gPptpTuns, tun);
 	    Freee(tun);
 	    close(csock);
@@ -885,8 +888,7 @@ PptpHookUp(Link l)
 
 	/* Get pptpgre node ID */
 	if ((tun->node_id = NgGetNodeID(csock, pptppath)) == 0) {
-	    Log(LG_ERR, ("[%s] Cannot get %s node id: %s",
-		l->name, NG_PPTPGRE_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] Cannot get %s node id", l->name, NG_PPTPGRE_NODE_TYPE);
 	    ghash_remove(gPptpTuns, tun);
 	    Freee(tun);
 	    close(csock);
@@ -906,8 +908,7 @@ PptpHookUp(Link l)
 	}
 	if (NgSendMsg(csock, pptppath, NGM_GENERIC_COOKIE,
 	  NGM_MKPEER, &mkp, sizeof(mkp)) < 0) {
-	    Log(LG_ERR, ("[%s] PPTP: can't attach %s node: %s",
-    		l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] PPTP: can't attach %s node", l->name, NG_KSOCKET_NODE_TYPE);
 	    close(csock);
 	    return(-1);
 	}
@@ -920,15 +921,14 @@ PptpHookUp(Link l)
 	((int *)(ksso->value))[0]=48*1024;
 	if (NgSendMsg(csock, ksockpath, NGM_KSOCKET_COOKIE,
 	    NGM_KSOCKET_SETOPT, &u, sizeof(u)) < 0) {
-		Log(LG_ERR, ("[%s] PPTP: can't setsockopt %s node: %s",
-		    l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+		Perror("[%s] PPTP: can't setsockopt %s node",
+		    l->name, NG_KSOCKET_NODE_TYPE);
 	}
 
 	/* Bind ksocket socket to local IP address */
 	if (NgSendMsg(csock, ksockpath, NGM_KSOCKET_COOKIE,
           NGM_KSOCKET_BIND, &self_addr, self_addr.ss_len) < 0) {
-	    Log(LG_ERR, ("[%s] PPTP: can't bind() %s node: %s",
-    		l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] PPTP: can't bind() %s node", l->name, NG_KSOCKET_NODE_TYPE);
 	    close(csock);
 	    return(-1);
 	}
@@ -937,8 +937,8 @@ PptpHookUp(Link l)
 	if (NgSendMsg(csock, ksockpath, NGM_KSOCKET_COOKIE,
     	  NGM_KSOCKET_CONNECT, &peer_addr, peer_addr.ss_len) < 0 &&
     	  errno != EINPROGRESS) {	/* happens in -current (weird) */
-	    Log(LG_ERR, ("[%s] PPTP: can't connect() %s node: %s",
-    	        l->name, NG_KSOCKET_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] PPTP: can't connect() %s node",
+    	        l->name, NG_KSOCKET_NODE_TYPE);
 	    close(csock);
     	    return(-1);
         }
@@ -950,8 +950,8 @@ PptpHookUp(Link l)
 	snprintf(cn.peerhook, sizeof(mkp.peerhook), NG_PPTPGRE_HOOK_SESSION_F, pi->cid);
 	if (NgSendMsg(csock, path, NGM_GENERIC_COOKIE,
           NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	    Log(LG_ERR, ("[%s] PPTP: can't connect to %s node: %s",
-    		l->name, NG_PPTPGRE_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] PPTP: can't connect to %s node",
+    		l->name, NG_PPTPGRE_NODE_TYPE);
 	    close(csock);
 	    return(-1);
 	}
@@ -970,8 +970,7 @@ PptpHookUp(Link l)
 
     if (NgSendMsg(csock, pptppath, NGM_PPTPGRE_COOKIE,
       NGM_PPTPGRE_SET_CONFIG, &gc, sizeof(gc)) < 0) {
-	Log(LG_ERR, ("[%s] PPTP: can't config %s node: %s",
-    	    l->name, NG_PPTPGRE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] PPTP: can't config %s node", l->name, NG_PPTPGRE_NODE_TYPE);
 	close(csock);
 	return(-1);
     }

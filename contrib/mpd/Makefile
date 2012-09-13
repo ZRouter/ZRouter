@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.12 2007/09/16 14:03:57 amotin Exp $
+# $Id: Makefile,v 1.13 2011/12/21 14:58:09 amotin Exp $
 
 VERSION!=	cat src/Makefile | grep ^VERSION | awk '{ print $$2 }'
 
 DISTNAME=	mpd-${VERSION}
 TARBALL=	${DISTNAME}.tar.gz
 PORTBALL=	port.tgz
-CVSROOT?=	mpd.cvs.sourceforge.net:/cvsroot/mpd
+CVSROOT?=	:pserver:anonymous@mpd.cvs.sourceforge.net:/cvsroot/mpd
 
 all:		${TARBALL} ${PORTBALL}
 
@@ -38,7 +38,7 @@ ${PORTBALL}:	.export-done
 	cp dist/Makefile ${DISTNAME}
 	cp dist/Makefile.conf ${DISTNAME}/conf/Makefile
 	cp dist/Makefile.doc ${DISTNAME}/doc/Makefile
-	cp src/COPYRIGHT* src/Makefile src/[a-z]* ${DISTNAME}/src
+	cp -r src/COPYRIGHT* src/Makefile src/[a-z]* ${DISTNAME}/src
 	sed 's/@VERSION@/${VERSION}/g' < src/Makefile > ${DISTNAME}/src/Makefile
 	cp doc/mpd*.html doc/mpd.ps ${DISTNAME}/doc
 	cp doc/mpd.8 ${DISTNAME}/doc/mpd5.8.in

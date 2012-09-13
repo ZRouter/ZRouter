@@ -160,8 +160,7 @@ LinksInit(void)
     /* Create a netgraph socket node */
     snprintf(name, sizeof(name), "mpd%d-lso", gPid);
     if (NgMkSockNode(name, &gLinksCsock, &gLinksDsock) < 0) {
-	Log(LG_ERR, ("LinksInit(): can't create %s node: %s",
-    	    NG_SOCKET_NODE_TYPE, strerror(errno)));
+	Perror("LinksInit(): can't create %s node", NG_SOCKET_NODE_TYPE);
 	return(-1);
     }
     (void) fcntl(gLinksCsock, F_SETFD, 1);
@@ -540,7 +539,8 @@ LinkInst(Link lt, char *name, int tmpl, int stay)
     SLIST_INIT(&l->actions);
     SLIST_FOREACH(at, &lt->actions, next) {
 	a = Mdup(MB_AUTH, at, sizeof(*a));
-	regcomp(&a->regexp, a->regex, REG_EXTENDED);
+	if (a->regex[0])
+	    regcomp(&a->regexp, a->regex, REG_EXTENDED);
 	if (!ap)
 	    SLIST_INSERT_HEAD(&l->actions, a, next);
 	else
@@ -653,14 +653,18 @@ LinkNgInit(Link l)
     struct ngm_mkpeer	mp;
     struct ngm_name	nm;
 
+    /* Initialize structures */
+    memset(&mp, 0, sizeof(mp));
+    memset(&nm, 0, sizeof(nm));
+
     /* Create TEE node */
     strcpy(mp.type, NG_TEE_NODE_TYPE);
     snprintf(mp.ourhook, sizeof(mp.ourhook), "l%d", l->id);
     strcpy(mp.peerhook, NG_TEE_HOOK_LEFT2RIGHT);
     if (NgSendMsg(gLinksCsock, ".:",
       NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("[%s] can't create %s node at \"%s\"->\"%s\": %s",
-    	    l->name, mp.type, ".:", mp.ourhook, strerror(errno)));
+	Perror("[%s] can't create %s node at \"%s\"->\"%s\"",
+	    l->name, mp.type, ".:", mp.ourhook);
 	goto fail;
     }
     strlcpy(l->hook, mp.ourhook, sizeof(l->hook));
@@ -669,15 +673,14 @@ LinkNgInit(Link l)
     snprintf(nm.name, sizeof(nm.name), "mpd%d-%s-lt", gPid, l->name);
     if (NgSendMsg(gLinksCsock, l->hook,
       NGM_GENERIC_COOKIE, NGM_NAME, &nm, sizeof(nm)) < 0) {
-	Log(LG_ERR, ("[%s] can't name %s node \"%s\": %s",
-    	    l->name, NG_TEE_NODE_TYPE, l->hook, strerror(errno)));
+	Perror("[%s] can't name %s node \"%s\"",
+	    l->name, NG_TEE_NODE_TYPE, l->hook);
 	goto fail;
     }
 
     /* Get TEE node ID */
     if ((l->nodeID = NgGetNodeID(gLinksCsock, l->hook)) == 0) {
-	Log(LG_ERR, ("[%s] Cannot get %s node id: %s",
-	    l->name, NG_TEE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] Cannot get %s node id", l->name, NG_TEE_NODE_TYPE);
 	goto fail;
     };
 
@@ -701,14 +704,15 @@ LinkNgJoin(Link l)
 
     snprintf(path, sizeof(path), "[%lx]:", (u_long)l->nodeID);
 
+    memset(&cn, 0, sizeof(cn));
     snprintf(cn.path, sizeof(cn.path), "[%lx]:", (u_long)l->bund->nodeID);
     strcpy(cn.ourhook, NG_TEE_HOOK_RIGHT);
     snprintf(cn.peerhook, sizeof(cn.peerhook), "%s%d", 
 	NG_PPP_HOOK_LINK_PREFIX, l->bundleIndex);
     if (NgSendMsg(gLinksCsock, path,
       NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    l->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    l->name, path, cn.ourhook, cn.path, cn.peerhook);
 	return(-1);
     }
     
@@ -726,13 +730,14 @@ LinkNgLeave(Link l)
     char		path[NG_PATHSIZ];
     struct ngm_connect	cn;
 
+    memset(&cn, 0, sizeof(cn));
     snprintf(cn.path, sizeof(cn.path), "[%lx]:", (u_long)l->nodeID);
     strcpy(cn.ourhook, l->hook);
     strcpy(cn.peerhook, NG_TEE_HOOK_LEFT2RIGHT);
     if (NgSendMsg(gLinksCsock, ".:",
       NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    l->name, ".:", cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    l->name, ".:", cn.ourhook, cn.path, cn.peerhook);
 	return(-1);
     }
 
@@ -760,8 +765,8 @@ LinkNgToRep(Link l)
     }
     if (NgSendMsg(gLinksCsock, path,
       NGM_GENERIC_COOKIE, NGM_CONNECT, &cn, sizeof(cn)) < 0) {
-	Log(LG_ERR, ("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\": %s",
-    	    l->name, path, cn.ourhook, cn.path, cn.peerhook, strerror(errno)));
+	Perror("[%s] can't connect \"%s\"->\"%s\" and \"%s\"->\"%s\"",
+	    l->name, path, cn.ourhook, cn.path, cn.peerhook);
 	return(-1);
     }
 
@@ -1438,7 +1443,7 @@ LinkSetCommand(Context ctx, int ac, char *av[], void *arg)
 		        strlcpy(n->regex, av[1], sizeof(n->regex));
 		        if (regcomp(&n->regexp, n->regex, REG_EXTENDED)) {
 		    	    Freee(n);
-			    Error("regexp \"%s\" compilation error", av[0]);
+			    Error("regexp \"%s\" compilation error", av[1]);
 			}
 		    }
 		} else {

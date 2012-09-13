@@ -95,8 +95,7 @@ DeflateInit(Bund b, int dir)
     strcpy(mp.peerhook, deflatehook);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_GENERIC_COOKIE, NGM_MKPEER, &mp, sizeof(mp)) < 0) {
-	Log(LG_ERR, ("[%s] can't create %s node: %s",
-    	    b->name, mp.type, strerror(errno)));
+	Perror("[%s] can't create %s node", b->name, mp.type);
 	return(-1);
     }
 
@@ -113,8 +112,8 @@ DeflateInit(Bund b, int dir)
     snprintf(path, sizeof(path), "[%x]:", id);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_DEFLATE_COOKIE, NGM_DEFLATE_CONFIG, &conf, sizeof(conf)) < 0) {
-	Log(LG_ERR, ("[%s] can't config %s node at %s: %s",
-    	    b->name, NG_DEFLATE_NODE_TYPE, path, strerror(errno)));
+	Perror("[%s] can't config %s node at %s",
+    	    b->name, NG_DEFLATE_NODE_TYPE, path);
 	NgFuncShutdownNode(gCcpCsock, b->name, path);
 	return(-1);
     }
@@ -194,8 +193,7 @@ DeflateRecvResetReq(Bund b, int id, Mbuf bp, int *noAck)
     snprintf(path, sizeof(path), "[%x]:", b->ccp.comp_node_id);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_DEFLATE_COOKIE, NGM_DEFLATE_RESETREQ, NULL, 0) < 0) {
-	Log(LG_ERR, ("[%s] reset-req to %s node: %s",
-    	    b->name, NG_DEFLATE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] reset-req to %s node", b->name, NG_DEFLATE_NODE_TYPE);
     }
     return(NULL);
 }
@@ -222,8 +220,7 @@ DeflateRecvResetAck(Bund b, int id, Mbuf bp)
     snprintf(path, sizeof(path), "[%x]:", b->ccp.decomp_node_id);
     if (NgSendMsg(gCcpCsock, path,
     	    NGM_DEFLATE_COOKIE, NGM_DEFLATE_RESETREQ, NULL, 0) < 0) {
-	Log(LG_ERR, ("[%s] reset-ack to %s node: %s",
-    	    b->name, NG_DEFLATE_NODE_TYPE, strerror(errno)));
+	Perror("[%s] reset-ack to %s node", b->name, NG_DEFLATE_NODE_TYPE);
     }
 }
 
@@ -346,8 +343,7 @@ DeflateStat(Context ctx, int dir)
     }
     if (NgFuncSendQuery(path, NGM_DEFLATE_COOKIE, NGM_DEFLATE_GET_STATS, NULL, 0, 
 	&u.reply, sizeof(u), NULL) < 0) {
-	    Log(LG_ERR, ("[%s] can't get %s stats: %s",
-		b->name, NG_DEFLATE_NODE_TYPE, strerror(errno)));
+	    Perror("[%s] can't get %s stats", b->name, NG_DEFLATE_NODE_TYPE);
 	    return(0);
     }
     memcpy(&stats, u.reply.data, sizeof(stats));

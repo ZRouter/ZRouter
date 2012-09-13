@@ -11,8 +11,11 @@
 #include <netgraph/ng_nat.h>
 
 #ifdef NG_NAT_DESC_LENGTH
+/* max. number of red-port rules */
 #define NM_PORT		16
+/* max. number of red-addr rules */
 #define NM_ADDR		8
+/* max. number of red-proto rules */
 #define NM_PROTO	8
 #endif
 

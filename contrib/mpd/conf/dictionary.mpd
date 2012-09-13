@@ -23,6 +23,10 @@ ATTRIBUTE	mpd-iface-index	15	integer
 ATTRIBUTE	mpd-input-acct	16	string
 ATTRIBUTE	mpd-output-acct	17	string
 ATTRIBUTE	mpd-action	18	string
+ATTRIBUTE	mpd-peer-ident	19	string
+ATTRIBUTE	mpd-iface-name	20	string
+ATTRIBUTE	mpd-iface-descr	21	string
+ATTRIBUTE	mpd-iface-group	22	string
 ATTRIBUTE	mpd-drop-user	154	integer
 
 END-VENDOR	mpd
