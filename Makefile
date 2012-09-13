@@ -246,7 +246,9 @@ _KERNEL_BUILD_ENV= \
 
 
 kernel-toolchain:
+.if !defined(SKIP_TOOLCHAIN)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+.endif
 
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
