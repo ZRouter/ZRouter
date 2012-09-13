@@ -15,6 +15,7 @@ netgraph/async \
 netgraph/bpf \
 netgraph/car \
 netgraph/deflate \
+netgraph/ether \
 netgraph/iface \
 netgraph/ipfw \
 netgraph/l2tp \
