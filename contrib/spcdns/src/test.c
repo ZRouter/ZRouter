@@ -37,6 +37,8 @@
 
 #include <getopt.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "dns.h"
 #include "mappings.h"
