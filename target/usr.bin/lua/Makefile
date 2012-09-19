@@ -2,7 +2,7 @@
 DIR=		/usr/lib/lua
 SHLIBDIR= 	${DIR}
 LIBDIR= 	${DIR}
-SUBDIR=		lua luaexpat luaposix luasocket luasysctl
+SUBDIR=		lua luadns luaexpat luaposix luasocket luasysctl luasyslog
 
 PREINSTALLDIRS+=${DIR}
 
