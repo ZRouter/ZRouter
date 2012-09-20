@@ -40,7 +40,10 @@ adapt_prestart()
 #	switchctl /dev/switch0 set port 5 pvid 1 flags Tag
 #	switchctl /dev/switch0 set port 6 pvid 1 flags Tag
 
-	gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
+	RESET_PIN=$(kenv RESET_PIN)
+	WPS_PIN=$(kenv WPS_PIN)
+	gpioctl -f /dev/gpioc0 -c ${RESET_PIN} IN II INT
+	gpioctl -f /dev/gpioc0 -c ${WPS_PIN} IN II INT
 
 	# Import MAC addresses with known names
 #	kenv LAN_MAC_ADDR=`kenv ethaddr`
@@ -48,9 +51,23 @@ adapt_prestart()
 
 	ifconfig arge0 name lan0
 	ifconfig arge1 name wan0
+	ifconfig ath0 name wifi0
 
 	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
 	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+#	ifconfig wifi0 ether `kenv WLAN_MAC_ADDR`
+
+	# Enable Wireless LED
+	sysctl dev.ath.0.ledpin=1
+	sysctl dev.ath.0.softled=0
+	sysctl dev.ath.0.softled=1
+	sysctl dev.ath.0.ledpin=0
+	sysctl dev.ath.0.softled=0
+	sysctl dev.ath.0.softled=1
+
+	# Preset "Internet" LED to black
+	echo 0 > /dev/led/internet
+	echo 1 > /dev/led/internet_bi
 
 	hostname `kenv HostName`
 
