@@ -12,9 +12,26 @@ mountcritlocal_start()
 {
 	# XXX: check TMPFS again
 	# XXX: get useful size: small for /etc or big for upgrade
-	md=`/sbin/mdconfig -a -t malloc -s 1m`
-	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
-	mount /dev/${md} /tmp
+	_IS_ETC_MOUNTED=0
+	if [ -f /boot/kernel/tmpfs.ko -a "x${TMPFS_ETC_ENABLED}" != "xno" ]; then
+		mount -t tmpfs tmpfs /tmp
+		_IS_ETC_MOUNTED=1
+	else
+		md=$(mdconfig -a -t malloc -s 1m)
+		if [ -f /boot/kernel/ufs.ko ]; then
+			newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
+			mount -t ufs /dev/${md} /tmp
+			_IS_ETC_MOUNTED=1
+		else
+			if [ -f /boot/kernel/msdosfs.ko ]; then
+				newfs_msdos -n 1 /dev/${md} > /dev/null
+				mount -t msdosfs /dev/${md} /tmp
+				_IS_ETC_MOUNTED=1
+			else
+				mdconfig -d ${md}
+			fi
+		fi
+	fi
 
 	mkdir -p /tmp/etc
 	for dir in account at audit cache db empty lib log mail msgs preserve \
