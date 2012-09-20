@@ -76,7 +76,7 @@ KERNCONF_DEVICES+=	ath_rate_sample
 TARGET_PROFILES+=SMALL_
 
 TARGET_PROFILES+= \
-	ath dhcp dlink.ua.web dnsmasq hostap ipfw lagg mpd mroute net_help \
+	ath dhcp lua_web_ui dnsmasq hostap ipfw lagg mpd ng_igmp_fwd net_help \
 	nfs_client ntpdate openvpn ppp racoon ssh 
 
 MKULZMA_BLOCKSIZE=65536

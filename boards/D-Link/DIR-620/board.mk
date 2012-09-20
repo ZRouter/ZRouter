@@ -40,8 +40,6 @@ WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 #
 ###################################################
 
-
-
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 
@@ -52,7 +50,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=	SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate \
+TARGET_PROFILES+=	SMALL_ mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate \
     dnsmasq hostap ipfw net_help ppp
 # nfs_client
 # racoon

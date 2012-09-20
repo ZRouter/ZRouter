@@ -58,7 +58,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon ppp hostap
+TARGET_PROFILES+=SMALL_ mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate dnsmasq racoon ppp hostap
 # nfs_client openvpn
 128M!=sh -c 'echo $$((128 * 1024 * 1024))'
 ROOTFS_WITH_KERNEL=yes

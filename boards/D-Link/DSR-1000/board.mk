@@ -55,7 +55,7 @@ KERNCONF_MODULES_OVERRIDE+=firmware
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ ipfw mpd ssh dlink.ua.web dhcp mroute ntpdate \
+TARGET_PROFILES+=SMALL_ ipfw mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate \
 	dnsmasq racoon openvpn ppp hostap ath nfs_client net_help
 
 MKULZMA_BLOCKSIZE=65536
