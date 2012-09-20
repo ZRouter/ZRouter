@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# BEFORE: ADAPTATION
+# PROVIDE: switchctl
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="switchctl"
+start_cmd="switchctl_start"
+extra_commands="enablelan disablelan"
+enablelan_cmd="enablelan_sub"
+disablelan_cmd="disablelan_sub"
+
+switchctl_start()
+{
+	# disable LAN ports until LAN iface will be configured
+	if [ -x /etc/rc.d/bd_switchctl ] ; then
+		/etc/rc.d/bd_switchctl disablelan;
+	fi
+}
+
+disablelan_sub()
+{
+	if [ -x /etc/rc.d/bd_switchctl ] ; then
+		/etc/rc.d/bd_switchctl disablelan;
+	fi
+}
+
+enablelan_sub()
+{
+	if [ -x /etc/rc.d/bd_switchctl ] ; then
+		/etc/rc.d/bd_switchctl enablelan;
+	fi
+}
+
+load_rc_config $name
+
+run_rc_command $*
