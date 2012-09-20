@@ -1,0 +1,50 @@
+#!/bin/sh
+
+LOG=/tmp/mpd-linkdown.log
+
+touch ${LOG}
+echo "mpd-linkdown $*" >> ${LOG}
+#set >> ${LOG}
+echo >>  ${LOG}
+
+interface=$1
+proto=$2
+localip=$3
+remoteip=$4
+authname=$5
+
+echo $#
+case $# in
+	6)
+	dns1="8.8.8.8"
+	dns2="8.8.4.4"
+	peeraddress=$6
+	;;
+	7)
+	dns1=$6
+	dns2="8.8.8.8"
+	peeraddress=$7
+	;;
+	8)
+	dns1=$6
+	dns2=$7
+	peeraddress=$8
+	;;
+esac
+
+echo "MPD: iface=${interface} proto = ${proto} localip=${localip} remoteip=${remoteip} dns1=${dns1} dns2=${dns2} peeraddress=${peeraddress}" >> ${LOG}
+
+query="cmd=event"
+query="${query}&state=down"
+query="${query}&iface=${interface}"
+query="${query}&proto=${proto}"
+query="${query}&gw=${remoteip}"
+query="${query}&ip=${localip}"
+#query="${query}&dns1=${dns1}"
+#query="${query}&dns2=${dns2}"
+
+# Notify configuration handler
+fetch -qo - "http://127.0.0.1:8/event.xml?${query}"
+
+exit 0
+

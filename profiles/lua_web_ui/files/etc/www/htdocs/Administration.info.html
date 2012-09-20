@@ -1,0 +1,16 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>Device Information</h1>
+Vendor:<strong>$$$info.device.vendor$$$</strong><br/>
+Model:<strong>$$$info.device.model$$$</strong><br/>
+Hardware Revision:<strong>$$$info.device.revision$$$</strong><br/>
+
+$$$code:conf_table("DevInfo", "Device Information", "info",
+{
+    { label = "Hostname", 	type = "node", htmltype = "text", 	node = "hostname" 	},
+    { label = "Location", 	type = "node", htmltype = "text", 	node = "location" 	},
+})$$$
+
+
+$$$code:inc("htdocs/footer.html")$$$
+
+

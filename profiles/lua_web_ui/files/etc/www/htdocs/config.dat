@@ -1,0 +1,10 @@
+
+
+if rq.POST["cmd"] == "download_config" then
+	return (xmldump(c:gettree()));
+else
+	return ("Unknow command");
+end
+
+
+
