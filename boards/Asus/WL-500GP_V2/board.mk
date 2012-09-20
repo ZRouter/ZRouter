@@ -48,7 +48,7 @@ MKULZMA_BLOCKSIZE=65536
 FIRMWARE_IMAGE_SIZE_MAX=0x007c0000
 
 TARGET_PROFILES+=SMALL_ mpd ssh hostap dhcp net_help nfs_client
-TARGET_PROFILES+=shttpd dlink.ua.web
+TARGET_PROFILES+=shttpd lua_web_ui
 
 IMAGE_TYPE=trx
 IMAGE_SUFFIX=trx
