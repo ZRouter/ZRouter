@@ -47,29 +47,33 @@ KERNCONF_DEVICES+=	switch
 
 
 .if !defined(WITHOUT_WIRELESS)
-KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
-KERNCONF_OPTIONS+=	IEEE80211_DEBUG
+#KERNCONF_MODULES_OVERRIDE+=wlan wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt ath ath_pci
+#KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
+#KERNCONF_OPTIONS+=	IEEE80211_DEBUG
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_MESH
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_TDMA
+KERNCONF_OPTIONS+=	IEEE80211_AMPDU_AGE
 KERNCONF_DEVICES+=	wlan
 KERNCONF_DEVICES+=	wlan_amrr
 KERNCONF_DEVICES+=	wlan_wep
 KERNCONF_DEVICES+=	wlan_ccmp
 KERNCONF_DEVICES+=	wlan_tkip
+KERNCONF_DEVICES+=	wlan_xauth
+KERNCONF_DEVICES+=	wlan_acl
+KERNCONF_DEVICES+=	wlan_rssadapt
+
+KERNCONF_OPTIONS+=	AH_RXCFG_SDMAMW_4BYTES
+KERNCONF_OPTIONS+=	AH_AR5416_INTERRUPT_MITIGATION
 
 KERNCONF_OPTIONS+=	AR71XX_ATH_EEPROM
 KERNCONF_OPTIONS+=	ATH_EEPROM_FIRMWARE
 KERNCONF_DEVICES+=	firmware
 
-KERNCONF_OPTIONS+=	AH_DEBUG
-KERNCONF_OPTIONS+=	ATH_DEBUG
-KERNCONF_OPTIONS+=	ATH_DIAGAPI
+#KERNCONF_OPTIONS+=	AH_DEBUG
+#KERNCONF_OPTIONS+=	ATH_DEBUG
+#KERNCONF_OPTIONS+=	ATH_DIAGAPI
 KERNCONF_OPTIONS+=	ATH_ENABLE_11N
 KERNCONF_OPTIONS+=	AH_SUPPORT_AR5416
-#KERNCONF_OPTIONS+=	AH_SUPPORT_AR9130
-KERNCONF_OPTIONS+=	AH_RXCFG_SDMAMW_4BYTES
-# interrupt mitigation not possible on AR9130
-# option		AH_AR5416_INTERRUPT_MITIGATION
 KERNCONF_DEVICES+=	ath
 KERNCONF_DEVICES+=	ath_hal
 KERNCONF_DEVICES+=	ath_pci
@@ -108,7 +112,7 @@ KERNCONF_DEVICES+=	ath_rate_sample
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x007b0000
 
 
 ###################################################
@@ -117,8 +121,23 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp hostap ath
-# nfs_client
+TARGET_PROFILES+= 	\
+	SMALL_		\
+	dhclient	\
+	lua_web_ui	\
+	dnsmasq		\
+	hostap		\
+	ipfw		\
+	mpd		\
+	net_help	\
+	nfs_client	\
+	ntpdate		\
+	ppp		\
+	racoon		\
+	ssh		\
+	watchdogd
+
+
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
