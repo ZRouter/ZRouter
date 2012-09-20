@@ -9,10 +9,13 @@
     <body class="yui3-skin-sam  yui-skin-sam">
 <script type="text/javascript" src="js/ajax.js"></script>
 <script>
-function send_update(form)
+function send_update(form, proc)
 {
     var query = getValuesAsArray(form);
-    ajax("POST", "/cmd.xml", query, true, function (x) { });
+    if (!proc) {
+	proc = function (x) { };
+    }
+    ajax("POST", "/cmd.xml", query, true, proc);
 
     return false;
 }

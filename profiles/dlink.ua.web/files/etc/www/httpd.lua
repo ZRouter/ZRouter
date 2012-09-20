@@ -27,6 +27,7 @@ package.cpath =
 --io.stderr = io.stdout;
 
 socket = require("socket");
+require('sysctl.core');
 
 -- Expat binding
 dofile('lib/xml.lua');
@@ -43,15 +44,28 @@ dofile('lib/node.lua');
 dofile('lib/base64.lua');
 -- Socket helper
 --dofile("lib/sock.lua");
+-- Route select logic
+dofile("lib/route.lua");
 -- MPD helper
 dofile("lib/mpd.lua");
 -- RACOON helper
 dofile("lib/racoon.lua");
 -- DHCPD helper
-dofile("lib/dhcpd.lua");
+-- dofile("lib/dhcpd.lua");
 -- HOSTAPD helper
-dofile("lib/hostapd.lua");
+--dofile("lib/hostapd.lua");
 
+-- redirect print to /dev/console
+-- dofile("lib/print_to_console.lua");
+
+-- redirect print to syslog
+dofile("lib/lsyslog.lua");
+syslog_init("httpd.lua");
+
+-- urlEncode/urlDecode
+dofile("lib/urlXxcode.lua");
+
+httpd_debug = true;
 
 --
 --  A table of MIME types.
@@ -60,8 +74,30 @@ dofile("lib/hostapd.lua");
 --
 mime = {};
 
+-- # lua -e 'package.cpath ="/usr/lib/lua/lua?.so"; require("sysctl.core"); s,e,v,t = pcall(function () return sysctl.get("hw.device.model") end); print(s,e,v,t);'
+-- true    DIR-825 A       nil
+-- # lua -e 'package.cpath ="/usr/lib/lua/lua?.so"; require("sysctl.core"); s,e,v,t = pcall(function () return sysctl.get("hw.device.mode") end); print(s,e,v,t);'
+-- false   (command line):1: unknown iod 'hw.device.mode'  nil     nil
 
-
+-- save sysctl obj
+sysctl_obj = sysctl;
+function sysctl(oid, value)
+	if type(oid) == "table" then
+		print("sysctl(table) not implemented\n");
+	else
+		if value then
+			print("sysctl(%s, %s)\n", oid, tostring(value));
+			local s,v,t = pcall(function () return sysctl_obj.set(oid, value) end);
+			if s then return (v); end
+			return (nil);
+		else
+			print("sysctl(%s)\n", oid);
+			local s,v,t = pcall(function () return sysctl_obj.get(oid) end);
+			if s then return (v); end
+			return (nil);
+		end
+	end
+end
 
 --
 --  Start a server upon the given port, using the given
@@ -479,7 +515,11 @@ function evalembeded(s)
 		end
 		return func();
 	else
-		return field(c:getNode(s):value());
+		node = c:getNode(s);
+		if node then
+			return field(node:value() or "");
+		end
+		return field("");
 	end
 end
 
@@ -499,7 +539,7 @@ function queryData(rq)
 				return os.date("%Y-%m-%d %H:%M:%S");
 			end
 			if key == "uptime" then
-				return exec_output("sysctl -n kern.ident");
+				return sysctl("kern.ident");
 			end
 		else
 			return ("Unknown command \"" .. cmd .. "\"");
@@ -583,6 +623,15 @@ function fileExists (file)
     end
 end
 
+function read_zrouter_version (ar)
+	ar.zrouter_version = {};
+	return parse_kv_file(ar.zrouter_version, "/etc/zrouter_version");
+end
+
+function read_rc_conf (ar)
+	ar.rc_conf = {};
+	return parse_kv_file(ar.rc_conf, "/etc/rc.conf");
+end
 
 --
 --  Read the mime file and setup mime types
@@ -601,7 +650,6 @@ function loadMimeFile(file, table)
      end
 end
 
-
 --
 --  Utility function:   Does the string end with the given suffix?
 --
@@ -609,39 +657,12 @@ function string.endsWith(String,End)
     return End=='' or string.sub(String,-string.len(End))==End
 end
 
-
 --
 --  Strip path traversal requests.
 --
 function string.strip( str )
     return( string.gsub( str, "/../", "" ) );
 end
-
-
---
--- Utility function:  URL encoding function
---
-function urlEncode(str)
-    if (str) then
-        str = string.gsub (str, "\n", "\r\n")
-        str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end)
-        str = string.gsub (str, " ", "+")
-    end
-    return str
-end
-
-
---
--- Utility function:  URL decode function
---
-function urlDecode(str)
-    str = string.gsub (str, "+", " ")
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
-    str = string.gsub (str, "\r\n", "\n")
-    return str
-end
-
 
 --
 -- Log an access request.
@@ -671,9 +692,6 @@ function logAccess( user, method, host, ip, request, status, size, agent, refere
     print( log );
 end
 
-
-
-
 --
 -----
 ---
@@ -684,8 +702,6 @@ end
 ---
 ----
 --
-
-
 
 --
 --  Setup the MIME types our server will use for serving files.
@@ -795,18 +811,44 @@ function configure_mpd_link(c, path, bundle, link)
 	mpd = MPD:new(c, "127.0.0.1", 5005);
     end
 
-    local bundle = "PPP";
-    local path = "interfaces.wan0.PPP";
+--    local bundle = "PPP";
+--    local path = "interfaces.wan0.PPP";
 
     mpd:config_bundle(path, bundle);
     mpd:config_link(path, link, bundle);
-
---    print(mpd:show_bundle(path, bundle));
-
---    print("--   --");
-
---    s:close();
 end
+
+function run_dhclient(c, iface)
+    local path = "interfaces." .. iface .. ".Static";
+
+    -- return if no iface.Static node.
+    if not c:getNode(path) then
+	return (nil);
+    end
+
+    -- return if Static mode not enabled.
+    if c:getNode(path):attr("enable") ~= "true" then
+	return (nil);
+    end
+
+    -- return if no DHCP enabled.
+    local dhcp = c:getNode(path .. ".dhcp");
+    if not dhcp or dhcp:attr("enable") ~= "true" then
+	return (nil);
+    end
+
+    -- Run dhclient
+    print("Run dhclient on " .. iface);
+    os.execute(string.format("kill `cat /var/run/dhclient.%s.pid`", iface));
+
+    -- Do not execute dhclient if interface is down
+    if exec_output("ifconfig -v " .. iface .." | grep 'status: active'") ~= "" then
+	os.execute(string.format("/sbin/dhclient -b %s", iface));
+	-- XXX, hack to "unplumb" iface if it was not up on boot
+	os.execute(string.format("ifconfig %s `ifconfig %s | grep 'ether '`", iface, iface));
+    end
+end
+
 
 function configure_wan(c)
     -- TODO: auto enumerate wan links
@@ -825,36 +867,58 @@ ipfw add 99 netgraph 60 all from any to any out via wan0
 sysctl net.inet.ip.fw.one_pass=0
     ]]
 
-    os.execute("kldload ng_nat");
-    os.execute("kldload ng_ipfw");
-    os.execute("sysctl net.inet.ip.fw.one_pass=0");
-
-
+    kldload({"ng_nat", "ng_ipfw"});
+    sysctl("net.inet.ip.fw.one_pass", 0);
 
     local sub = "";
-    for _, sub in ipairs({"Static", "PPPoE", "PPP"}) do
+    for _, sub in ipairs({"Static", "PPPoE", "PPP", "PTPP", "L2TP"}) do
 	print("sub=" .. sub);
 	local path = "interfaces.wan0." .. sub;
+	local ifnode = c:getNode(path);
 
-	if c:getNode(path):attr("enable") == "true" then
+	if ifnode and ifnode:attr("enable") == "true" then
 	    local subtype = c:getNode(path):attr("type");
 	    print("subtype=" .. subtype);
-	    if
-		(subtype == "l2tp") or
-		(subtype == "pppoe") or
-		(subtype == "pptp") then
+	    if (subtype == "l2tp") then
 		-- TODO: multilink have different link names
-	    elseif (subtype == "modem") then
-		os.execute("kldload umodem");
-		os.execute("kldload u3g");
+	    elseif (subtype == "pppoe") then
+		kldload({"ng_pppoe"});
 		os.execute("sleep 1");
 		configure_mpd_link(c, path, sub, sub);
+		-- Add interface to route select logic
+		r.route:f(sub,
+		    safeValue(c, path .. ".group", "WAN"),
+		    safeValue(c, path .. ".cost", "1000") - 0,
+		    "down",
+		    "LINKDOWN")
+	    elseif (subtype == "pptp") then
+		-- TODO: multilink have different link names
+	    elseif (subtype == "modem") then
+		kldload({"umodem", "u3g"});
+		os.execute("sleep 1");
+		configure_mpd_link(c, path, sub, sub);
+		r.route:f(sub,
+		    safeValue(c, path .. ".group", "WAN"),
+		    safeValue(c, path .. ".cost", "1000") - 0,
+		    "down",
+		    "LINKDOWN")
 	    elseif (subtype == "hw") then
-		local dhcp = c:getNode(path .. ".dhcp");
 		local dev = c:getNode(path .. ".device"):value();
+		local dhcp = c:getNode(path .. ".dhcp");
+		local dhcpenabled = 0;
+		if dhcp and dhcp:attr("enable") == "true" then
+			dhcpenabled = true;
+		end
+
+		os.execute(string.format("ifconfig %s up", dev));
+		r.route:f(sub,
+		    safeValue(c, path .. ".group", "WAN"),
+		    safeValue(c, path .. ".cost", "1000") - 0,
+		    "up",
+		    "LINKDOWN")
 
     		local query = "cmd=event";
-        	query = query .. "&eventtype=linkup";
+        	query = query .. "&state=up";
         	query = query .. "&iface=" .. 	urlEncode(dev);
         	query = query .. "&gw=" .. 	urlEncode(c:getNode(path .. ".gateway"):value());
         	query = query .. "&ip=" .. 	urlEncode(c:getNode(path .. ".ipaddr"):value());
@@ -863,23 +927,26 @@ sysctl net.inet.ip.fw.one_pass=0
     		query = query .. "&dns2=" .. 	urlEncode(c:getNode(path .. ".dns2"):value());
 
 		-- Call collector, to let him know about static config, and assign route+dns's
-    		print("fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"");
-    		os.execute("fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"");
+		cmdline = "fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"";
+    		print("Exec: " .. cmdline);
+    		os.execute(cmdline);
 
 		-- Config static first
 		local ip = c:getNode(path .. ".ipaddr"):value();
+		local dhcp = c:getNode(path .. ".dhcp");
 		print("Run: \"ifconfig " .. dev .. " " .. ip .. "\"");
 		if os.execute(string.format("ifconfig %s %s", dev, ip)) ~= 0 then
-		    print("\"ifconfig " .. dev .. " " .. ip .. "\" - fail");
+		    print("\"ifconfig " .. dev .. " " .. ip .. "\" - failed");
 		end
 
-		if dhcp and dhcp:attr("enable") == "true" then
-		    print(path .. ".dhcp:attr(enable)=" .. dhcp:attr("enable"));
-		    -- Run dhclient
-		    print("Run dhclient on " .. dev);
-		    os.execute("mkdir -p /var/db/");
-		    os.execute(string.format("/sbin/dhclient %s &", dev));
-		end
+		run_dhclient(c, dev); -- if DHCP enabled.
+
+		-- XXX temporary FIX for wan0 with static address
+		-- if not dhcpenabled and dev == "wan0" then
+		    os.execute(string.format("route add default %s",
+			c:getNode(path .. ".gateway"):value()));
+		-- end
+
 
 		local nat = c:getNode(path .. ".nat");
 		if nat and nat:attr("enable") == "true" then
@@ -890,9 +957,18 @@ sysctl net.inet.ip.fw.one_pass=0
 		    os.execute("ngctl connect ipfw: wan0nat: 61 in");
 		    os.execute("ngctl msg wan0nat: setaliasaddr " .. ip);
 
-		    os.execute("ipfw add 98 netgraph 61 all from any to any in via wan0");
-		    os.execute("ipfw add 99 netgraph 60 all from any to any out via wan0");
+		    if dhcpenabled then
+			-- pass DHCP via iface
+			os.execute("ipfw add 96 allow all from any 67 to any 68 out via " .. dev);
+			os.execute("ipfw add 97 allow all from any 68 to any 67 out via " .. dev);
+		    end
+		    os.execute("ipfw add 98 netgraph 61 all from any to any in via " .. dev);
+		    os.execute("ipfw add 99 netgraph 60 all from any to any out via " .. dev);
 		else
+		    if dhcpenabled then
+			os.execute("ipfw delete 96");
+			os.execute("ipfw delete 97");
+		    end
 		    os.execute("ipfw delete 98");
 		    os.execute("ipfw delete 99");
 		end
@@ -930,10 +1006,156 @@ function getopt(args, opts)
     return (opts);
 end
 
+function update_board_info(c)
+    for _, oid in pairs({"device.vendor", "device.model", "device.revision", "soc.vendor", "soc.model"}) do
+	n = c:getOrCreateNode("info." .. oid);
+	n:value(sysctl("hw." .. oid));
+	if not n:value() then
+	    n:value("__NO_DATA__");
+	end
+	print(tostring(oid) .. "=" .. n:value());
+    end
+end
 
+function safeValue(c, name, default)
+	node = c:getNode(name);
+	if not node then
+		if default then
+			return default;
+		else
+			return "";
+		end
+	end
+	return node:value();
+end
 
+function start_dnsmasq(c)
+	-- TODO: if DNS-Relay enabled
+	-- XXX: dnsmasq able to do DHCPD also
+	-- dhcp-range=[interface:<inter-face>,][tag:<tag>[,tag:<tag>],][set:<tag],]<start-addr>,<end-addr>[,<netmask>[,<broadcast>]][,<lease time>]
+	-- # --domain=zrouter,192.168.0.100,192.168.0.200
+	-- # --dhcp-range=192.168.0.100,192.168.0.200,1h
+	-- # --dhcp-authoritative - don't wait for other DHCPDs
+	-- # --bogus-priv - NXDOMAIN for private nets
+	local_domain = "";
+	local_dhcp_range = "";
+	if c:getNode("dhcpd.instances.instance[1]"):attr("enable") == "true" then
 
+		dhcproot = "dhcpd.instances.instance[1].";
+		domain = safeValue(c, dhcproot .. "domain", "zrouter");
+		dltime = safeValue(c, dhcproot .. "default-lease-time", 3600);
+		mltime = safeValue(c, dhcproot .. "max-lease-time");
+		ranges = safeValue(c, dhcproot .. "range.start");
+		rangee = safeValue(c, dhcproot .. "range.end");
 
+		local_domain = " --domain=" .. domain .."," .. ranges .. "," .. rangee;
+		local_dhcp_range = " --dhcp-range=" .. ranges .. "," .. rangee .. "," .. dltime;
+
+	end
+	dnsmasq_cmd =
+	    "/sbin/dnsmasq" ..
+	    " -i bridge0" ..
+	    local_domain ..
+	    local_dhcp_range ..
+	    " --dhcp-authoritative" ..
+	    " --bogus-priv";
+
+	print("Start " .. dnsmasq_cmd);
+	os.execute(dnsmasq_cmd);
+end
+
+function start_hostapd(c)
+	if c:getNode("hostapd.instance[1]"):attr("enable") == "true" then
+		kldload({"wlan_xauth", "wlan_tkip", "wlan_ccmp"});
+		aproot = "hostapd.instance[1].";
+		driver = "bsd";
+		--        <ieee80211d>1</ieee80211d>
+		--        <country_code>UA</country_code>
+		channel = safeValue(c, aproot .. "channel", 6);
+		country_code = safeValue(c, aproot .. "country_code", "UA");
+		--        <interface>wlan0</interface>
+		interface = safeValue(c, aproot .. "interface", "wlan0");
+
+		commandline = string.format("ifconfig %s down",interface);
+		if os.execute(commandline) ~= 0 then
+		    print("Exec: " .. commandline .. " - FAILED");
+		end
+		commandline = string.format(
+		    "ifconfig %s country %s channel %s up",
+		    interface, country_code, channel);
+		if os.execute(commandline) ~= 0 then
+		    print("Exec: " .. commandline .. " - FAILED");
+		end
+		--        <macaddr_acl>0</macaddr_acl>
+		--        <auth_algs>1</auth_algs>
+		--        <debug>0</debug>
+		--        <hw_mode>g</hw_mode>
+		--        <ctrl_interface>/var/run/hostapd</ctrl_interface>
+		--        <ctrl_interface_group>wheel</ctrl_interface_group>
+		--        <ssid>zrouter</ssid>
+		ssid = safeValue(c, aproot .. "ssid", "zrouter");
+		--        <!-- Open -->
+		--        <wpa>0</wpa>
+		wpa = safeValue(c, aproot .. "wpa", 3);
+		--        <!-- WPA -->
+		--        <!-- <wpa>1</wpa> -->
+		--        <!-- RSN/WPA2 -->
+		-- <!-- <wpa>2</wpa> -->
+    		-- <wpa_pairwise>CCMP TKIP</wpa_pairwise>
+		wpa_key_mgmt = safeValue(c, aproot .. "wpa_key_mgmt", "WPA-PSK");
+		wpa_passphrase = safeValue(c, aproot .. "wpa_passphrase", "freebsdmall");
+		wpa_pairwise = safeValue(c, aproot .. "wpa_pairwise", "CCMP");
+		ctrl_interface = "/var/run/hostapd";
+
+		-- # TARGET
+		-- interface=wlan0
+		-- driver=bsd
+		-- ssid=CACHEBOY_11N_1
+		-- wpa=3
+		-- wpa_key_mgmt=WPA-PSK
+		-- wpa_passphrase=Sysinit891234
+		-- wpa_pairwise=CCMP
+		-- ctrl_interface=/var/run/hostapd
+		hostapd_conf = "/tmp/hostapd." .. interface ..".conf";
+
+		hostapd_conf_data = 
+		    "interface=" ..		interface .. "\n" ..
+		    "driver=" ..		driver .. "\n" ..
+		    "country_code=" .. 		country_code .. "\n" ..
+		    "channel=" ..		channel .. "\n" ..
+		    "ssid=" ..			ssid .. "\n" ..
+		    "wpa=" ..			wpa .. "\n" ..
+		    "wpa_key_mgmt=" ..		wpa_key_mgmt .. "\n" ..
+		    "wpa_passphrase=" ..	wpa_passphrase .. "\n" ..
+		    "wpa_pairwise=" ..		wpa_pairwise .. "\n" ..
+		    "ctrl_interface=" ..	ctrl_interface .. "\n";
+
+		local f = assert(io.open(hostapd_conf, "w"));
+		f:write(hostapd_conf_data);
+		f:close();
+
+		hostapd_cmd = "/usr/sbin/hostapd -B " .. hostapd_conf;
+
+		print("Start " .. hostapd_cmd);
+		os.execute(hostapd_cmd);
+
+	end
+end
+
+function start_igmp_fwd(c)
+	if not c:getNode("igmp.instance[1]") then
+		return;
+	end
+	if c:getNode("igmp.instance[1]"):attr("enable") == "true" then
+		upif   = safeValue(c, aproot .. "up", "wan0");
+		downif = safeValue(c, aproot .. "down", "lan0");
+
+		cmd = "/etc/rc.d/ng_igmpproxy start " .. upif .. " " .. downif;
+
+		print("Start " .. cmd);
+		os.execute(cmd);
+	end
+end
 
 -- Globals
 config = {};	-- Unused now
@@ -948,6 +1170,7 @@ r.tasks.step = 5; -- Seconds
 r.tasks.periodic = {};
 r.tasks.onetime  = {}; -- At some time
 r.tasks.countdown= {}; -- when counter expired
+r.ver = {};
 
 opts = {};
 opts["-P"] = "/var/run/httpd.pid";
@@ -964,29 +1187,37 @@ pidfile(opts["-P"]);
 print("Parse config ...");
 c = Conf:new(load_file("config.xml"));
 
-print("Run info collector ...");
--- Run it as background task
---os.execute("/etc/www/collector.sh &");
+update_board_info(c);
+read_zrouter_version(r);
+read_rc_conf(r);
 
 print("Initialize board ...");
 
-print("Init LAN");
+print("Initialize route select logic ...");
+r.route = ROUTE:new(c, 0);
+
+print("Enable LAN ports ...");
+os.execute("/etc/rc.d/switchctl enablelan");
+print("Init LAN ...");
 configure_lan(c);
 
--- TODO: if DNS-Relay enabled
--- XXX: dnsmasq able to do DHCPD also
-os.execute("dnsmasq -i bridge0");
-
-start_dhcpd(c);
+print("Start DHCP/DNS Relay ...");
+start_dnsmasq(c);
+-- start_dhcpd(c);
 
 -- print("Init AP");
 -- ap = HOSTAPD:new(c, 1);
 -- ap:run();
 
+print("Init AP ...");
+start_hostapd(c);
+
+print("Init IGMP/Multicast forwarding ...");
+start_igmp_fwd(c);
 
 os.execute("ipfw add 100 allow ip from any to any via lo0");
-os.execute("ipfw add 200 deny ip from any to 127.0.0.0/8");
-os.execute("ipfw add 300 deny ip from 127.0.0.0/8 to any");
+-- os.execute("ipfw add 200 deny ip from any to 127.0.0.0/8");
+-- os.execute("ipfw add 300 deny ip from 127.0.0.0/8 to any");
 
 -- Hide Web-UI from WAN links
 os.execute("ipfw add 400 allow tcp from any to me 80 via lan0");
@@ -994,7 +1225,39 @@ os.execute("ipfw add 500 allow tcp from any to me 80 via bridge0");
 -- TODO: If not enabled WAN administration
 os.execute("ipfw add 600 deny tcp from any to me 80");
 -- check w/ ipfw NAT-ed packets
-os.execute("sysctl net.inet.ip.fw.one_pass=0");
+sysctl("net.inet.ip.forwarding", 1);
+sysctl("net.inet.ip.fastforwarding", 1);
+sysctl("net.inet.tcp.blackhole", 2);
+sysctl("net.inet.udp.blackhole", 0);
+sysctl("net.inet.icmp.drop_redirect", 1);
+sysctl("net.inet.icmp.log_redirect", 0);
+sysctl("net.inet.ip.redirect", 0);
+sysctl("net.inet.ip.sourceroute", 0);
+sysctl("net.inet.ip.accept_sourceroute", 0);
+sysctl("net.inet.icmp.bmcastecho", 0);
+sysctl("net.inet.icmp.maskrepl", 0);
+sysctl("net.link.ether.inet.max_age", 30);
+sysctl("net.inet.ip.ttl", 226);
+sysctl("net.inet.tcp.drop_synfin", 1);
+sysctl("net.inet.tcp.syncookies", 1);
+-- sysctl("kern.ipc.somaxconn", 32768);
+-- sysctl("kern.maxfiles", 204800);
+-- sysctl("kern.maxfilesperproc", 200000);
+-- ??? -- sysctl("kern.ipc.nmbclusters", 524288);
+-- sysctl("kern.ipc.maxsockbuf", 2097152);
+sysctl("kern.random.sys.harvest.ethernet", 0);
+sysctl("kern.random.sys.harvest.interrupt", 0);
+-- sysctl("net.inet.ip.dummynet.io_fast", 1);
+-- sysctl("net.inet.ip.dummynet.max_chain_len", 2048);
+-- sysctl("net.inet.ip.dummynet.hash_size", 65535);
+-- sysctl("net.inet.ip.dummynet.pipe_slot_limit", 2048);
+-- ?? -- sysctl("net.inet.carp.preempt", 1);
+-- ?? -- sysctl("net.inet.carp.log", 2);
+-- ?? -- sysctl("kern.ipc.shmmax", 67108864);
+sysctl("net.inet.ip.intr_queue_maxlen", 8192);
+sysctl("net.inet.ip.fw.one_pass", 0);
+sysctl("net.inet.ip.portrange.randomized", 0);
+sysctl("net.inet.tcp.nolocaltimewait", 1);
 
 racoon = 0;
 if racoon == 0 then
@@ -1004,8 +1267,7 @@ end
 -- WAN links tasks
 table.insert(r.tasks.countdown, { count=2, task=
 	function()
-	    print("Init WAN links");
-	    os.execute("echo 'Init WAN links ...' > /dev/console");
+	    print("Init WAN links ...");
 	    configure_wan(c);
 	    return (true);
 	end
@@ -1013,8 +1275,7 @@ table.insert(r.tasks.countdown, { count=2, task=
 -- IPSec links tasks
 table.insert(r.tasks.countdown, { count=10, task=
 	function()
-	    print("Run racoon");
-	    os.execute("echo 'Run racoon ...' > /dev/console");
+	    print("Run racoon ...");
 	    racoon:run();
 	    return (true);
 	end

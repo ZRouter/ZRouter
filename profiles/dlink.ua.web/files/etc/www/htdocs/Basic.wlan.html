@@ -1,163 +1,18 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-    <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Wireless configuration</title>
-	<style type="text/css"> body {	margin:0; padding:0; } 	</style>
-	<link href="css/anim.css" rel="stylesheet" type="text/css">
-    </head>
-    <body class="yui3-skin-sam  yui-skin-sam">
-    <h2>Wireless configuration</h2>
+$$$code:inc("htdocs/header.html")$$$
+    <h1>Wireless configuration</h1>
 
-<div id="Static" class="boxitem">
-    <div class="yui3-hd">
-        <h4>Radio Settings</h4>
-    </div>
-    <div class="yui3-bd">
-	<form method="POST" target="/test.lua">
-<table width="100%">
-    <tr>
-	<td class=""><label for="radio_control">Enable Wireless&nbsp;:</label></td>
-	<td>
-	    <input id="radio_control" _value="data.wireless.radio_control" type="checkbox">
-	</td>
-	</tr>
-	<tr>
-		<td class="">Wireless Channel&nbsp;:</td>
-		<td>
-		    <select name="channel">
-			<option value="1">2.412 GHz - CH 1</option>
-			<option value="2">2.417 GHz - CH 2</option>
-			<option value="3">2.422 GHz - CH 3</option>
-			<option value="4">2.427 GHz - CH 4</option>
-			<option value="5">2.432 GHz - CH 5</option>
-			<option value="6">2.437 GHz - CH 6</option>
-			<option value="7">2.442 GHz - CH 7</option>
-			<option value="8">2.447 GHz - CH 8</option>
-			<option value="9">2.452 GHz - CH 9</option>
-			<option value="10">2.457 GHz - CH 10</option>
-			<option value="11">2.462 GHz - CH 11</option>
-		    </select>
-		</td>
-	</tr>
-
-	<tr>
-		<td class="">802.11 Mode&nbsp;:</td>
-		<td>
-			<select>
-				<option value="2">802.11g only</option>
-				<option value="3">Mixed 802.11g and 802.11b</option>
-				<option value="1">802.11b only</option>
-				<option value="8">802.11n only</option>
-				<option value="11">Mixed 802.11n, 802.11g and 802.11b</option>
-			</select>
-		</td>
-	</tr>
-
-	<tr>
-		<td class="">Channel Width&nbsp;:</td>
-		<td>
-			<select>
-				<option value="0">20 MHz</option>
-				<option value="1">Auto 20/40 MHz</option>
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td class="">Transmission Rate&nbsp;:</td>
-		<td>
-			<select>
-				<!-- Turbo rates in brackets. Rates are given in units of 500 kbits/s -->
-				<option value="0">Best (automatic)</option>
-				<!--@OPTIONAL:radio_type_NA or radio_type_NG@-->
-				<option value="27">MCS 15 - 130 [270]</option>
-				<option value="26">MCS 14 - 117 [243]</option>
-				<option value="25">MCS 13 - 104 [216]</option>
-				<option value="24">MCS 12 - 78 [162]</option>
-
-				<option value="23">MCS 11 - 52 [108]</option>
-				<option value="22">MCS 10 - 39 [81]</option>
-				<option value="21">MCS 9 - 26 [54]</option>
-				<option value="20">MCS 8 - 13 [27]</option>
-				<option value="19">MCS 7 - 65 [135]</option>
-				<option value="18">MCS 6 - 58.5 [121.5]</option>
-
-				<option value="17">MCS 5 - 52 [108]</option>
-				<option value="16">MCS 4 - 39 [81]</option>
-				<option value="15">MCS 3 - 26 [54]</option>
-				<option value="14">MCS 2 - 19.5 [40.5]</option>
-				<option value="13">MCS 1 - 13 [27]</option>
-				<option value="12">MCS 0 - 6.5 [13.5]</option>
-
-				<!--@ENDOPTIONAL@-->
-				<!--@OPTIONAL:radio_type_A or radio_type_G@-->
-				<option value="11">54 [108]</option>
-				<option value="10">48 [96]</option>
-				<option value="9">36 [72]</option>
-				<option value="8">24 [48]</option>
-				<option value="7">18 [36]</option>
-
-				<option value="6">12 [24]</option>
-				<option value="5">9 [18]</option>
-				<option value="4">6 [12]</option>
-				<!--@ENDOPTIONAL@-->
-				<option value="3">11</option>
-				<option value="2">5.5</option>
-
-				<option value="1">2</option>
-				<option value="32768">1</option><!--Most significant bit is set to distinguish from Best-->
-			</select>
-			(Mbit/s) </td>
-	</tr>
-</table>
-
-
-
-	</form>
-
-<!-- Subitems -->
-$$$code:dofile("htdocs/vaps.lua")$$$
-
-	</form>
-    </div>
-</div>
-
-    </div>
-</div>
-
-
-<script type="text/javascript">
-function updateSecurityMode(obj)
+$$$code:conf_table("WLAN", "Wireless Access Point configuration", "hostapd.instance[1]",
 {
-    table = obj.parentNode.parentNode.parentNode;
-    trs = table.getElementsByTagName('tr');
-    for (i = 0; i < trs.length; i ++) //>
-    {
-	tr = trs[i];
-	class = tr.className;
-	if (!class || !class.match(/security\_mode\_/))
-	    continue;
+    { label = "Enabled", 			type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Country code (UA)", 		type = "node", htmltype = "text", 	node = "country_code" 	},
+    { label = "wireless iface (wlan0)", 	type = "node", htmltype = "text", 	node = "interface" 	},
+    { label = "Channel (6)", 			type = "node", htmltype = "text", 	node = "channel" 	},
+    { label = "SSID", 				type = "node", htmltype = "text", 	node = "ssid"		},
+    { label = "WPA mode, 1-WPA, 2-RSN, 3-WPA+RSN", 	type = "node", htmltype = "text", 	node = "wpa"	},
+    { label = "WPA key", 			type = "node", htmltype = "text", 	node = "wpa_passphrase" },
+})$$$
 
-	if (class == ('security_mode_' + obj.value) )
-	    tr.style.display = '';
-	else
-	    tr.style.display = 'none';
-    }
-}
-
-sls = document.getElementsByTagName('select');
-for (i = 0; i < sls.length; i ++) //>
-{
-	sl = sls[i];
-	class = sl.className;
-	if (!class || !class.match(/security\_mode/))
-	    continue;
-	updateSecurityMode(sl);
-}
+$$$code:inc("htdocs/footer.html")$$$
 
 
-</script>
-
-</body>
-</html>
 

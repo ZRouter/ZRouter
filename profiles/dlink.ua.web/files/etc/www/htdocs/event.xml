@@ -6,13 +6,19 @@
 -- rq.GET["dns2"	] = "192.168.1.3";
 -- rq.GET["dns1"	] = "192.168.1.3";
 -- rq.GET["iface"	] = "PPP";
--- rq.GET["eventtype"] = "linkup";
+-- rq.GET["state"] = "up";
 
 -- r = {};
 
 -- function doit()
 
 function process()
+    if not c then
+	print("Configuration structure 'c' is missing");
+    end
+    if not rq then
+	print("Request structure 'rq' is missing");
+    end
 
     if     rq.GET["cmd"] == "get" then
 
@@ -29,18 +35,19 @@ function process()
 	if os.execute("rm /tmp/etc/www/config.xml") ~= 0 then
 	    return ("Can't remove current config");
 	end
-	if os.execute("/etc/save_etc") ~= 0 then
+	if os.execute("/etc/rc.save_config") ~= 0 then
 	    return ("Error saving configuration block to flash");
 	end
-	if os.execute("reboot") ~= 0 then
+	if os.execute("reboot &") ~= 0 then
 	    return ("Error when trying reboot");
 	end
 	return ("Configuration restored successful");
 
     elseif rq.GET["cmd"] == "event" then
 	    -- print(rq.RequestHeader);
-
+	    -- cmd=event&iface=wan0&state=linkup
 	    local iface = rq.GET["iface"];
+	    local newstate = rq.GET["state"];
 
 	    if not iface then
 		return ("event.lua: ERROR: Interface not defined");
@@ -48,12 +55,21 @@ function process()
 
 	    if type(r[iface]) ~= "table" then r[iface] = {}; end
 
-	    os.execute("echo \"event.xml: " .. rq.QueryString .."\" > /dev/console");
-	    -- Update NAT alias address for Static/DHCP
-	    if iface == "wan0" then
-		local ip = rq.GET["ip"];
-		ip = ip:gsub("/%d+", "");
-		os.execute("ngctl msg wan0nat: setaliasaddr " .. ip);
+	    print("echo \"event.xml: " .. rq.QueryString .."\" > /dev/console");
+	    if newstate == "up" then
+		-- Update NAT alias address for Static/DHCP
+		if iface == "wan0" then
+		    local ip = rq.GET["ip"];
+		    ip = ip:gsub("/%d+", "");
+		    os.execute("ngctl msg wan0nat: setaliasaddr " .. ip);
+		end
+	    elseif newstate == "linkup" then
+		--
+		run_dhclient(c, iface); -- if DHCP enabled.
+	    elseif newstate == "down" then
+		--
+	    elseif newstate == "linkdown" then
+		--
 	    end
 
 	    for k,v in pairs(rq.GET) do

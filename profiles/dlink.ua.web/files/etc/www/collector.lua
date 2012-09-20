@@ -17,6 +17,7 @@ serverport = serverport or "80";
 r = {};		-- Runtime varibles structure
 rquery = {};
 queue = {};
+local internet_led = nil;
 
 --
 -- Utility function:  URL encoding function
@@ -95,15 +96,18 @@ function process(q, queryline)
 		    r[iface][k] = v;
 		end
 	    end
-	    if q["eventtype"] == "linkup" then
+	    if q["state"] == "up" then
 		-- XXX: should not be here
 		-- XXX: must check exit code
-		exitcode = os.execute(
-		    "route change default  " .. r[iface]["gw"] .." > /dev/null 2>&1 || " ..
-		    "route add default  " .. r[iface]["gw"] .." > /dev/null 2>&1"
---		    "route change default -iface " .. iface .." > /dev/null 2>&1 || " ..
---		    "route add default -iface " .. iface .." > /dev/null 2>&1"
-		);
+		if r[iface]["gw"] then
+		    exitcode = os.execute(
+			"route change default  " .. r[iface]["gw"] .." > /dev/null 2>&1 || " ..
+			"route add default  " .. r[iface]["gw"] .." > /dev/null 2>&1"
+		    );
+		    if internet_led then
+			internet_led:set(1);
+		    end
+		end
 		local dns = {};
 		if q["dns1"] and q["dns1"]:len() >= 7 then
 		    table.insert(dns, q["dns1"]);
@@ -118,6 +122,13 @@ function process(q, queryline)
 			resolv_conf:write("nameserver	" .. v .. "\n");
 		    end
 		    resolv_conf:close();
+		end
+	    end
+	    if q["state"] == "down" then
+		if r[iface]["gw"] then
+		    if internet_led then
+			internet_led:set(0);
+		    end
 		end
 	    end
 
@@ -185,6 +196,10 @@ end
 -- Check pidfile
 dofile("lib/pidfile.lua");
 pidfile(opts["-P"]);
+
+dofile("lib/led.lua");
+
+internet_led = Led:new_from_env("INTERNET_LED");
 
 socket = require("socket");
 http = require("socket.http");

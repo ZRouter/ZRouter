@@ -35,7 +35,7 @@ esac
 echo "MPD: iface=${interface} proto = ${proto} localip=${localip} remoteip=${remoteip} dns1=${dns1} dns2=${dns2} peeraddress=${peeraddress}" >> ${LOG}
 
 query="cmd=event"
-query="${query}&eventtype=linkdown"
+query="${query}&state=down"
 query="${query}&iface=${interface}"
 query="${query}&proto=${proto}"
 query="${query}&gw=${remoteip}"

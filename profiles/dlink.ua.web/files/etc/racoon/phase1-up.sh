@@ -13,13 +13,16 @@ echo "LOCAL_ADDR = ${LOCAL_ADDR} LOCAL_PORT = ${LOCAL_PORT} REMOTE_ADDR = ${REMO
 echo >>  ${LOG}
 
 query="cmd=event"
-query="${query}&eventtype=linkup"
+query="${query}&state=up"
 query="${query}&iface=IPSec0"	# XXX: should use names for IPSec peers
 query="${query}&gw=${REMOTE_ADDR}:${REMOTE_PORT}"
 query="${query}&ip=${LOCAL_ADDR}:${LOCAL_PORT}"
 
 # Notify configuration handler
 fetch -qo - "http://127.0.0.1:8/event.xml?${query}"
+
+# XXX: should be handled by httpd/collector
+sh "/var/run/racoon.${REMOTE_ADDR}_up.sh"
 
 exit 0
 

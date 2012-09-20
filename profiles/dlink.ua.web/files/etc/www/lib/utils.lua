@@ -167,7 +167,7 @@ function conf_table(id, header, rootpath, fields)
 		"        <h4>" .. header .."</h4>\n" ..
 		"    </div>\n" ..
 		"    <div class=\"yui3-bd\">\n" ..
-		"	<form method=\"POST\" target=\"/cmd.xml\">\n" ..
+		"	<form method=\"POST\" target=\"/cmd.xml\" onchange=\"document.getElementById('" .. id .. "_update_button').disabled = false; return true;\">\n" ..
 		"	    <input type=\"hidden\" name=\"path\" value=\"" .. rootpath .."\" />\n" ..
 		"	    <input type=\"hidden\" name=\"cmd\" value=\"setmany\" />\n" ..
 		"	<table>\n";
@@ -189,7 +189,8 @@ function conf_table(id, header, rootpath, fields)
 		    ret = ret .. "Error parsing attr fileld at path " .. v.node;
 		else
 
-		attrvalue = c:getNode(nodestr):attr(attrstr) or "Error getting attribute value of " .. nodestr .. ":attr(" .. attrstr .. ")";
+		attrvalue = c:getNode(nodestr):attr(attrstr) or
+		    "Error getting attribute value of " .. nodestr .. ":attr(" .. attrstr .. ")";
 		local inserted = "";
 		if v.htmltype == "checkbox" then
 		    inserted = checked(attrvalue);
@@ -201,9 +202,13 @@ function conf_table(id, header, rootpath, fields)
 		ret = ret ..
 		"            <tr>\n" ..
 		"        	<td>" .. v.label .. ":</td>\n" ..
-		"        	<td><input name=\"smattr:" .. v.node .. "\" type=\"" .. v.htmltype .. "\" " ..
+		"        	<td><input name=\"smattr:" .. v.node .. "\" " ..
+				    "type=\"" .. v.htmltype .. "\" " ..
 				    inserted ..
-				    "></td>\n" ..
+				    " onchange=\"" ..
+					"document.getElementById(" .. 
+					    "'" .. id .. "_update_button'" ..
+					").disabled = false; return true;\"/></td>\n" ..
 		"    	     </tr>\n";
 		end
 	    elseif v.type == "node" then
@@ -221,12 +226,16 @@ function conf_table(id, header, rootpath, fields)
 		    nodevalue = "Error: node " .. nodestr .. " not found";
 		end
 
+		nodevalue = nodevalue:gsub("\"","&quot;");
+
 		ret = ret ..
 		"            <tr>\n" ..
 		"        	<td>" .. v.label .. ":</td>\n" ..
 		"    		<td><input type=\"" .. v.htmltype .. "\" name=\"sm:" .. v.node .. "\" value=\"" ..
 				    nodevalue ..
-				    "\"/></td>\n" ..
+				    "\" onchange=\"document.getElementById(" ..
+					"'" .. id .. "_update_button'" ..
+				    ").disabled = false; return true;\"/></td>\n" ..
 		"            </tr>\n";
 	    end
 	end
@@ -234,7 +243,9 @@ function conf_table(id, header, rootpath, fields)
 	ret = ret ..
 		"            <tr>\n" ..
 		"        	<td>&nbsp;</td>\n" ..
-		"        	<td><input type=\"button\" name=\"Update\" value=\"Update\" onclick=\"send_update(this.form)\"/></td>\n" ..
+		"        	<td><input id=\"" .. id .. "_update_button\" type=\"button\" name=\"Update\" value=\"Update\" disabled onclick=\"" ..
+					"send_update(this.form, function(x) { document.getElementById('" .. id .. "_update_button').disabled = true; })" ..
+				    "\"/></td>\n" ..
 		"            </tr>\n" ..
 		"	</table>\n" ..
 		"	</form>\n" ..
@@ -244,4 +255,74 @@ function conf_table(id, header, rootpath, fields)
 	return (ret);
 end
 
+function peritem(item, sub)
+	if type(item) == "table" then
+
+    		for k, v in pairs(item) do
+    			sub(v);
+    		end
+	else
+    		sub(item);
+	end
+end
+
+function kldload(module)
+	function kldload_one(module)
+		if debug then
+			print("kldstat -q -m " .. module .. " || kldload " .. module);
+		end
+		os.execute("kldstat -q -m " .. module .. " || kldload " .. module);
+	end
+	peritem(module, kldload_one);
+end
+
+function strip_quote (str)
+	str = str:gsub("^\"(.*)\"$", "%1");
+	str = str:gsub("^\'(.*)\'$", "%1");
+	return str;
+end
+
+function parse_kv_file (ar, file)
+	local err = nil;
+	if not file then
+		return "Filename required";
+	end
+
+	if type(ar) ~= "table" then
+		return "First argument must be table";
+	end
+
+	local f = io.open(file);
+	if not f then
+		return "Can't open \"" .. file .. "\"\n";
+	end
+
+	local count = 0;
+	while true do
+		local line = f:read('*line');
+		if line == nil then break end -- EOF
+		if count > 100 then
+			-- to much lines
+			err = "Lines count more than 100 \"" .. file .. "\n";
+			break;
+		end
+
+		line = line:gsub("#.*$", ""); -- Strip comments
+		line = line:gsub("%s*$", ""); -- Strip whitespaces
+
+		if line ~= "" then -- Do only if line not empty
+			match, _, name, value = line:find("^(.+)=(.+)%s*$");
+			if not match then
+				err = "Wrong format in \"" .. file .. "\n";
+				break;
+			end
+			ar[strip_quote(name)] = strip_quote(value);
+		end
+
+		count = count + 1;
+	end
+
+	f:close();
+	return err;
+end
 

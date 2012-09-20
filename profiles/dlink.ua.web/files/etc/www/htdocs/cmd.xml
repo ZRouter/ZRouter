@@ -66,39 +66,45 @@ function process()
 
     elseif rq.POST["save"] == "config" then
 
-	print("try to save config.xml");
+	print("Saving configuration to config.xml");
 	if not save_file("config.xml", xmldump(c:gettree())) then
 	    return ("Error saving configuration");
 	end
-	if os.execute("/etc/save_etc") ~= 0 then
+	if os.execute("/etc/rc.save_config") ~= 0 then
 	    return ("Error saving configuration block to flash");
 	end
 	return ("Configuration saved successful");
 
     elseif rq.POST["restore"] == "config" then
 
-	if os.execute("rm /tmp/etc/www/config.xml") ~= 0 then
-	    return ("Can't remove current config");
+	print("Restoring factory default setting");
+	os.execute("echo '(sleep 5 ; rm /tmp/etc/www/config.xml ; /etc/rc.save_config ; /sbin/reboot ) & ' >> /tmp/restore_scrip.sh");
+	if os.execute("sh /tmp/restore_scrip.sh &") ~= 0 then
+	    return ("Run restore script fail");
 	end
-	if os.execute("/etc/save_etc") ~= 0 then
-	    return ("Error saving configuration block to flash");
-	end
-	if os.execute("/sbin/reboot &") ~= 0 then
-	    return ("Error when trying reboot");
-	end
-	return ("Configuration restored successful");
+	return ("Configuration restore procedure started");
 
     elseif rq.POST["system"] == "reboot" then
 
 	print("Reboot device");
-	if os.execute("/sbin/reboot &") ~= 0 then
-	    return ("Error when try to execute /sbin/reboot");
+	os.execute("echo '(sleep 5 ; /sbin/reboot) &' > /tmp/reboot_scrip.sh");
+	os.execute("echo 'Run /tmp/reboot_scrip.sh' > /dev/console");
+	if os.execute("sh /tmp/reboot_scrip.sh &") ~= 0 then
+	    return ("Can't execute reboot script");
 	end
+	os.execute("echo 'Return \"Reboot in progress\" to parent' > /dev/console");
 	return ("Reboot in progress");
+
+    elseif rq.POST["telnet"] == "enable" then
+
+	print("Enabling telnet service");
+	os.execute("echo 'Enabling telnet service' > /dev/console");
+	os.execute("/usr/libexec/telnetd -4 -debug 23 &");
+	return ("telnet service started");
 
     else
 
-	print(tdump(rq));
+--	print(tdump(rq));
 --	print(tdump(rq.POST));
 	return ("Unknow command");
 

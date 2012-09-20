@@ -1,6 +1,7 @@
 #!/bin/sh
 
-LOG=/tmp/DHCLIENT-SCRIPT.log
+#LOG=/tmp/DHCLIENT-SCRIPT.log
+LOG=/dev/null
 
 touch ${LOG}
 echo "DHCLIENT-SCRIPT: $*" >> ${LOG}
@@ -40,7 +41,7 @@ REBOOT|BOUND|RENEW)
         ifconfig ${interface} ${new_ip_address} netmask ${new_subnet_mask}
         echo "DHCP: iface=${interface} ip=${new_ip_address} netmask=${new_subnet_mask} route=${new_routers} dns=${new_domain_name_servers}" >> ${LOG}
         query="cmd=event"
-        query="${query}&eventtype=linkup"
+        query="${query}&state=up"
         query="${query}&iface=${interface}"
         query="${query}&gw=${new_routers}"
         query="${query}&ip=${new_ip_address}"

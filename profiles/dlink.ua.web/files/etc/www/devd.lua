@@ -10,29 +10,15 @@ package.cpath =
 serverhost = serverhost or "127.0.0.1";
 serverport = serverport or "80";
 
---
--- Utility function:  URL encoding function
---
-function urlEncode(str)
-    if (str) then
-        str = string.gsub (str, "\n", "\r\n")
-        str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end)
-        str = string.gsub (str, " ", "+")
-    end
-    return str
-end
+-- redirect print to /dev/console
+-- dofile("lib/print_to_console.lua");
 
+-- redirect print to syslog
+dofile("lib/lsyslog.lua");
+syslog_init("devd.lua");
 
---
--- Utility function:  URL decode function
---
-function urlDecode(str)
-    str = string.gsub (str, "+", " ")
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
-    str = string.gsub (str, "\r\n", "\n")
-    return str
-end
+-- urlEncode/urlDecode
+dofile("lib/urlXxcode.lua");
 
 function tab_to_query(t)
     local ret = "event=devd";
@@ -57,6 +43,13 @@ function call_server(config, q)
 
 end
 
+function exec_output(cmd)
+	fp = io.popen(cmd, "r");
+	data = fp:read("*a");
+	fp:close();
+	return data;
+end
+
 function system_event(config, msg)
     -- !system=IFNET subsystem=rt0 type=ATTACH
     -- !system=DEVFS subsystem=CDEV type=CREATE cdev=usb/0.1.1
@@ -65,6 +58,20 @@ function system_event(config, msg)
     --		sernum= release=0x0100 mode=host port=1 parent=dotg0
     -- !system=GPIO subsystem=pin14 type=PIN_LOW bus=gpiobus0 period=0
     -- !system=GPIO subsystem=pin14 type=PIN_HIGH bus=gpiobus0 period=0
+
+    function generic_event(m, msg)
+	-- Relay to main control logic
+	local query = "cmd=event" ..
+	    "&system=" .. m.system ..
+	    "&subsystem=" .. m.subsystem ..
+	    "&type=" .. m.type ..
+	    "&data=" .. urlEncode(msg);
+	-- cmd=event&iface=wan0&state=linkup;
+	print("devd.lua: query master with \"" .. query .. "\"");
+	if call_server(config, query) == false then
+	    -- XXX error handling
+	end
+    end
 
     local m = {};
 
@@ -80,14 +87,62 @@ function system_event(config, msg)
     if m.system and m.subsystem and m.type then
 	if     m.system == "IFNET" then
 	    -- Interfaces
+	    -- system=IFNET subsystem=lan0 type=LINK_UP
+	    local linkstate;
+	    if m.type == "LINK_UP" then
+		if m.subsystem == "lan0" then
+		    -- XXX: bug workaround, we have to check why UP does not unplumb iface
+		    os.execute("ifconfig lan0 down");
+		    os.execute("ifconfig lan0 up");
+		end
+		linkstate = "linkup";
+	    elseif m.type == "LINK_DOWN" then
+		linkstate = "linkdown";
+	    else
+		generic_event(m, msg);
+		return (nil);
+	    end
+	    local query = "cmd=event" ..
+		"&iface=" .. urlEncode(m.subsystem) ..
+		"&state=" .. linkstate;
+	    -- cmd=event&iface=wan0&state=linkup;
+	    if call_server(config, query) == false then
+		-- XXX error handling
+	    end
 	elseif m.system == "DEVFS" then
 	    -- Device nodes
+	    generic_event(m, msg);
+
 	elseif m.system == "USB" then
 	    -- USB messages
+	    generic_event(m, msg);
+	    -- !system=USB subsystem=INTERFACE type=ATTACH ugen=ugen0.2 cdev=ugen0.2 vendor=0x1f28 product=0x0021
+	    -- devclass=0x00 devsubclass=0x00 sernum="216219360300" release=0x0000
+	    -- mode=host interface=0 endpoints=2 intclass=0x08 intsubclass=0x06 intprotocol=0x50
+
+	    -- system=USB subsystem=DEVICE type=ATTACH ugen=ugen0.2 cdev=ugen0.2 vendor=0x1f28 product=0x0021
+	    -- devclass=0x00 devsubclass=0x00 sernum=%22216219360300%22 release=0x0000 mode=host port=1 parent=ugen0.1
+
+	    -- Our usb_modeswitch :)
+	    if m.subsystem == "DEVICE" and m.type == "ATTACH" then
+		-- XXX: get that from config
+		m.vendor = m.vendor - 0;
+		m.product = m.product - 0;
+		-- ugen0.2 -> 0.2
+		devid = m.ugen:gsub("ugen", "");
+		if m.vendor == 0x1f28 and m.product == 0x0021 then
+	    	    os.execute("hex2bin " ..
+	    		"55534243b82e238c24000000800108df200000000000000000000000000000" ..
+	    		" > /dev/usb/" .. devid .. ".8"); -- EndPoint 8
+		end
+	    end
+
 	elseif m.system == "GPIO" then
 	    -- GPIO messages
+	    generic_event(m, msg);
+
 	    -- XXX: should not be hardcoded
-	    if m.subsystem == "pin10" and m.bus == "gpiobus0" then
+	    if m.subsystem == reset_pin and m.bus == "gpiobus0" then
 		if     m.type == "PIN_LOW" then
 		    -- Pin return to normal state
 		    time = tonumber(m.period);
@@ -99,7 +154,7 @@ function system_event(config, msg)
 			-- if call_server(config, "restore=config") == false then
 			    -- If we can't get success from httpd, then we restore default manualy
 			    os.execute("mv /tmp/etc/www/config.xml /tmp/etc/www/config.xml.bak");
-			    os.execute("/etc/save_etc");
+			    os.execute("/etc/rc.save_config");
 			    os.execute("reboot");
 			-- end
 			os.execute("echo \"devd.lua: User request Reset to Default\" > /dev/console");
@@ -115,7 +170,6 @@ function system_event(config, msg)
 	    -- Unknown system
 	end
     end
-
 end
 
 function unknown_device(config, msg)
@@ -136,7 +190,11 @@ local run = true;
 local config = {};
 config.http = require("socket.http");
 
-
+reset_pin = exec_output("kenv -q RESET_PIN");
+if not reset_pin then
+    reset_pin = 10;
+end
+reset_pin = string.format("pin%03d", reset_pin);
 
 while run do
     if not config.d then
@@ -144,6 +202,7 @@ while run do
     end
     local line = config.d:read("*l");
     if line then
+	print("devd.lua:DEBUG: got \"" .. line .. "\"");
 	local m, _, t, msg = line:find("^(.)(.*)");
 	if m and t and msg then
 		if     t == "!" then

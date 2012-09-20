@@ -4,7 +4,7 @@
   <HEAD>
     <LINK REL="stylesheet" HREF="index_files/router.css" TYPE="text/css">
     <META http-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-    <TITLE>$$$info.model$$$</TITLE>
+    <TITLE>$$$info.device.vendor$$$&nbsp;&nbsp;&nbsp;$$$info.device.model$$$&nbsp;&nbsp;&nbsp;$$$info.device.revision$$$</TITLE>
     <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/ajax.js"></script>
   </HEAD>
@@ -21,8 +21,15 @@
             <TABLE ID="table_set_main" BORDER="0" CELLPADDING="0" CELLSPACING="0">
               <!-- ________________________________ Main Content Start ______________________________ -->
               <TBODY>
-                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">Model Name</TD><TD ID="td_right">$$$info.model$$$&nbsp;&nbsp;&nbsp;$$$info.rev$$$</TD></TR>
-                <TR><TD ID="td_left" HEIGHT="25">Firmware Version</TD><TD ID="td_right">$$$info.firmware.version$$$&nbsp;&nbsp;&nbsp;$$$info.firmware.date$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">Device</TD>
+            	    <TD ID="td_right">$$$info.device.vendor$$$&nbsp;&nbsp;&nbsp;$$$info.device.model$$$&nbsp;&nbsp;&nbsp;$$$info.device.revision$$$</TD>
+            	</TR>
+                <TR><TD ID="td_left" HEIGHT="25" WIDTH="150">SoC</TD>
+            	    <TD ID="td_right">$$$info.soc.vendor$$$&nbsp;&nbsp;&nbsp;$$$info.soc.model$$$&nbsp;&nbsp;&nbsp;$$$info.soc.revision$$$</TD>
+            	</TR>
+                <TR><TD ID="td_left" HEIGHT="25">Firmware Version</TD><TD ID="td_right">$$$info.firmware.version$$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">Code revision</TD><TD ID="td_right">$$$code: r.zrouter_version.revision $$$</TD></TR>
+                <TR><TD ID="td_left" HEIGHT="25">Firmware build date</TD><TD ID="td_right">$$$code: r.zrouter_version.build $$$</TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">System Name</TD><TD ID="td_right">$$$info.hostname$$$</TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">Location</TD><TD ID="td_right">$$$info.location$$$</TD></TR>
                 <TR><TD ID="td_left" HEIGHT="25">System Time</TD><TD ID="td_right">$$$code:os.date("%Y-%m-%d %H:%M:%S")$$$</TD></TR>
@@ -31,6 +38,7 @@
                 <!-- TR><TD ID="td_left" HEIGHT="25">MAC Address</TD><TD ID="td_right">00:21:91:5a:86:f2</TD></TR-->
                 <!-- TR><TD ID="td_left" HEIGHT="25">SSID 1~3</TD><TD ID="td_right">02:21:91:5a:86:f2 ~ 06:21:91:5a:86:f2</TD></TR-->
                 <TR><TD ID="td_left" HEIGHT="25">IP Address</TD><TD ID="td_right">$$$interfaces.bridge0.ipaddr$$$</TD></TR>
+
               </TBODY>
     	      <!-- ________________________________  Main Content End _______________________________ -->
             </TABLE>
