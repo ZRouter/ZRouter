@@ -22,7 +22,11 @@ var xmlhttptimeout = 0;
 
 function ajax(method, target, msg, async, handler)
 {
-	xmlhttptimeout = setTimeout( function(){ xmlhttp.abort(); alert("Timeout") }, 10000);
+
+	if (handler != "ignore") {
+		xmlhttptimeout = setTimeout( function(){ xmlhttp.abort(); alert("Timeout") }, 10000);
+	}
+
 	xmlhttp.onreadystatechange = function()
 	{
 		if (xmlhttp.readyState != 4) return;
@@ -35,11 +39,11 @@ function ajax(method, target, msg, async, handler)
 	    		alert("Error: " + xmlhttp.statusText);
 		}
 	}
+
 	xmlhttp.open(method, target, async);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
 	xmlhttp.send(msg);
 }
-
 
 function getValuesAsArray(formRef)
 {

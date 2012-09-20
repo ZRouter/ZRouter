@@ -8,3 +8,6 @@
 WORLD_SUBDIRS_ZROUTER+= \
 	target/usr.bin/lua/
 
+WORLD_SUBDIRS_USR_SBIN+=	\
+	tcpdump
+

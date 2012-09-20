@@ -20,6 +20,9 @@
             <!-- Values holders -->
             <dns1></dns1>
             <dns2></dns2>
+            <name>wan0pppoe</name>
+            <group>WAN</group>
+            <cost>10</cost>
         </PPPoE>
         <PPP enable="false" type="modem" onchange="iface_changed('interfaces.wan0.PPP')">
             <action>
@@ -44,6 +47,9 @@
             <!-- Values holders -->
             <dns1></dns1>
             <dns2></dns2>
+            <name>PPP</name>
+            <group>WAN</group>
+            <cost>1000</cost>
         </PPP>
         <Static enable="true" type="hw">
             <nat enable="true"></nat>
@@ -56,6 +62,9 @@
             <gateway>10.0.0.1</gateway>
             <dns1>10.0.0.1</dns1>
             <dns2>10.0.0.2</dns2>
+            <name>wan0</name>
+            <group>WAN</group>
+            <cost>100</cost>
         </Static>
     </wan0>
     <wlan0 enable="true" type="wlan">
@@ -63,7 +72,7 @@
             <exec>ifconfig wlan0 create wlandev wifi0 wlanmode hostap</exec>
         </create>
         <init>
-            <exec>ifconfig wlan0 country UA channel 6 ht ssid DIR-620</exec>
+            <exec>ifconfig wlan0</exec>
         </init>
         <wlan_interface>wifi0</wlan_interface>
         <channel>6</channel>
@@ -82,14 +91,16 @@
     </lan0>
     <bridge0 type="bridge">
         <create>
-            <exec>ifconfig wlan0 ether `kenv LAN_MAC_ADDR` down</exec>
-            <exec>ifconfig lan0 ether `kenv LAN_MAC_ADDR` down</exec>
+            <exec>ifconfig wlan0 down</exec>
+            <exec>ifconfig lan0 down</exec>
             <exec>ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
+            <exec>ifconfig bridge0 down</exec>
+            <exec>ifconfig bridge0 ether `kenv LAN_MAC_ADDR`</exec>
             <exec>ifconfig lan0 up</exec>
             <exec>ifconfig wlan0 up</exec>
+            <exec>ifconfig bridge0 up</exec>
         </create>
         <init>
-            <exec order="3">ifconfig bridge0 ether `kenv LAN_MAC_ADDR`</exec>
         </init>
         <ipaddr>192.168.0.1/24</ipaddr>
         <lagg_interfaces>lan0,wlan0</lagg_interfaces>
@@ -147,15 +158,23 @@
     <nameserver order="100">8.8.8.8</nameserver>
     <nameserver order="101">8.8.4.4</nameserver>
 </resolve>
+<igmp>
+    <instance id="0" enable="false">
+	<up>wan0</up>
+	<down>wlan0</down>
+    </instance>
+    <instance id="0" enable="false">
+	<up>wan0</up>
+	<down>lan0</down>
+    </instance>
+</igmp>
 <info>
-    <hostname>dir620.dlink.ua</hostname>
-    <model>DIR-620</model>
-    <rev>A1</rev>
+    <hostname>zrouter</hostname>
     <location>home</location>
     <firmware>
 	<!-- XXX: version and build date should be here -->
-        <version>DIR-620_0.1</version>
-        <date>Mon 6 Jun 14:27:48 2011</date>
+        <version>???</version>
+        <date>????</date>
         <update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/Firmware/FreeBSD/D-Link_DIR-620-last.txt</update_url>
     </firmware>
 </info>
@@ -170,13 +189,17 @@
         <hw_mode>g</hw_mode>
         <ctrl_interface>/var/run/hostapd</ctrl_interface>
         <ctrl_interface_group>wheel</ctrl_interface_group>
-        <ssid>DIR-620</ssid>
+        <ssid>zrouter</ssid>
+        <channel>6</channel>
         <!-- Open -->
-        <wpa>0</wpa>
+        <wpa>3</wpa>
         <!-- WPA -->
         <!-- <wpa>1</wpa> -->
         <!-- RSN/WPA2 -->
         <!-- <wpa>2</wpa> -->
+        <wpa_passphrase>freebsdmall</wpa_passphrase>
+        <wpa_key_mgmt>WPA-PSK</wpa_key_mgmt>
+        <wpa_pairwise>CCMP TKIP</wpa_pairwise>
     </instance>
     <instance id="1" enable="false">
         <ieee80211d>1</ieee80211d>
@@ -188,7 +211,7 @@
         <hw_mode>g</hw_mode>
         <ctrl_interface>/var/run/hostapd</ctrl_interface>
         <ctrl_interface_group>wheel</ctrl_interface_group>
-        <ssid>DIR-620</ssid>
+        <ssid>zrouter</ssid>
         <!-- WPA -->
         <!-- <wpa>1</wpa> -->
         <!-- RSN/WPA2 -->
@@ -210,7 +233,7 @@
     <port>80</port>
 </http>
 <ipsec>
-    <remote id="0" enable="true">
+    <remote id="0" enable="false">
 	<gateway>10.0.0.2:500</gateway>
         <exchange_mode>main,aggressive</exchange_mode>
         <my_identifier>address 10.0.0.1</my_identifier>

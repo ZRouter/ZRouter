@@ -32,6 +32,7 @@ aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Basic Settings </font
 insDoc(aux1, gLnk("R","&nbsp;Internet", "/Basic.wan.html"));
 insDoc(aux1, gLnk("R","&nbsp;Wireless", "/Basic.wlan.html"));
 insDoc(aux1, gLnk("R","&nbsp;LAN", "/Basic.lan.html"));
+insDoc(aux1, gLnk("R","&nbsp;IPTV", "/Basic.iptv.html"));
 
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Security Links </font>", ""));
 insDoc(aux1, gLnk("R","&nbsp;IPSec", "/Security.IPSec.html"));
@@ -62,6 +63,7 @@ insDoc(aux1, gLnk("R","&nbsp;Firmware", "/Administration.firmware.html"));
 
 aux1 = insFld(foldersTree, gFld("<font face=Tahoma size=2> Status</font>", ""));
 insDoc(aux1, gLnk("R","&nbsp;Device Information", "/status.lua"));
+insDoc(aux1, gLnk("R","&nbsp;System Log", "/log.lua"));
 //insDoc(aux1, gLnk("R","&nbsp;Client Information", "/home_sys.html?page=st_info.html"));
 //insDoc(aux1, gLnk("R","&nbsp;WDS Information", "/home_sys.html?page=st_wds_info.html"));
 

@@ -36,6 +36,7 @@ set modem device /dev/cuaU0.0
 set modem var $DialPrefix "DT"
 set modem var $Telephone "#777"
 set modem var $TryPPPEarly "yes"
+set modem var $InitString "+CGDCONT=1,\"IP\",\"internet\""
 set modem script DialPeer
 set modem idle-script Ringback
 set modem watch -cd
@@ -109,6 +110,7 @@ function MPD:msg(s, wait)
 end
 
 function MPD:config_bundle(path, bundle)
+    local pathl = path .. ".";
     local node;
 
     self.socket = socket.connect(self.host, self.port);
@@ -124,28 +126,34 @@ function MPD:config_bundle(path, bundle)
 --    self:msg("set bundle links L1");
 
     -- TODO
---    local ip = c:getNode(path .. "." .. "ipaddr")
+--    local ip = c:getNode(pathl .. "ipaddr")
 --    if ip then
 --	string.match(ip:value(), "%d+%.%d+%.%d+%.%d+%/(%d+)")
 --    end
 
-    self:msg("set iface addrs 10.254.254.1 10.254.254.2");
+    local def_local_addr = "0.0.0.0";
+    local def_perr_addr = "10.254.254.2";
+    if self.c:getNode(pathl .. "gateway"):value() then
+	def_perr_addr = self.c:getNode(pathl .. "gateway"):value();
+    end
+
+    self:msg("set iface addrs " .. def_local_addr .. " " .. def_perr_addr);
     self:msg("set iface up-script /etc/mpd-linkup");
     self:msg("set iface down-script /etc/mpd-linkdown");
-    self:msg("set ipcp ranges 0.0.0.0/0 0.0.0.0/0");
+    self:msg("set ipcp ranges " .. def_local_addr .. "/0 " .. def_perr_addr .."/0");
 
     -- We should apply default on a up-script run
 --     self:msg("set iface route default");
 
-    local dod = self.c:getNode(path .. "." .. "on-demand")
+    local dod = self.c:getNode(pathl .. "on-demand")
     if dod and dod:attr("enable") == "true" then
 	self:msg("set iface enable on-demand");
-        self:msg("set iface idle " .. self.c:getNode(path .. "." .. "idle-time"):value());
+        self:msg("set iface idle " .. self.c:getNode(pathl .. "idle-time"):value());
     end
 
     self:msg("set iface name " .. bundle);
 
-    node = self.c:getNode(path .. "." .. "nat")
+    node = self.c:getNode(pathl .. "nat")
     if node and node:attr("enable") == "true" then
 	self:msg("set iface enable nat");
     end
@@ -162,7 +170,7 @@ function MPD:config_bundle(path, bundle)
 end
 
 function MPD:config_link(path, link, bundle)
-
+    local pathl = path .. ".";
     self.socket = socket.connect(self.host, self.port);
 	if not self.socket then
 		print("Can't connect to " .. self.host .. ":" .. self.port);
@@ -179,10 +187,10 @@ function MPD:config_link(path, link, bundle)
     self:msg("create link static " .. link .. " " .. mpdtype);
     self:msg("link " .. link);
 
-    local user = self.c:getNode(path .. "." .. "username");
+    local user = self.c:getNode(pathl .. "username");
     if user and user:value() and string.len(user:value()) > 0 then
 	self:msg("set auth authname " .. user:value());
-	local passwd = self.c:getNode(path .. "." .. "username");
+	local passwd = self.c:getNode(pathl .. "password");
 	if passwd and passwd:value() then
 	    self:msg("set auth password \"" .. passwd:value() .. "\"");
 	else
@@ -191,16 +199,33 @@ function MPD:config_link(path, link, bundle)
     end
 
     if mpdtype == "modem" then
-	self:msg("set modem device " .. self.c:getNode(path .. "." .. "device"):value() .. "");
+	self:msg("set modem device " ..
+	    self.c:getNode(pathl .. "device"):value() .. "");
 	self:msg("set modem var $DialPrefix \"DT\"");
+	-- Try to send PPP request, for cases when modem stick at data mode
+	-- Leased Line.
 	self:msg("set modem var $TryPPPEarly \"yes\"");
-	self:msg("set modem var $Telephone \"" .. self.c:getNode(path .. "." .. "phone"):value() .. "\"");
+	self:msg("set modem var $Telephone \"" ..
+	    self.c:getNode(pathl .. "phone"):value() .. "\"");
+	local initstring = self.c:getNode(pathl .. "init_string");
+	if initstring then -- If node
+	    initstring = initstring:value();
+	    if initstring and initstring ~= "" then -- If value not empty
+		-- Escape double quotes
+		initstring = initstring:gsub("\"", "\\\"");
+		print("set modem var $InitString \"" .. initstring .. "\"");
+		self:msg("set modem var $InitString \"" .. initstring .. "\"");
+	    end
+	end
 	self:msg("set modem script DialPeer");
 	self:msg("set modem idle-script Ringback");
 	self:msg("set modem watch -cd");
     elseif mpdtype == "pppoe" then
-	self:msg("set pppoe iface " .. self.c:getNode(path .. "." .. "interface"):value() .. "");
-	self:msg("set pppoe service \"" .. self.c:getNode(path .. "." .. "service"):value() .. "\"");
+	self:msg("set pppoe iface " .. self.c:getNode(pathl .. "device"):value() .. "");
+	local service_node = self.c:getNode(pathl .. "service_name");
+	if service_node and service_node:value() then
+	    self:msg("set pppoe service \"" .. service_node:value() .. "\"");
+	end
     elseif mpdtype == "pptp" then
 	-- TODO:
 	self:msg("set pptp self 10.1.3.3");

@@ -190,6 +190,9 @@ function RACOON:make_conf()
 	return (ret);
     end
 
+    -- XXX: We need setup routes per IPSec tunnel
+    local last_gw = nil;
+
     for i = 1,16,1 do
 	local ppath = "ipsec.remote[" ..i.. "]";
 	local node = self.c:getNode(ppath);
@@ -197,6 +200,7 @@ function RACOON:make_conf()
 	    local gw = self.c:getNode(ppath .. ".gateway"):value();
 	    local file = "/var/run/racoon." .. gw .. ".conf";
 	    local remote = gw:gsub(":", " [") .. "]";
+	    last_gw = gw:gsub(":.*", "");
 
 	    local conf = "remote\t" .. remote .. "\n";
 
@@ -232,6 +236,21 @@ function RACOON:make_conf()
 
 	end
     end
+
+    local route_up = nil;
+    local route_down = nil;
+
+    if last_gw then
+	local route_up_file = "/var/run/racoon." .. last_gw .. "_up.sh";
+	local route_down_file = "/var/run/racoon." .. last_gw .. "_down.sh";
+
+	route_up = assert(io.open(route_up_file, "w"));
+	route_down = assert(io.open(route_down_file, "w"));
+
+	route_up:write("#!/bin/sh\n");
+	route_down:write("#!/bin/sh\n");
+    end
+
     for i = 1,16,1 do
 	local ppath = "ipsec.sainfo[" ..i.. "]";
 	local node = self.c:getNode(ppath);
@@ -244,8 +263,14 @@ function RACOON:make_conf()
 	    if dst_cidr:match("%d+%.%d+%.%d+%.%d+%/%d+") then
 		-- Preinstall routes of secured remote nets
 		-- "already in table" ignored
-		print("/sbin/route add " .. dst_cidr .. " -blackhole");
-		os.execute("/sbin/route add " .. dst_cidr .. " -blackhole");
+		local cmd = string.format(
+		    "/sbin/route add %s -iface lo0 -reject", dst_cidr);
+		print(cmd);
+		os.execute(cmd);
+		if last_gw then
+		    route_up:write(string.format("/sbin/route change %s %s\n", dst_cidr, last_gw));
+		    route_down:write(string.format("/sbin/route change %s -iface lo0 -reject\n", dst_cidr));
+		end
 	    end
 
 	    local conf = "sainfo (" .. src .. " " .. dst .. ")\n";
@@ -265,6 +290,10 @@ function RACOON:make_conf()
 	    f:write(conf);
 	    f:close();
 	end
+    end
+    if last_gw then
+	route_up:close();
+	route_down:close();
     end
 
 end
