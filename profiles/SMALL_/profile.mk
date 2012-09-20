@@ -169,13 +169,14 @@ telnetd
 
 #ppp \
 WORLD_SUBDIRS_USR_SBIN+= \
-ngctl \
-nghook \
 chroot \
 cron \
-pwd_mkdb \
 inetd \
 gpioctl \
+newsyslog \
+ngctl \
+nghook \
+pwd_mkdb \
 syslogd
 
 .if defined(WITH_USB)
