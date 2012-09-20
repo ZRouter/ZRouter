@@ -1,8 +1,22 @@
 
-
+0	LED	WPS
 1	LED	STATUS Yellow
+2
+3
+4
+5
+6	LED	STATUS Green
+7	LED	Internet
+8	BUTTON	Reset
+9	UART
+10	UART
 11	LED	USB
 12 	BUTTON	WPS
+13
+14
+15
+16
+17	LED	Internet Bi
 
 
 

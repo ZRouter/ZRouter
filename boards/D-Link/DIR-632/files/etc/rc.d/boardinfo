@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# BEFORE: ADAPTATION
+# PROVIDE: boardinfo
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="boardinfo"
+start_cmd="boardinfo_start"
+extra_commands="enablelan"
+enablelan_cmd="enablelan_sub"
+
+# Empty set of MAC addresses
+MAC0=
+MAC1=
+MAC2=
+MAC3=
+MAC4=
+MAC5=
+MAC6=
+MAC7=
+# Who wants more?
+
+assign_macs()
+{
+	MAC0=$1; shift;
+	MAC1=$1; shift;
+	MAC2=$1; shift;
+	MAC3=$1; shift;
+	MAC4=$1; shift;
+	MAC5=$1; shift;
+	MAC6=$1; shift;
+	MAC7=$1; shift;
+}
+
+
+boardinfo_start()
+{
+
+	echo "Disable LAN ports"
+	switchctl /dev/switch0 set reg 0x000 0x0800
+	switchctl /dev/switch0 set reg 0x100 0x0800
+	switchctl /dev/switch0 set reg 0x200 0x0800
+	switchctl /dev/switch0 set reg 0x300 0x0800
+	switchctl /dev/switch0 set reg 0x400 0x0800
+	switchctl /dev/switch0 set reg 0x500 0x0800
+	switchctl /dev/switch0 set reg 0x600 0x0800
+	switchctl /dev/switch0 set reg 0x700 0x0800
+
+	kenv	RESET_PIN=8
+	kenv	WPS_PIN=12
+	kenv	INTERNET_LED=internet_bi
+
+	MAC_ADDR_LIST=$(dd if=/dev/map/MAC bs=64k count=1 2>/dev/null | lua /usr/sbin/base_mac.lua 3)
+	assign_macs ${MAC_ADDR_LIST}
+
+	kenv BASE_MAC_ADDR="${MAC0}"
+	kenv LAN_MAC_ADDR="${MAC0}"
+	kenv WAN_MAC_ADDR="${MAC1}"
+	kenv WLAN_MAC_ADDR="${MAC2}"
+	echo "Using default board MAC address \"${MAC0}\""
+
+}
+
+enablelan_sub()
+{
+	echo "Enable LAN ports"
+	switchctl /dev/switch0 set reg 0x000 0x3100
+	switchctl /dev/switch0 set reg 0x100 0x3100
+	switchctl /dev/switch0 set reg 0x200 0x3100
+	switchctl /dev/switch0 set reg 0x300 0x3100
+	switchctl /dev/switch0 set reg 0x400 0x3100
+	switchctl /dev/switch0 set reg 0x500 0x3100
+	switchctl /dev/switch0 set reg 0x600 0x3100
+	switchctl /dev/switch0 set reg 0x700 0x3100
+}
+
+load_rc_config $name
+
+run_rc_command $*

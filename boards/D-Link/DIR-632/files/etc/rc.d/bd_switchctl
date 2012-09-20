@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# BEFORE: ADAPTATION
+# PROVIDE: bd_switchctl
+# KEYWORD: nojail nostart
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="bd_switchctl"
+extra_commands="enablelan disablelan"
+enablelan_cmd="enablelan_sub"
+disablelan_cmd="disablelan_sub"
+
+disablelan_sub()
+{
+
+	echo "Disable LAN ports"
+	switchctl /dev/switch0 set reg 0x000 0x0800
+	switchctl /dev/switch0 set reg 0x100 0x0800
+	switchctl /dev/switch0 set reg 0x200 0x0800
+	switchctl /dev/switch0 set reg 0x300 0x0800
+	switchctl /dev/switch0 set reg 0x400 0x0800
+	switchctl /dev/switch0 set reg 0x500 0x0800
+	switchctl /dev/switch0 set reg 0x600 0x0800
+	switchctl /dev/switch0 set reg 0x700 0x0800
+
+}
+
+enablelan_sub()
+{
+	echo "Enable LAN ports"
+	switchctl /dev/switch0 set reg 0x000 0x3100
+	switchctl /dev/switch0 set reg 0x100 0x3100
+	switchctl /dev/switch0 set reg 0x200 0x3100
+	switchctl /dev/switch0 set reg 0x300 0x3100
+	switchctl /dev/switch0 set reg 0x400 0x3100
+	switchctl /dev/switch0 set reg 0x500 0x3100
+	switchctl /dev/switch0 set reg 0x600 0x3100
+	switchctl /dev/switch0 set reg 0x700 0x3100
+}
+
+load_rc_config $name
+
+run_rc_command $*

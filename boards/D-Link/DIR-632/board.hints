@@ -106,21 +106,33 @@ hint.gpioled.0.flags="0x0102"
 
 # 1	LED	STATUS Yellow
 hint.gpioled.1.at="gpiobus0"
-hint.gpioled.1.name="status"
+hint.gpioled.1.name="status_yellow"
 hint.gpioled.1.pins=0x0002
-hint.gpioled.1.flags="0x0102"
+hint.gpioled.1.flags="0x0002"
 
-# 11	LED	USB
+# 6	LED	STATUS Green
 hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.name="usb"
-hint.gpioled.2.pins=0x0800
+hint.gpioled.2.name="status"
+hint.gpioled.2.pins=0x0040
 hint.gpioled.2.flags="0x0102"
 
-# ? 	BUTTON	RESET
+# 7	LED	Internet
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.name="internet"
+hint.gpioled.3.pins=0x0080
+hint.gpioled.3.flags="0x0102"
+
+# 8 	BUTTON	RESET
 #hint.gpioreset.0.at="gpiobus0"
-#hint.gpioreset.0.pins="0x0400"
+#hint.gpioreset.0.pins="0x0100"
 #hint.gpioreset.0.name="reset"
 #hint.gpioreset.0.flags="0x04a1"
+
+# 11	LED	USB
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.name="usb"
+hint.gpioled.4.pins=0x0800
+hint.gpioled.4.flags="0x0102"
 
 # 12 	BUTTON	WPS
 hint.gpiobutton.0.at="gpiobus0"
@@ -128,6 +140,11 @@ hint.gpiobutton.0.pins="0x1000"
 hint.gpiobutton.0.name="wps"
 hint.gpiobutton.0.flags="0x04a1"
 
+# 17	LED	Internet
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.name="internet_bi"
+hint.gpioled.5.pins=0x20000
+hint.gpioled.5.flags="0x0002"
 
 # SPI flash
 hint.spi.0.at="nexus0"
