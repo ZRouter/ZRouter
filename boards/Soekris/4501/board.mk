@@ -45,7 +45,7 @@ WITHOUT_WIRELESS=yes
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp nfs_client
+TARGET_PROFILES+=SMALL_ mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate dnsmasq racoon openvpn ppp nfs_client
 # hostap
 # racoon
 
