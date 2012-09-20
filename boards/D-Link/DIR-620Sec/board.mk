@@ -52,7 +52,8 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh dlink.ua.web dhcp mroute ntpdate dnsmasq racoon openvpn ppp
+TARGET_PROFILES+=SMALL_ mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate dnsmasq racoon openvpn ppp
+
 # hostap
 # nfs_client
 # racoon
