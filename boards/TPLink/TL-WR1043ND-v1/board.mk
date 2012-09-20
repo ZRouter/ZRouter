@@ -88,7 +88,7 @@ KERNEL_MAP_START=0x00020000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh shttpd dlink.ua.web hostap dhcp nfs_client
+TARGET_PROFILES+=SMALL_ mpd ssh shttpd lua_web_ui hostap dhcp nfs_client
 
 MKULZMA_BLOCKSIZE=65536
 
