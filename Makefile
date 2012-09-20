@@ -68,11 +68,6 @@ show-target-pairs:
 ##############################################################################
 .include "socs/socs.mk"
 
-##############################################################################
-# Local vendor changes
-##############################################################################
-.include "vendor/vendor.mk"
-
 .if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
 TARGET_ARCH_SUBDIR=	""
 .else
@@ -124,6 +119,11 @@ target-profiles-list:
 # Profiles - set of SUBDIRS that need to build
 ##############################################################################
 .include "profiles/profiles.mk"
+
+##############################################################################
+# Local vendor changes
+##############################################################################
+.include "vendor/vendor.mk"
 
 .if defined(IMAGE_TYPE) && ${IMAGE_TYPE} == "trx"
 IMAGE_HEADER_EXTRA?=0x1c
