@@ -68,6 +68,11 @@ show-target-pairs:
 ##############################################################################
 .include "socs/socs.mk"
 
+##############################################################################
+# Local vendor changes
+##############################################################################
+.include "vendor/vendor.mk"
+
 .if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
 TARGET_ARCH_SUBDIR=	""
 .else
