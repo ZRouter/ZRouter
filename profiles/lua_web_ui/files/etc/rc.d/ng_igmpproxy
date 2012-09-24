@@ -1,0 +1,125 @@
+#!/bin/sh
+# Copyright (c) 2011 Rozhuk Ivan <rozhuk.im@gmail.com>
+# All rights reserved.
+# 
+# Subject to the following obligations and disclaimer of warranty, use and
+# redistribution of this software, in source or object code forms, with or
+# without modifications are expressly permitted by Whistle Communications;
+# provided, however, that:
+# 1. Any and all reproductions of the source or object code must include the
+#    copyright notice above and the following disclaimer of warranties; and
+# 2. No rights are granted, in any manner or form, to use Whistle
+#    Communications, Inc. trademarks, including the mark "WHISTLE
+#    COMMUNICATIONS" on advertising, endorsements, or otherwise except as
+#    such appears in the above copyright notice or in the software.
+# 
+# THIS SOFTWARE IS BEING PROVIDED BY WHISTLE COMMUNICATIONS "AS IS", AND
+# TO THE MAXIMUM EXTENT PERMITTED BY LAW, WHISTLE COMMUNICATIONS MAKES NO
+# REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, REGARDING THIS SOFTWARE,
+# INCLUDING WITHOUT LIMITATION, ANY AND ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+# WHISTLE COMMUNICATIONS DOES NOT WARRANT, GUARANTEE, OR MAKE ANY
+# REPRESENTATIONS REGARDING THE USE OF, OR THE RESULTS OF THE USE OF THIS
+# SOFTWARE IN TERMS OF ITS CORRECTNESS, ACCURACY, RELIABILITY OR OTHERWISE.
+# IN NO EVENT SHALL WHISTLE COMMUNICATIONS BE LIABLE FOR ANY DAMAGES
+# RESULTING FROM OR ARISING OUT OF ANY USE OF THIS SOFTWARE, INCLUDING
+# WITHOUT LIMITATION, ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+# PUNITIVE, OR CONSEQUENTIAL DAMAGES, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES, LOSS OF USE, DATA OR PROFITS, HOWEVER CAUSED AND UNDER ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF WHISTLE COMMUNICATIONS IS ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+# Author: Rozhuk Ivan <rozhuk.im@gmail.com>
+#
+# This script creates bridge between two network interfaces
+# downstream - network with clients
+# upstream - network with multicast
+# downstream <-IGMP-> upstream
+# downstream <-UDP<- upstream
+# Only packets with multicast destination mac address are forwarded
+# through the bridge and (!) are not passed to network stack
+#
+# PROVIDE: ng_igmpproxy
+# KEYWORD: nojail nostart
+
+IF_UPSTREAM="$2"
+IF_DOWNSTREAM="$3"
+BR_NAME="${IF_UPSTREAM}-${IF_DOWNSTREAM}-br"
+PATTERN_MCAST_IGMP="ether[0] & 1 = 1 and (ether[0:4] != 0xffffffff or ether[4:2] != 0xffff) and ip[9] = 2"
+PATTERN_MCAST_IGMP_UDP="ether[0] & 1 = 1 and (ether[0:4] != 0xffffffff or ether[4:2] != 0xffff) and (ip[9] = 17 or ip[9] = 2)"
+# allways NOT MATCH
+BPFPROG_PASSTROUTH="bpf_prog_len=1 bpf_prog=[ { code=6 jt=0 jf=0 k=0 } ]"
+
+usage_msg()
+{
+        echo "usage: start|stop upstreamIF downstreamIF"
+        echo "This will create bridge between two interfaces for IGMP, and UDP from upstreamIF to downstreamIF"
+}
+if [ -z "${IF_UPSTREAM}" -o -z "${IF_DOWNSTREAM}" ]; then
+        usage_msg
+        return 1
+fi
+if ! ifconfig "$IF_UPSTREAM" > /dev/null 2>&1 ; then
+fi
+case "$1" in
+start)
+        echo "start bridging beetwen ${IF_UPSTREAM} and ${IF_DOWNSTREAM}"
+        # load modules
+        kldload ng_ether > /dev/null 2>&1
+        kldload ng_bpf > /dev/null 2>&1
+        BPFPROG_MCAST_IGMP=$( tcpdump -i wan0 -s 65535 -ddd ${PATTERN_MCAST_IGMP} | \
+                ( read len ; \
+                echo -n "bpf_prog_len=$len " ; \
+                echo -n "bpf_prog=[" ; \
+                while read code jt jf k ; do \
+                  echo -n " { code=$code jt=$jt jf=$jf k=$k }" ; \
+                done ; \
+                echo " ]" ) )
+        BPFPROG_MCAST_IGMP_UDP=$( tcpdump -i wan0 -s 65535 -ddd ${PATTERN_MCAST_IGMP_UDP} | \
+                ( read len ; \
+                echo -n "bpf_prog_len=$len " ; \
+                echo -n "bpf_prog=[" ; \
+                while read code jt jf k ; do \
+                  echo -n " { code=$code jt=$jt jf=$jf k=$k }" ; \
+                done ; \
+                echo " ]" ) )
+        # create and connect nodes
+        ngctl mkpeer ${IF_UPSTREAM}: bpf lower ${IF_UPSTREAM}-lower
+        ngctl name ${IF_UPSTREAM}:lower ${BR_NAME}-bpf
+        ngctl connect ${IF_UPSTREAM}: ${BR_NAME}-bpf: upper ${IF_UPSTREAM}-upper
+        ngctl connect ${IF_DOWNSTREAM}: ${BR_NAME}-bpf: lower ${IF_DOWNSTREAM}-lower
+        ngctl connect ${IF_DOWNSTREAM}: ${BR_NAME}-bpf: upper ${IF_DOWNSTREAM}-upper
+        # configure BPF node
+        ngctl msg ${BR_NAME}-bpf: setprogram { thisHook=\"${IF_UPSTREAM}-lower\" ifMatch=\"${IF_DOWNSTREAM}-lower\" ifNotMatch=\"${IF_UPSTREAM}-upper\" ${BPFPROG_MCAST_IGMP_UDP} }
+        ngctl msg ${BR_NAME}-bpf: setprogram { thisHook=\"${IF_UPSTREAM}-upper\" ifMatch=\"\" ifNotMatch=\"${IF_UPSTREAM}-lower\" ${BPFPROG_PASSTROUTH} }
+        ngctl msg ${BR_NAME}-bpf: setprogram { thisHook=\"${IF_DOWNSTREAM}-lower\" ifMatch=\"${IF_UPSTREAM}-lower\" ifNotMatch=\"${IF_DOWNSTREAM}-upper\" ${BPFPROG_MCAST_IGMP} }
+        ngctl msg ${BR_NAME}-bpf: setprogram { thisHook=\"${IF_DOWNSTREAM}-upper\" ifMatch=\"\" ifNotMatch=\"${IF_DOWNSTREAM}-lower\" ${BPFPROG_PASSTROUTH} }
+        # configure net if
+        ngctl msg ${IF_UPSTREAM}: setautosrc 1
+        ngctl msg ${IF_UPSTREAM}: setpromisc 1
+        #ngctl msg ${IF_DOWNSTREAM}: setautosrc 0
+        ngctl msg ${IF_DOWNSTREAM}: setpromisc 1
+        ;;
+stop)
+        echo "stop bridging beetwen ${IF_UPSTREAM} and ${IF_DOWNSTREAM}"
+        # configure net if
+        ngctl msg ${IF_UPSTREAM}: setautosrc 0
+        ngctl msg ${IF_UPSTREAM}: setpromisc 0
+        #ngctl msg ${IF_DOWNSTREAM}: setautosrc 0
+        ngctl msg ${IF_DOWNSTREAM}: setpromisc 0
+        # remove hooks and nodes
+        ngctl rmhook ${IF_UPSTREAM}: lower
+        ngctl rmhook ${IF_UPSTREAM}: upper
+        ngctl rmhook ${IF_DOWNSTREAM}: lower
+        ngctl rmhook ${IF_DOWNSTREAM}: upper
+        ngctl shutdown ${BR_NAME}-bpf:
+        # unload modules
+        #kldunload ng_ether > /dev/null 2>&1
+        #kldunload ng_bpf > /dev/null 2>&1
+        ;;
+*)
+        usage_msg
+esac
+return 0
