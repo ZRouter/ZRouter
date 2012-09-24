@@ -14,6 +14,7 @@ echo >>  ${LOG}
 
 query="cmd=event"
 query="${query}&state=up"
+query="${query}&proto=inet"
 query="${query}&iface=IPSec0"	# XXX: should use names for IPSec peers
 query="${query}&gw=${REMOTE_ADDR}:${REMOTE_PORT}"
 query="${query}&ip=${LOCAL_ADDR}:${LOCAL_PORT}"

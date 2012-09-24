@@ -45,6 +45,7 @@ REBOOT|BOUND|RENEW)
         query="${query}&iface=${interface}"
         query="${query}&gw=${new_routers}"
         query="${query}&ip=${new_ip_address}"
+        query="${query}&proto=inet"
         query="${query}&netmask=${new_subnet_mask}"
         query="${query}&dhclient_reason=${reason}"
         query="${query}&dhclient_lease_time=${new_dhcp_lease_time}"
