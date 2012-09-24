@@ -493,7 +493,7 @@ function handleRequest( c, config, path, client, method, rq )
 			    " " .. urlEncode(path));
 			retcode = "500";
 		else
-			t = code();
+			st, t = pcall(code);
 		end
 	end
 	client:send(t);
@@ -509,11 +509,16 @@ function evalembeded(s)
 
 	match, _, code = string.find(s, "^code%:(.*)$");
 	if match then
-		local func, err = loadstring("return " .. code);
+		local func, err = assert(loadstring("return " .. code));
 		if not func then
 			return err;
 		end
-		return func();
+		local status, ret = pcall(func);
+		if status == false then
+			print(code, " failed");
+			return "";
+		end
+		return (ret);
 	else
 		node = c:getNode(s);
 		if node then
