@@ -1,0 +1,82 @@
+.toolbar{
+	background: #ccdce2 url('../img/tool_bar.jpg') center left;
+	border:none;
+	border:0px;
+	margin:0px;
+	padding:0px;
+	font-size:14px;
+	font-weight:bold;
+	}
+.toolbar ul{
+	height:25px;
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+.toolbar li{
+	float:left;
+	padding:0px;
+}
+.toolbar li a{
+	color:white;
+	display:block;
+	font-weight:normal;
+	line-height:25px;
+	margin:0px;
+	padding:0px 10px;
+	text-align:center;
+	text-decoration:none;
+}
+.toolbar li a:hover, .toolbar ul li:hover a{
+	color:white;
+	text-decoration:none;
+}
+.toolbar li ul{
+	display:none;
+	height:auto;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	position:absolute;
+	z-index:200;
+	width: 150px;
+}
+.toolbar li:hover ul{	display:block;	}
+.toolbar li ul li a:active span{	color:red;	}
+.toolbar li li {
+	background: #ccdce2 url('../img/tool_bar.jpg') center left;
+	display:block;
+	float:none;
+	margin:0px;
+	padding:0px;
+	width: 150px;
+}
+.toolbar li:hover li a{	background:none; }
+.toolbar li ul a{
+	display:block;
+	height:25px;
+	font-size:12px;
+	font-style:normal;
+	margin:0px;
+	padding:0px 10px 0px 10px;
+	text-align:left;
+}
+.toolbar li ul a:hover, .toolbar li ul li:hover a{
+	border:none;
+	border:0px;
+	color:#ffffff;
+	background: #ccdce2 url('../img/tool_bar.jpg') center left;
+	text-decoration:none;
+}
+.toolbar p{clear:left;}
+
+.separator {
+	border:none;
+	border:0px;
+	background: #ccdce2 url('../img/tool_bar_v.jpg') center left no-repeat;
+	width: 2px;
+	list-style:none;
+	margin:6px 0px 2px 0px;
+	padding:0px 0px 0px 0px;
+}
+
