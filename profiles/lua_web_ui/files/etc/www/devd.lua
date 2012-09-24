@@ -10,9 +10,6 @@ package.cpath =
 serverhost = serverhost or "127.0.0.1";
 serverport = serverport or "80";
 
--- redirect print to /dev/console
--- dofile("lib/print_to_console.lua");
-
 -- redirect print to syslog
 dofile("lib/lsyslog.lua");
 syslog_init("devd.lua");
