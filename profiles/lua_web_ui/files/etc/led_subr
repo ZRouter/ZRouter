@@ -1,0 +1,8 @@
+
+
+# echo 0 > /dev/led/internet
+# echo 0 > /dev/led/internet_bi
+# echo 1 > /dev/led/internet
+# echo 1 > /dev/led/internet_bi
+
+# TODO
