@@ -1,0 +1,8 @@
+
+
+mtdparts=ar7100-nor0:
+256k(uboot),	0xbf000000 - 0xbf040000
+64k(Config),	0xbf040000 - 0xbf050000
+1024k(vmlinux),	0xbf050000 - 0xbf150000
+5184k(rootfs),	0xbf150000 - 0xbf660000
+64k(caldata)	0xbf7f0000 - 0xbf800000
