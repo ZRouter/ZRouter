@@ -39,6 +39,7 @@ upgrade -l /dev/console -h \
 -H YWRtaW46YWRtaW4= -M \"Secure Area\" \
 -f /dev/%s -d /dev/map/upgrade\n" ${MD_DEV} >> /etc/inetd.conf
 			inetd -wW;
+			/usr/libexec/telnetd -4 -debug 23 &
 			sh
 		fi
 	fi
