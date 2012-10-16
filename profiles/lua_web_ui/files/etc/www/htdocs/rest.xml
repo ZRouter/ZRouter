@@ -1,0 +1,109 @@
+--[[
+
+endWithSlash
+	GET	List the URIs and perhaps other details of the collection's members.
+	PUT	Replace the entire collection with another collection.
+	POST	Create a new entry in the collection. The new entry's URL is assigned automatically and is usually returned by the operation.
+	DELETE	Delete the entire collection.
+!endWithSlash
+	GET	Retrieve a representation of the item of the collection, expressed in an appropriate Internet media type.
+	PUT	Replace the item of the collection, or if it doesn't exist, create it.
+	POST	Treat the item as a collection in its own right and create a new entry in it.
+	DELETE	Delete the item of the collection.
+]]
+
+-- read_file, tdump, xmldump
+dofile('lib/utils.lua');
+
+
+function err(...)
+	local str = string.format(...);
+	return ("<error>" .. str .. "</error>");
+end
+
+function path2item(tree, path)
+	local left, newpath = path:match("^([^\/]+)\/(.*)");
+	if not left then
+		if tree[path] then
+			return (tree[path]);
+		end
+	else
+		if not newpath or newpath == "" then
+			return (tree[left]);
+		end
+		if tree[left] then
+			return (path2item(tree[left], newpath));
+		end
+	end
+	return (nil);
+end
+
+function process()
+	if not sys then
+		print("Configuration structure 'sys' is missing");
+	end
+	if not rq then
+		print("Request structure 'rq' is missing");
+	end
+
+    	local item = path2item(sys, rq.path);
+	if not item then
+		return err("Item \"%s\" is not found", rq.path);
+	end
+
+	if rq.path:sub(-1) == '/' then
+	        -- Collection
+	    	if type(item) ~= "table" then
+	    		return err("Element \"%s\" is not a collection", rq.path);
+	    	end
+
+	        if rq.GET then
+			-- List table items.
+			local list = "";
+			for k, v in pairs(item) do
+				list = list .. string.format("<%s>%s</%s>", k, v, k);
+			end
+			return (list);
+	        elseif rq.PUT then
+			-- Replace whole table.
+	        elseif rq.POST then
+			-- Add table item.
+	        elseif rq.DELETE then
+			-- Free table.
+	        else
+	    		return err("Protocol not implemented");
+	    	end
+	else
+		-- Item
+	    	-- if type(item) ~= "table" then
+	    	-- 	return err("Element \"%s\" is not a collection", rq.path);
+	    	-- end
+
+	        if rq.GET then
+			-- Retrieve item value.
+			return (xmldump(item));
+	        elseif rq.PUT then
+			-- Replace item, or if it doesn't exist, create it.
+	        elseif rq.POST then
+			-- Append/Insert new item to table.
+	        elseif rq.DELETE then
+			-- Delete item from table.
+	        else
+	    		return err("Protocol not implemented");
+	    	end
+	end
+
+end
+
+return ([[
+<?xml version="1.0" encoding="utf-8" ?>
+<data>]] ..
+process() ..
+[[
+</data>
+]]);
+
+-- end
+
+-- print(doit());
+

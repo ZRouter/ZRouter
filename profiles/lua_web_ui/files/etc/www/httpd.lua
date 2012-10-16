@@ -34,7 +34,7 @@ dofile('lib/xml.lua');
 -- XML entity handlers
 dofile('lib/handler.lua');
 
--- read_file, tdump, xmldump
+-- read_file, tdump, xmldump, exec_output
 dofile('lib/utils.lua');
 -- Conf object
 dofile('lib/conf.lua');
@@ -111,7 +111,7 @@ function start_server( c, config )
 	-- c:getNode("http.host"):value();
 	s = socket.tcp();
 	assert(s:setoption("reuseaddr", true));
-	assert(s:bind("*", c:getNode("http.port"):value()));
+	assert(s:bind("*", c:getNodeValueSafe("http.port", 80)));
 	assert(s:listen(8));
 	assert(s:settimeout(5));
 	config.listener = s;
@@ -120,8 +120,8 @@ function start_server( c, config )
 	--   Print some status messages.
 	--
 	print( "\nListening upon:" );
-	print( "  http://" .. c:getNode("http.host"):value() .. ":" ..
-			c:getNode("http.port"):value() .. "/" );
+	print( "  http://" .. c:getNodeValueSafe("http.host", "*") .. ":" ..
+			c:getNodeValueSafe("http.port", 80) .. "/" );
 	print( "\n\n");
 	--[[
 	table.insert(r.tasks.countdown, { count=25, task=
@@ -288,7 +288,8 @@ function processConnection( c, config )
 	--
 	-- We only handle GET requests.
 	--
-	if ( method ~= "GET" ) and ( method ~= "POST" ) then
+	if ( method ~= "GET" ) and ( method ~= "POST" ) and
+	    ( method ~= "PUT" ) and ( method ~= "DELETE" ) then
 		error = "Method not implemented";
 
 		if ( method == nil ) then
@@ -308,6 +309,7 @@ function processConnection( c, config )
 	-- Decode the requested path.
 	--
 	path = urlDecode( path );
+	rq.path = path;
 
 	--
 	-- find the Virtual Host which we need for serving, and find the
@@ -517,19 +519,8 @@ function evalembeded(s)
 		end
 		return (ret);
 	else
-		node = c:getNode(s);
-		if node then
-			return field(node:value() or "");
-		end
-		return field("");
+		return (field(c:getNodeValueSafe(s, "")));
 	end
-end
-
-function exec_output(cmd)
-	fp = io.popen(cmd, "r");
-	data = fp:read("*a");
-	fp:close();
-	return data;
 end
 
 function queryData(rq)
@@ -889,8 +880,8 @@ sysctl net.inet.ip.fw.one_pass=0
 		configure_mpd_link(c, path, sub, sub);
 		-- Add interface to route select logic
 		r.route:f(sub,
-		    safeValue(c, path .. ".group", "WAN"),
-		    safeValue(c, path .. ".cost", "1000") - 0,
+		    c:getNodeValueSafe(path .. ".group", "WAN"),
+		    c:getNodeValueSafe(path .. ".cost", "1000") - 0,
 		    "down",
 		    "LINKDOWN")
 	    elseif (subtype == "pptp") then
@@ -900,12 +891,12 @@ sysctl net.inet.ip.fw.one_pass=0
 		os.execute("sleep 1");
 		configure_mpd_link(c, path, sub, sub);
 		r.route:f(sub,
-		    safeValue(c, path .. ".group", "WAN"),
-		    safeValue(c, path .. ".cost", "1000") - 0,
+		    c:getNodeValueSafe(path .. ".group", "WAN"),
+		    c:getNodeValueSafe(path .. ".cost", "1000") - 0,
 		    "down",
 		    "LINKDOWN")
 	    elseif (subtype == "hw") then
-		local dev = c:getNode(path .. ".device"):value();
+		local dev = c:getNodeValueSafe(path .. ".device", "wan0");
 		local dhcp = c:getNode(path .. ".dhcp");
 		local dhcpenabled = 0;
 		if dhcp and dhcp:attr("enable") == "true" then
@@ -914,8 +905,8 @@ sysctl net.inet.ip.fw.one_pass=0
 
 		os.execute(string.format("ifconfig %s up", dev));
 		r.route:f(sub,
-		    safeValue(c, path .. ".group", "WAN"),
-		    safeValue(c, path .. ".cost", "1000") - 0,
+		    c:getNodeValueSafe(path .. ".group", "WAN"),
+		    c:getNodeValueSafe(path .. ".cost", "1000") - 0,
 		    "up",
 		    "LINKDOWN")
 
@@ -929,7 +920,7 @@ sysctl net.inet.ip.fw.one_pass=0
     		query = query .. "&dns2=" .. 	urlEncode(c:getNode(path .. ".dns2"):value());
 
 		-- Call collector, to let him know about static config, and assign route+dns's
-		cmdline = "fetch -qo - \"http://127.0.0.1:8/event.xml?" .. query .. "\"";
+		cmdline = "fetch -qo - \"" .. eventrelay .. "?" .. query .. "\"";
     		print("Exec: " .. cmdline);
     		os.execute(cmdline);
 
@@ -1044,11 +1035,11 @@ function start_dnsmasq(c)
 	if c:getNode("dhcpd.instances.instance[1]"):attr("enable") == "true" then
 
 		dhcproot = "dhcpd.instances.instance[1].";
-		domain = safeValue(c, dhcproot .. "domain", "zrouter");
-		dltime = safeValue(c, dhcproot .. "default-lease-time", 3600);
-		mltime = safeValue(c, dhcproot .. "max-lease-time");
-		ranges = safeValue(c, dhcproot .. "range.start");
-		rangee = safeValue(c, dhcproot .. "range.end");
+		domain = c:getNodeValueSafe(dhcproot .. "domain", "zrouter");
+		dltime = c:getNodeValueSafe(dhcproot .. "default-lease-time", 3600);
+		mltime = c:getNodeValueSafe(dhcproot .. "max-lease-time");
+		ranges = c:getNodeValueSafe(dhcproot .. "range.start");
+		rangee = c:getNodeValueSafe(dhcproot .. "range.end");
 
 		local_domain = " --domain=" .. domain .."," .. ranges .. "," .. rangee;
 		local_dhcp_range = " --dhcp-range=" .. ranges .. "," .. rangee .. "," .. dltime;
@@ -1073,10 +1064,10 @@ function start_hostapd(c)
 		driver = "bsd";
 		--        <ieee80211d>1</ieee80211d>
 		--        <country_code>UA</country_code>
-		channel = safeValue(c, aproot .. "channel", 6);
-		country_code = safeValue(c, aproot .. "country_code", "UA");
+		channel = c:getNodeValueSafe(aproot .. "channel", 6);
+		country_code = c:getNodeValueSafe(aproot .. "country_code", "UA");
 		--        <interface>wlan0</interface>
-		interface = safeValue(c, aproot .. "interface", "wlan0");
+		interface = c:getNodeValueSafe(aproot .. "interface", "wlan0");
 
 		commandline = string.format("ifconfig %s down",interface);
 		if os.execute(commandline) ~= 0 then
@@ -1095,18 +1086,18 @@ function start_hostapd(c)
 		--        <ctrl_interface>/var/run/hostapd</ctrl_interface>
 		--        <ctrl_interface_group>wheel</ctrl_interface_group>
 		--        <ssid>zrouter</ssid>
-		ssid = safeValue(c, aproot .. "ssid", "zrouter");
+		ssid = c:getNodeValueSafe(aproot .. "ssid", "zrouter");
 		--        <!-- Open -->
 		--        <wpa>0</wpa>
-		wpa = safeValue(c, aproot .. "wpa", 3);
+		wpa = c:getNodeValueSafe(aproot .. "wpa", 3);
 		--        <!-- WPA -->
 		--        <!-- <wpa>1</wpa> -->
 		--        <!-- RSN/WPA2 -->
 		-- <!-- <wpa>2</wpa> -->
     		-- <wpa_pairwise>CCMP TKIP</wpa_pairwise>
-		wpa_key_mgmt = safeValue(c, aproot .. "wpa_key_mgmt", "WPA-PSK");
-		wpa_passphrase = safeValue(c, aproot .. "wpa_passphrase", "freebsdmall");
-		wpa_pairwise = safeValue(c, aproot .. "wpa_pairwise", "CCMP");
+		wpa_key_mgmt = c:getNodeValueSafe(aproot .. "wpa_key_mgmt", "WPA-PSK");
+		wpa_passphrase = c:getNodeValueSafe(aproot .. "wpa_passphrase", "freebsdmall");
+		wpa_pairwise = c:getNodeValueSafe(aproot .. "wpa_pairwise", "CCMP");
 		ctrl_interface = "/var/run/hostapd";
 
 		-- # TARGET
@@ -1149,8 +1140,8 @@ function start_igmp_fwd(c)
 		return;
 	end
 	if c:getNode("igmp.instance[1]"):attr("enable") == "true" then
-		upif   = safeValue(c, aproot .. "up", "wan0");
-		downif = safeValue(c, aproot .. "down", "lan0");
+		upif   = c:getNodeValueSafe(aproot .. "up", "wan0");
+		downif = c:getNodeValueSafe(aproot .. "down", "lan0");
 
 		cmd = "/etc/rc.d/ng_igmpproxy start " .. upif .. " " .. downif;
 
@@ -1160,9 +1151,14 @@ function start_igmp_fwd(c)
 end
 
 -- Globals
-config = {};	-- Unused now
+sys = {};	-- Full tree of all params
+config = {};	-- Hold HTTPD server params
 c = {}; 	-- XML tree from config.xml
 r = {};		-- Runtime varibles structure
+
+sys.r = r;
+sys.c = c;
+sys.config = config;
 
 r.routes = {};
 r.routes["default"] = "127.0.0.1";
@@ -1173,6 +1169,8 @@ r.tasks.periodic = {};
 r.tasks.onetime  = {}; -- At some time
 r.tasks.countdown= {}; -- when counter expired
 r.ver = {};
+eventrelay = exec_output("kenv -q EVENTRELAY");
+
 
 opts = {};
 opts["-P"] = "/var/run/httpd.pid";

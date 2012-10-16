@@ -22,6 +22,18 @@ return ([[
     <body class="yui3-skin-sam  yui-skin-sam">
     <h1>LAN configuration</h1>
 
+<div id="Routes" class="yui3-module boxitem">
+    <div class="yui3-hd">
+        <h4>Routes</h4>
+    </div>
+    <div class="yui3-bd">
+    ]] ..
+    "<pre>\n" ..
+    exec_output("netstat -rn") ..
+    "</pre>\n" ..
+    [[
+    </div>
+</div>
 <div id="Static" class="yui3-module boxitem">
     <div class="yui3-hd">
         <h4>Static/DHCP</h4>

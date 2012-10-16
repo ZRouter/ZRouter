@@ -26,7 +26,10 @@ end
     return XML subtree of table
 ]]
 
-function xmldump(t)
+function xmldump(t, level)
+    if type(t) ~= "table" then
+	return (nil);
+    end
 
     local function xatrdmp(t)
 	local ret = '';
@@ -35,7 +38,7 @@ function xmldump(t)
     	    ret = ret .. string.format(" %s=\"%s\"", tostring(k), tostring(v));
         end
 
-        return ret;
+        return (ret);
     end
 
     local function xdmp(t, l)
@@ -83,15 +86,12 @@ function xmldump(t)
     	elseif t._type == "COMMENT" then
     	    ret = ret ..
     		string.format("%s<!-- %s -->\n", string.rep(" ", l*4), t._text);
---    	else
---    	    print("Parse Error Unknow type \"" .. (t._type or "(nil)") .. "\"");
     	end
 
-	-- print(ret);
-	return ret;
+	return (ret);
     end
 
-    return xdmp(t, -1);
+    return xdmp(t, level or -1);
 end
 
 
@@ -326,3 +326,10 @@ function parse_kv_file (ar, file)
 	return err;
 end
 
+function exec_output(cmd)
+	fp = io.popen(cmd, "r");
+	data = fp:read("*a");
+	fp:close();
+	-- remove CR and LF, but only at the end of data
+	return data:gsub("[\n\r]$", "");
+end
