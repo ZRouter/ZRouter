@@ -17,6 +17,11 @@ syslog_init("devd.lua");
 -- urlEncode/urlDecode
 dofile("lib/urlXxcode.lua");
 
+-- read_file, tdump, xmldump, exec_output
+dofile('lib/utils.lua');
+
+local eventrelay = exec_output("kenv -q EVENTRELAY");
+
 function tab_to_query(t)
     local ret = "event=devd";
 
@@ -28,7 +33,7 @@ function tab_to_query(t)
 end
 
 function call_server(config, q)
-    local query = "http://127.0.0.1:80/event.xml?" .. q;
+    local query = eventrelay .. "?" .. q;
 
     local body, code, headers = config.http.request(query);
 
@@ -38,13 +43,6 @@ function call_server(config, q)
 	return (nil);
     end
 
-end
-
-function exec_output(cmd)
-	fp = io.popen(cmd, "r");
-	data = fp:read("*a");
-	fp:close();
-	return data;
 end
 
 function system_event(config, msg)

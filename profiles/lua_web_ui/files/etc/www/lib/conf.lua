@@ -66,6 +66,18 @@ function Conf:getNode(path)
     return (Node:new(ret, path));
 end
 
+function Conf:getNodeValueSafe(path, default)
+	node = self:getNode(path);
+	if not node then
+		if default then
+			return default;
+		else
+			return ("");
+		end
+	end
+	return node:value();
+end
+
 --      node = { _name = <Element Name>,
 --              _type = ROOT|ELEMENT|TEXT|COMMENT|PI|DECL|DTD,
 --              _attr = { Node attributes - see callback API },

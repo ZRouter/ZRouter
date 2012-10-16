@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# PROVIDE: eventrelay
+# BEFORE: httpd devd collector
+# REQUIRE: MAIN
+# KEYWORD: nojail shutdown
+
+. /etc/rc.subr
+
+#[ -z "${eventrelay_enable}" ] && eventrelay_enable="YES"
+eventrelay_enable="YES"
+name="eventrelay"
+command="/etc/www/${name}.sh"
+rcvar=`set_rcvar`
+
+conf_file="/etc/${name}.conf"
+pidfile="/var/run/${name}.pid"
+
+command_args="-P ${pidfile} -B ${conf_file} &"
+
+load_rc_config ${name}
+run_rc_command "$1"

@@ -1,10 +1,38 @@
 
 
-if rq.POST["cmd"] == "download_config" then
-	return (xmldump(c:gettree()));
-else
-	return ("Unknow command");
+if type(rq.POST) == "table" then
+	if rq.POST["cmd"] == "download_config" then
+		return (xmldump(c:gettree()) or "nil");
+	end
+elseif type(rq.GET) == "table" then
+	if rq.GET["key"] then
+		local node = c:getNode(rq.GET["key"]);
+		if node then
+			if rq.GET["value"] then
+				-- try to assign the value
+				node:value(rq.GET["value"]);
+			else
+				-- return value
+				return (node:value() or "nil");
+			end
+		else
+			return ("Item \"" .. rq.GET["key"] ..
+			    "\" not found");
+		end
+	elseif rq.GET["dump"] then
+		local node = c:getNode(rq.GET["dump"]);
+		local format = rq.GET["format"] or "xml";
+
+		if node then
+			return (node:dump(format) or "nil");
+		else
+			return ("Item \"" .. rq.GET["dump"] ..
+			    "\" not found");
+		end
+	end
 end
+
+return ("Unknow command");
 
 
 
