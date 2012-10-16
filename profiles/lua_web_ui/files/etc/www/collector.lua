@@ -13,35 +13,17 @@ port = port or "8";
 serverhost = serverhost or "127.0.0.1";
 serverport = serverport or "80";
 
+-- read_file, tdump, xmldump, exec_output
+dofile('lib/utils.lua');
+
+-- urlEncode/urlDecode
+dofile("lib/urlXxcode.lua");
+
 -- Globals
 r = {};		-- Runtime varibles structure
 rquery = {};
 queue = {};
 local internet_led = nil;
-
---
--- Utility function:  URL encoding function
---
-function urlEncode(str)
-    if (str) then
-        str = string.gsub (str, "\n", "\r\n")
-        str = string.gsub (str, "([^%w ])",
-            function (c) return string.format ("%%%02X", string.byte(c)) end)
-        str = string.gsub (str, " ", "+")
-    end
-    return str
-end
-
-
---
--- Utility function:  URL decode function
---
-function urlDecode(str)
-    str = string.gsub (str, "+", " ")
-    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
-    str = string.gsub (str, "\r\n", "\n")
-    return str
-end
 
 -- convert name1=value1&name2=val+ue%2F2
 -- to table {"name1"="value1", "name2"="val ue/2"}
