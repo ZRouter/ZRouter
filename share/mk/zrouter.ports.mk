@@ -2,8 +2,8 @@
 
 # that may used for any platform
 # we need only say cross-build to configure
-PORTS_CONFIGURE_TARGET=--build=i386-portbld-freebsd8.2 --host=mipsel-portbld-freebsd8.2
-
+TARGET_ARCH=mips
+CFLAGS="-std=c99 -I${WORLDDESTDIR}/include"
 
 _TARGET_DEFS = \
 	TARGET_VENDOR=${TARGET_VENDOR} \
@@ -14,14 +14,11 @@ _TARGET_DEFS = \
 
 
 _TARGET_CROSS_DEFS = \
-	PATH=${FREEBSD_BUILD_ENV_PATH}:/usr/local/bin:/usr/local/sbin \
-	PREFIX=${WORLDDESTDIR} \
-	LOCALBASE=${WORLDDESTDIR} \
-	CC="${CC} -L${WORLDDESTDIR}/lib -L${WORLDDESTDIR}/usr/lib" \
+	PATH=/usr/mips-freebsd/usr/bin:${PATH} \
 	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
-	GNU_CONFIGURE_PREFIX=${WORLDDESTDIR} \
-	GLOBAL_CONFIGURE_ARGS="${PORTS_CONFIGURE_TARGET}" \
+	PKG_DBDIR=${WORLDDESTDIR}/libdata/var/db/pkg \
+	TARGET_ARCH=mips \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
 	NO_PKG_REGISTER=yes \
@@ -30,13 +27,13 @@ _TARGET_CROSS_DEFS = \
 	BINOWN=ray \
 	BINGRP=wheel \
 	NOPORTEXAMPLES=yes \
-	INSTALL_AS_USER=yes \
-	INSTALL="sh ${FREEBSD_SRC_TREE}/tools/install.sh" \
+	INSTALL=${ZROUTER_ROOT}/tools/install.sh \
 	ac_cv_func_malloc_0_nonnull=yes \
 	ac_cv_func_realloc_0_nonnull=yes \
-	AUTOTOOLS_LOCALBASE=/usr/local
-
-#	LDADD="-L${WORLDDESTDIR}/lib"
+	AUTOTOOLS_LOCALBASE=/usr/local \
+	LIBDIR+=${WORLDDESTDIR}/lib \
+	LDADD+="-L${WORLDDESTDIR}/lib" \
+	CXXFLAGS="-I${WORLDDESTDIR}/include -I${WORLDDESTDIR}/include/json"
 #	LIBTOOL=/usr/local/bin/libtool \
 #	-ELIBTOOL
 
@@ -48,6 +45,7 @@ port-build:
 	@echo "----> Start building ports dependencies ..."
 .for dir in ${WORLD_SUBDIRS_PORTS}
 	@echo "Start ${dir} port building..."
+	mkdir -p ${WORLDDESTDIR}/libdata/var/db/pkg
 	cd ${ZROUTER_ROOT} ;${MAKE} ${_TARGET_DEFS} PORT_BUILD_DEPEND_CROSS=${dir} port-build-depend-cross
 .endfor
 	@echo "----> Ports dependencies build done ..."
@@ -101,8 +99,8 @@ port-build-depend-cross:
 	    if [ $${PORT_STATUS} -lt 50 ] ; then \
 		    echo "$${PORT_STATUS}% of files matched, do install" ; \
 		    rm -f ${ZROUTER_OBJ}/ports/${dir}/.install* ; \
-		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ; \
-		    cd ${dir} ; PATH=${FREEBSD_BUILD_ENV_PATH} ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install || \
+		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/; \
+		    cd ${dir} ; PATH=${FREEBSD_BUILD_ENV_PATH} ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/ || \
 			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
 			    echo ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
 			    ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
@@ -111,7 +109,7 @@ port-build-depend-cross:
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` && \
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
 			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
-			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install && \
+			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/ && \
 			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
 	    fi
 .endfor
