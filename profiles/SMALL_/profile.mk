@@ -125,6 +125,7 @@ netstat \
 passwd \
 sed \
 sockstat \
+sort \
 tail \
 tar \
 tee \
@@ -134,9 +135,6 @@ uname \
 vi \
 wc \
 xargs
-
-WORLD_SUBDIRS_GNU_USR_BIN+= \
-sort
 
 WORLD_SUBDIRS_GNU_LIB+= \
 csu \

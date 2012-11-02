@@ -1,0 +1,104 @@
+hint.arge.0.media=1000
+hint.arge.0.fduplex=1
+hint.arge.1.media=1000
+hint.arge.1.fduplex=1
+
+# No probe at all
+hint.miibus.0.phymask="0x00000000"
+hint.miibus.1.phymask="0x00000000"
+
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=1000
+
+hint.floatphy.1.at="miibus1"
+hint.floatphy.1.phyno=0
+hint.floatphy.1.flags=0x00000000
+hint.floatphy.1.speed=1000
+
+# compatible value, device with 4M/8M/16M of flash, may found it on same
+# location, because flash just aliased to upper segments
+hint.ath.0.eepromdata=0x1fff1000
+
+# ath0 - slot 17
+hint.pcib.0.bus.0.17.0.ath_fixup_addr=0x1f051000
+hint.pcib.0.bus.0.17.0.ath_fixup_size=4096
+# ath1 - slot 18
+hint.pcib.0.bus.0.18.0.ath_fixup_addr=0x1f055000
+hint.pcib.0.bus.0.18.0.ath_fixup_size=4096
+# .. and now, telling each ath(4) NIC where to find the firmware
+# image.
+hint.ath.0.eeprom_firmware="pcib.0.bus.0.17.0.eeprom_firmware"
+hint.ath.1.eeprom_firmware="pcib.0.bus.0.18.0.eeprom_firmware"
+
+# 0	LED	WPS
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="wps"
+hint.gpioled.0.pins=0x0001
+hint.gpioled.0.flags="0x0102"
+
+# 1	LED	STATUS Yellow
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.name="status"
+hint.gpioled.1.pins=0x0002
+hint.gpioled.1.flags="0x0102"
+
+# 11	LED	USB
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.name="usb"
+hint.gpioled.2.pins=0x0800
+hint.gpioled.2.flags="0x0102"
+
+# ? 	BUTTON	RESET
+#hint.gpioreset.0.at="gpiobus0"
+#hint.gpioreset.0.pins="0x0400"
+#hint.gpioreset.0.name="reset"
+#hint.gpioreset.0.flags="0x04a1"
+
+# 12 	BUTTON	WPS
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x1000"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x04a1"
+
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00040000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00040000
+hint.map.1.end=0x00050000
+hint.map.1.name="bootloader-env"
+hint.map.1.readonly=1
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00050000
+hint.map.2.end=0x00060000
+hint.map.2.name="art"
+hint.map.2.readonly=1
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start=0x00060000
+hint.map.3.end=0x007c0000
+hint.map.3.name="upgrade"
+
+hint.map.4.at="flash/spi0"
+hint.map.4.start=0x00060000
+hint.map.4.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.4.name="kernel"
+
+hint.map.5.at="flash/spi0"
+hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.5.end=0x007c0000
+hint.map.5.name="rootfs"
+
+hint.map.6.start=0x007c0000
+hint.map.6.end=0x007f0000
+hint.map.6.name="config"
+#hint.map.6.readonly=1

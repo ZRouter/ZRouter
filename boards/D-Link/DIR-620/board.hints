@@ -23,6 +23,10 @@ hint.rt2860.0.at="nexus0"
 hint.rt2860.0.maddr=0x10180000
 hint.rt2860.0.msize=0x40000
 hint.rt2860.0.irq=4
+hint.ral.0.at="nexus0"
+hint.ral.0.maddr=0x10180000
+hint.ral.0.msize=0x40000
+hint.ral.0.irq=4
 
 # uart0
 #hint.uart.0.at="obio0"
