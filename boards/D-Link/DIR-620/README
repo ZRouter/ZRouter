@@ -1,0 +1,8 @@
+
+
+tft 0x80800000 DIR-620/D-Link_DIR-620.zimage
+erase bf050000 bf7dffff
+cp.b 80800000 bf050000 $(filesize)
+
+setenv updatebsd 'tft 0x80800000 DIR-620/D-Link_DIR-620.zimage ; erase bf050000 bf7dffff ; cp.b 80800000 bf050000 $(filesize)'
+saveenv

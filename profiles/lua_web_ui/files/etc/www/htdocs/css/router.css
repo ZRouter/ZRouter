@@ -1,0 +1,293 @@
+/* Copyright 2004 D-Link Systems, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------- */
+
+html, div, h1, h2, h3, h4, p, ul, ol, li, dl, dt, dd, td, input, select, textarea
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+}
+
+body
+{
+	background: #CCDCE2;
+	font-size: 12px; font-family:
+	Arial; margin: 0px;
+}
+
+body.body_fw{
+	background: #ffffff;
+}
+
+input, select, textarea
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 11px;
+}
+
+input.text
+{
+	text-align: left;
+	border: solid;
+	border-width: 1px;
+	border-color: steelblue;
+}
+
+.style6
+{
+	font-size: 14px;
+	font-weight: bold;
+}
+.r_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:right;
+}
+.c_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:center;
+}
+.l_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:left;
+}
+.br_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:right;
+	font-weight: bold;
+}
+.bc_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:center;
+	font-weight: bold;
+}
+.bl_tb
+{
+	font-family: Tahoma, Helvetica, Geneva, Arial, sans-serif;
+	font-size: 12px;
+	text-align:left;
+	font-weight: bold;
+}
+
+h1
+{
+	color: #000000;
+	font-size: 12px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	margin: 0 -10px 5px -10px;
+	padding: 5px 5px 5px 10px;
+	background: url(img/light_blue1.jpg);
+}
+
+#table_tree{
+    font-family: Arial;
+    font-size: 22px;
+    height: 514px;
+    width: 200px;
+    margin: 5px 4px 3px 1px;
+    border-top-color:#808080;
+    border-left-color:#808080;
+    background:#FFFFFF;
+}
+
+#table_page{
+    width:555px;
+    height: 514px;
+    margin: 5px 5px 5px 3px;
+    border-width: 2px;
+    border-top:solid 2 #ffffff;
+    border-bottom:solid 2 #808080;
+    border-left:solid 2 #ffffff;
+    border-right:solid 2 #808080;
+    background:#CCDCE2;
+}
+
+#table_frame{
+    width:547px;
+    height: 504px;
+    margin: 2px 2px 2px 3px;
+    border: 1px solid #136393;
+    background:#E4EAEB;
+}
+
+#alink_tree a:link, #alink_tree a:visited, #alink_tree a:active{
+text-decoration: none;
+font-size: 11px;
+color: #000000;
+}
+
+#td_header
+{
+font-family: Arial;
+height: 30px;
+color: #000000;
+font-size: 18px;
+background: url(img/light_blue1.jpg);
+padding-left: 15px;
+}
+
+#table_header{
+height: 30px;
+width: 100%;
+background:#CCDCE2;
+}
+
+#table_set_main{
+width: 100%;
+margin-top: 1px;
+border-top: solid 1px  #136393;
+background: #E4EAEB;
+padding-left: 5px;
+padding-top: 5px;
+}
+
+#td_left{
+font-family: Arial;
+text-align:left;
+margin: 2px;
+height:25px;
+}
+
+#td_right{
+font-family: Arial;
+text-align:left;
+}
+
+span.word{
+	vertical-align: 3px;
+	padding: 0px 3px 0px 3px;
+}
+
+span.img{
+	vertical-align: 5px;
+}
+
+a.logout{
+	font-family: Arial;
+	font-size: 11px;
+	margin: 0px 0px 0px 0px;
+	padding: 6px 8px 6px 8px;
+	width:200px;
+}
+
+a.logout:link, a.logout:visited, a.logout:active{
+	color: #000000;
+	background: #FFFFCC;
+}
+
+a.logout:hover {
+	color: #0000FF;
+	background: #FFFFCC;
+	text-decoration: underline;
+}
+
+.list_head{
+	background: #4D4D4D;
+	color: #FFFFFF;
+}
+
+.div_tab {
+	background: #ffffff;
+	border-color: #c0c0c0 #ffffff #ffffff #c0c0c0;
+	border-style: inset;
+	border-width: 2px;
+	overflow: auto;
+	height: 125px;
+}
+
+.div_tab td{
+	height: 20px;
+}
+
+.div_tab tr{
+	height: auto;
+}
+
+.div_client_tab{
+	background: #E4EAEB;
+	border-color: #c0c0c0 #ffffff #ffffff #c0c0c0;
+	border-style: inset;
+	border-width: 1px;
+	overflow: auto;
+}
+
+.div_client_tab td{
+	height: 20px;
+}
+
+.div_client_tab tr{
+	height: auto;
+}
+
+.table_tool{
+	width: 99%;
+	background: #E4EAEB;
+	border: 1px solid #136393;
+
+}
+
+.table_tool_td{
+	font-family: Arial;
+	height: 25px;
+	color: #ffffff;
+	font-size: 15px;
+	background: #6595b9;
+	padding-left: 5px;
+}
+
+.table_tool td{
+	padding: 3px;
+}
+
+.sec_n {
+  	background-color: #EEEEEE;
+  	color: #000000;
+  	border-left: 1px solid #FFFFFF;
+  	border-top: 1px solid #FFFFFF;
+  	border-right: 1px solid gray;
+  	border-bottom: 1px solid #FFFFFF
+}
+
+.sec_s {
+  	background-color: #D4D0C8;
+  	color: #000000;
+  	border-left: 1px solid #FFFFFF;
+  	border-top: 1px solid #FFFFFF;
+ 	 border-right: 1px solid gray;
+ 	font-weight: bold;
+}
+
+.TabPane_body {
+  	background-color: #D4D0C8;
+  	color: #000000;
+  	border-left:1px solid #FFFFFF;
+  	border-right: 1px solid gray;
+  	border-bottom: 1px solid gray;
+  	width:99%;
+  	height:350px;
+}
+
+.edit_vlan_table{
+
+	background-color: #E4EAEB;
+	margin:20px 10px 0px 10px;
+	border: 1px solid #136393;
+}
+
+.help_title_td
+{
+	font-size: 14px;
+	text-decoration: underline;
+	font-weight:bold;
+
+}

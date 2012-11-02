@@ -1,0 +1,418 @@
+<!-- $Id: links.sgml,v 1.31 2010/02/01 16:43:26 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Link layer<label id="links"></heading>
+
+  <p>
+  This chapter describes commands that configure the link layer.
+  All of these commands apply to the currently active link, i.e.,
+  the link shown at the command line prompt.
+
+<descrip>
+
+<tag><tt>set link action (bundle|forward) <em>name</em> [ <em>regexp</em> ]</tt></tag><p>
+<tag><tt>set link action drop [ <em>regexp</em> ]</tt></tag><p>
+
+List of such command describes how incoming calls should be processed.
+"bundle" means that connection should be processed locally with
+specified bundle. "forward" means that connection should be forwarded
+using repeater to the specified link. "drop" means that connection
+should be dropped. Optional "regexp" parameneter defines regular
+expression which will be checked against peer auth name.
+
+Actions from list are checked in order of definition until regexp
+match will be found. Actions processed at three points. First time
+they are checked just after connection acception, second time just 
+after receiving peer's auth during LCP negotiation and third time
+when link is authenticated. As during first check there is no peer
+auth name known yet, check will be skipped if there are more then 
+one action specified for link or if action has regexp specified.
+
+<tag><tt>set link action clear</tt></tag><p>
+
+Clears link actions list.
+
+<tag><tt>set link latency <em>microseconds</em></tt></tag><p>
+<tag><tt>set link bandwidth <em>bits-per-second</em></tt></tag><p>
+
+These commands are relevant when multi-link PPP is active.  They
+affect the way in which packets are chopped up into fragments
+before being sent over the various links that make up the bundle.
+
+To motivate the idea, imagine a bundle that had a modem link and
+a 1.5Mbps T1 link. If mpd sent each packet in two equal sized
+fragments over these links, then by the time the modem got around
+to transmitting the first byte of its fragment, the T1 link would
+have probably already sent the whole other fragment. Clearly this
+is not very good. By factoring in the latency and bandwidth parameters
+for each link, mpd can distribute the fragments in a more intelligent
+way.
+
+Mpd attempts to distribute bytes over the links so that (if the
+configured parameters are accurate) the last byte of each fragment
+arrives at the peer at the same time on each link. This minimizes
+latency. However, if you only care about maximizing throughput,
+simply set all of the latency values to zero.
+
+If all of your links are of the same type and speed (which is often
+the case), then they should be configured with the same values (or
+just not configured at all, since all links default to the same
+values anyway). Then mpd will distribute packets in equal sized
+fragments over the links.
+
+<tag><tt>set link mtu <em>numbytes</em></tt></tag><p>
+<tag><tt>set link mru <em>numbytes</em></tt></tag><p>
+<tag><tt>set link mrru <em>numbytes</em></tt></tag><p>
+
+The <tt>set link mtu</tt> command sets the maximum transmit unit
+(MTU) value for the link.  This is the size of the largest single
+PPP frame (minus PPP header) that this link will transmit, unless
+the peer requests an even lower value. The default value is 1500 bytes.
+
+The <tt>set link mru</tt> command sets maximum receive unit (MRU)
+value for the link, which is the size of the largest single PPP frame
+(minus PPP header) that this link is capable of receiving. The default
+value is 1500 bytes.
+
+If PPP multilink is negotiated on a link, then these values are
+less important, because multilink allows PPP frames themselves to
+be fragmented, so a PPP frame up to MRRU bytes can always pass
+through no matter how small the MTU is in a particular direction.
+
+Otherwise, mpd is responsible for making sure that the MTU configured
+on the system networking interface is low enough so that the largest
+transmitted IP packet does not exceed the peer's negotiated MRU after
+it becomes a PPP frame. This includes e.g. PPP encryption and/or
+compression overhead.
+
+However, mpd does not account for overhead that occurs ``outside''
+of the PPP frame. For example, when using link types such as PPTP
+that encapsulate PPP frames within IP packets, a large outgoing
+``inner'' IP packet can result in a fragmented ``outer'' IP packet,
+resulting in suboptimal performance. In this situation it may be
+useful to set the link MTU to a lower value to avoid fragmentation.
+
+<tag><tt>
+set link accmap <em>value</em>
+</tt></tag>
+
+This sets the desired asynchronous control-character map for the
+link at the local end.  This option is only relevant for the
+asynchronous link types (i.e., <bf>modem</bf> and <bf>tcp</bf>).
+It determines which control characters need to be escaped.
+
+The <tt><em>value</em></tt> is expressed as a 32-bit hex
+value; the default is <tt>0x000a0000</tt>, which escapes the
+Control-S and Control-Q characters.
+
+<tag><tt>
+set link ident <em>string</em>
+</tt></tag>
+
+This enables the sending of an identification string to the peer
+via the LCP Ident code. The Ident string is sent when the link is
+brought up. This is useful for debugging, etc. and is meant to be
+human-readable. However, it confuses some broken PPP implementations.
+
+Setting an empty string disables this feature; this is the default.
+
+<tag><tt>
+set link fsm-timeout <em>seconds</em>
+</tt></tag>
+
+This command is analogous to the same command at the bundle layer,
+but it applies to link-layer FSM's such as Link Control Protocol (LCP).
+The default is two seconds; normally this value shouldn't be changed.
+
+<tag><tt>
+set link keep-alive <em>seconds</em> <em>max</em>
+</tt></tag>
+
+This command enables the sending of LCP echo packets on the link.
+The first echo packet is sent after <tt><em>seconds</em></tt>
+seconds of quiet time (i.e., no frames received from the peer on
+that link).  After <tt><em>seconds</em></tt> more seconds, another
+echo request is sent.  If after <tt><em>max</em></tt> seconds of
+doing this no echo reply has been received yet, the link is brought
+down.
+
+If <tt><em>seconds</em></tt> is zero, echo packets are disabled.
+The default values are five second intervals with a maximum no-reply
+time of forty.
+
+This feature is especially useful with modems when the carrier
+detect signal is unreliable. However, in situations where lines are
+noisy and modems spend a lot of time retraining, the <tt><em>max</em></tt>
+value may need to be bumped up to a more generous value.
+
+<tag><tt>
+set link max-redial <em>num</em>
+</tt></tag>
+
+When a link fails to connect, mpd automatically retries the connection.
+This command limits the number of consecutive retries.
+After <tt><em>num</em></tt> attempts, mpd will give up.
+
+When there is another open event, new dial-on-demand traffic, etc.
+mpd will try again, starting over at zero.
+
+If <tt>max-redial</tt> is set to -1, then mpd will never redial.
+This setting should be used with links that are dedicated for dial-in.
+
+If <tt>max-redial</tt> is set to 0, then mpd will redial infinitely.
+
+The default value is -1.
+
+<tag><tt>
+set link redial-delay <em>seconds</em>
+</tt></tag>
+
+This command defines time between connection retries.
+
+The default value is 1.
+
+<tag><tt>
+set link max-children <em>num</em>
+</tt></tag>
+
+This template option specifies maximum number of links, created using
+this template, that could exist at the same time. Value 0 disables template.
+
+The default value is 10000.
+
+<tag><tt>set link accept <em>option ...</em> </tt></tag><p>
+<tag><tt>set link deny <em>option ...</em> </tt></tag><p>
+<tag><tt>set link enable <em>option ...</em> </tt></tag><p>
+<tag><tt>set link disable <em>option ...</em> </tt></tag><p>
+<tag><tt>set link yes <em>option ...</em> </tt></tag><p>
+<tag><tt>set link no <em>option ...</em> </tt></tag><p>
+
+These commands configure various link options. Most options 
+are <em>bi-directional</em> in that they can be independently
+enabled and disabled in each direction.
+
+The <tt><bf>enable</bf></tt> and <tt><bf>disable</bf></tt> commands determine
+whether we want the corresponding option.
+The <tt><bf>accept</bf></tt> and <tt><bf>deny</bf></tt> commands determine
+whether we will allow the peer to request the corresponding option.
+
+Note that when talking about the authentication options PAP and CHAP,
+when you <tt><bf>enable</bf></tt> an option you're saying you are going
+to require a login and password from the peer.
+When you <tt><bf>accept</bf></tt> an option you're saying you will
+allow the peer to require a login and password from us.
+
+<p>
+The <bf><tt>yes</tt></bf> command is the same as
+<tt><bf>enable</bf></tt> and <tt><bf>accept</bf></tt>.
+The <bf><tt>no</tt></bf> command is the same as
+<tt><bf>disable</bf></tt> and <tt><bf>deny</bf></tt>.
+
+</descrip>
+
+<p>
+The options available at the link layer are:
+
+<descrip>
+
+<tag><tt>pap</tt></tag>
+
+PAP style authentication. Note that this style of authentication
+is insecure, since the password crosses the link in plaintext.
+
+Default <tt><bf>disable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>chap</tt></tag>
+
+CHAP style authentication. This style of authentication is safer
+than PAP, because only a hash of the password is passed over the
+link.  Mpd supports MD5 style CHAP and Microsoft style CHAP versions
+1 and 2.  Mpd will prefer Microsoft CHAP over MD5 CHAP to get
+encryption keys.
+
+This option is an alias for <tt>chap-md5</tt> <tt>chap-msv1</tt> <tt>chap-msv2</tt>
+
+<tag><tt>chap-md5</tt></tag>
+
+Traditional CHAP MD5 style authentication.
+
+Default <tt><bf>disable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>chap-msv1</tt></tag>
+
+Microsoft CHAP style authentication.
+
+Default <tt><bf>disable</bf></tt> and <tt><bf>deny</bf></tt>.
+
+<tag><tt>chap-msv2</tt></tag>
+
+Microsoft CHAP style authentication Version 2.
+
+Default <tt><bf>disable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>eap</tt></tag>
+
+Extensible Authentication Protocol. For details see
+<ref id="eap" name="the EAP chapter">.
+
+Default <tt><bf>disable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>incoming</tt></tag>
+
+This option enables the acceptance of incoming connections.
+If this option is disabled, mpd will not accept incoming connections
+using this link. To avoid races it is advised to enable it after
+all other link options are configured.
+
+The default is <tt><bf>disable</bf></tt>.
+
+<tag><tt>multilink</tt></tag>
+
+This command enables multi-link PPP on the link. This option is required
+in both directions if there is more than one link in the bundle. However,
+multi-link PPP is sometimes useful on single links when the link MTU is
+low; multi-link PPP allows arbitrarily long packets to go over a link
+in fragments.
+
+The default is <tt><bf>disable</bf></tt> (i.e., normal non-multilink PPP).
+
+<tag><tt>shortseq</tt></tag>
+
+This option is only meaningful if multi-link PPP is negotiated.
+It proscribes shorter multi-link fragment headers,
+saving two bytes on every frame.
+
+The default is <tt><bf>enable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>acfcomp</tt></tag>
+
+Address and control field compression. This option only applies
+to asynchronous link types. It saves two bytes per frame.
+
+The default is <tt><bf>enable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>protocomp</tt></tag>
+
+Protocol field compression. This option saves one byte per frame
+for most frames.
+
+The default is <tt><bf>enable</bf></tt> and <tt><bf>accept</bf></tt>.
+
+<tag><tt>magicnum</tt></tag><p>
+<tag><tt>check-magic</tt></tag>
+
+The <tt>magicnum</tt> option enables using a magic number for the
+local end of the PPP link.  This causes a unique number to be
+included in each LCP packet we send, which helps detect loopback
+conditions.
+
+The <tt>check-magic</tt> option causes mpd to verify that the peer's
+magic number is correct in all received LCP frames.
+
+Some old broken PPP implementations don't handle magic numbers correctly,
+so these options need to be disabled in these cases.
+
+Default for both options is <tt><bf>enable</bf></tt>.
+
+Note that the two most common reasons for seeing ``loopback condition
+detected'' on a modem link are:
+<itemize>
+<item> The modem is in command mode and is echoing back all of our frames.
+<item> The PPP server is not in PPP mode, but is giving a shell prompt
+	or somesuch and echoing back all of our frames.
+</itemize>
+
+<tag><tt>passive</tt></tag>
+
+Enables passive mode for this link. This is useful on some full time
+connections. See RFC 1661 for more information about this option.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>callback</tt></tag>
+
+Enables PPP callback request. If the remote peer can/wants to, it will 
+hangup immediately after connecting and call us back.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>no-orig-auth</tt></tag>
+
+Normally, if PAP or CHAP is enabled, we require the peer to
+authenticate to us at the beginning of each connection. This option
+temporarily disables this requirement if we are the one who originated
+the connection and the peer rejects our request for a login.
+
+This is useful when the same link is used for both dial-in and dial-out.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>keep-ms-domain</tt></tag>
+
+Normally, if using MS-CHAP, the MS-Domain is stripped and only the plain
+username is used. Under certain circumstances the MS-Domain should be kept,
+for instance if IAS is used as RADIUS server.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>time-remain</tt></tag>
+
+Send Time-Remaining LCP packet to the peer if AAA returned session timeout.
+
+Default <tt><bf>disable</bf></tt>.
+
+<tag><tt>peer-as-calling</tt></tag>
+
+Forces mpd to send remote tunnel address in Calling-Station-Id 
+instead of addres supplied by remote peer via tunnel (for PPTP and L2TP).
+Can be enabled for untrusted peers.
+
+Default is <tt><bf>disable</bf></tt>.
+
+<tag><tt>report-mac</tt></tag>
+
+Forces mpd to send peer MAC address and interface in Calling-Station-Id.
+
+Default <tt><bf>disable</bf></tt>.
+
+</descrip>
+
+</p>
+
+  <sect1><heading>EAP<label id="eap"></heading>
+
+<p>
+
+  This chapter describes commands that configure the EAP (Extensible Authentication 
+  Protocol). Mpd supports natively only the EAP-Type MD5; other EAP-Types may be used 
+  in conjunction with a RADIUS server. All of these commands apply to the currently
+  active link.
+
+<descrip>
+
+<tag><tt>set eap accept <em>option ...</em> </tt></tag><p>
+<tag><tt>set eap deny <em>option ...</em> </tt></tag><p>
+<tag><tt>set eap enable <em>option ...</em> </tt></tag><p>
+<tag><tt>set eap disable <em>option ...</em> </tt></tag><p>
+<tag><tt>set eap yes <em>option ...</em> </tt></tag><p>
+<tag><tt>set eap no <em>option ...</em> </tt></tag><p>
+
+These commands configure various EAP options. Most options 
+are <em>bi-directional</em> in that they can be independently
+enabled and disabled in each direction. 
+
+<tag><tt>md5</tt></tag>
+
+EAP-Type MD5. It's the same as CHAP-MD5, except that is framed inside EAP packets.
+
+The default is disable and accept.
+
+<tag><tt>radius-proxy</tt></tag>
+
+Causes Mpd to proxy all EAP requests to the RADIUS server.
+
+The default is disable.
+
+</descrip>

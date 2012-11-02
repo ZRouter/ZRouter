@@ -1,0 +1,45 @@
+# arge0
+# PHY20 = 1 << 20
+hint.arge.0.phymask=0xffffffff
+
+# arge1
+# PHY1, PHY2, PHY3 
+hint.arge.1.phymask=0xffffffff
+hint.arge.1.media=100
+hint.arge.1.fduplex=1
+
+# No probe at all
+hint.miibus.0.phymask="0x00000000"
+hint.miibus.1.phymask="0x00000000"
+
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.master="switch"
+hint.floatphy.0.master_unit=0
+hint.floatphy.0.master_phys=0x00000010 # Sense PHY4
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=100
+
+# Switch attached to MDIO bus on arge0
+hint.switch.0.at="miibus0"
+hint.switch.0.phyno=1
+hint.ar8x16_switch.0.mii_mode=0x012603e2
+
+hint.floatphy.1.at="miibus1"
+hint.floatphy.1.phyno=0
+hint.floatphy.1.master="switch"
+hint.floatphy.1.master_unit=0
+hint.floatphy.1.master_phys=0x0000000f # Link Sensing PHY0-PHY3
+hint.floatphy.1.flags=0x00000004 # "Link on any PHYs" | "Static link speed"
+hint.floatphy.1.speed=1000
+
+# RTC shares the same bus with mx25l. 
+# CE low for flash, CE high for RTC
+#hint.rtc.0.at="spibus0"
+#hint.rtc.0.cs=0
+
+# RF led - pin 2
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="rfled"
+hint.gpioled.0.pins=0x0004
+

@@ -1,0 +1,14 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>IPTV configuration (Multicast forwarding)</h1>
+
+$$$code:conf_table("IPTV", "IPTV", "igmp.instance[1]",
+{
+    { label = "Enabled", 			type = "attr", htmltype = "checkbox", 	node = ":enable" 	},
+    { label = "Upstream (wan0)", 		type = "node", htmltype = "text", 	node = "up" 		},
+    { label = "Downstream (lan0 or wlan0)", 	type = "node", htmltype = "text", 	node = "down" 		},
+})$$$
+
+$$$code:inc("htdocs/footer.html")$$$
+
+
+

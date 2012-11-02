@@ -1,0 +1,8 @@
+
+CFI
+
+Flashing using console cable and TFTP
+ifconfig eth0 -addr=192.168.0.89 -mask=255.255.255.0
+flash -noheader 192.168.0.90:/NQ-900/NorthQ_NQ-900.trx flash1.trx
+
+

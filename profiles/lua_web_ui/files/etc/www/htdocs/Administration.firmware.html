@@ -1,0 +1,20 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>Device Firmware</h1>
+Current Version: <strong>$$$info.firmware.version$$$</strong><br/>
+Build Date:<strong>$$$info.firmware.date$$$</strong><br/>
+
+$$$code:conf_table("Firmware", "Firmware", "info.firmware",
+{
+    { label = "Update URL", 		type = "node", htmltype = "text", 	node = "update_url" 	},
+})$$$
+
+    <h4>Upgrade Firmware</h4>
+    <form method="post" action="/cmd.xml" enctype="application/x-www-form-urlencoded">
+	<input type="hidden" name="cmd" value="upgrade">
+	<input type="submit" name="Start Upgrade" value="Start Upgrade">
+    </form>
+
+
+$$$code:inc("htdocs/footer.html")$$$
+
+

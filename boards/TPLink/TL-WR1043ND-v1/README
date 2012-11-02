@@ -1,0 +1,50 @@
+Further work is in progress, for now the kernel boots and the rootfs
+mounts.
+
+This was tested with TL-WR1043ND versions 1.1 and 1.8, but I expect all 1.x
+should work.
+
+Many thanks to Adrian Chadd and Alexandr Rybalko for the kind help with
+this board definition, which is mostly based on Adrian's work on: 
+
+http://code.google.com/p/freebsd-wifi-build/wiki/TpLinkTLWR1043ND
+
+
+How to build
+--------------------------------------------------------------------------
+
+as root:
+
+env \
+	__MAKE_CONF=/dev/null \
+	SRCCONF=/dev/null  \
+	make \
+		FREEBSD_SRC_TREE=/path/to/ZRouter's/FreeBSD/head \
+		TARGET_PAIR=TPLink/TL-WR1043ND-v1
+
+Find the TPLink_TL-WR1043ND-v1.bin in /usr/obj/... and copy it to
+your TFTP server.
+
+How to flash
+--------------------------------------------------------------------------
+
+erase 0xbf020000 +7c0000
+tftpboot 0x81000000 TPLink_TL-WR1043ND-v1.bin
+cp.b 0x81000000 0xbf020000 0x7c0000
+bootm 0xbf020000
+
+(hint: you can concatenate the commands by ";")
+
+
+How to boot kernel without flashing it
+--------------------------------------------------------------------------
+
+tftpboot 0x80040000 TPLink_TL-WR1043ND-v1_kernel; go 0x80050000
+
+
+TODO
+--------------------------------------------------------------------------
+
+* invert LEDs, now `echo 1 > /dev/led/status` switches off
+
+Eric Kraußer

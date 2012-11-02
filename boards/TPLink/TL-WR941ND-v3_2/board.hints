@@ -1,0 +1,47 @@
+
+
+# arge0
+hint.arge.0.at="nexus0"
+hint.arge.0.maddr=0x19000000
+hint.arge.0.msize=0x1000
+hint.arge.0.irq=2
+# PHY4, PHY3, PHY2, PHY1, PHY0
+hint.arge.0.phymask=0x001f
+hint.arge.0.media=100
+hint.arge.0.fduplex=1
+# Where is the MAC address stored in flash ?
+hint.arge.0.eeprommac=0x1f01fc00
+
+# ath0
+hint.ath.0.at="nexus0"
+hint.ath.0.maddr=0x180c0000
+hint.ath.0.msize=0x30000
+hint.ath.0.irq=0
+hint.ath.0.eepromaddr=0x1fff1000
+
+# ar71xx_spi
+hint.spi.0.at="nexus0"
+hint.spi.0.maddr=0x1f000000
+hint.spi.0.msize=0x01000000
+
+# SYS led
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="sys"
+# pin 2
+hint.gpioled.0.pins=0x0004
+
+# QSS led
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.name="qss-red"
+# pin 4
+hint.gpioled.1.pins=0x0010
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.name="qss-green"
+# pin 5
+hint.gpioled.2.pins=0x0020
+
+# WLAN led
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.name="wlan"
+# pin 9
+hint.gpioled.3.pins=0x0200

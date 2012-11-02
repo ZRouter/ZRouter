@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+
+# PROVIDE: cleanvar
+# REQUIRE: root
+
+#	This is a dummy dependency, for capability only
+

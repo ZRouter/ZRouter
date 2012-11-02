@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# PROVIDE: UPGRADE_MODE
+# BEFORE: MAIN
+# REQUIRE: ADAPTATION FILESYSTEMS
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="UPGRADE_MODE"
+start_cmd="upgrade_mode_start"
+
+upgrade_mode_start()
+{
+	WPS_PIN=$(kenv WPS_PIN)
+	WPS_PIN_INVERT=$(kenv WPS_PIN_INVERT)
+	if [ ! -z "${WPS_PIN}" ] ; then
+		WPS_PIN_VAL=$(gpioctl -f /dev/gpioc0 -q -g ${WPS_PIN});
+		if [ -z "${WPS_PIN_INVERT}" -o "${WPS_PIN_INVERT}" != "1" ] ; then
+			WPS_PIN_INVERT=0;
+		fi
+		WPS_PIN_VAL=$(( ${WPS_PIN_VAL} ^ ${WPS_PIN_INVERT} ));
+		echo "UPGRADE_MODE: WPS pin[${WPS_PIN}]^${WPS_PIN_INVERT} value = \"${WPS_PIN_VAL}\"";
+		if [ "${WPS_PIN_VAL}" = "1" ] ; then
+			if [ -c /dev/led/wps  ]; then
+				echo m---... > /dev/led/wps
+			fi
+			/etc/rc.d/switchctl enablelan;
+			sleep 5; # Wait for linkup event # XXX better to read devctl
+			echo "RUN UPGRADE MODE";
+			# XXX: Run shell for now
+			ifconfig lan0 192.168.0.1/24
+			ifconfig lan0 down
+			ifconfig lan0 up
+			MD_DEV=$(mdconfig -a -t malloc -o reserve -s8M)
+			printf "http\tstream\ttcp\tnowait\troot\t\
+/sbin/upgrade\t\
+upgrade -l /dev/console -h \
+-H YWRtaW46YWRtaW4= -M \"Secure Area\" \
+-f /dev/%s -d /dev/map/upgrade\n" ${MD_DEV} >> /etc/inetd.conf
+			inetd -wW;
+			/usr/libexec/telnetd -4 -debug 23 &
+			sh
+		fi
+	fi
+
+}
+
+load_rc_config $name
+
+run_rc_command $*

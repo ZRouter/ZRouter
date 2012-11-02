@@ -1,0 +1,49 @@
+#!/bin/sh
+stty status '^T'
+trap : 2
+trap : 3
+HOME=/
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
+export HOME PATH
+. /etc/rc.subr
+load_rc_config 'XXX'
+reverse_list()
+{
+	_revlist=
+	for _revfile in $*; do
+		_revlist="$_revfile${script_name_sep}$_revlist"
+	done
+	echo $_revlist
+}
+_rcshutdown_watchdog=
+if [ -n "$rcshutdown_timeout" ]; then
+	debug "Initiating watchdog timer."
+	sleep $rcshutdown_timeout && (
+		_msg="$rcshutdown_timeout second watchdog"
+		_msg="$_msg timeout expired. Shutdown terminated."
+		logger -t rc.shutdown "$_msg"
+		echo "$_msg"
+		date
+		kill -KILL $$ >/dev/null 2>&1
+	) &
+	_rcshutdown_watchdog=$!
+fi
+rcorder_opts="-k shutdown"
+[ `/sbin/sysctl -n security.jail.jailed` -eq 1 ] && rcorder_opts="$rcorder_opts -s nojail"
+case ${local_startup} in
+[Nn][Oo] | '') ;;
+*)     find_local_scripts_new ;;
+esac
+files=`rcorder ${rcorder_opts} /etc/rc.d/* ${local_rc} 2>/dev/null`
+for _rc_elem in `reverse_list $files`; do
+	debug "run_rc_script $_rc_elem faststop"
+	run_rc_script $_rc_elem faststop
+done
+if [ -n "$_rcshutdown_watchdog" ]; then
+	pkill -TERM -P $_rcshutdown_watchdog >/dev/null 2>&1
+fi
+
+echo '.'
+# Kill unbreakable oinit
+kill -INT 1
+exit 0

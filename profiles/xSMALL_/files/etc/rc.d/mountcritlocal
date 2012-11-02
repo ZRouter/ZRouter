@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# PROVIDE: mountcritlocal
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="MAIN"
+start_cmd="mountcritlocal_start"
+
+mountcritlocal_start()
+{
+	# XXX: check TMPFS again
+	# XXX: get useful size: small for /etc or big for upgrade
+	md=`/sbin/mdconfig -a -t malloc -s 10m`
+	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
+	mount /dev/${md} /tmp
+
+	mkdir -p /tmp/etc
+	mkdir -p /tmp/var/empty
+	mkdir -p /tmp/var/log
+	mkdir -p /tmp/var/run
+	mkdir -p /tmp/var/spool/lock
+	mkdir -p /tmp/var/tmp
+	touch /tmp/var/log/all.log
+
+	mount_unionfs /tmp/etc /etc
+
+	/etc/rc.restore_config
+}
+
+load_rc_config $name
+
+run_rc_command $*

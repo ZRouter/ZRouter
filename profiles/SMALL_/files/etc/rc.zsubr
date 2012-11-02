@@ -1,0 +1,17 @@
+
+if [ -z "${_rc_zsubr_loaded}" ]; then
+
+_rc_zsubr_loaded="YES"
+
+get_config_part()
+{
+	for p in ${zconfig_partitions}; do
+		if [ -c ${p} ]; then
+			echo ${p}
+			break
+		fi
+	done
+}
+
+fi
+

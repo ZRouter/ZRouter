@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Use /etc/rc.save_config instead"
+

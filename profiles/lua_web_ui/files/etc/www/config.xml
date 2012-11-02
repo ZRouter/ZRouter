@@ -1,0 +1,274 @@
+<interfaces>
+    <wan0>
+        <PPPoE enable="false" type="pppoe" onchange="iface_changed('interfaces.wan0.PPPoE')">
+            <action>
+                <create target="socket:127.0.0.1:5005" type="socket">
+                    <message></message>
+                </create>
+            </action>
+            <nat enable="true"></nat>
+            <name>PPPoE</name>
+            <username>pppoe1</username>
+            <password>test</password>
+            <service_name></service_name>
+            <device>wan0</device>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <gateway flags="DEFAULT">10.0.0.2</gateway>
+            <!-- <ip6addr></ip6addr> -->
+            <!-- Values holders -->
+            <dns1></dns1>
+            <dns2></dns2>
+            <name>wan0pppoe</name>
+            <group>WAN</group>
+            <cost>10</cost>
+        </PPPoE>
+        <PPP enable="false" type="modem" onchange="iface_changed('interfaces.wan0.PPP')">
+            <action>
+                <up target="socket:127.0.0.1:5005" type="socket"></up>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
+                <down target="socket:127.0.0.1:5005" type="socket"></down>
+                <create target="socket:127.0.0.1:5005" type="socket"></create>
+                <destroy target="socket:127.0.0.1:5005" type="socket"></destroy>
+            </action>
+            <name>3G</name>
+            <nat enable="true"></nat>
+            <username>IT</username>
+            <password>IT</password>
+            <phone>#777</phone>
+            <init_string></init_string>
+            <device>/dev/cuaU0.0</device>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.1/32</ipaddr>
+            <gateway flags="DEFAULT">10.0.0.2</gateway>
+            <!-- <ip6addr></ip6addr> -->
+            <!-- Values holders -->
+            <dns1></dns1>
+            <dns2></dns2>
+            <name>PPP</name>
+            <group>WAN</group>
+            <cost>1000</cost>
+        </PPP>
+        <Static enable="true" type="hw">
+            <nat enable="true"></nat>
+            <dhcp enable="true"></dhcp>
+            <device>wan0</device>
+            <default_route>true</default_route>
+            <!-- flags -> FORCE='overwrite received', DEFAULT='used if no received' -->
+            <ipaddr flags="DEFAULT,FORCE">10.0.0.10/24</ipaddr>
+            <!-- Values holders -->
+            <gateway>10.0.0.1</gateway>
+            <dns1>10.0.0.1</dns1>
+            <dns2>10.0.0.2</dns2>
+            <name>wan0</name>
+            <group>WAN</group>
+            <cost>100</cost>
+        </Static>
+    </wan0>
+    <wlan0 enable="true" type="wlan">
+        <create>
+            <exec>ifconfig wlan0 create wlandev wifi0 wlanmode hostap</exec>
+        </create>
+        <init>
+            <exec>ifconfig wlan0</exec>
+        </init>
+        <wlan_interface>wifi0</wlan_interface>
+        <channel>6</channel>
+        <mode>11ng</mode>
+        <ht40>true</ht40>
+    </wlan0>
+    <wifi0>
+        <init>
+            <exec>ifconfig wifi0 up</exec>
+        </init>
+    </wifi0>
+    <lan0>
+        <init>
+            <!-- exec>ifconfig lan0 up</exec -->
+        </init>
+    </lan0>
+    <bridge0 type="bridge">
+        <create>
+            <exec>ifconfig wlan0 down</exec>
+            <exec>ifconfig lan0 down</exec>
+            <exec>ifconfig bridge0 create addm lan0 addm wlan0 up</exec>
+            <exec>ifconfig bridge0 down</exec>
+            <exec>ifconfig bridge0 ether `kenv LAN_MAC_ADDR`</exec>
+            <exec>ifconfig lan0 up</exec>
+            <exec>ifconfig wlan0 up</exec>
+            <exec>ifconfig bridge0 up</exec>
+        </create>
+        <init>
+        </init>
+        <ipaddr>192.168.0.1/24</ipaddr>
+        <lagg_interfaces>lan0,wlan0</lagg_interfaces>
+    </bridge0>
+</interfaces>
+<switch>
+    <ports>
+        <port id="0" pvid="1" tagged="false"></port>
+        <port id="1" pvid="1" tagged="false"></port>
+        <port id="2" pvid="1" tagged="false"></port>
+        <port id="3" pvid="1" tagged="false"></port>
+        <port id="4" pvid="2" tagged="false"></port>
+        <port id="5" pvid="1" tagged="true"></port>
+        <port id="6" pvid="1" tagged="false"></port>
+    </ports>
+    <vlans>
+        <vlan id="0" vid="1">0,1,2,3,5</vlan>
+        <vlan id="1" vid="2">4,5</vlan>
+    </vlans>
+</switch>
+<dnsrelay enable="false"></dnsrelay>
+<dhcpd>
+    <instances>
+        <instance id="0" enable="true">
+            <interface>bridge0</interface>
+            <domain>dlink.ua</domain>
+            <!-- <domainservers>192.168.0.1</domainservers> -->
+            <default-lease-time>600</default-lease-time>
+            <max-lease-time>7200</max-lease-time>
+            <range>
+                <start>192.168.0.100</start>
+                <end>192.168.0.200</end>
+            </range>
+        </instance>
+    </instances>
+</dhcpd>
+<routes>
+    <default>
+        <source priority="10">interfaces.wan0.DHCP.gateway</source>
+        <source priority="11">interfaces.wan0.PPPoE.gateway</source>
+        <source priority="12">interfaces.wan0.PPP.gateway</source>
+        <source priority="13">interfaces.wan0.Static.gateway</source>
+        <source priority="14">interfaces.wan0.PPTP.gateway</source>
+        <source priority="15">interfaces.wan0.L2TP.gateway</source>
+    </default>
+    <route id="1" enable="false">
+        <net>172.16.0.0/12</net>
+        <gw>192.168.0.2</gw>
+    </route>
+</routes>
+<resolve>
+    <search>dlink.ua</search>
+    <domain>dlink.ua dlink.ru</domain>
+    <options>attempts:5 timeout:10</options>
+    <nameserver order="100">8.8.8.8</nameserver>
+    <nameserver order="101">8.8.4.4</nameserver>
+</resolve>
+<igmp>
+    <instance id="0" enable="false">
+	<up>wan0</up>
+	<down>wlan0</down>
+    </instance>
+    <instance id="0" enable="false">
+	<up>wan0</up>
+	<down>lan0</down>
+    </instance>
+</igmp>
+<info>
+    <hostname>zrouter</hostname>
+    <location>home</location>
+    <firmware>
+	<!-- XXX: version and build date should be here -->
+        <version>???</version>
+        <date>????</date>
+        <update_url>http://www.dlink.ua/files/products/ftp/pub/Router/DIR-620/Firmware/FreeBSD/D-Link_DIR-620-last.txt</update_url>
+    </firmware>
+</info>
+<hostapd>
+    <instance id="0" enable="true">
+        <ieee80211d>1</ieee80211d>
+        <country_code>UA</country_code>
+        <interface>wlan0</interface>
+        <macaddr_acl>0</macaddr_acl>
+        <auth_algs>1</auth_algs>
+        <debug>0</debug>
+        <hw_mode>g</hw_mode>
+        <ctrl_interface>/var/run/hostapd</ctrl_interface>
+        <ctrl_interface_group>wheel</ctrl_interface_group>
+        <ssid>zrouter</ssid>
+        <channel>6</channel>
+        <!-- Open -->
+        <wpa>3</wpa>
+        <!-- WPA -->
+        <!-- <wpa>1</wpa> -->
+        <!-- RSN/WPA2 -->
+        <!-- <wpa>2</wpa> -->
+        <wpa_passphrase>freebsdmall</wpa_passphrase>
+        <wpa_key_mgmt>WPA-PSK</wpa_key_mgmt>
+        <wpa_pairwise>CCMP TKIP</wpa_pairwise>
+    </instance>
+    <instance id="1" enable="false">
+        <ieee80211d>1</ieee80211d>
+        <country_code>UA</country_code>
+        <interface>wlan0</interface>
+        <macaddr_acl>0</macaddr_acl>
+        <auth_algs>1</auth_algs>
+        <debug>0</debug>
+        <hw_mode>g</hw_mode>
+        <ctrl_interface>/var/run/hostapd</ctrl_interface>
+        <ctrl_interface_group>wheel</ctrl_interface_group>
+        <ssid>zrouter</ssid>
+        <!-- WPA -->
+        <!-- <wpa>1</wpa> -->
+        <!-- RSN/WPA2 -->
+        <wpa>2</wpa>
+        <wpa_passphrase>freebsdmall</wpa_passphrase>
+        <wpa_key_mgmt>WPA-PSK</wpa_key_mgmt>
+        <wpa_pairwise>CCMP TKIP</wpa_pairwise>
+    </instance>
+</hostapd>
+<http>
+    <users>
+        <user username="admin" password="admin" group="admin"></user>
+        <user username="user" password="123" group="stat"></user>
+    </users>
+    <!-- host>192.168.0.1</host
+	bind to all, because we need local access also.
+	XXX: we should take care about ipfw deny for that. -->
+    <host>192.168.0.1</host>
+    <port>80</port>
+</http>
+<ipsec>
+    <remote id="0" enable="false">
+	<gateway>10.0.0.2:500</gateway>
+        <exchange_mode>main,aggressive</exchange_mode>
+        <my_identifier>address 10.0.0.1</my_identifier>
+        <peers_identifier>address 10.0.0.2</peers_identifier>
+        <lifetime>time 28800 sec</lifetime>
+	<initial_contact>on</initial_contact>
+        <passive>off</passive>
+        <proposal_check>obey</proposal_check>
+	<nat_traversal>off</nat_traversal>
+        <generate_policy>off</generate_policy>
+        <proposal>
+            <encryption_algorithm>3des</encryption_algorithm>
+            <hash_algorithm>md5</hash_algorithm>
+            <authentication_method>pre_shared_key</authentication_method>
+            <dh_group>5</dh_group>
+            <psk>pskpskpsk</psk>
+	</proposal>
+    </remote>
+    <sainfo id="0" enable="true">
+	<src>address 192.168.0.0/24 any</src>
+	<dst>address 192.168.2.0/24 any</dst>
+	<pfs_group>5</pfs_group>
+	<lifetime>time 3600 sec</lifetime>
+	<encryption_algorithm>3des</encryption_algorithm>
+	<authentication_algorithm>hmac_md5</authentication_algorithm>
+	<compression_algorithm>deflate</compression_algorithm>
+    </sainfo>
+    <setkey>
+	<line>spdadd 192.168.0.0/24 192.168.2.0/24 any -P out ipsec esp/tunnel/10.0.0.1-10.0.0.2/use</line>
+	<line>spdadd 192.168.2.0/24 192.168.0.0/24 any -P in ipsec esp/tunnel/10.0.0.2-10.0.0.1/use</line>
+	<line></line>
+	<line></line>
+    </setkey>
+</ipsec>
+<ntp enable="true">
+    <server id="1">ntp.dlink.com.tw</server>
+    <server id="2">ntp1.dlink.com</server>
+</ntp>

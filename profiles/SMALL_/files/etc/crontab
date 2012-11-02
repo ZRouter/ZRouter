@@ -1,0 +1,6 @@
+SHELL=/bin/sh
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+*/6	*	*	*	*	root	newsyslog
+#1	3	*	*	*	root	periodic daily
+#15	4	*	*	6	root	periodic weekly
+#30	5	1	*	*	root	periodic monthly

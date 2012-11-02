@@ -1,0 +1,232 @@
+<!-- $Id: interface.sgml,v 1.29 2011/08/30 11:47:02 dmitryluhtionov Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Interface layer<label id="interface"></heading>
+
+<p>
+
+  This chapter describes commands that configure the interface layer.
+  All of these commands apply to the currently active bundle.
+
+  Note that while most of the time mpd is used for transmitting
+  IP traffic, it is designed to support other (currently unimplemented)
+  protocols such as AppleTalk, IPX, etc. This is why the Interface
+  layer (which is protocol independent) is distinct from the <ref id="ipcp"
+  name="IP Control Protocol (IPCP) layer"> which is specific to IP.
+
+<descrip>
+
+<tag><tt>
+set iface name [ <em>name</em> ]
+</tt></tag>
+
+This command changes interface name from default ngX to specified one.
+If name argument is not specified, original ngX name is restored.
+Note that inside Netgraph original ngX name is always used.
+
+<tag><tt>
+set iface description [ <em>description</em> ]
+</tt></tag>
+
+This command changes interface description.
+
+<tag><tt>
+set iface group [ <em>group</em> ]
+</tt></tag>
+
+This command add interface to specific group.
+
+<tag><tt>
+set iface addrs [!]<em>local-ip</em> [!]<em>remote-ip</em>
+</tt></tag>
+
+This command is usually required when dial-on-demand is enabled.
+Normally, mpd configures the interface with the IP addresses that
+were negotiated when connecting the link.  Since dial-on-demand
+configures the interface before actually connecting, mpd has to be
+told initial local and remote IP addresses to give the interface.
+These addresses don't have to correspond to the ``real'' ones; in
+fact, both addresses can be completely fictional. If and when
+different addresses are negotiated later, mpd will automatically
+renumber the interface and adjust the routes.
+
+Also this command may be used to force specified addresses usage
+instead of negotiated ones. It may be useful in some specific cases,
+for example, to avoid routing loop with misconfigured PPTP server.
+In such case '!' mark specifies IPs to be forced.
+
+<tag><tt>
+set iface route <em>address[/width]</em>
+</tt></tag>
+
+This command associates a route with the bundle. Whenever the
+interface is configured up, all associated routes are added.
+A route of <tt><bf>default</bf></tt> indicates the default route.
+Otherwise, the route is a network address with optional netmask
+width (e.g., <tt><bf>192.168.1.0/24</bf></tt>). If the netmask
+width is omitted, a single host route is assumed (i.e., a width
+of 32).
+
+Routes are automatically removed when the interface is brought down.
+
+<tag><tt>
+set iface mtu <em>value</em>
+</tt></tag>
+
+This command sets an upper bound on the MTU that will be configured
+on the interface when the bundle comes up.
+This value is not used at all during link negotiation; there are
+separate bundle and link commands for configuring that.
+Even if a higher bundle MTU is negotiated, this limit will still apply.
+
+This command is useful when you want to manually restrict the MTU
+of the interface for other reasons, e.g., if you're also doing IPSec.
+
+The default is 1500.
+
+<tag><tt>
+set iface idle <em>seconds</em>
+</tt></tag>
+
+Sets the idle timeout value for the bundle. If no incoming or
+outgoing packets are transmitted for <tt><em>seconds</em></tt>
+seconds, the connection is brought down. An idle timeout of
+zero disables this feature.
+
+When the idle timeout occurs, if the dial-on-demand option is
+enabled, mpd goes back into dial-on-demand mode. Otherwise, the
+interface is brought down and all associated routes removed.
+
+The default is 0.
+
+<tag><tt>
+set iface session <em>seconds</em>
+</tt></tag>
+
+Sets the session timeout value for the bundle. An session timeout of
+zero disables this feature.
+
+The default is 0.
+
+<tag><tt>set iface up-script <em>script</em> </tt></tag><p>
+<tag><tt>set iface down-script <em>script</em> </tt></tag><p>
+
+Mpd can optionally run a user program every time one of network
+protocols (IPCP/IPv6CP) at the interface is brought up or down.
+The <tt><bf>up-script</bf></tt> is called like this:
+<tscreen><tt>
+<em>script</em> <em>interface</em> <em>proto</em> <em>local-ip</em> 
+<em>remote-ip</em> <em>authname</em> [ dns1 <em>server-ip</em> ] [ dns2 <em>server-ip</em> ]
+<em>peer-address</em>
+</tt></tscreen>
+
+If up-script exit status is not 0, mpd will kill respective protocol.
+
+The <tt><bf>down-script</bf></tt> is called like this:
+<tscreen><tt>
+<em>script</em> <em>interface</em> <em>proto</em> <em>local-ip</em> 
+<em>remote-ip</em> <em>authname</em> <em>peer-address</em>
+</tt></tscreen>
+
+<tag><tt>
+set iface enable <em>option ...</em>
+<newline>set iface disable <em>option ...</em>
+</tt></tag>
+
+Enable and disable the various interface layer options for the bundle.
+
+</descrip>
+
+<p>
+The options available at the interface layer are:
+
+<descrip>
+
+<tag><tt>on-demand</tt></tag>
+
+This option causes the interface to operate in dial-on-demand mode,
+allowing you to have a ``virtual full time'' connection.
+An OPEN event causes the interface to be configured, but the actual
+connection of the link is delayed until qualifying outgoing traffic
+is detected. Moreover, after an idle timeout, the interface is not
+brought down; further traffic will bring the link back up again.
+
+The default is disable.
+
+<tag><tt>proxy-arp</tt></tag>
+
+When this option is enabled, if after link negotiation the peer's
+IP address is determined to lie on a local subnet, then mpd will
+arrange for the local machine to install a proxy ARP entry for
+the remote machine's IP address.
+
+For example, suppose the local machine lies on a LAN with address
+192.168.1.10, and another machine will be connecting via mpd
+and using the LAN address 192.168.1.20. Then these commands would
+set up proxy ARP for the remote machine:
+<tscreen><tt>
+set iface enable proxy-arp
+<newline>set ipcp ranges 192.168.1.10/32 192.168.1.20/32
+</tt></tscreen>
+
+The default is disable.
+
+<tag><tt>tcpmssfix</tt></tag>
+This option causes mpd to adjust incoming and outgoing TCP SYN
+segments so that the requested maximum segment size is not greater
+than the amount allowed by the interface MTU.
+
+This is necessary in many setups to avoid problems caused by routers
+that drop ICMP Datagram Too Big messages.  Without these messages,
+the originating machine sends data, it passes the rogue router then
+hits a machine that has an MTU that is not big enough for the data.
+Because the IP Don't Fragment option is set, this machine sends an
+ICMP Datagram Too Big message back to the originator and drops the
+packet.  The rogue router drops the ICMP message and the originator
+never gets to discover that it must reduce the fragment size or drop
+the IP Don't Fragment option from its outgoing data.
+
+The code is based on tcpmssd wich was written by Ruslan Ermilov
+<htmlurl url='mailto:<ru@FreeBSD.org>' name='&lt;ru@FreeBSD.org&gt;'>
+ based on work done by Patrick Bihan-Faou
+<htmlurl url='mailto:<patrick@mindstep.com>' name='&lt;patrick@mindstep.com&gt;'>.
+
+The default is disable.
+
+<tag><tt>tee</tt></tag>
+If enabled, a ng_tee(4) node will be inserted
+into the bundle graph, right after the interface node. The tee node
+can be useful for debugging or traffic accounting.
+
+The default is disable.
+
+<tag><tt>nat</tt></tag>
+Enable NAT for this bundle.
+See <ref id="nat" name="the NAT chapter"> for more information.
+
+The default is disable.
+
+<tag><tt>netflow-in</tt></tag><P>
+<tag><tt>netflow-out</tt></tag><P>
+<tag><tt>netflow-once</tt></tag>
+If enabled, the bundle will participate in
+NetFlow generation. See <ref id="netflow" name="the NetFlow chapter">
+for more information. The netflow-out option is like netflow-in, but 
+generates NetFlow data for outgoing packets instead of incoming.
+If netflow-once enabled - packet will be accounted only once while
+in kernel.
+
+The default is disable.
+
+<tag><tt>ipacct</tt></tag>
+If enabled, the bundle will participate in IP accounting with ng_ipacct node.
+See <ref id="ipacct" name="the IP Accounting chapter"> for more information.
+
+The default is disable.
+
+</descrip>
+</p>
+
+

@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# PROVIDE: MAIN
+# REQUIRE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="MAIN"
+start_cmd="main_start"
+start_precmd="main_prestart"
+start_postcmd="main_poststart"
+stop_cmd="main_stop"
+
+main_prestart()
+{
+	stty status '^T'
+	sysctl kern.coredump=0
+	sysctl net.inet.ip.forwarding=1
+
+	md=`/sbin/mdconfig -a -t malloc -s 10m`
+	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
+	mount /dev/${md} /tmp
+
+	mkdir -p /tmp/etc
+	mkdir -p /tmp/var/empty
+	mkdir -p /tmp/var/log
+	mkdir -p /tmp/var/run
+	mkdir -p /tmp/var/spool/lock
+	touch /tmp/var/log/all.log
+
+	syslogd -s
+
+	mount_unionfs /tmp/etc /etc
+
+	if [ -c /dev/map/config ]; then
+		dd if=/dev/map/config of=/tmp/etc.tar.gz;
+		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
+	fi
+
+	pwd_mkdb /etc/master.passwd
+
+	ifconfig lo0 127.0.0.1/8
+	#ifconfig rt0 192.168.0.28/24
+	mpd  --background
+
+	inetd -wW
+
+}
+
+main_start()
+{
+}
+
+main_poststart()
+{
+}
+
+main_stop()
+{
+	/etc/rc.save_config
+}
+
+load_rc_config $name
+
+run_rc_command $*

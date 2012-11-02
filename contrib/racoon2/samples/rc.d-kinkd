@@ -1,0 +1,25 @@
+#! /bin/sh
+# $Id: rc.d-kinkd.in,v 1.3 2005/10/28 06:33:16 kamada Exp $
+# kinkd rc.d script for NetBSD
+#
+
+# PROVIDE: kink
+# REQUIRE: isdnd kdc ppp
+# BEFORE:  SERVERS
+# REQUIRE: spmd
+
+. /etc/rc.subr
+
+prefix=/usr/local
+exec_prefix=${prefix}
+
+name="kinkd"
+rcvar=`set_rcvar`
+command="${exec_prefix}/sbin/${name}"
+extra_commands="reload"
+required_vars="spmd_enable"
+pidfile="/var/run/${name}.pid"
+required_files="/usr/local/etc/racoon2/racoon2.conf"
+
+load_rc_config $name
+run_rc_command "$1"

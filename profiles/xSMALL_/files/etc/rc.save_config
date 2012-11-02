@@ -1,0 +1,55 @@
+#!/bin/sh
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+BLOCK_SIZE=64
+
+. /etc/rc.subr
+
+name="save_config"
+load_rc_config "$name"
+
+CONFIG_PART=$( get_config_part )
+if [ -z "${CONFIG_PART}" ]; then
+	err 1 'No config partition found'
+fi
+
+exclude=
+if [ "${zconfig_exclude_files}" ]; then
+	for i in ${zconfig_exclude_files}; do
+		exclude="${exclude:+$exclude }--exclude=etc/${i}"
+	done
+fi
+
+set -- $( ${SYSCTL_N} kern.geom.conftxt | grep -F "${CONFIG_PART#/dev/}" )
+CONFIG_PART_SIZE=$4
+set --
+
+debug "Saving /etc to etc.tar.gz"
+tar ${exclude} -cvzf ${zconfig_temp_file} -C /tmp etc
+
+set -- $( ls -l ${zconfig_temp_file} )
+size=$5
+set --
+if [ ${size} -gt ${CONFIG_PART_SIZE} ]; then
+	rm -f ${zconfig_temp_file}
+	err 1 "${zconfig_temp_file##*/} too big: ${size}; must be less than ${CONFIG_PART_SIZE}"
+fi
+CONFIG_PART_BLKS=$(( ${CONFIG_PART_SIZE} / ${BLOCK_SIZE} / 1024 ))
+
+debug "Saving /etc to ${CONFIG_PART}"
+
+# echo f1 > /dev/led/status
+
+${SYSCTL_W} hw.cfi.rdonly=0 2>/dev/null
+dd if=${zconfig_temp_file} of=${CONFIG_PART} bs=${BLOCK_SIZE}k \
+	count=${CONFIG_PART_BLKS} conv=sync
+${SYSCTL_W} hw.cfi.rdonly=1 2>/dev/null
+
+if [ -f ${zconfig_temp_file} ]; then
+	rm -f ${zconfig_temp_file}
+fi
+
+# echo f9 > /dev/led/status
+
+debug "."
+

@@ -1,0 +1,19 @@
+$$$code:inc("htdocs/header.html")$$$
+    <h1>Device Configuration</h1>
+
+    <h4>Upload Configuration</h4>
+    <form method="post" action="/cmd.xml" enctype="multipart/form-data">
+	<input type="hidden" name="cmd" value="upload_config">
+	<input type="file" name="config" value="">
+	<input type="submit" name="Upload Config" value="Upload Config">
+    </form>
+    <h4>Download Configuration</h4>
+    <form method="post" action="/config.dat" enctype="application/x-www-form-urlencoded">
+	<input type="hidden" name="cmd" value="download_config">
+	<input type="submit" name="Download Config" value="Download Config">
+    </form>
+
+
+$$$code:inc("htdocs/footer.html")$$$
+
+

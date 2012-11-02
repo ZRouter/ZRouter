@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# PROVIDE: DEBUG
+# REQUIRE: MAIN
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="MAIN"
+start_cmd="main_start"
+start_precmd="main_prestart"
+start_postcmd="main_poststart"
+stop_cmd="main_stop"
+
+main_prestart()
+{
+
+}
+
+main_start()
+{
+}
+
+main_poststart()
+{
+}
+
+main_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*

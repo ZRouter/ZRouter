@@ -1,0 +1,10 @@
+
+
+GPIO:
+0	- WPS Button
+9	- Power LED	(gpiomode 0xb0000060 = 0x40029c)
+10	- Reset Button
+13	- WPS LED
+14	- USB LED
+??	- Status LED
+

@@ -1,0 +1,59 @@
+<!-- $Id: installing.sgml,v 1.5 2007/09/22 14:14:32 amotin Exp $ -->
+<!-- mpd netgraph enabled user mode PPP daemon -->
+
+<!-- <!DOCTYPE linuxdoc PUBLIC '-//FreeBSD//DTD linuxdoc//EN'> -->
+
+  <sect><heading>Installing mpd<label id="installing"></heading>
+
+  <p>
+	If you use the FreeBSD package or port, mpd will be
+	automatically installed
+	into <tt>/usr/local/sbin/mpd5</tt>.
+	with the default set of device types compiled into it.
+	In order to run, mpd needs
+	a few configuration files. The directory
+	<tt>/usr/local/etc/mpd5</tt> is created
+	to hold them.
+	In it you will find some sample configuration files.
+</p>
+
+<p>
+	Before you can run mpd, you must set up your site-specific
+	configuration files. These files are:
+	<descrip>
+
+	<tag> <bf><tt>mpd.conf</tt></bf>
+
+<p>
+	This file defines one or more <bf>configurations</bf>.
+	When mpd is invoked, you specify the name of a
+	configuration on the command line. This configuration
+	(which merely consists of a series of mpd commands) is loaded.
+	If no configuration is given, 'default' configuration
+	is loaded.
+</p>
+
+<p>
+	Each configuration defines one or more bundles, links and repeaters.
+	They can be defined with the <bf><tt>create</tt></bf> command.
+	Subsequent commands in the configuration configure the various
+	layers for that item.
+</p>
+
+	<tag> <bf><tt>mpd.secret</tt></bf>
+
+<p>
+	This file contains login, password pairs. This is where
+	mpd looks to find all authentication information. This
+	file should be readable only by <tt>root</tt>.
+</p>
+
+	<tag> <bf><tt>mpd.script</tt></bf>
+
+<p>
+	This file contains chat scripts for modem devices.
+</p>
+
+	</descrip>
+
+

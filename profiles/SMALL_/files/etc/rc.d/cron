@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+
+# PROVIDE: cron
+# REQUIRE: MAIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="cron"
+rcvar="cron_enable"
+command="/usr/sbin/${name}"
+pidfile="/var/run/${name}.pid"
+start_precmd="cron_precmd"
+
+load_rc_config $name
+if checkyesno cron_dst
+then
+	cron_flags="$cron_flags -s"
+fi
+
+cron_precmd()
+{
+	if [ ! -d /var/cron ] ; then
+	    mkdir -p /var/cron
+	fi
+}
+
+run_rc_command "$1"

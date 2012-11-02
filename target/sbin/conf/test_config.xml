@@ -1,0 +1,18 @@
+<root>
+  <interfaces>
+    <alc0>
+      <static>
+        <enable value="TRUE"></enable>
+        <ipaddr value="127.0.0.1/24"></ipaddr>
+      </static>
+      <DHCP descriptions="Get network config from DHCP server">
+        <enable descriptions="Enabled status" type="BOOL" value="FALSE" default="FALSE"></enable>
+        <ipaddr descriptions="IPv4 Address" type="CIDR" value="255.255.254.0/255.255.254.0" default="0.0.0.0/0.0.0.0"></ipaddr>
+        <gwaddr descriptions="IPv4 Gateway Address" type="IPADDR" value="192.168.0.253" default="0.0.0.0"></gwaddr>
+        <dns1addr descriptions="IPv4 DNS1 Address" type="IPADDR" value="192.168.100.1" default="0.0.0.0"></dns1addr>
+        <dns2addr descriptions="IPv4 DNS2 Address" type="IPADDR" value="192.168.100.2" default="0.0.0.0"></dns2addr>
+      </DHCP>
+    </alc0>
+  </interfaces>
+</root>
+

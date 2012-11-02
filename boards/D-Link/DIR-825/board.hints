@@ -1,0 +1,159 @@
+hint.arge.0.media=1000	# RGMII
+hint.arge.0.fduplex=1
+hint.arge.1.media=100	# RMII
+hint.arge.1.fduplex=1
+
+# No probe at all
+hint.miibus.0.phymask="0x00000000"
+hint.miibus.1.phymask="0x00000000"
+
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=1000
+
+hint.floatphy.1.at="miibus1"
+hint.floatphy.1.phyno=0
+hint.floatphy.1.flags=0x00000000
+hint.floatphy.1.speed=1000
+
+
+# compatible value, device with 4M/8M/16M of flash, may found it on same
+# location, because flash just aliased to upper segments
+#hint.ath.0.eepromdata=0x1fff1000
+
+# ath0 - slot 17
+hint.pcib.0.bus.0.17.0.ath_fixup_addr=0x1fff1000
+hint.pcib.0.bus.0.17.0.ath_fixup_size=4096
+# ath1 - slot 18
+hint.pcib.0.bus.0.18.0.ath_fixup_addr=0x1fff5000
+hint.pcib.0.bus.0.18.0.ath_fixup_size=4096
+# .. and now, telling each ath(4) NIC where to find the firmware
+# image.
+hint.ath.0.eeprom_firmware="pcib.0.bus.0.17.0.eeprom_firmware"
+hint.ath.1.eeprom_firmware="pcib.0.bus.0.18.0.eeprom_firmware"
+
+# GPIO specific configuration block
+
+# Don't flip on anything that isn't already enabled.
+# This includes leaving the SPI CS1/CS2 pins as GPIO pins as they're
+# not used here.
+hint.gpio.0.function_set=0x00000000
+hint.gpio.0.function_clear=0x00000000
+
+# These are the GPIO LEDs and buttons which can be software controlled.
+hint.gpio.0.pinmask=0x000009ff
+
+# GPIO I2C bus
+hint.gpioiic.0.at="gpiobus0"
+hint.gpioiic.0.pins=0x00a0
+hint.gpioiic.0.sda=0
+hint.gpioiic.0.scl=1
+
+# I2C bus
+# Don't be strict about I2C protocol - the relaxed semantics are required
+# by the realtek switch PHY.
+hint.iicbus.0.strict=0
+
+# Bit bang bus - override default delay
+#hint.iicbb.0.udelay=3
+
+# 0	LED	USB Blue
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="usb"
+hint.gpioled.0.pins=0x0001
+hint.gpioled.0.flags="0x0102"
+
+# 1	LED	STATUS Yellow
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.name="status"
+hint.gpioled.1.pins=0x0002
+hint.gpioled.1.flags="0x0102"
+
+# 2	LED	USB
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.name="status_bi"
+hint.gpioled.2.pins=0x0004
+hint.gpioled.2.flags="0x0102"
+
+# 4	LED	WPS
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.name="wps"
+hint.gpioled.4.pins=0x0010
+hint.gpioled.4.flags="0x0102"
+
+# 6	LED	Internet Orange
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.name="internet_bi"
+hint.gpioled.5.pins=0x0040
+hint.gpioled.5.flags="0x0102"
+
+# 11	LED	Internet Blue
+hint.gpioled.6.at="gpiobus0"
+hint.gpioled.6.name="internet"
+hint.gpioled.6.pins=0x0800
+hint.gpioled.6.flags="0x0102"
+
+# 3 	BUTTON	RESET
+#hint.gpioreset.0.at="gpiobus0"
+#hint.gpioreset.0.pins="0x0004"
+#hint.gpioreset.0.name="reset"
+#hint.gpioreset.0.flags="0x04a1"
+
+# 8 	BUTTON	WPS
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x0100"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x04a1"
+
+#5	I2C	SDA
+#7	I2C	SCK
+
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00040000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00040000
+hint.map.1.end=0x00050000
+hint.map.1.name="nvram"
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00050000
+hint.map.2.end=0x007b0000
+hint.map.2.name="upgrade"
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start=0x00050000
+hint.map.3.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.3.name="kernel"
+
+hint.map.4.at="flash/spi0"
+hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.4.end=0x007b0000
+hint.map.4.name="rootfs"
+
+hint.map.5.at="flash/spi0"
+hint.map.5.start=0x007b0000
+hint.map.5.end=0x007c0000
+hint.map.5.name="MAC"
+#hint.map.5.readonly=1
+
+hint.map.6.at="flash/spi0"
+hint.map.6.start=0x007c0000
+hint.map.6.end=0x007f0000
+hint.map.6.name="config"
+#hint.map.6.readonly=1
+
+hint.map.7.at="flash/spi0"
+hint.map.7.start=0x007f0000
+hint.map.7.end=0x00800000
+hint.map.7.name="ART"
+#hint.map.7.readonly=1
+
+

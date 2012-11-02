@@ -1,0 +1,17 @@
+	"<root>"
+	    "<test default=\"1\" value=\"0\"><some>data</some></test>"
+	    "<interfaces>"
+		"<wlan0>"
+		    "<DHCP descriptions=\"Get network config from DHCP server\">"
+			"<enable default=\"FALSE\" value=\"TRUE\" type=\"BOOL\" descriptions=\"Enabled status\"></enable>"
+		    "</DHCP>"
+
+		"</wlan0>"
+		"<alc0>"
+		    "<DHCP>"
+			"<enable value=\"XXX\" value1=\"TRUE\"></enable>"
+		    "</DHCP>"
+
+		"</alc0>"
+	    "</interfaces>"
+	"</root>";

@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# BEFORE: ADAPTATION
+# PROVIDE: boardinfo
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="boardinfo"
+start_cmd="boardinfo_start"
+extra_commands="enablelan"
+enablelan_cmd="enablelan_sub"
+
+# Empty set of MAC addresses
+MAC0=
+MAC1=
+MAC2=
+MAC3=
+MAC4=
+MAC5=
+MAC6=
+MAC7=
+# Who wants more?
+
+assign_macs()
+{
+	MAC0=$1; shift;
+	MAC1=$1; shift;
+	MAC2=$1; shift;
+	MAC3=$1; shift;
+	MAC4=$1; shift;
+	MAC5=$1; shift;
+	MAC6=$1; shift;
+	MAC7=$1; shift;
+}
+
+
+boardinfo_start()
+{
+
+	kenv	RESET_PIN=8
+	kenv	WPS_PIN=12
+	kenv	INTERNET_LED=internet_bi
+	# GPIO H/W and driver do not support inversion, so define it
+	kenv	RESET_PIN_INVERT=1
+	kenv	WPS_PIN_INVERT=1
+	kenv	INTERNET_LED_INVERT=1
+
+	# XXX: found where is it :)
+#	MAC_ADDR_LIST=$(dd if=/dev/map/MAC bs=64k count=1 2>/dev/null | lua /usr/sbin/base_mac.lua 3)
+	MAC_ADDR_LIST=$(echo "84:c9:b2:4a:4c:de" | lua /usr/sbin/base_mac.lua 3)
+	assign_macs ${MAC_ADDR_LIST}
+
+	kenv BASE_MAC_ADDR="${MAC0}"
+	kenv LAN_MAC_ADDR="${MAC0}"
+	kenv WAN_MAC_ADDR="${MAC1}"
+	kenv WLAN_MAC_ADDR="${MAC2}"
+	echo "Using default board MAC address \"${MAC0}\""
+	kldload if_ath
+	kldload if_ath_pci
+
+}
+
+enablelan_sub()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*

@@ -1,0 +1,13 @@
+UBNT_ARCH=RS
+UBNT_VERSION=RSPRO.ar7100pro.V1
+
+
+ubnt-mkfwimage 			\
+    -B ${UBNT_ARCH}		\
+    -v ${UBNT_VERSION}		\
+    -k ${X_KERNEL}.gz		\
+    -C 262144			\
+    -c ${X_CFGFS}		\
+    -r ${X_FSIMAGE}.uzip	\
+    -o /tftpboot/${KERNCONF}.initial.img
+

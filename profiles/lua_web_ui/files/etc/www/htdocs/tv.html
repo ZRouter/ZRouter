@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>ZRouter main menu</title>
+<link href="css/tv.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="js/tv.js"></script>
+</head>
+<body>
+<div class="treeview">
+    <ul>
+        <li>
+            <div>
+        	<p>
+        	    <a href="javascript: void(0)" class="sc" onclick="return UnHide(this)">
+        		<img src="icons/monitor.gif" class="icon"/>
+        	    </a>
+        	    <a href="/home_sys.html" target="ifrMain">ZRouter Config</a>
+        	</p>
+    	    </div>
+            <ul>
+                <li class="cl"><div><p><a href="javascript: void(0)" class="sc" onclick="return UnHide(this)"><img src="icons/plus.gif" class="icon_exp"/><span>Basic Settings</span></a></p></div>
+		    <ul>
+			<li><div><p><a href="/Basic.wan.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />Internet</a></p></div></li>
+			<li><div><p><a href="/Basic.lan.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />LAN</a></p></div></li>
+			<li><div><p><a href="/Basic.wlan.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />Wireless</a></p></div></li>
+			<li><div><p><a href="/Basic.iptv.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />IPTV</a></p></div></li>
+		    </ul>
+                </li>
+                <li class="cl"><div><p><a href="javascript: void(0)" class="sc" onclick="return UnHide(this)"><img src="icons/plus.gif" class="icon_exp"/><span>Security Links</span></a></p></div>
+			<ul>
+				<li><div><p><a href="/Security.IPSec.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />IPSec</a></p></div></li>
+				<!-- li><div><p><a href="/Security.OpenVPN.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />OpenVPN</a></p></div></li -->
+				<!-- li><div><p><a href="/Security.SSH.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />SSH Tunnels</a></p></div></li -->
+			</ul>
+                </li>
+                <li class="cl"><div><p><a href="javascript: void(0)" class="sc" onclick="return UnHide(this)"><img src="icons/plus.gif" class="icon_exp"/><span>Administration</span></a></p></div>
+			<ul>
+				<li><div><p><a href="/Administration.info.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />Device Info</a></p></div></li>
+				<li><div><p><a href="/Administration.users.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />Users</a></p></div></li>
+				<li><div><p><a href="/Administration.firmware.html" target="ifrMain"><img src="icons/text.gif" class="i icon" />Firmware</a></p></div></li>
+			</ul>
+                </li>
+                <li class="cl"><div><p><a href="javascript: void(0)" class="sc" onclick="return UnHide(this)"><img src="icons/plus.gif" class="icon_exp"/><span>Status</span></a></p></div>
+			<ul>
+				<li><div><p><a href="/Status.status.lua" target="ifrMain"><img src="icons/text.gif" class="i icon" />Device Information</a></p></div></li>
+				<li><div><p><a href="/Status.log.lua" target="ifrMain"><img src="icons/text.gif" class="i icon" />System Log</a></p></div></li>
+			</ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
