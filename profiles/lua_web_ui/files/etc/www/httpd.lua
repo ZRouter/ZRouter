@@ -55,9 +55,6 @@ dofile("lib/racoon.lua");
 -- HOSTAPD helper
 --dofile("lib/hostapd.lua");
 
--- redirect print to /dev/console
--- dofile("lib/print_to_console.lua");
-
 -- redirect print to syslog
 dofile("lib/lsyslog.lua");
 syslog_init("httpd.lua");
