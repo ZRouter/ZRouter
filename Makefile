@@ -455,6 +455,9 @@ world:  build-verify build-info world-toolchain world-build world-install world-
 
 .if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
 .include "share/mk/zrouter.ports.mk"
+.else
+port-build:
+	@echo "No ports defined in WORLD_SUBDIRS_PORTS"
 .endif
 
 rootfs-dir!
