@@ -453,7 +453,9 @@ world-fix-lib-links:
 world:  build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 .ORDER: build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 
+.if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
 .include "share/mk/zrouter.ports.mk"
+.endif
 
 rootfs-dir!
 	mkdir -p ${WORLDDESTDIR}
