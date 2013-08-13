@@ -32,7 +32,7 @@
 # The main menu
 #
 main_menu() {
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"ZRouter build menu ${PROFILE_NAME}\" --menu ' ' 15 60 7 \
 	    Device \"Select the target device\" \
@@ -73,7 +73,7 @@ get_target_device() {
 		DEFOPTIONS="${DEFOPTIONS} ${TARGET_DEVICE} ${1}"
 		shift 1
 	done
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, select the target device\" --menu ' ' \
 	    ${BOX_SIZE} 60 ${MENU_SIZE} ${DEFOPTIONS} 2> ${TMPOPTIONSFILE}"
@@ -123,7 +123,7 @@ select_base_profile() {
 		PROFILES_MENU="${PROFILES_MENU}	${profile} \"${SDESCR}\"";
 	done
 
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, select base profile \" --menu ' ' \
 	    19 75 12 \
@@ -176,7 +176,7 @@ select_build_profiles() {
 		PROFILES_MENU="${PROFILES_MENU}	${profile} \"${SDESCR}\" ${ENABLED}";
 	done
 
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, select profiles to build \" --checklist ' ' \
 	    19 75 12 \
@@ -196,7 +196,7 @@ select_build_profiles() {
 # Read the FreeBSD tree source path
 #
 get_src_path() {
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, enter the build object directory\" \
 	    --inputbox ' ' 8 60 "${FREEBSD_SRC_TREE}" 2> ${TMPOPTIONSFILE}"
@@ -214,7 +214,7 @@ get_src_path() {
 # Read the objects directory path
 #
 get_obj_path() {
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, enter the build object directory\" \
 	    --inputbox ' ' 8 60 "${OBJ_DIR}" 2> ${TMPOPTIONSFILE}"
@@ -232,7 +232,7 @@ get_obj_path() {
 # Provide a inputmenu for source and obj directories selection
 #
 get_src_dirs() {
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	while [ 1 ]; do
 		${SH} -c "${DIALOG} --title \"Please, set the source and obj directories\" \
@@ -301,7 +301,7 @@ save_profile() {
 	else
 		SAVE_PROFILE=""
 	fi
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, enter the profile name\" --inputbox ' ' \
 	    8 60 \"${SAVE_PROFILE}\" 2> ${TMPOPTIONSFILE}"
@@ -369,7 +369,7 @@ load_profile() {
 		DEFOPTIONS="${DEFOPTIONS} ${PROFILE_NAME} '${PROFILE_PATH}'"
 		shift 1
 	done
-	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menu)
+	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, select one profile file\" --menu ' ' \
 	    $BOX_SIZE 60 $MENU_SIZE ${DEFOPTIONS} 2> ${TMPOPTIONSFILE}"
