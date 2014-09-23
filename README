@@ -46,5 +46,5 @@ make TARGET_PAIR=D-Link/DIR-615-E4 FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}
 replace ${FREEBSD_SRC_TREE} with path to ZRouter.org copy of FreeBSD tree.
 replace D-Link/DIR-615-E4 with device for which you want to build FirmWare.
 List of devices you can get by:
-make
+ make show-target-pairs
 
