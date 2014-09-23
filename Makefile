@@ -670,7 +670,7 @@ zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
 .if target(ubntimage)
 .if !defined(UBNT_VERSION) || empty(UBNT_VERSION)
-.error Specify UBNT_VERSION or device will not accept firmware
+.error Specify UBNT_VERSION otherwise device will not accept firmware
 .endif
 .endif
 
