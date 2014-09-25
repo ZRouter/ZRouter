@@ -51,11 +51,10 @@ PREINSTALLDIRS=/lib
 ##############################################################################
 # Board configuration must define used SoC/CPU
 ##############################################################################
+.include "boards/boards.mk"
 
 .if !defined(TARGET_BOARDDIR)
 TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
-.else
-.include "boards/boards.mk"
 .endif
 
 menu:
