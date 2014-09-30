@@ -15,7 +15,11 @@ makefs_ffs:	${ZTOOLS_PATH}/makefs
 
 makefs_cd9660:	${ZTOOLS_PATH}/makefs
 
-${ZTOOLS_PATH}/makefs:
+libnetbsd_a:
+	cd ${FREEBSD_SRC_TREE}/lib/libnetbsd; \
+	make MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX} DESTDIR=${ZTOOLS_PATH}
+
+${ZTOOLS_PATH}/makefs:	libnetbsd_a
 	mkdir -p ${ZTOOLS_PATH}
 	cd ${FREEBSD_SRC_TREE}/usr.sbin/makefs; \
 	make MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX} DESTDIR=${ZTOOLS_PATH}; \
