@@ -254,8 +254,10 @@ _KERNEL_BUILD_ENV= \
 	${CLANG_VARS} \
 	-DNO_CLEAN
 
+upgrade_checks:
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} upgrade_checks
 
-kernel-toolchain:
+kernel-toolchain:	upgrade_checks
 .if !defined(SKIP_TOOLCHAIN)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 .endif
@@ -429,7 +431,7 @@ FREEBSD_BUILD_ENV_${var}
 #
 # World
 #
-world-toolchain:
+world-toolchain:	upgrade_checks
 .if !defined(SKIP_WORLD_INSTALL)
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} \
 	    -C ${FREEBSD_SRC_TREE} toolchain
