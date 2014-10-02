@@ -229,6 +229,9 @@ _DEVICE_HINTS=${TARGET_BOARDDIR}/board.hints
 
 kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
+.for hint in ${KERNEL_HINTS}
+	echo "${hint}" >> ${KERNEL_HINTS_FILE}
+.endfor
 
 # TODO: make dtd file for FDT
 #
