@@ -79,17 +79,15 @@ TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
 .endif
 ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
-# XXX bad idea, because require changes to system code
-# Better to define it in hints, then fetch by KENV
-KERNCONF_OPTIONS+=	SOC_VENDOR=\\\"${SOC_VENDOR}\\\"
-KERNCONF_OPTIONS+=	SOC_MODEL=\\\"${SOC_CHIP}\\\"
+KERNEL_HINTS+=	hw.soc.vendor=\"${SOC_VENDOR}\"
+KERNEL_HINTS+=	hw.soc.model=\"${SOC_CHIP}\"
 .if defined(SOC_REVISION)
-KERNCONF_OPTIONS+=	SOC_REV=\\\"${SOC_REVISION}\\\"
+KERNEL_HINTS+=	hw.soc.revision=\"${SOC_REVISION}\"
 .endif
-KERNCONF_OPTIONS+=	DEVICE_VENDOR=\\\"${TARGET_VENDOR}\\\"
-KERNCONF_OPTIONS+=	DEVICE_MODEL=\\\"${TARGET_DEVICE}\\\"
+KERNEL_HINTS+=	hw.board.vendor=\"${TARGET_VENDOR}\"
+KERNEL_HINTS+=	hw.board.model=\"${TARGET_DEVICE}\"
 .if defined(BOARD_REVISION)
-KERNCONF_OPTIONS+=	DEVICE_REV=\\\"${BOARD_REVISION}\\\"
+KERNEL_HINTS+=	hw.board.revision=\"${BOARD_REVISION}\"
 .endif
 
 KERNCONF_OPTIONS+=	NO_SWAPPING
