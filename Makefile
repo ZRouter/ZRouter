@@ -182,6 +182,8 @@ ${KERNELCONFDIR}:
 # Generate kernel config file
 KERNEL_HINTS_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}.hints
 KERNEL_CONFIG_FILE?=${KERNELCONFDIR}/${TARGET_VENDOR}_${TARGET_DEVICE}
+KERNEL_CONFIG_FILENAME=${TARGET_VENDOR}_${TARGET_DEVICE}
+KERNCONFDIR=${KERNELCONFDIR}
 
 kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "# Kernel config for ${SOC_CHIP} on ${TARGET_VENDOR} ${TARGET_DEVICE} board" > ${KERNEL_CONFIG_FILE}
@@ -232,7 +234,6 @@ kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
 .for hint in ${KERNEL_HINTS}
 	echo "${hint}" >> ${KERNEL_HINTS_FILE}
 .endfor
-
 # TODO: make dtd file for FDT
 #
 
@@ -251,6 +252,7 @@ _KERNEL_BUILD_ENV= \
 	TARGET_CPUARCH=${TARGET_CPUARCH} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
+	KERNCONFDIR=${KERNCONFDIR} \
 	${CLANG_VARS} \
 	-DNO_CLEAN
 
@@ -266,9 +268,9 @@ ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if defined(WITH_KERNFAST)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILE} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
 .else
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILE} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
 .endif
 
 #XXX_BEGIN Only for testing
@@ -613,16 +615,16 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 
-${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel:	kernel-build
+${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILENAME}/kernel:	kernel-build
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	echo "XXXXXXXXXXXXX ${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel"
+	echo "XXXXXXXXXXXXX ${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILENAME}/kernel"
 
 kernel-install:				${KERNELDESTDIR}/boot/kernel/kernel
 
-${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILE}/kernel kernel-install-dir
+${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONFIG_FILENAME}/kernel kernel-install-dir
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 .if !empty(KERNELDESTDIR)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILE} installkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} DESTDIR=${KERNELDESTDIR} KERNCONF=${KERNEL_CONFIG_FILENAME} installkernel
 .else
 .error "KERNELDESTDIR must be set for kernel-install, since we always do cross-build"
 .endif
