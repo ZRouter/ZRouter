@@ -53,7 +53,9 @@ PREINSTALLDIRS=/lib
 ##############################################################################
 # Board configuration must define used SoC/CPU
 ##############################################################################
+.ifnmake show-target-pairs
 .include "boards/boards.mk"
+.endif
 
 .if !defined(TARGET_BOARDDIR)
 TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'
