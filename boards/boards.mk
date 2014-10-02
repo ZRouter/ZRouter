@@ -29,5 +29,5 @@ BOARD_FIRMWARE_SIGNATURE_FILE=${TARGET_BOARDDIR}/board_firmware.sig
 .endif # exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/vendor.mk)
 
 .else
-.error "No ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/ board vendor directory found"
+.error "No ${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/ board vendor directory found.  Do `make show-target-pairs` to get list."
 .endif # exists(${ZROUTER_ROOT}/boards/${TARGET_VENDOR}/)
