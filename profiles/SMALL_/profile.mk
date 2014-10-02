@@ -1,8 +1,4 @@
 
-
-
-
-
 WORLD_SUBDIRS_LIB+= \
 libalias \
 libbsm \
@@ -72,6 +68,14 @@ stty \
 sync \
 uuidgen
 
+.if exists(${FREEBSD_SRC_TREE}/sbin/switchctl)
+_switchctl=switchctl
+.else
+.if exists(${FREEBSD_SRC_TREE}/sbin/etherswitchcfg)
+_switchctl=etherswitchcfg
+.endif
+.endif
+
 WORLD_SUBDIRS_SBIN+= \
 dmesg \
 ifconfig \
@@ -93,19 +97,12 @@ ping \
 rcorder \
 reboot \
 route \
-switchctl \
+${_switchctl} \
 sysctl \
 umount
 
-#/sbin/oinit
-
-
-
 WORLD_SUBDIRS_ZROUTER+=target/sbin/cdevd
 WORLD_SUBDIRS_ZROUTER+=target/usr.bin/hex2bin
-
-
-
 
 WORLD_SUBDIRS_USR_BIN+= \
 basename \
@@ -146,7 +143,6 @@ libstdc++
 #libreadline \
 # XXX: libreadline must be replaced with libedit
 
-
 WORLD_SUBDIRS_LIB+= \
 libfetch \
 libradius \
@@ -186,7 +182,6 @@ WORLD_SUBDIRS_LIB+= \
 libusb
 .endif
 
-
 KERNCONF_MODULES_OVERRIDE+=if_bridge bridgestp
 KERNCONF_MODULES_OVERRIDE+=libalias/libalias
 #KERNCONF_MODULES_OVERRIDE+=libalias/modules/cuseeme
@@ -199,4 +194,3 @@ KERNCONF_MODULES_OVERRIDE+=libalias/modules/pptp
 #KERNCONF_MODULES_OVERRIDE+=libalias/modules/skinny
 KERNCONF_MODULES_OVERRIDE+=geom/geom_label
 KERNCONF_MODULES_OVERRIDE+=md unionfs msdosfs ufs tmpfs
-
