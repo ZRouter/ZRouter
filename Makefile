@@ -22,9 +22,11 @@ OBJ_DIR?=/usr/obj
 #
 .if exists(${FREEBSD_SRC_TREE}/sys/conf/newvers.sh)
 FREEBSD_VERSION_VARS!=grep -E '(TYPE|REVISION|BRANCH)=\"' \
-	${FREEBSD_SRC_TREE}/sys/conf/newvers.sh | sed 's/\"//g'
+	${FREEBSD_SRC_TREE}/sys/conf/newvers.sh | sed 's/\"//g' | sed 's/^/FREEBSD_/'
 .for var in ${FREEBSD_VERSION_VARS}
-FREEBSD_${var}
+VAR_LEFT=${var:C/=.*//}
+VAR_RIGHT=${var:C/.*=//}
+${VAR_LEFT}:=${VAR_RIGHT}
 .endfor
 FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
 .else
