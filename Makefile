@@ -421,8 +421,9 @@ WORLD_SUBDIRS+=gnu/usr.bin/${dir}
 WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
-FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${FREEBSD_SRC_MAKE} \
-    ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars | sed 's/^/FREEBSD_BUILD_ENV_/')
+FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} \
+    ${_WORLD_BUILD_ENV} -C ${FREEBSD_SRC_TREE} buildenvvars | \
+    sed 's/^/FREEBSD_BUILD_ENV_/')
 # Import buildenvvars into our namespace with suffix FREEBSD_BUILD_ENV_
 .for var in ${FREEBSD_BUILD_ENV_VARS}
 VAR_LEFT=${var:C/=.*//}
