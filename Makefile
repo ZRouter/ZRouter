@@ -518,7 +518,7 @@ NEW_KERNEL=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_kernel
 NEW_ROOTFS=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 NEW_IMAGE=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 
-IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}
+IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}:${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin:${PATH}
 
 .include "share/mk/zrouter.local.tools.mk"
 .include "share/mk/zrouter.base.tools.mk"
@@ -539,6 +539,7 @@ ROOTFS_RMLIST= \
     -name obj -or \
     -name info -or \
     -name man -or \
+    -name tests -or \
     -name zfs \\) \\)
 
 ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
