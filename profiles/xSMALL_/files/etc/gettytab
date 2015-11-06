@@ -1,5 +1,5 @@
 default:\
-	:cb:ce:ck:lc:fd
+	:nc:cb:ce:ck:lc:fd
 	:if=/etc/issue:
 c|std.300|300-baud:\
 	:np:nd
