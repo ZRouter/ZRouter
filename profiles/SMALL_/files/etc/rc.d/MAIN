@@ -11,6 +11,8 @@ start_cmd="main_start"
 
 main_start()
 {
+	# Copy hints to dynamic kenv
+	sysctl kern.hintmode=2
 	# Disable saving core files
 	sysctl kern.coredump=0
 	# Allow routing/forwarding
