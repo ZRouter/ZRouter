@@ -1,0 +1,34 @@
+*.o
+*.d
+*.so
+*.sw?
+tags
+cscope*
+
+# /
+/cfg.tab.c
+/cfg.tab.h
+/lex.yy.c
+/opensips
+/debian
+/curses.out
+/.svnrevision
+/.gitrevision
+
+# /doc/
+/doc/database
+
+# /menuconfig/
+/menuconfig/configure
+/Makefile.conf
+
+# /utils/opensipsunix/
+/utils/opensipsunix/opensipsunix
+
+# miscellaneous files
+core
+core.*
+out
+log
+*.log
+*.html

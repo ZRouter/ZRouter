@@ -1,0 +1,170 @@
+#
+#
+# common Makefile rules, included by main Makefile & the  modules
+#
+
+#
+# Uses: NAME, ALLDEP, CC, CFLAGS, DEFS, LIBS, MKDEP, auto_gen, depends, objs,
+# extra_objs, static_modules, static_modules_path
+# (all this must  be defined previously!,  see Makefile.defs & Makefile)
+#
+
+#directory lists for clean rules
+all_modules=$(shell [ -d modules -a -d utils ] && ls modules)
+all_utils=$(shell [ -d modules -a -d utils ] && ls utils)
+builtin_modules=$(shell [ -d net ] && ls net | grep ^proto_ )
+all_nostatic_modules=$(filter-out $(addprefix modules/, $(static_modules)), \
+			$(wildcard modules/*))
+all_modules:=$(addprefix modules/, $(all_modules))
+all_modules:=$(addprefix net/, $(builtin_modules)) $(all_modules)
+all_utils:=$(addprefix utils/, $(all_utils))
+
+#implicit rules
+%.o: %.c $(ALLDEP)
+ifeq (,$(FASTER))
+	@echo "Compiling $<"
+endif
+	$(Q)$(CC) $(CFLAGS) $(DEFS) -c $< -o $@
+
+%.d: %.c $(ALLDEP)
+	@set -e; $(MKDEP) $(DEFS) $< \
+	|  sed 's#\(\($*D)\)\?$(*F)\)\.o[ :]*#$*.o $@ : #g' > $@; \
+	[ -s $@ ] || rm -f $@
+
+
+# normal rules
+$(NAME): $(objs) $(extra_objs) $(ALLDEP)
+ifeq (,$(FASTER))
+	@echo "Linking $(NAME)"
+endif
+	$(Q)$(LD) $(LDFLAGS) $(objs) $(extra_objs) $(LIBS) -o $(NAME)
+
+
+main.o: main.c $(ALLDEP) $(NEWREVISION)
+ifeq (,$(FASTER))
+	@echo "Compiling $<"
+endif
+	$(Q)$(CC) $(CFLAGS) $(DEFS) -c $< -o $@
+
+.PHONY: all
+all: $(NAME) modules
+
+.PHONY: dep
+dep: $(depends)
+
+.PHONY: static
+static: $(objs)
+
+Makefile.conf: Makefile.conf.template
+	@if ! [ -e "$@" ]; then \
+		echo Creating new $@; \
+		cp $< $@; \
+	fi
+
+$(cfg_prefix)/$(cfg_dir):
+		mkdir -p $(cfg_prefix)/$(cfg_dir)
+
+$(bin_prefix)/$(bin_dir):
+		mkdir -p $(bin_prefix)/$(bin_dir)
+
+$(modules_prefix)/$(modules_dir):
+		mkdir -p $(modules_prefix)/$(modules_dir)
+
+$(doc_prefix)/$(doc_dir):
+		mkdir -p $(doc_prefix)/$(doc_dir)
+
+$(man_prefix)/$(man_dir)/man8:
+		mkdir -p $(man_prefix)/$(man_dir)/man8
+
+$(man_prefix)/$(man_dir)/man5:
+		mkdir -p $(man_prefix)/$(man_dir)/man5
+
+$(data_prefix)/$(data_dir):
+		mkdir -p $(data_prefix)/$(data_dir)
+
+
+.PHONY: dosetrev
+dosetrev:
+	@echo "New $(VERSIONTYPE) revision: $(THISREVISION)"
+	@if [ -f "main.o" ] ; then \
+		rm main.o ; \
+	fi
+	@echo "$(THISREVISION)" >.$(VERSIONTYPE)revision
+
+
+.PHONY: docbook-clean
+docbook-clean:
+	-@for r in $(modules) $(static_modules_path) "" ; do \
+		if [ -d "$$r" ]; then \
+			if [ -d "$$r"/doc ]; then \
+				rm -f "$$r"/doc/*.txt ; \
+				rm -f "$$r"/doc/*.html ; \
+				rm -f "$$r"/doc/*.pdf ; \
+			fi ; \
+		fi ; \
+	done
+
+.PHONY: dbschema-docbook-clean
+dbschema-docbook-clean:
+	-@if [ -d doc/database ] ; then \
+		rm -f doc/database/*.txt ; \
+		rm -f doc/database/*.html ; \
+		rm -f doc/database/*.pdf ; \
+		$(MAKE) -C db/schema docbook_clean; \
+	fi
+
+.PHONY: clean
+clean: docbook-clean dbschema-docbook-clean
+	-@rm -f $(objs) $(NAME) $(objs:.o=.il) 2>/dev/null
+	-@for r in $(all_modules) "" ; do \
+		if [ -d "$$r" -a -f "$$r/Makefile" ]; then \
+			$(MAKE) -C $$r clean ; \
+		fi ; \
+	done
+	-@for r in $(all_utils) "" ; do \
+		if [ -d "$$r" -a -f "$$r/Makefile" ]; then \
+			$(MAKE) -C $$r clean ; \
+		fi ; \
+	done
+
+.PHONY: proper
+.PHONY: distclean
+.PHONY: realclean
+proper realclean distclean: clean
+	-@rm -f $(depends) $(auto_gen) 2>/dev/null
+	-@rm -f cfg.tab.h 2>/dev/null
+	-@for r in $(all_nostatic_modules) "" ; do \
+		if [ -d "$$r" -a -f "$$r/Makefile" ]; then \
+			 $(MAKE) -C $$r proper ; \
+		fi ; \
+	done
+	-@if [ -d menuconfig ]; then $(MAKE) -C menuconfig proper; fi
+	-@if [ -d utils/opensipsunix ]; then $(MAKE) -C utils/opensipsunix proper; fi
+	-@if [ -d utils/db_berkeley ]; then $(MAKE) -C utils/db_berkeley proper; fi
+	-@if [ -d utils/db_oracle ]; then $(MAKE) -C utils/db_oracle proper; fi
+
+.PHONY: mantainer-clean
+mantainer-clean: distclean
+	-rm -f TAGS tags *.dbg .*.swp
+	-@for r in $(modules) "" ; do \
+		if [ -d "$$r" ]; then \
+			$(MAKE) -C $$r mantainer-clean; \
+		fi ; \
+	 done
+	-@if [ -d utils/opensipsunix ]; then $(MAKE) -C utils/opensipsunix mantainer-clean; fi
+
+
+.PHONY: install_module_custom
+
+
+.PHONY: TAGS
+TAGS:
+	$(MKTAGS)
+
+ifeq (,$(MAKECMDGOALS))
+-include $(depends)
+endif
+ifneq (,$(filter-out clean proper distclean realclean mantainer-clean TAGS \
+		tar modules, $(MAKECMDGOALS)))
+-include $(depends)
+endif

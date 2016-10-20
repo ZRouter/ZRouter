@@ -1,0 +1,23 @@
+<book>
+<title>OpenSIPS database tables</title>
+<bookinfo>
+	<productname class="trade">&osips;</productname>
+	<authorgroup>
+		<author>
+			<firstname>&osips;</firstname>
+			<surname>Development Team</surname>
+			<affiliation><orgname>&osipshomelink;</orgname></affiliation>
+			<address>&osipsdevmail;</address>
+		</author>
+	</authorgroup>
+	<copyright>
+		<year>2007-2014</year>
+		<holder>OpenSIPS development Team</holder>
+	</copyright>
+	<revhistory>
+		<revision>
+			<revnumber>$Revision: 8814 $</revnumber>
+			<date>$Date$</date>
+		</revision>
+	</revhistory>
+</bookinfo>

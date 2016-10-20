@@ -1,0 +1,45 @@
+#
+# module Makefile
+#(to be included from each module)
+#
+MOD_NAME=$(NAME:.so=)
+
+ALLDEP=Makefile ../../Makefile.sources ../../Makefile.rules \
+ ../../Makefile.modules ../../Makefile.conf
+
+#override modules value, a module cannot have submodules
+override modules=
+override static_modules=
+override static_modules_path=
+
+
+ifeq ($(MAKELEVEL), 0)
+# make called directly in the module dir!
+
+$(warning "you should run make from the main opensips directory")
+ifneq ($(makefile_defs), 1)
+$(error "the local makefile does not include Makefile.defs!")
+endif
+
+ifeq (,$(wildcard ../../Makefile.conf))
+$(shell cp ../../Makefile.conf.template ../../Makefile.conf)
+endif
+include ../../Makefile.conf
+
+else
+# called by the main Makefile
+
+ALLDEP+=../../Makefile ../../Makefile.defs
+
+endif
+
+include ../../Makefile.sources
+
+ifeq (,$(filter $(MOD_NAME), $(static_modules)))
+CFLAGS:=$(MOD_CFLAGS)
+LDFLAGS:=$(MOD_LDFLAGS)
+endif
+
+CFLAGS+=-DMOD_NAME='"$(MOD_NAME)"'
+
+include ../../Makefile.rules

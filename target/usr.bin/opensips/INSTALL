@@ -1,0 +1,559 @@
+$Id$
+
+
+     ===========================================
+
+            OpenSIPS Installation Notes
+
+             http://www.opensips.org/
+
+     ===========================================
+
+  This memo gives you hints how to set up OpenSIPS quickly. To 
+  understand how OpenSIPS works and how to configure it properly,
+  read admin's guide available from OpenSIPS website. We also
+  urge you to read latest ISSUES (available from OpenSIPS website 
+  too) and check for potential problems in this release.
+  Users of previous releases are encouraged to read NEWS to
+  learn how to move to this new OpenSIPS version.
+  
+
+TOC
+
+1. Supported Architectures and Requirements
+2. Howto Build opensips From Source Distribution
+3. Quick-Start Installation Guide
+   A) Getting Help
+   B) Disclaimers
+   C) Quick Start
+   D) opensips with Persistent Data Storage
+   E) osipsconsole installation	
+   F) menuconfig installation
+4. Troubleshooting
+
+
+
+1. Supported Architectures and Requirements
+-------------------------------------------
+
+Supported architectures: Linux/i386, Linux/armv4l, FreeBSD/i386, OpenBSD/i386
+Solaris/sparc64, NetBSD/sparc64
+(for other architectures the Makefiles might need to be edited)
+
+There are various configuration options defined in the Makefile.
+
+Requirements:
+
+
+- gcc / suncc / icc : gcc >= 2.9x; 4.[012] recommended (it will work with 
+   older version but it might require some options tweaking for best 
+   performance)
+- bison or yacc (Berkley yacc)
+- flex
+- GNU make (on Linux this is the standard "make", on FreeBSD and Solaris is
+   called "gmake") version >= 3.79.
+- sed and tr (used in the makefiles)
+- GNU tar ("gtar" on Solaris) and gzip if you want "make tar" to work
+- GNU install or BSD install (on Solaris "ginstall") if you want "make
+  install", "make bin", "make sunpkg" to work
+- openssl if you want to compile the TLS support
+- libsctp if you want to compile the SCTP support
+- libmysqlclient & libz (zlib) -libs and devel headers- if you want mysql DB
+   support (the db_mysql module)
+- libpq / postgresql -libs and devel headers- if you want postgres DB
+   support (the db_postgres module)
+- unixodbc -libs and devel headers- if you want unixodbc DB
+   support (the db_unixodbc module)
+- libexpat if you want the jabber gateway support (the jabber module) or the
+   XMPP gateway support
+- libxml2 if you want to use the cpl-c (Call Processing Language) or
+   the presence modules (presence and pua*)
+- libradius-ng -libs and devel headers- if you want to use functionalities
+   with radius support - authentication, accounting, group support, etc
+- unixodbc - libs and devel headers - if you want UNIXODBC support as
+   DB underlayer
+- libxmlrpc-c3 - libs and devel headers - if you want to have XML-RPC support
+   for the Management interface (MI)
+- libperl - libs and devel headers - if you want PERL connector to support
+   perl scripting from you config file (perl module)
+- libsnmp9 - libs and devel headers - if you want SNMP client functionality 
+   (SNMP AgentX subagent) for opensips
+- libldap libs and devel headers v2.1 or greater - if you want LDAP support
+- libconfuse and devel headers - if you want to compile the carrierroute
+  module
+- libncurses5-dev and m4 - if you want to use the menuconfig graphical user interface
+  for configuring OpenSIPS compilation & cfg file options
+
+OS Notes:
+
+- FreeBSD/OpenBSD/NetBSD: make sure gmake, bison or yacc & flex are installed
+- Solaris: as above; you can use Solaris's yacc instead of bison. You might
+  need also gtar and ginstall.
+
+
+2. Howto Build opensips From Source Distribution
+-------------------------------------------
+
+(NOTE: if make doesn't work try gmake  instead)
+
+- compile with default options (TLS support is enabled by "TLS=1"; SCTP
+support is enabled by "SCTP=1"):
+
+make   #builds only opensips core, equivalent to make opensips
+make modules
+
+or make all #builds everything
+
+-compile debug mode version
+
+make mode=debug all
+
+-compile only the textops module
+
+make modules=modules/textops modules
+
+-compile all the "default" modules except textops and db_mysql
+
+make skip_modules="textops db_mysql" modules
+
+-compile all default modules and include uri_radius (not compiled by default):
+
+make include_modules="uri_radius" modules
+
+-compile all the modules from the modules subdirectory (even the one excluded
+by default):
+
+make exclude_modules="" modules
+
+-compile all the modules from the modules subdirectory excluding exec:
+
+make exclude_modules=exec modules
+or
+make exclude_modules="" skip_modules=exec modules
+
+-generate README file for textops module
+
+make modules=modules/textops modules-readme
+
+-compile with gcc-3.2 instead of gcc
+
+make CC=gcc-3.2 all
+
+or
+
+CC=gcc-3.2 make all
+
+
+Make targets:
+
+Clean:
+
+make clean   (clean the modules too)
+make proper  (clean also the dependencies)
+make distclean (the same as proper)
+make mantainer-clean (clean everything, including auto generated files,
+ tags, *.dbg a.s.o)
+
+Compile:
+
+make proper
+make
+(or gmake on non-Linux systems)
+make modules 
+or make modules exclude_modules="exec" etc.
+
+Make tags:
+
+make TAGS
+
+Create a tar.gz with the sources (in ../):
+
+make tar
+
+Create a tar.gz with the binary distribution (in ../):
+
+make bin
+
+Create a gzipped solaris package (in ../):
+
+make sunpkg
+
+Create debian packages (in ../):
+
+make deb
+
+or
+
+dpkg-buildpackage
+
+Install:
+
+make prefix=/usr/local  install
+
+Note: If you use prefix parameter in make install then you also need
+to use this parameter in previous make commands, i.e. make, make modules,
+or make all. If you fail to do this then OpenSIPS will look for the default
+configuration file in a wrong directory, because the directory of the
+default configuration file is hard coded into opensips during compile time. 
+When you use a different prefix parameter when installing then the 
+directory hard coded in opensips and the directory in which the file will be 
+installed by make install will not match. (You can specify exact location
+of the configuration file using -f parameter of opensips).
+
+For example, if you do the following:
+make all
+make prefix=/ install
+
+Then the installation will put the default configuration file into
+/etc/opensips/opensips.cfg (because prefix is /), but opensips will look for the
+file in /usr/local/etc/opensips/opensips.cfg (because there was no prefix
+parameter in make all and /usr/local is the default value of prefix).
+
+Workaround is trivial, use the same parameters in all make commands:
+make prefix=/ all
+make prefix=/ install
+
+That applies to other make parameters as well (for example parameters
+"modules" or "excluded_modules").
+
+
+Start graphical user interface:
+
+make menuconfig
+
+
+3. Quick-Start Installation Guide
+----------------------------------------------
+
+A) Getting Help
+
+This guide gives you instructions on how to quickly set up OpenSIPS 
+on your box. In case the default configuration does not fly, check 
+documentation at opensips site
+  http://www.opensips.org/
+to learn how to configure OpenSIPS for your site.
+
+If the documentation does not resolve your problem you may try contacting 
+our user forum by E-mail at users@opensips.org -- that is the mailing list 
+of opensips community. To participate in the mailing list, subscribe at the 
+following web address:
+  http://www.opensips.org/cgi-bin/mailman/listinfo/users
+
+
+B) Disclaimers
+
+Note well the default "quick-start" configuration is very simple in order 
+to be easily installable. It provides minimum features. Particularly, 
+authentication is by default disabled, which means anyone can register using
+any name with the server. (This is on purpose to avoid installation 
+dependencies on MySQL which is needed for storing user credentials.)
+
+
+C) Quick Start
+
+The following step-by step guide gives you instructions how to install the 
+sql-free distribution of opensips. If you need persistence and authentication, 
+then you have to install additional MySql support -- proceed to section D)
+after you are finished with C).
+
+1) Download an RPM or debian package from our site
+     http://opensips.org/pub/opensips/latest/packages/
+If you don't use an rpm or debian based distribution, see if corresponding 
+packages are available or try our tar.gz'ed binaries.
+If you use Gentoo Linux you do not have to download a package.
+For debian, packages are available via the Debian official repositories for
+testing and unstable. For stable, use the project's repository at:
+     deb http://www.opensips.org/debian stable main
+
+2) install the package
+RPM:
+    rpm -i <package_name>
+debian:
+    dpkg -i <package_name>
+    or if APT repository is used:
+    apt-get install <package_name> 
+gentoo:
+    emerge opensips
+    (or if use only stable packets: ACCEPT_KEYWORDS="~x86" emerge opensips)
+tar.gz:
+    cd /; tar zxvf <package_name>_os_arch.tar.gz
+    (it will install in /usr/local/, and the configuration file in
+     /usr/local/etc/opensips/opensips.cfg)
+Solaris:
+    gunzip <package_name>.gz ; pkgadd -d <package_name>
+*BSD:
+    pkg_add package_name
+    Note that the OpenSIPS package is in the FreeBSD package tree included, 
+    but is not present in the OpenBSD and NetBSD repository. You'll probably
+    have more luck trying to build directly from the source with the tar.gz,
+    as the package files for this systems are somewhat out of date at the
+    moment.
+
+3) start the server
+RPM + gentoo:
+    /etc/init.d/opensips start
+debian:
+    opensips is started automatically after the install
+    (in case something fails you can start it with /etc/init.d/opensips start)
+tar.gz:
+    the tar.gz does not include an init.d script, you'll have to create one of
+    your own or adapt one from the source distribution (debian/init.d,
+    rpm/opensips.init.*, gentoo/opensips.init)
+    You can start opensips directly with /usr/local/sbin/opensips.
+Solaris:
+    see tar.gz.
+
+4) optionally, watch server's health using the opensipsctl utility
+    - to do so, first set the environment variable SIP_DOMAIN to your domain 
+      name, e.g., in Bourne shell, call
+        export SIP_DOMAIN="myserver.foobar.com"
+    - if you are using other than 'localhost' mysql server for maintaining
+      subscriber database, change the variable 'SQL_HOST' to the proper
+      host name in the opensipsctl script
+    - run the opensipsctl utility
+        /usr/sbin/opensipsctl moni
+      or
+        /usr/local/sbin/opensipsserctl moni (if you installed from a tar.gz
+        or solaris package)
+    - you can create a resource file for opensipsctl, name it .opensipsctlrc
+      and place it in your home directory. You can set there the values for
+      opensipsctl variables (e.g., SIP_DOMAIN, SQL_HOST, SQL_USER, SQL_DB ...)
+
+5) Register with the server using your favourite SIP User Agent.
+   For example, users of Windows Messenger need to set
+   in Tools->Options->Accounts the following values:
+     Sign-in Name: <username>@<your_server_address>
+     Advanced->Configure Settings (on)
+     Advanced->Server: <your_server_address>
+     Connect Using: UDP
+
+
+
+D) opensips with Persistent Data Storage
+
+The default configuration is very simple and features many simplifications. 
+In particular, it does not authenticate users and loses User Location database 
+on reboot. To provide persistence, keep user credentials and remember users' 
+locations across reboots, opensips can be configured to use MySQL. Before you
+proceed, you need to make sure MySQL is installed on your box.
+
+1) Download the package containing mysql support for opensips from: 
+    http://www.opensips.org/pub/opensips/
+    (rpm and deb provided, most of the binary tar.gz distributions and the 
+     solaris package include it; if it is not present you'll have to rebuild
+     from the source).
+   For gentoo please include 'mysql' to your USE variable in /etc/make.conf
+   or give it as variable to the emerge command.
+2) install the package
+    RPM based:
+      rpm -i <package_name>
+    DEB based:
+      dpkg -i <package_name> 
+      or if APT repository is used
+      apt-get install <package_name> 
+    Gentoo Linux:
+      emerge opensips
+      (if do not want to put 'mysql' into your USE variable you can type:
+      USE="mysql" emerge opensips)
+3) create SQL tables
+    You must specify your database type in the /etc/opensipsctlrc file, e.g.
+    MySQL. See section 7 for an explanation of further possible parameters.
+    - if you have a previously installed OpenSIPS on your system, use
+         /usr/sbin/opensipsdbctl migrate
+      to convert your OpenSIPS database into new structures
+      NOTE: "migrate" is available only for mysql DBs
+    - otherwise, if this is your very first installation, use
+         /usr/sbin/opensipsdbctl create
+      to create OpenSIPS database structures
+      (you will be prompted for password of MySQL "root" user)
+
+4) configure opensips to use SQL
+    uncomment all lines in configuration file opensips.cfg which are related to 
+    authentication:
+    - loadmodule "/usr/lib/opensips/modules/db_mysql.so"
+    - loadmodule "/usr/lib/opensips/modules/auth.so"
+    - loadmodule "/usr/lib/opensips/modules/auth_db.so"
+    - modparam("usrloc", "db_mode", 2)
+    - modparam("auth", "calculate_ha1", yes)
+    - modparam("auth_db", "password_column", "password")
+    - if (!www_authorize("sip.org", "subscriber")) {
+        www_challenge("sip.org", "0"); 
+        break;
+      };
+5) be sure to replace realm, the first parameter in www_* actions, 
+   with name of your server; some broken UAC implementations don't 
+   authenticate otherwise; the authentication command in your
+   configuration script should look then like this:
+      if (!www_authorize("myserver.foobar.com", "subscriber")) {
+        www_challenge("myserver.foobar.com", "0"); 
+        break;
+      }
+6) restart the server
+    /etc/init.d/opensips restart
+7) you can now start  managing the server using the opensipsctl utility; 
+   you need to first set the environment variable SIP_DOMAIN to your 
+   local SIP realm, e.g.,
+       export SIP_DOMAIN="myserver.foobar.com"
+   or you can configure via the resource file for opensipsctlrc. The default
+   file is installed in the etc/ directory of your installation (along with the
+   OpenSIPS config file). For per user configuration, create .opensipsctlrc
+   in your home directory.
+   You can set there the values for opensipsctl variables like:
+        SIP_DOMAIN - your SIP domain
+        DBENGINE - database type: MYSQL, PGSQL or DBTEXT by default none is loaded
+        DBHOST - database host
+        DBNAME - database name
+        DBRWUSER - database read/write user
+        DBROUSER - database read only user
+        DBROPW - password for database read only user
+        DBROOTUSER - database super user
+        ALIASES_TYPE - type of aliases used:
+                        DB - database aliases
+                        UL - usrloc aliases
+                        default none
+        CTLENGINE - control engine: FIFO or UNIXSOCK
+        OSIPS_FIFO - path to FIFO file
+        VERBOSE - verbose - debug purposes - default '0'
+
+   a) watch the server status using 'opensipsctl moni'
+   b) try to login with your SIP client as user 'admin' with 
+      password 'opensipsrw'
+   c) try adding new users using 
+       'opensipsctl add <name> <password> <email>'
+
+8) default values (database url, users and passwords) are:
+   - db_default_url="mysql://opensips:opensipsrw@localhost/opensips"
+   - r/w user: opensips ; passwd: opensipsrw
+   - r/o user: opensipsro ; passwd: opensipsro
+     VERY IMPORTANT NOTE: for security reasons, do change the values of 
+     passwords after installation
+
+E) osipsconsole installation
+
+1) Perl requirements
+
+	For the osipsconsole tool the following perl modules are needed:  
+
+	DBI
+	DBD::mysql 
+	DBD::Pg 
+	DBD::Oracle 
+	BerkeleyDB
+	Frontier::RPC2
+
+2) Debian/Ubuntu Installation
+
+    In order for the script to work, there are listed bellow the modules 
+    needed and their debian package correspondent, a brief description of each 
+    package and whether it is mandatory to install it or not. ( To be mentioned
+    the fact that these packages have been tested in Debian and Ubuntu 
+    distros. )
+
+Perl module        | Debian Package         | Description           | Use
+---------------------------------------------------------------------------
+perl               |perl                    |Practical Extraction   | mandatory
+                   |                        |and Report Language    |
+
+DBI                |libdbi-perl             |Perl database interface| mandatory
+
+DBD::mysql         |libdbd-mysql-perl       |MySQL driver for the   |*optional
+                   |                        |Perl5 DBI              |
+
+DBD::Pg            |libdbd-pg-perl          |PostgreSQL database    |*optional
+                   |                        |driver for DBI module  |
+
+**DBD::Oracle      |       ------           |Oracle database driver |*optional
+                   |                        |for the DBI module     |
+
+Frontier::RPC2     |libfrontier-rpc-perl    |encode/decode RPC2     | mandatory
+                   |                        |format XML     |
+
+Term::ReadLine::Gnu|libterm-readline-gnu-per|Perl extension for the | mandatory
+                   |                        |GNU Readline/History Lib|
+
+BerkeleyDB         |libberkeleydb-perl      |Perl extension for     | mandatory
+                   |                        |Berkeley database      |
+                   |                        |version 2, 3 or 4      |
+
+
+   Install these packages using apt-get:
+
+    apt-get install perl libdbi-perl libdbd-mysql-perl libdbd-pg-perl
+		    libfrontier-rpc-perl libterm-readline-gnu-perl 
+		    libberkeleydb-perl
+
+   NOTE: * packages are at the user's choice. At least one of them is 
+         mandatory, depending on the DB type used by OpenSIPS. The other
+         ones have no need of being installed.
+         ** For the DBD::Oracle module there is no debian package. This 
+         will be installed as follows:
+         - Download the .tar.gz archive from: 
+	   http://search.cpan.org/~pythian/DBD-Oracle-1.22/Oracle.pm
+	     - Decompress and unpack it 
+	     - cd DBD-Oracle-1.22
+	     - perl Makefile.PL
+	     - make
+	     - make test
+	     - make install
+
+F) menuconfig installation
+
+The Interface allows the user to do the following :
+
+1. Configure OpenSIPS compilation related options such as :
+    - Compilation Flags. For example, the user can now easily compile in TCP
+      support from within the GUI, or enable memory allocation debugging, etc.
+      Each compilation flag functionality is explained in short in the GUI.
+    - Module Compilation Selection. The user can now easily select to compile
+      modules that have external dependencies, and that are not compiled in
+      by default. For example, the user can choose to also enable the MySQL
+      support by enabling the db_mysql module. The interface will also notify
+      the user about the dependencies that must be installed based on the modules
+      that the user has selected.
+    - Installation Prefix. The user can use the GUI to configure the OpenSIPS
+      installation path to be used
+
+2. Install OpenSIPS and Cleanup OpenSIPS sources
+    - Upon configuring OpenSIPS related options from above,
+      the user can choose to install OpenSIPS directly from the GUI.
+
+3. Generate OpenSIPS config files
+    - The tool can also generate OpenSIPS configuration files based on the 
+      user's preferences. So far, we have defined three main classes of OpenSIPS
+      configuration files :
+        - Residential
+        - Trunking
+        - Load-balancer
+
+   For each type of configuration file, the user can choose to enable/disable 
+   certain options. For example, for the Residential script, the user can choose
+   to enable presence support, to handle NAT, and many more. After the user has
+   properly configured it's desired OpenSIPS script in the GUI, it will have the
+   option to generate and obtain the final OpenSIPS cfg.
+
+
+If you have installed OpenSIPS from packages ( debs, rpms, etc ) and not from sources,
+you will still be able to use the graphical interface for generating configuration files,
+by running
+	osipsconfig
+
+
+4. Troubleshooting
+------------------
+
+Q: SIP requests are replied by opensips with "483 Too Many Hops" or 
+   "513 Message Too Large"
+
+A: In both cases, the reason is probably an error in request routing script 
+   which caused an infinite loop. You can easily verify whether this happens 
+   by watching SIP traffic on loopback interface. A typical reason for
+   misrouting is a failure to match local domain correctly. If a server fails
+   to recognize a request for itself, it will try to forward it to current URI
+   in believe it would forward them to a foreign domain. Alas, it forwards the
+   request to itself again. This continues to happen until value of
+   max_forwards header field reaches zero or the request grows too big.
+   Solutions is easy: make sure that domain matching 
+   is correctly configured. A quick way to achieve that is to introduce a config
+   option to opensips.cfg: alias=domainname, where domainname shall be replaced
+   with name of domain, which you wish to server and which appears in
+   request-URIs.

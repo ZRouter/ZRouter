@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE table PUBLIC "-//opensips.org//DTD DBSchema V1.1//EN" 
+  "http://opensips.org/pub/opensips/dbschema/dtd/1.1/dbschema.dtd" [
+
+<!ENTITY % entities SYSTEM "entities.xml">
+%entities;
+
+]>
+
+<table id="dr_carriers" xmlns:db="http://docbook.org/ns/docbook">
+	<name>dr_carriers</name>
+	<version>2</version>
+	<type db="mysql">&MYSQL_TABLE_TYPE;</type>
+	<description>
+		<db:para>This table is used by the Dynamic Routing module to define
+		carriers (a carrier is defined by a list of gateways and an ordering
+		rule).
+		More information can be found at: &OPENSIPS_MOD_DOC;drouting.html.
+		</db:para>
+	</description>
+
+	<column id="id">
+		<name>id</name>
+		<type>unsigned int</type>
+		<size>&table_id_len;</size>
+		<autoincrement/>
+		<natural/>
+		<primary/>
+		<type db="dbtext">int,auto</type>
+		<description>Table key, not used by module</description>
+	</column>
+
+	<column id="carrierid">
+		<name>carrierid</name>
+		<type>string</type>
+		<size>64</size>
+		<description>Unique ID of the carrier</description>
+	</column>
+
+	<column id="gwlist">
+		<name>gwlist</name>
+		<type>string</type>
+		<size>255</size>
+		<description>Reference to the GWs/destinations from the list.
+		</description>
+	</column>
+
+	<column id="flags">
+		<name>flags</name>
+		<type>unsigned int</type>
+		<size>&flag_len;</size>
+		<default>0</default>
+		<description>Flags (for different purposes) of the carriers
+		</description>
+	</column>
+
+	<column id="state">
+		<name>state</name>
+		<type>unsigned int</type>
+		<size>&flag_len;</size>
+		<default>0</default>
+		<description>The state of the carrier (on / off).
+		</description>
+	</column>
+
+	<column id="attrs">
+		<name>attrs</name>
+		<type>string</type>
+		<size>255</size>
+		<null/>
+		<default></default>
+		<description>Attributes string for the carrier
+		</description>
+	</column>
+
+	<column id="description">
+		<name>description</name>
+		<type>string</type>
+		<size>128</size>
+		<default></default>
+		<description>Text description of the GW list</description>
+	</column>
+
+	<index>
+		<name>dr_carrier_idx</name>
+		<colref linkend="carrierid"/>
+		<unique/>
+	</index>
+
+
+</table>

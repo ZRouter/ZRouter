@@ -1,0 +1,67 @@
+<!-- $Id$ -->
+
+<!-- Entities often used in the documentation -->
+
+<!ENTITY fhg "FhG FOKUS">
+<!ENTITY vsname "Voice Sistem SRL">
+<!ENTITY voicesystem "Voice Sistem SRL">
+
+<!ENTITY osips "OpenSIPS">
+<!ENTITY osipsname "Open SIP Server">
+
+<!ENTITY osipssolname "OpenSIPS Solutions">
+<!ENTITY osipssol "<ulink url='http://www.opensips-solutions.com/'>www.opensips-solutions.com</ulink>">
+
+<!ENTITY osipshome "http://www.opensips.org/">
+<!ENTITY osipsbugs "https://github.com/OpenSIPS/opensips/issues">
+<!ENTITY osipshelp "http://lists.opensips.org/cgi-bin/mailman/listinfo/users">
+<!ENTITY osipsusers "http://lists.opensips.org/cgi-bin/mailman/listinfo/users">
+<!ENTITY osipsdev "http://lists.opensips.org/cgi-bin/mailman/listinfo/devel">
+<!ENTITY osipsdbdocs "http://www.opensips.org/html/docs/db/db-schema-devel.html">
+
+<!ENTITY osipshomelink "<ulink url='&osipshome;'>&osipshome;</ulink>">
+<!ENTITY osipsbugslink "<ulink url='&osipsbugs;'>&osipsbugs;</ulink>">
+<!ENTITY osipshelplink "<ulink url='&osipshelp;'>&osipshelp;</ulink>">
+<!ENTITY osipsuserslink "<ulink url='&osipsusers;'>&osipsusers;</ulink>">
+<!ENTITY osipsdevlink "<ulink url='&osipsdev;'>&osipsdev;</ulink>">
+<!ENTITY osipsdbdocslink "<ulink url='&osipsdbdocs;'>&osipsdbdocs;</ulink>">
+
+<!ENTITY osipshelpmail "<email>users@lists.opensips.org</email>">
+<!ENTITY osipsusersmail "<email>users@lists.opensips.org</email>">
+<!ENTITY osipsdevmail "<email>devel@lists.opensips.org</email>">
+
+<!ENTITY adminguide "Admin Guide">
+<!ENTITY develguide "Developer Guide">
+<!ENTITY faqguide "Frequently Asked Questions">
+
+<!ENTITY defaultdb "mysql://opensips:opensipsrw@localhost/opensips">
+<!ENTITY defaultrodb "mysql://opensipsro:opensipsro@localhost/opensips">
+<!ENTITY exampledb "dbdriver://username:password@dbhost/dbname">
+
+<!-- Often used acronyms -->
+
+<!ENTITY sip "<acronym>SIP</acronym>">
+<!ENTITY sdp "<acronym>SDP</acronym>">
+<!ENTITY rtp "<acronym>RTP</acronym>">
+<!ENTITY pstn "<acronym>PSTN</acronym>">
+<!ENTITY http "<acronym>HTTP</acronym>">
+<!ENTITY ruri "<acronym>R-URI</acronym>">
+<!ENTITY uri "<acronym>URI</acronym>">
+<!ENTITY url "<acronym>URL</acronym>">
+<!ENTITY uac "<acronym>UAC</acronym>">
+<!ENTITY uas "<acronym>UAS</acronym>">
+<!ENTITY ua "<acronym>UA</acronym>">
+<!ENTITY nat "<acronym>NAT</acronym>">
+<!ENTITY ip "<acronym>IP</acronym>">
+<!ENTITY udp "<acronym>UDP</acronym>">
+<!ENTITY ietf "<ulink url='http://www.ietf.org'>IETF</ulink>">
+<!ENTITY im "<acronym>IM</acronym>">
+<!ENTITY smtp "<acronym>SMTP</acronym>">
+<!ENTITY gnu "<ulink url='http://www.gnu.org'>GNU</ulink>">
+<!ENTITY gpl "<ulink url='http://www.gnu.org/licenses/licenses.html#GPL'>GPL</ulink>">
+
+<!-- Often used RFCs -->
+
+<!ENTITY rfc3261 "<ulink url='http://www.ietf.org/rfc/rfc3261.txt'>RFC3261</ulink>">
+<!ENTITY rfc822 "<ulink url='http://www.ietf.org/rfc/rfc822.txt'>RFC822</ulink>">
+<!ENTITY rfc2543 "<ulink url='http://www.ietf.org/rfc/rfc2543.txt'>RFC2543</ulink>">
