@@ -6,7 +6,7 @@ CDIR=${.CURDIR}/../../../contrib/lzo2
 
 CFLAGS+=	-I${CDIR} -I${CDIR}/include
 
-NO_MAN=
+MK_MAN= no	
 
 SRCS=		\
     lzo_crc.c lzo_init.c lzo_ptr.c lzo_str.c lzo_util.c \

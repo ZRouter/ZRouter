@@ -1,5 +1,5 @@
 PROG=hex2bin
-NO_MAN=MAN
+MK_MAN=no
 CFLAGS+=-Wall
 BINDIR?=/usr/bin/
 

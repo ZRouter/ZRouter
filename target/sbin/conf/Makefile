@@ -10,14 +10,14 @@ HEADERS=	conf_param.h conf_node.h conf_nodelist.h conf_parsers.h conf_conf.h con
 
 .if ${WITH_XML_PARSER} == 1
 CFLAGS+= 	-DWITH_XML_PARSER
-LDADD+=		-lbsdxml
+LIBADD+=	bsdxml
 SRCS+=		conf_xml.c
 HEADERS+=	conf_xml.h
 .endif
 
 SRCS+=		${HEADERS}
 PROG=		conf
-NO_MAN=		NO_MAN
+MK_MAN=	 no	
 
 test:	${PROG}
 	./${PROG}

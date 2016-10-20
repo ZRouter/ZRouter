@@ -4,7 +4,7 @@ SHLIB_NAME?=	luaposix.so
 LIBDIR?= 	/usr/lib/lua
 SRCS=		lposix.c
 CFLAGS+=	-I${.CURDIR}/../lua/
-NO_MAN=
+MK_MAN=		no	
 
 .include <bsd.lib.mk>
 

@@ -8,7 +8,7 @@ CDIR=${.CURDIR}/../../../contrib/igmpproxy/
 CFLAGS+=	-I${CDIR}
 
 PROG=		igmpproxy
-NO_MAN=
+MK_MAN=	 	no	
 
 PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin

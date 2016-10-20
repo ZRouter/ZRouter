@@ -9,9 +9,9 @@ SRCS=	lapi.c lcode.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c \
 # MYCFLAGS="-DLUA_USE_LINUX"
 
 PROG=		lua
-NO_MAN=
+MK_MAN=		no	
 DPADD=		${LIBM}
-LDADD=		-lm
+LIBADD=		m
 # -ldl
 CFLAGS+=	-DLUA_USE_DLOPEN -DLUA_USE_POSIX
 

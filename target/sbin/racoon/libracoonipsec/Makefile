@@ -15,7 +15,7 @@ CLEANFILES+=	policy_parse.c policy_token.c y.tab.h
 #/bin/sh ../../ylwrap policy_parse.y y.tab.c policy_parse.c y.tab.h policy_parse.h y.output policy_parse.output -- bison -y  -d -p __libipsec
 
 
-NO_MAN=
+MK_MAN=		no
 
 SHLIB_MAJOR= 	0
 SHLIBDIR?= 	/lib

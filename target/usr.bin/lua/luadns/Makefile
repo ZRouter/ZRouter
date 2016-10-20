@@ -14,14 +14,14 @@ SRCS+= 			\
 	test.c
 CFLAGS+=	-I. -I${CDIR} -I${.CURDIR}/../lua/
 CFLAGS+=	-DNDEBUG
-NO_MAN=
+MK_MAN=	 	no	
 
 .include <bsd.lib.mk>
 
 
 
 
-#LDADD+=		-lm
+#LIBADD+=		-lm
 #DPADD+=		${LIBM}
 
 #ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/dig//}

@@ -2,11 +2,11 @@
 LOCALBASE?=/usr/local
 DEBUG?=-g -DDEBUG=1
 PROG=conf
-NO_MAN=MAN
+MK_MAN=no
 CFLAGS+= ${DEBUG} -Wall -I${LOCALBASE}/include
 LDFLAGS+= ${DEBUG} -L${LOCALBASE}/lib
 BINDIR?=/bin/
-LDADD+=-ljson
+LIBADD+=json
 DPADD+=${LIBJSON}
 
 .PHONY=test

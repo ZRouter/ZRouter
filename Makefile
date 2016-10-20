@@ -72,11 +72,11 @@ show-target-pairs:
 ##############################################################################
 .include "socs/socs.mk"
 
-.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
-TARGET_ARCH_SUBDIR=	""
-.else
+#.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
+#TARGET_ARCH_SUBDIR=	""
+#.else
 TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
-.endif
+#.endif
 ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
 KERNEL_HINTS+=	hw.soc.vendor=\"${SOC_VENDOR}\"

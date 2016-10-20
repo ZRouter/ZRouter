@@ -3,6 +3,6 @@
 PROG=cdevd
 CFLAGS+=-Wall
 BINDIR?=/sbin/
-NO_MAN=MAN
+MK_MAN=no
 
 .include <bsd.prog.mk>

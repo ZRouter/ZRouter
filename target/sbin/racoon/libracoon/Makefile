@@ -8,7 +8,7 @@ CFLAGS+=	-I${CDIR} -I${CDIR}/src/libipsec -I${CDIR}/src/racoon
 CFLAGS+=	-DHAVE_CONFIG_H
 
 
-NO_MAN=
+MK_MAN=		no 
 
 SHLIB_MAJOR= 	0
 SHLIBDIR?= 	/lib

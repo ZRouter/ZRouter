@@ -15,7 +15,7 @@ CFLAGS+=		\
 	-DVER=\"$(VER)\" \
 	-DSSH_PATH=\"$(SSH)\"
 
-NO_MAN=
+MK_MAN=		no 
 
 PREFIX?=		/
 BINDIR?=		${PREFIX}/sbin

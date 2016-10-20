@@ -22,6 +22,6 @@ LIBDIR?= 	/usr/lib/lua
 CFLAGS+=	-I${CDIR}
 CFLAGS+=	-I${.CURDIR}/../../lua/
 
-NO_MAN=
+MK_MAN=		no	
 
 .include <bsd.lib.mk>

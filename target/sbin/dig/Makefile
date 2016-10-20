@@ -5,7 +5,7 @@ CDIR=${.CURDIR}/../../../contrib/spcdns/src
 
 BINDIR?=	/sbin/
 PROG=		dig
-NO_MAN=
+MK_MAN=		no	
 
 CFLAGS+=	-I. -I${CDIR} 
 CFLAGS+=	-DNDEBUG
@@ -16,7 +16,7 @@ SRCS+= 			\
 	netsimple.c	\
 	test.c
 
-LDADD+=		-lm
+LIBADD+=		m
 DPADD+=		${LIBM}
 
 ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/dig//}

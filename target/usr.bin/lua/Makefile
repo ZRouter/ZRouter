@@ -1,9 +1,9 @@
-
-DIR=		/usr/lib/lua
-SHLIBDIR= 	${DIR}
-LIBDIR= 	${DIR}
+STAGEDIR=	/usr/lib
+DIR=		lua
+SHLIBDIR= 	${STAGEDIR}${DIR}
+LIBDIR= 	${STAGEDIR}${DIR}
 SUBDIR=		lua luadns luaexpat luaposix luasocket luasysctl luasyslog
 
-PREINSTALLDIRS+=${DIR}
+PREINSTALLDIRS+=${STAGEDIR}${DIR}
 
 .include <bsd.subdir.mk>

@@ -9,6 +9,6 @@ CFLAGS+=	-I${.CURDIR}/../../lua/
 SHLIB_NAME= 	${NAME}-core.so
 LIBDIR?= 	/usr/lib/lua
 
-NO_MAN=
+MK_MAN= no 
 
 .include <bsd.lib.mk>

@@ -5,7 +5,7 @@ CDIR=		${.CURDIR}/../../../../contrib/racoon2/
 
 CFLAGS+=	-I${CDIR} -I${CDIR}/lib/
 
-NO_MAN=
+MK_MAN=		no	
 
 SHLIB_MAJOR= 	0
 SHLIBDIR?= 	/lib

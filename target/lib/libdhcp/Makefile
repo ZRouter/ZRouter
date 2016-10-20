@@ -6,7 +6,7 @@ DHCPDIR=${.CURDIR}/../../../contrib/dhcp
 
 CFLAGS+=	-I${DHCPDIR} -I${DHCPDIR}/includes
 
-NO_MAN=
+MK_MAN=	no	
 
 SRCS=		raw.c parse.c nit.c icmp.c dispatch.c conflex.c upf.c bpf.c \
 	socket.c lpf.c packet.c memory.c print.c options.c inet.c convert.c \

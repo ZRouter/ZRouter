@@ -5,7 +5,7 @@ DPADD=		${LIBMD}
 LDADD=		-lmd -lutil
 BINDIR?=	/sbin/
 CFLAGS+=	-Wall -static
-NO_MAN=		yet
+MK_MAN=		no	
 
 .if !defined(WITHOUT_HTTP_MODE)
 SRCS+=		http_input.c

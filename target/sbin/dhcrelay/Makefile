@@ -8,11 +8,11 @@ DHCPDIR=${.CURDIR}/../../../contrib/dhcp
 CFLAGS+=	-I${DHCPDIR} -I${DHCPDIR}/includes
 
 PROG=		dhcrelay
-NO_MAN=
+MK_MAN=	 	no	
 
 PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin
-LDADD+=		-ldhcp
+#LIBADD+=	dhcp
 DPADD+=		${LIBDHCP}
 
 ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/dhcrelay//}

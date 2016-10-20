@@ -5,7 +5,7 @@ CDIR=${.CURDIR}/../../../contrib/openvpn
 
 BINDIR?=	/sbin/
 PROG=		openvpn
-MAN=		openvpn.8
+#MAN=		openvpn.8
 
 CFLAGS+=	-I. -I${CDIR} 
 CFLAGS+=	-DHAVE_CONFIG_H
@@ -73,7 +73,7 @@ SRCS+= 			\
 #LDFLAGS+=	-L/usr/lib
 
 
-LDADD+=		-lssl -lcrypto -llzo2
+LIBADD+=	ssl crypto lzo2
 DPADD+=		${LIBSSL} ${LIBCRYPTO} ${LIBLZO2}
 
 ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/openvpn//}

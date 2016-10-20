@@ -8,7 +8,7 @@ DIR=${.CURDIR}/../../../contrib/ser2net
 CFLAGS+=	-I${DIR} -I${.CURDIR}
 
 PROG=		ser2net
-NO_MAN=
+MK_MAN=		no	
 
 PREFIX?=		/
 BINDIR?=		${PREFIX}/sbin

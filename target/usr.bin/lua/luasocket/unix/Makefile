@@ -17,7 +17,7 @@ SRCS=		\
 CFLAGS+=	-I${CDIR}
 CFLAGS+=	-I${.CURDIR}/../../lua/
 
-NO_MAN=
+MK_MAN= no	
 
 
 

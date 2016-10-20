@@ -9,8 +9,8 @@ CFLAGS+=	-DNO_IPV6
 #CFLAGS+=	 -DHAVE_IDN
 
 PROG=		dnsmasq
-NO_MAN=
-
+MK_MAN= no
+	
 PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin
 

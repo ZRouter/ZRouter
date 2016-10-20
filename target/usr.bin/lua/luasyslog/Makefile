@@ -4,7 +4,7 @@ SHLIB_NAME?=	syslog.so
 LIBDIR?= 	/usr/lib/lua
 SRCS=		lsyslog.c
 CFLAGS+=	-I${.CURDIR}/../lua/
-NO_MAN=
+MK_MAN=		no	
 
 .include <bsd.lib.mk>
 

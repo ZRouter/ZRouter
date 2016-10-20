@@ -5,13 +5,15 @@
 .PATH: ${.CURDIR}/../../../contrib/shttpd/src
 
 PROG=		shttpd
-MAN=		shttpd.1
+#MAN=		shttpd.1
+MK_MAN=		no
+
 
 PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin
 VERSION=	5.6a1
 
-LDADD+=		-lpthread
+LIBADD+=	pthread
 DPADD+=		${LIBPTHREAD}
 
 CFLAGS+=	-g -I${.CURDIR}/../../../contrib/shttpd/src
