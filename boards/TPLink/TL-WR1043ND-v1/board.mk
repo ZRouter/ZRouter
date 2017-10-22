@@ -32,7 +32,16 @@ WITH_USB=yes
 # Builded modules
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
-KERNCONF_DEVICES+=	switch
+KERNCONF_DEVICES+=	gpioiic
+KERNCONF_DEVICES+=	iicbb
+KERNCONF_DEVICES+=	iicbus
+KERNCONF_DEVICES+=	iic
+
+KERNCONF_OPTIONS+=	ARGE_MDIO
+KERNCONF_DEVICES+=	etherswitch
+KERNCONF_DEVICES+=	miiproxy
+KERNCONF_DEVICES+=	rtl8366rb
+WORLD_SUBDIRS_SBIN+=	etherswitchcfg
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
@@ -88,7 +97,8 @@ KERNEL_MAP_START=0x00020000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ mpd ssh shttpd lua_web_ui hostap dhcp nfs_client
+#TARGET_PROFILES+=SMALL_ mpd ssh shttpd lua_web_ui hostap dhcp nfs_client
+TARGET_PROFILES+=xSMALL_
 
 MKULZMA_BLOCKSIZE=65536
 

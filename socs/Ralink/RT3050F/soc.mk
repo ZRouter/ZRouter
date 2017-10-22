@@ -39,7 +39,7 @@ KERNCONF_OPTIONS+=		SCSI_NO_OP_STRINGS
 
 
 # Don't build any modules yet.
-#KERNCONF_MAKEOPTIONS+=	MODULES_OVERRIDE="wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt random if_bridge bridgestp msdosfs md ipfw dummynet libalias geom/geom_label geom/geom_uncompress ufs usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib"
+#KERNCONF_MAKEOPTIONS+=	MODULES_OVERRIDE="wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt random if_bridge bridgestp msdosfs md ipfw dummynet libalias geom/geom_label geom/geom_uzip ufs usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib"
 
 # Debug definitions
 ##KERNCONF_MAKEOPTIONS+=	"DEBUG=-g"
@@ -97,7 +97,7 @@ KERNCONF_DEVICES+=	cfid
 
 KERNCONF_DEVICES+=	nvram2env
 KERNCONF_DEVICES+=	geom_map
-KERNCONF_DEVICES+=	geom_uncompress
+KERNCONF_DEVICES+=	geom_uzip
 
 
 KERNCONF_OPTIONS+=	SCSI_DELAY=1000
