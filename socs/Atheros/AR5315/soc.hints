@@ -1,0 +1,51 @@
+# $FreeBSD$
+hint.apb.0.at="nexus0"
+hint.apb.0.irq=0
+
+# uart0
+hint.uart.0.at="apb0"
+# see atheros/uart_cpu_ar71xx.c why +3
+hint.uart.0.maddr=0x11100003
+hint.uart.0.msize=0x20
+#hint.uart.0.irq=0
+#hint.uart.0.flags="0x30"
+
+# GPIO controller
+hint.gpio.0.at="apb0"
+hint.gpio.0.maddr=0x11000000
+hint.gpio.0.msize=0x1000    
+hint.gpio.0.irq=6
+hint.gpio.0.pinmask=0x007FFFFF
+
+# Watchdog
+hint.ar5315_wdog.0.at="apb0"
+hint.ar5315_wdog.0.irq=7
+
+# ar5315_spi
+hint.spi.0.at="nexus0"
+hint.spi.0.maddr=0x11300000
+hint.spi.0.msize=0x0000000c
+#hint.spi.0.irq=2
+
+# XXX The ath device hangs off of the AHB, rather than the Nexus.
+#hint.ath.0.at="nexus0"
+#hint.ath.0.maddr=0x10000000
+#hint.ath.0.msize=0x100000
+#hint.ath.0.irq=1
+# Where ART is
+#hint.ath.0.eepromaddr=0x083f0000
+
+# pci
+#hint.pcib.0.at="nexus0"
+#hint.pcib.0.irq=0
+
+hint.ath.0.at="nexus0"
+hint.ath.0.maddr=0x10000000
+hint.ath.0.msize=0x100000
+hint.ath.0.irq=1
+hint.ath.0.device_id=0x0013
+
+hint.are.0.at="nexus0"
+hint.are.0.maddr=0x10500000
+hint.are.0.msize=0x500000
+hint.are.0.irq=2

@@ -1,0 +1,54 @@
+#
+#
+#
+
+hint.mx25l.0.at="spibus0"       
+hint.mx25l.0.cs=0
+
+# RF led - pin 2
+#hint.gpioled.0.at="gpiobus0"
+#hint.gpioled.0.name="rfled"
+#hint.gpioled.0.pins=0x0004
+
+# GPIO01  - LED
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins="0x02"
+hint.gpioled.0.name="led1"
+hint.gpioled.0.flags="0x0001"
+
+# GPIO02  - LED
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins="0x04"
+hint.gpioled.2.name="led2"
+hint.gpioled.2.flags="0x0001"
+
+# GPIO03  - LED
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins="0x08"
+hint.gpioled.3.name="led3"
+hint.gpioled.3.flags="0x0001"
+
+# GPIO04  - LED
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.pins="0x10"
+hint.gpioled.4.name="led4"
+hint.gpioled.4.flags="0x0001"
+
+# GPIO07  - LED
+hint.gpioled.5.at="gpiobus0"
+hint.gpioled.5.pins="0x80"
+hint.gpioled.5.name="status"
+hint.gpioled.5.flags="0x0001"
+
+# GEOM redboot FIS directory offset
+hint.redboot.0.fisoffset="0x007e0000"
+
+# etherswitch setting
+hint.e6060sw.0.at="mdio0"
+#hint.e6060sw.0.phymask=0x18
+
+hint.aremdio.0.at="nexus0"
+hint.aremdio.0.maddr=0x10500000
+hint.aremdio.0.msize=0x500000
+
+hint.ath.0.eepromaddr=0x87f0000
