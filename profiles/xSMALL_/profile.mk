@@ -1,3 +1,9 @@
+# shrink the size of the kernel text segment
+# shrink about 8% binary size. compress size is 5% down
+KERNCONF_OPTIONS+=MUTEX_NOINLINE
+KERNCONF_OPTIONS+=RWLOCK_NOINLINE
+KERNCONF_OPTIONS+=SX_NOINLINE
+
 WORLD_SUBDIRS_LIB+= \
 	lib80211 \
 	libbz2 \
