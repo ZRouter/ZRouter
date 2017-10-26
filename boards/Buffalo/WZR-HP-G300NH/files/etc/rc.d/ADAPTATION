@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	/sbin/etherswitchcfg port0 pvid 1
+	/sbin/etherswitchcfg port1 pvid 1
+	/sbin/etherswitchcfg port2 pvid 1
+	/sbin/etherswitchcfg port3 pvid 1
+	/sbin/etherswitchcfg port4 pvid 1
+	/sbin/etherswitchcfg vlangroup1 members none
+	/sbin/etherswitchcfg vlangroup0 vlan 1 members 0,1,2,3,4
+
+	# Import MAC addresses with known names
+#	kenv LAN_MAC_ADDR=`kenv ethaddr`
+#	kenv WAN_MAC_ADDR=`kenv wanmac`
+
+#	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+#	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+
+#	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+	gpioctl -t 6
+	gpioctl -t 17
+	gpioctl -t 18
+
+#	hostname `kenv HostName`
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*

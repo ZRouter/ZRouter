@@ -1,0 +1,104 @@
+# $FreeBSD$
+
+hint.spigen.0.at="spibus0"
+
+hint.mx25l.0.at="spibus1"
+hint.mx25l.0.cs=0
+
+# XXX this should really say it's an AR933x switch, as there
+# are some vlan specific differences here!
+hint.arswitch.0.is_7240=1
+hint.arswitch.0.numphys=4
+hint.arswitch.0.phy4cpu=1       # phy 4 is a "CPU" separate PHY
+hint.arswitch.0.is_rgmii=0
+hint.arswitch.0.is_gmii=1       # arge1 <-> switch PHY is GMII
+
+# arge0 - MII, autoneg, phy(4)
+hint.arge.0.phymask=0x10        # PHY4
+hint.arge.0.mdio=mdioproxy1     # .. off of the switch mdiobus
+hint.arge.0.eeprommac=0x1fff0000
+
+# arge1 - GMII, 1000/full
+hint.arge.1.phymask=0x0         # No directly mapped PHYs
+hint.arge.1.media=1000
+hint.arge.1.fduplex=1
+hint.arge.1.eeprommac=0x1fff0006
+
+# Watchdog
+hint.ar71xx_wdog.0.at="nexus0"
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00020000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00020000
+hint.map.1.end=0x00fb0000
+hint.map.1.name="upgrade"
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00020000
+hint.map.2.end="search:0x000a0000:0x10000:.!/bin/sh"
+hint.map.2.name="kernel"
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start="search:0x000a0000:0x10000:.!/bin/sh"
+hint.map.3.end=0x00fe0000
+hint.map.3.name="rootfs"
+
+# 64KiB cfg
+hint.map.4.at="flash/spi0"
+hint.map.4.start=0x00fe0000
+hint.map.4.end=0x00ff0000
+hint.map.4.name="cfg"
+hint.map.4.readonly=1
+
+# 64KiB ART
+hint.map.5.at="flash/spi0"
+hint.map.5.start=0x00ff0000
+hint.map.5.end=0x01000000
+hint.map.5.name="ART"
+hint.map.5.readonly=1
+
+# GPIO
+
+hint.gpio.0.function_set=0x00000000
+hint.gpio.0.function_clear=0x00000000
+
+hint.gpio.0.pinmask=0x0c8ff1c3
+
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins=0x08000000
+hint.gpioled.0.name="status"
+hint.gpioled.0.invert=0
+
+#Red
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.pins=0x00020000
+hint.gpioled.1.name="red"
+hint.gpioled.1.invert=0
+
+#Green
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins=0x00010000
+hint.gpioled.2.name="green"
+hint.gpioled.2.invert=0
+
+#Blue
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.pins=0x00008000
+hint.gpioled.3.name="blue"
+hint.gpioled.3.invert=0
+
+# https://wiki.onion.io/Tutorials/Using-SPI
+
+hint.gpiospi.0.at="gpiobus0"
+hint.gpiospi.0.pins=0x400c2
+hint.gpiospi.0.cs0=2
+hint.gpiospi.0.sclk=1
+hint.gpiospi.0.mosi=3
+hint.gpiospi.0.miso=0
+hint.gpiospi.0.freq=100000000
+

@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+}
+
+adapt_start()
+{
+# this is separate interface setting
+#	ifconfig fv0 inet 192.168.1.1 netmask 255.255.255.0
+#	ifconfig fv1 inet 192.168.2.1 netmask 255.255.255.0
+
+# this is bridge setting
+# must be add KERNCONF_MODULES_OVERRIDE+=if_bridge bridgestp
+#	ifconfig bridge create
+#	ifconfig fv0 up
+#	ifconfig fv1 up
+#	ifconfig bridge0 addm fv0 addm fv1 up
+#	ifconfig bridge0 inet 192.168.1.1 netmask 255.255.255.0
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*

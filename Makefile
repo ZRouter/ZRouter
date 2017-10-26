@@ -16,6 +16,7 @@ ZROUTER_ROOT=${.CURDIR}
 #
 FREEBSD_SRC_TREE?=/usr/src
 OBJ_DIR?=/usr/obj
+USE_SYSTEMTOOLS?=yes
 
 #
 # Check access to FreeBSD source tree and fetch version variables
@@ -51,6 +52,11 @@ KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
 PREINSTALLDIRS=/lib
 
 ##############################################################################
+# Local vendor changes
+##############################################################################
+.include "vendor/vendor.mk"
+
+##############################################################################
 # Board configuration must define used SoC/CPU
 ##############################################################################
 .ifnmake show-target-pairs
@@ -72,11 +78,11 @@ show-target-pairs:
 ##############################################################################
 .include "socs/socs.mk"
 
-#.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
-#TARGET_ARCH_SUBDIR=	""
-#.else
+.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
+TARGET_ARCH_SUBDIR=	""
+.else
 TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
-#.endif
+.endif
 ZROUTER_FREEBSD_OBJDIR=${ZROUTER_OBJ}/tmp/${TARGET_ARCH_SUBDIR}/${FREEBSD_SRC_TREE}
 
 KERNEL_HINTS+=	hw.soc.vendor=\"${SOC_VENDOR}\"
@@ -98,6 +104,9 @@ KERNCONF_MAKEOPTIONS+=	"KERNLOADADDR=${KERNCONF_KERNLOADADDR}"
 KERNCONF_MAKEOPTIONS+=	"LDSCRIPT_NAME=${KERNCONF_KERN_LDSCRIPT_NAME}"
 .endif
 
+.if defined(KERNCONF_FDT_DTS_FILE)
+KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${KERNCONF_FDT_DTS_FILE}"
+.endif
 
 # resolve board flash size with trailing M or K
 .if defined(BOARD_FLASH_SIZE)
@@ -122,11 +131,6 @@ target-profiles-list:
 ##############################################################################
 .include "profiles/profiles.mk"
 
-##############################################################################
-# Local vendor changes
-##############################################################################
-.include "vendor/vendor.mk"
-
 .if defined(IMAGE_TYPE) && ${IMAGE_TYPE} == "trx"
 IMAGE_HEADER_EXTRA?=0x1c
 .else
@@ -142,10 +146,28 @@ CLANG_VARS?=			\
 	CXX=clang++		\
 	CPP=clang-cpp
 .else
+.if defined(BUILD_ZROUTER_WITH_GCC)
 CLANG_TC_VARS?=			\
-	WITHOUT_CLANG=yes
+	WITHOUT_CLANG=yes	\
+	WITHOUT_CLANG_BOOTSTRAP=yes	\
+	WITHOUT_CLANG_FULL=yes		\
+	WITHOUT_CLANG_IS_CC=yes		\
+	WITHOUT_LLD=yes		\
+	WITH_GCC=yes		\
+	WITH_GCC_BOOTSTRAP=yes	\
+	WITH_GNUCXX=yes	
 CLANG_VARS?=			\
-	WITHOUT_CLANG=yes
+	WITHOUT_CLANG=yes	\
+	WITHOUT_CLANG_BOOTSTRAP=yes	\
+	WITHOUT_CLANG_FULL=yes		\
+	WITHOUT_CLANG_IS_CC=yes		\
+	WITHOUT_LLD=yes		\
+	WITH_GCC=yes		\
+	WITH_GCC_BOOTSTRAP=yes	\
+	WITH_GNUCXX=yes	
+.else
+# use src.opts.mk default
+.endif
 .endif
 
 build-verify:
@@ -212,6 +234,9 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 .for option in ${KERNCONF_OPTIONS}
 	echo "options	${option}" >> ${KERNEL_CONFIG_FILE}
 .endfor
+.for nooption in ${KERNCONF_NOOPTIONS}
+	echo "nooptions	${nooption}" >> ${KERNEL_CONFIG_FILE}
+.endfor
 	echo "# devices section" >> ${KERNEL_CONFIG_FILE}
 .for device in ${KERNCONF_DEVICES}
 	echo "device	${device}" >> ${KERNEL_CONFIG_FILE}
@@ -228,28 +253,40 @@ _SOC_HINTS=${TARGET_SOCDIR}/soc.hints
 .if exists(${TARGET_BOARDDIR}/board.hints)
 _DEVICE_HINTS=${TARGET_BOARDDIR}/board.hints
 .endif
+.if exists(${ZROUTER_ROOT}/vendor/${TARGET_VENDOR}/vendor.hints)
+_VENDOR_HINTS=${ZROUTER_ROOT}/vendor/${TARGET_VENDOR}/vendor.hints
+.endif
 
-kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${KERNELCONFDIR}
-	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} > ${KERNEL_HINTS_FILE}
+kernelhints:	${_SOC_HINTS} ${_DEVICE_HINTS} ${_VENDOR_HINTS} ${KERNELCONFDIR}
+	cat /dev/null ${_SOC_HINTS} ${_DEVICE_HINTS} ${_VENDOR_HINTS} > ${KERNEL_HINTS_FILE}
 .for hint in ${KERNEL_HINTS}
 	echo "${hint}" >> ${KERNEL_HINTS_FILE}
 .endfor
 # TODO: make dtd file for FDT
 #
 
-_KERNEL_TC_BUILD_ENV= \
+.if defined(TARGET_CPUTYPE)
+_KERNEL_TERGET_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET_CPUARCH} \
+	TARGET_CPUTYPE=${TARGET_CPUTYPE} \
+	TARGET_CPUARCH=${TARGET_CPUARCH}
+.else
+_KERNEL_TERGET_ENV= \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET_CPUARCH}
+.endif
+
+_KERNEL_TC_BUILD_ENV= \
+	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
 	${CLANG_TC_VARS} \
 	-DNO_CLEAN
 
 _KERNEL_BUILD_ENV= \
-	TARGET=${TARGET} \
-	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET_CPUARCH} \
+	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
 	KERNCONFDIR=${KERNCONFDIR} \
@@ -283,11 +320,23 @@ _KERNEL_BUILD_ENV+=KMODGRP=${KMODGRP}
 kernel:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
 .ORDER:	build-verify build-info kernel-toolchain kernel-build kernel-install-dir kernel-install
 
-_WORLD_TCBUILD_ENV= \
+.if defined(TARGET_CPUTYPE)
+_WORLD_TERGET_ENV= \
 	TARGET=${TARGET} \
 	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET_CPUARCH} \
+	TARGET_CPUTYPE=${TARGET_CPUTYPE} \
+	TARGET_CPUARCH=${TARGET_CPUARCH}
+.else
+_WORLD_TERGET_ENV= \
+	TARGET=${TARGET} \
+	TARGET_ARCH=${TARGET_ARCH} \
+	TARGET_CPUARCH=${TARGET_CPUARCH}
+.endif
+
+_WORLD_TCBUILD_ENV= \
+	${_WORLD_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
+	${CLANG_TC_VARS} \
 	WITHOUT_ATM=yes \
 	WITHOUT_AUDIT=yes \
 	WITHOUT_INFO=yes \
@@ -297,23 +346,21 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_NLS=yes \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
-	WITHOUT_CDDL=yes \
-	${CLANG_TC_VARS} \
 	WITHOUT_CRYPTO=yes \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
 	MALLOC_PRODUCTION=yes \
+	MK_TESTS=no \
 	-DNO_CLEAN
 
 _WORLD_BUILD_ENV= \
-	TARGET=${TARGET} \
-	TARGET_ARCH=${TARGET_ARCH} \
-	TARGET_CPUARCH=${TARGET_CPUARCH} \
+	SSHDIR=${FREEBSD_SRC_TREE}/crypto/openssh \
+	${_WORLD_TERGET_ENV} \
+	${CLANG_VARS} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_ASSERT_DEBUG=yes \
 	WITHOUT_ATM=yes \
 	WITHOUT_AUDIT=yes \
-	${CLANG_VARS} \
 	WITHOUT_INFO=yes \
 	WITHOUT_INSTALLLIB=yes \
 	WITHOUT_IPX=yes \
@@ -322,11 +369,13 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_NLS=yes \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
-	WITHOUT_SSP=yes \
 	MALLOC_PRODUCTION=yes \
+	MK_TESTS=no \
 	-DNO_CLEAN
 
-
+.if !defined(DTRACE_ENABLE)
+_WORLD_BUILD_ENV+= WITHOUT_CDDL=yes
+.endif
 .if !defined(JAIL_ENABLE)
 _WORLD_BUILD_ENV+= WITHOUT_JAIL=yes
 .endif
@@ -352,8 +401,6 @@ _WORLD_INSTALL_ENV+=WITHOUT_TOOLCHAIN=yes
 _WORLD_BUILD_ENV+=WITHOUT_IPSEC=yes
 _WORLD_INSTALL_ENV+=WITHOUT_IPSEC=yes
 .endif
-
-_WORLD_BUILD_ENV+=WITHOUT_CDDL=yes
 
 _WORLD_BUILD_ENV+=WITHOUT_NIS=yes
 
@@ -406,12 +453,24 @@ WORLD_SUBDIRS+=usr.sbin/${dir}
 WORLD_SUBDIRS+=libexec/${dir}
 .endfor
 
+.for dir in ${WORLD_SUBDIRS_SHARE}
+WORLD_SUBDIRS+=share/${dir}
+.endfor
+
 .for dir in ${WORLD_SUBDIRS_GNU_LIB}
 WORLD_SUBDIRS+=gnu/lib/${dir}
 .endfor
 
 .for dir in ${WORLD_SUBDIRS_GNU_USR_BIN}
 WORLD_SUBDIRS+=gnu/usr.bin/${dir}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_CDDL_LIB}
+WORLD_SUBDIRS+=cddl/lib/${dir}
+.endfor
+
+.for dir in ${WORLD_SUBDIRS_CDDL_USR_SBIN}
+WORLD_SUBDIRS+=cddl/usr.sbin/${dir}
 .endfor
 
 
@@ -471,6 +530,7 @@ port-build:
 .endif
 
 rootfs-dir!
+	rm -rf ${WORLDDESTDIR}
 	mkdir -p ${WORLDDESTDIR}
 	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/ || true
 	mkdir -p ${WORLDDESTDIR}/usr/local/bin/ || true
@@ -521,7 +581,9 @@ NEW_IMAGE=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 IMAGE_BUILD_PATHS=${ZTOOLS_PATH}:${FREEBSD_BUILD_ENV_PATH}:${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin:${PATH}
 
 .include "share/mk/zrouter.local.tools.mk"
+.if ${USE_SYSTEMTOOLS} != "yes"
 .include "share/mk/zrouter.base.tools.mk"
+.endif
 
 .if !defined(ROOTFS_WITH_KERNEL)
 _FIND_MATCH_KERNEL=-name kernel -or
@@ -551,13 +613,21 @@ rootfs:		${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
 ROOTFS_CLEAN_MTREE_FILE=    ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean.mtree
 
-${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST}
+${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 	for d in ${ROOTFS_COPY_DIRS} ; do \
 		for f in `( cd $${d} ; find . -type f )` ; do \
 			mkdir -p `dirname ${WORLDDESTDIR}/$${f}` ; \
 			cp $${d}/$${f} ${WORLDDESTDIR}/$${f} ; \
 		done ; \
 	done
+.if defined(ROOTFS_COPY_OVERWRITE_DIRS)
+	for d in ${ROOTFS_COPY_OVERWRITE_DIRS} ; do \
+		for f in `( cd $${d} ; find . -type f )` ; do \
+			mkdir -p `dirname ${WORLDDESTDIR}/$${f}` ; \
+			cp $${d}/$${f} ${WORLDDESTDIR}/$${f} ; \
+		done ; \
+	done
+.endif
 	rm -f ${NEW_KERNEL}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
@@ -579,6 +649,7 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	 ln -sf md5 sha1 ; \
 	 ln -sf md5 sha256
 	cd ${NEW_ROOTFS}/usr/bin/ ; \
+	 ln -sf w uptime ; \
 	 ln -sf id groups ; \
 	 ln -sf id whoami ; \
 	 ln -sf bsdgrep grep ; \
@@ -592,18 +663,21 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	 ln -sf bsdgrep lzgrep ; \
 	 ln -sf bsdgrep xzegrep ; \
 	 ln -sf bsdgrep xzfgrep ; \
-	 ln -sf bsdgrep xzgrep ; \
+	 ln -sf bsdgrep xzgrep
+.if ${TARGET_PROFILES} == "SMALL_"
+	cd ${NEW_ROOTFS}/usr/bin/ ; \
 	 ln -sf ssh slogin ; \
 	 ln -sf vi nvi ; \
 	 ln -sf vi ex ; \
 	 ln -sf vi nex ; \
 	 ln -sf vi view ; \
 	 ln -sf vi nview
+.endif
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
-	hg --repository "${ZROUTER_ROOT}" tip \
-	    --template 'revision="{rev}"\ndate="{date|isodate}"\n' > \
-	    "${NEW_ROOTFS}/etc/zrouter_version"
+#	hg --repository "${ZROUTER_ROOT}" tip \
+#	    --template 'revision="{rev}"\ndate="{date|isodate}"\n' > \
+#	    "${NEW_ROOTFS}/etc/zrouter_version"
 	LANG=C date '+build="%Y-%m-%d %H:%M:%S"' >> \
 	    "${NEW_ROOTFS}/etc/zrouter_version"
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
@@ -613,6 +687,8 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 		sed -E 's/uname=[[:alnum:]]+/uname=root/' | \
 		sed -E 's/gname=[[:alnum:]]+/gname=wheel/' > \
 		    ${ROOTFS_CLEAN_MTREE_FILE}
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
+	    rm -rf usr/lib/debug boot/kernel/kernel*
 
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -633,7 +709,7 @@ ${KERNELDESTDIR}/boot/kernel/kernel:	${ZROUTER_FREEBSD_OBJDIR}/sys/${KERNEL_CONF
 
 ${NEW_KERNEL}:		${KERNELDESTDIR}/boot/kernel/kernel
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
-	rm -f ${NEW_KERNEL}
+	rm -rf ${NEW_KERNEL}*
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 
 MKULZMA_FLAGS?=-v
@@ -645,16 +721,25 @@ KERNCONF_KERNENTRYPOINT?=	${KERNCONF_KERNLOADADDR}
 
 .warning	Load address: ${KERNCONF_KERNLOADADDR} Entry point: ${KERNCONF_KERNENTRYPOINT}
 
-UBOOT_KERNEL_LOAD_ADDRESS?=	${KERNCONF_KERNLOADADDR}
-UBOOT_KERNEL_ENTRY_POINT?=	${KERNCONF_KERNENTRYPOINT}
+.if !defined(PHYSADDR)
+.if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
+PHYSADDR=0x80000000
+.else 
+# arm
+PHYSADDR=0x00000000
+.endif
+.endif
+UBOOT_KERNEL_ENTRY_POINT=`${ZROUTER_ROOT}/tools/entryaddr.sh ${TARGET_ARCH} ${PHYSADDR} ${NEW_KERNEL}`
+UBOOT_KERNEL_LOAD_ADDRESS=${UBOOT_KERNEL_ENTRY_POINT}
+
 
 UBNT_FIRMWARE_IMAGE_SIZE_MAX?=	${FIRMWARE_IMAGE_SIZE_MAX}
 UBNT_KERNEL_LOAD_ADDRESS?=	${KERNCONF_KERNLOADADDR}
 UBNT_KERNEL_ENTRY_POINT?=	${KERNCONF_KERNENTRYPOINT}
 UBNT_KERNEL_FLASH_BASE?=	0xbf030000
 
-TPLINK_KERN_LOADADDR?=	${KERNCONF_KERNLOADADDR}
-TPLINK_KERN_STARTADDR?=	${KERNCONF_KERNENTRYPOINT}
+TPLINK_KERN_LOADADDR?=	${UBOOT_KERNEL_LOAD_ADDRESS}
+TPLINK_KERN_STARTADDR?=	${UBOOT_KERNEL_ENTRY_POINT}
 TPLINK_IMG_NAME?=	ZRouter.org
 TPLINK_IMG_VERSION?=	${ZROUTER_VERSION}
 
@@ -724,6 +809,21 @@ tplink_image: ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/mktplin
 	    -o "${NEW_IMAGE}" && \
 	PATH=${IMAGE_BUILD_PATHS} mktplinkfw -i "${NEW_IMAGE}"
 
+tplink_new_image: ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/mktplinkfw
+	PATH=${IMAGE_BUILD_PATHS} mktplinkfw \
+            -H ${TPLINK_HARDWARE_ID} \
+            -W ${TPLINK_HARDWARE_VER} \
+            -F ${TPLINK_HARDWARE_FLASHID} \
+            -L ${TPLINK_KERN_LOADADDR} \
+            -E ${TPLINK_KERN_STARTADDR} \
+            -N ${TPLINK_IMG_NAME} \
+            -V ${TPLINK_IMG_VERSION} \
+            -s \
+	    -r "${ROOTFS_PACKED_NAME}" \
+            -a 0x10000 \
+            -X ${TPLINK_FIRMWARE_RESERV} \
+            -k ${KERNEL_PACKED_NAME} \
+	    -o "${NEW_IMAGE}"
 
 split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 	touch "${NEW_IMAGE}"

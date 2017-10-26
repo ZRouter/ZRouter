@@ -2,10 +2,11 @@
 
 # that may used for any platform
 # we need only say cross-build to configure
-TARGET_ARCH=mips
 CFLAGS="-std=c99 -I${WORLDDESTDIR}/include"
 
 _TARGET_DEFS = \
+	WITHOUT_CHECK=yes \
+	WITHOUT_SSP=yes \
 	TARGET_VENDOR=${TARGET_VENDOR} \
 	TARGET_DEVICE=${TARGET_DEVICE} \
 	FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} \
@@ -14,13 +15,13 @@ _TARGET_DEFS = \
 
 
 _TARGET_CROSS_DEFS = \
-	PATH=/usr/mips-freebsd/usr/bin:${PATH} \
+	PATH=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}${FREEBSD_SRC_TREE}/tmp/usr/bin:${PATH}:/usr/local/bin \
 	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	PKG_DBDIR=${WORLDDESTDIR}/libdata/var/db/pkg \
-	TARGET_ARCH=mips \
 	NO_INSTALL_MANPAGES=yes \
 	WITHOUT_CHECK=yes \
+	WITHOUT_SSP=yes \
 	NO_PKG_REGISTER=yes \
 	NO_DEPENDS=yes \
 	NOPORTDOCS=yes \
@@ -33,7 +34,9 @@ _TARGET_CROSS_DEFS = \
 	AUTOTOOLS_LOCALBASE=/usr/local \
 	LIBDIR+=${WORLDDESTDIR}/lib \
 	LDADD+="-L${WORLDDESTDIR}/lib" \
-	CXXFLAGS="-I${WORLDDESTDIR}/include -I${WORLDDESTDIR}/include/json"
+	CXXFLAGS="-I${WORLDDESTDIR}/include -I${WORLDDESTDIR}/include/json" \
+	ZWORKROOT=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}${ZROUTER_ROOT} \
+	ZWORLDDESTDIR=${WORLDDESTDIR}
 #	LIBTOOL=/usr/local/bin/libtool \
 #	-ELIBTOOL
 
@@ -102,15 +105,15 @@ port-build-depend-cross:
 		    echo cd ${dir} ; echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/; \
 		    cd ${dir} ; PATH=${FREEBSD_BUILD_ENV_PATH} ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/ || \
 			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
-			    echo ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
-			    ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
+			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
+			    ${MAKE} ZPREFIX=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs/usr/local ZARCH=${TARGET}.${TARGET_ARCH} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` && \
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
-			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} all && \
+			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} ZPREFIX=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs/usr/local all && \
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/ && \
-			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install ) ; \
+			    ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} ZPREFIX=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs/usr/local install ) ; \
 	    fi
 .endfor
 	@echo "--------> Done building ${dir} port ..."

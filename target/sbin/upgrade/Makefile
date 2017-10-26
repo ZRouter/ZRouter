@@ -2,7 +2,7 @@
 PROG=		upgrade
 SRCS=		upgrade.c
 DPADD=		${LIBMD}
-LDADD=		-lmd -lutil
+LIBADD=		md util
 BINDIR?=	/sbin/
 CFLAGS+=	-Wall -static
 MK_MAN=		no	
@@ -14,7 +14,7 @@ CFLAGS+=	-DWITH_HTTP_MODE
 .if !defined(WITHOUT_GEOM_GET_SIZE)
 SRCS+=		geom_get_size.c
 CFLAGS+=	-DUSE_GEOM_GET_SIZE
-LDADD+=		-lgeom -lsbuf -lbsdxml
+LIBADD+=	geom sbuf bsdxml
 .endif
 
 .include <bsd.prog.mk>

@@ -1,5 +1,5 @@
 default:\
-	:nc:cb:ce:ck:lc:fd
+	:cb:ce:ck:lc:fd
 	:if=/etc/issue:
 c|std.300|300-baud:\
 	:np:nd
@@ -47,3 +47,21 @@ al.115200:\
 	:al=root:tc=std.115200:
 al.230400:\
 	:al=root:tc=std.230400:
+
+# 
+# Entries for 3-wire serial terminals.  These don't supply carrier, so
+# clocal needs to be set, and crtscts needs to be unset.
+# 
+3wire.9600|9600-3wire:\
+	:np:nc:sp#9600:
+3wire.19200|19200-3wire:\
+	:np:nc:sp#19200:
+3wire.38400|38400-3wire:\
+	:np:nc:sp#38400:
+3wire.57600|57600-3wire:\
+	:np:nc:sp#57600:
+3wire.115200|115200-3wire:\
+	:np:nc:sp#115200:
+3wire.230400|230400-3wire:\
+	:np:nc:sp#230400:
+
