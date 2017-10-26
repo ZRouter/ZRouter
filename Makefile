@@ -620,8 +620,8 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 			cp $${d}/$${f} ${WORLDDESTDIR}/$${f} ; \
 		done ; \
 	done
-.if defined(ROOTFS_COPY_PRE_DIRS)
-	for d in ${ROOTFS_COPY_PRE_DIRS} ; do \
+.if defined(ROOTFS_COPY_OVERWRITE_DIRS)
+	for d in ${ROOTFS_COPY_OVERWRITE_DIRS} ; do \
 		for f in `( cd $${d} ; find . -type f )` ; do \
 			mkdir -p `dirname ${WORLDDESTDIR}/$${f}` ; \
 			cp $${d}/$${f} ${WORLDDESTDIR}/$${f} ; \

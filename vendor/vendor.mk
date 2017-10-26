@@ -11,7 +11,7 @@ TARGET_DEVICE=${TARGET_PAIR:C/.*\///}
 
 .if exists(${ZROUTER_ROOT}/vendor/${TARGET_VENDOR}/files)
 # Vendor wide files
-ROOTFS_COPY_PRE_DIRS+=${ZROUTER_ROOT}/vendor/${TARGET_VENDOR}/files
+ROOTFS_COPY_OVERWRITE_DIRS+=${ZROUTER_ROOT}/vendor/${TARGET_VENDOR}/files
 .endif # exists(vendor/TARGET_VENDOR/files)
 
 # Vendor wide tunables
