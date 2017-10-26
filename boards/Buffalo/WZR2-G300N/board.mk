@@ -13,6 +13,8 @@ BOARD_FLASH_SIZE=4194304
 
 KERNCONF_FDT_DTS_FILE?=	"wzr2-g300n.dts"
 
+BUILD_ZROUTER_WITH_GCC=yes
+
 ###################################################
 #
 # Vars for kernel config 

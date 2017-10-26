@@ -1,4 +1,0 @@
-# $FreeBSD$
-
-# etherswitch setting
-#hint.ip17x.0.at="mdio0"
