@@ -15,12 +15,22 @@ stop_cmd="main_stop"
 main_prestart()
 {
 	stty status '^T'
-	# Copy hints to dynamic kenv
-	sysctl kern.hintmode=2
 	sysctl kern.coredump=0
 	sysctl net.inet.ip.forwarding=1
 
-	md=`/sbin/mdconfig -a -t malloc -s 10m`
+	if [ -z "$zmdsize" ]; then
+		memsize=`sysctl -n hw.physmem`
+		if [ $memsize -le 8388608 ]; then 
+			zmdsize="2m"
+		elif [ $memsize -le 16777216 ]; then 
+			zmdsize="4m"
+		else
+			zmdsize="10m"
+		fi
+	fi
+	echo "memory disk size = ${zmdsize}"
+
+	md=`/sbin/mdconfig -a -t malloc -s ${zmdsize}`
 	newfs -b 4096 -f 512 -n -o space /dev/${md} > /dev/null
 	mount /dev/${md} /tmp
 
@@ -28,25 +38,24 @@ main_prestart()
 	mkdir -p /tmp/var/empty
 	mkdir -p /tmp/var/log
 	mkdir -p /tmp/var/run
+	mkdir -p /tmp/var/db
 	mkdir -p /tmp/var/spool/lock
+	mkdir -p /tmp/var/cron/tabs
 	touch /tmp/var/log/all.log
+
+	ifconfig lo0 127.0.0.1/8
 
 	syslogd -s
 
 	mount_unionfs /tmp/etc /etc
 
 	if [ -c /dev/map/config ]; then
-		dd if=/dev/map/config of=/tmp/etc.tar.gz;
-		cd /tmp/ && tar xvzf /tmp/etc.tar.gz
+		dd if=/dev/map/config of=/tmp/etc.tar.gz 2> /dev/null
+		cd /tmp/ && tar xvzf /tmp/etc.tar.gz 2> /dev/null
+		echo "restore /etc"
 	fi
 
 	pwd_mkdb /etc/master.passwd
-
-	ifconfig lo0 127.0.0.1/8
-	#ifconfig rt0 192.168.0.28/24
-	mpd  --background
-
-	inetd -wW
 
 }
 
