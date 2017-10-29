@@ -217,13 +217,13 @@ get_obj_path() {
 	TMPOPTIONSFILE=$(mktemp -t zrouter-build-menuXXXXXX)
 	trap "${RM} -f ${TMPOPTIONSFILE}; exit 1" 1 2 3 5 10 13 15
 	${SH} -c "${DIALOG} --title \"Please, enter the build object directory\" \
-	    --inputbox ' ' 8 60 "${OBJ_DIR}" 2> ${TMPOPTIONSFILE}"
+	    --inputbox ' ' 8 60 "${ZOBJ_DIR}" 2> ${TMPOPTIONSFILE}"
 	status=$?
 	if [ ${status} -ne 0 ] ; then
 		${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
 		return 1
 	fi
-	OBJ_DIR=`${CAT} ${TMPOPTIONSFILE} 2> /dev/null`
+	ZOBJ_DIR=`${CAT} ${TMPOPTIONSFILE} 2> /dev/null`
 	${RM} -f ${TMPOPTIONSFILE} 2> /dev/null
 	return 0
 }
@@ -238,7 +238,7 @@ get_src_dirs() {
 		${SH} -c "${DIALOG} --title \"Please, set the source and obj directories\" \
 		    --menu ' ' 10 60 3 \
 		    Sources \"${FREEBSD_SRC_TREE}\" \
-		    Objects \"${OBJ_DIR}\" \
+		    Objects \"${ZOBJ_DIR}\" \
 		    Back \"Back to main menu\" \
 		    2> ${TMPOPTIONSFILE}"
 		status=$?
@@ -335,7 +335,7 @@ TARGET_PAIR="${TARGET_PAIR}"
 TARGET_BASE_PROFILE="${TARGET_BASE_PROFILE}"
 TARGET_PROFILES="${TARGET_PROFILES}"
 FREEBSD_SRC_TREE="${FREEBSD_SRC_TREE}"
-OBJ_DIR="${OBJ_DIR}"
+ZOBJ_DIR="${ZOBJ_DIR}"
 EOF
 	PROFILE_NAME="(${PROFILE})"
 	return 0
@@ -410,7 +410,7 @@ build_info() {
 	    \nTARGET_BASE_PROFILE: ${TARGET_BASE_PROFILE} \
 	    \nTARGET_PROFILES: ${TARGET_PROFILES} \
 	    \nFREEBSD_SRC_TREE: ${FREEBSD_SRC_TREE} \
-	    \nOBJ_DIR: ${OBJ_DIR} \
+	    \nZOBJ_DIR: ${ZOBJ_DIR} \
 	    \n\nContinue with build ?\" \
 	    ${BOX_SIZE} 60"
 	status=$?
@@ -427,7 +427,7 @@ build_info() {
 #
 : ${BUILD_PROFILES_DIR:="build_profiles"}
 : ${FREEBSD_SRC_TREE:="/usr/src"}
-: ${OBJ_DIR:="/usr/obj"}
+: ${ZOBJ_DIR:="/usr/obj"}
 : ${TARGET_PAIR:="NONE"}
 : ${PROFILE:="NONE"}
 : ${TARGETS:="kernel.oldlzma.uboot rootfs.iso.ulzma"}
@@ -498,10 +498,10 @@ echo "==> building zrouter !!!"
 # If at least one of base profiles selected
 if [ "${TARGET_BASE_PROFILE}" != "" ]; then
 	make -C "${ZROUTER_ROOT}" TARGET_PAIR=${TARGET_PAIR} \
-		FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR} \
+		FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} ZOBJ_DIR=${ZOBJ_DIR} \
 		TARGET_PROFILES="${TARGET_BASE_PROFILE} ${TARGET_PROFILES}";
 else
 	make -C "${ZROUTER_ROOT}" TARGET_PAIR=${TARGET_PAIR} \
-		FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} OBJ_DIR=${OBJ_DIR}
+		FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE} ZOBJ_DIR=${ZOBJ_DIR}
 fi
 
