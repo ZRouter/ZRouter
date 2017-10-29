@@ -20,7 +20,7 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Board have 128M of RAM
 KERNCONF_OPTIONS+=	AR71XX_REALMEM=128*1024*1024
 
-KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uncompress\\\"
+KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
 KERNCONF_DEVICES+=	geom_map
 
 # Include usb and SoC usb controller drivers

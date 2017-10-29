@@ -1,15 +1,19 @@
 
-
-
-
-
 #WORLD_SUBDIRS+=
 #WORLD_SUBDIRS_BIN+=
-#WORLD_SUBDIRS_LIB+=
+
+WORLD_SUBDIRS_LIB+= \
+    libmemstat \
+    libpcap \
+    libnetgraph
+
 #WORLD_SUBDIRS_LIBEXEC+=
 #WORLD_SUBDIRS_SBIN+=
 
 WORLD_SUBDIRS_USR_BIN+= \
+    telnet \
+    nc \
+    netstat \
     sockstat
 
 WORLD_SUBDIRS_USR_SBIN+=	\
