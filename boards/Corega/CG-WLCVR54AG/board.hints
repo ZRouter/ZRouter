@@ -1,0 +1,14 @@
+
+hint.cfi.0.at="nexus0"
+hint.cfi.0.maddr=0xbfc00000
+hint.cfi.0.msize=0x400000
+
+# GEOM redboot FIS directory offset
+hint.redboot.0.fisoffset="0x003d0000"
+
+# only use are1 this model
+hint.are.1.at="nexus0"     
+hint.are.1.maddr=0x18200000
+hint.are.1.msize=0x00100000
+hint.are.1.irq=2
+
