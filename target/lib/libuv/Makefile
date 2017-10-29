@@ -34,12 +34,14 @@ src/unix/thread.c \
 src/unix/timer.c \
 src/unix/tty.c \
 src/unix/udp.c \
+src/unix/bsd-ifaddrs.c \
 src/unix/freebsd.c \
-src/unix/kqueue.c 
+src/unix/kqueue.c \
+src/unix/posix-hrtime.c
 
 INCS=		\
 include/android-ifaddrs.h \
-include/pthread-fixes.h \
+include/pthread-barrier.h \
 include/stdint-msvc2008.h \
 include/tree.h \
 include/uv-aix.h \
@@ -47,6 +49,8 @@ include/uv-bsd.h \
 include/uv-darwin.h \
 include/uv-errno.h \
 include/uv-linux.h \
+include/uv-os390.h \
+include/uv-posix.h \
 include/uv-sunos.h \
 include/uv-threadpool.h \
 include/uv-unix.h \
