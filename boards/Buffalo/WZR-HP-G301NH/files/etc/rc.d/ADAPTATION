@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+#	kldload bridgestp.ko
+#	kldload if_bridge.ko
+
+#	kldload wlan_acl
+#	kldload wlan_rssadapt
+#	kldload wlan_xauth
+
+	# Import MAC addresses with known names
+#	kenv LAN_MAC_ADDR=`kenv ethaddr`
+#	kenv WAN_MAC_ADDR=`kenv wanmac`
+
+#	ifconfig arge0 name lan0
+#	ifconfig arge1 name wan0
+
+#	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+#	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+
+#	ifconfig wlan0 create wlandev ath0 wlanmode hostap channel 1 country JP
+
+#	/usr/sbin/hostapd -B /etc/hostapd.conf
+
+#	ifconfig bridge0 create
+#	ifconfig bridge0 addm arge0 addm wlan0 up
+
+#	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+	gpioctl -t 6
+	gpioctl -t 17
+	gpioctl -t 18
+
+#	hostname `kenv HostName`
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
