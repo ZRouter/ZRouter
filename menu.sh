@@ -495,6 +495,7 @@ while [ 1 ]; do
 done
 
 echo "==> building zrouter !!!"
+export INSTALL_AS_USER=yes
 # If at least one of base profiles selected
 if [ "${TARGET_BASE_PROFILE}" != "" ]; then
 	make -C "${ZROUTER_ROOT}" TARGET_PAIR=${TARGET_PAIR} \
