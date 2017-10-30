@@ -7,3 +7,6 @@
 [submodule "contrib/iperf"]
 	path = contrib/iperf
 	url = https://github.com/esnet/iperf.git
+[submodule "contrib/miruo"]
+	path = contrib/miruo
+	url = https://github.com/KLab/miruo.git

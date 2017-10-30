@@ -1,0 +1,248 @@
+● Jerminal version 0.8096
+(FreeBSD, NetBSD, MacOSX, Linux, Cygwin 用シリアル通信プログラム)
+
+"9600 bps, 8bit data, 1 stop bit, parity even"
+などというアレな条件で接続する必要があったのですが、
+標準のシリアル通信プログラムであるところの
+cu(1) や tip(1) (実体は一つ)が揃いも揃って使えないので、
+急拠自作しました。
+
+● インストール
+
+	$ zcat jerm-80??.tar.gz | tar xf -
+	$ cd jerm-80??   # 80?? はバージョンに合わせてください
+	$ make
+
+これでできた jerm を PATH の通ったディレクトリにコピーします。
+
+以上。ただし /dev/cuaa? 等のアクセス権は持ってないとダメ。
+
+大抵の人は Rockwell binary モード
+(ある種の GPS と通信可能なモード)
+は不要でしょう。
+Rockwell binary モードをコンパイルしないようにできます。
+
+	$ make JUPITER_FLAGS=
+
+この場合 -j オプションは使えなくなります。
+
+● 使い方
+
+(1) シリアルポート接続
+
+jerm [デバイスオプション] [クライアントオプション] デバイス名
+
+○デバイスオプション
+	-b speed        	通信スピード(9600)
+	-p [none|even|odd]      パリティ(none)
+	-d [7|8]        	データビット長(8)
+	-s [1|2|1.5]    	ストップビット(1)
+	-f [none|x|hard]        フロー制御(none)
+	-F      		Set FUCK MODE for TA-100KR/RA SYSTEMS CORP.
+
+パリティ等は、最初の一文字だけで指定できます。(例: -pn)
+
+デバイス名は
+	FreeBSD	/dev/cuaa0 等。
+	NetBSD	/dev/dty00 等。(でいいのか??)
+	Darwin	/dev/cu.serial または
+		/dev/tty.serial 等。
+
+	MacOS X の場合は
+	<URL:http://d.hatena.ne.jp/vm_converter/20030811>
+	も参考に。
+	Cygwin	/dev/ttyS0 (com1) 等
+
+○クライアントオプション
+	-x		16進ダンプモードで開始します。
+	-j		Rockwell binary data を読みます。
+	-r rnRN		行末文字の変換方法を設定します。
+			rnRN は 4 文字からなる文字列で、それぞれ
+			  r: リモートからローカルへ来た CR の変換方法
+			  n: リモートからローカルへ来た NL の変換方法
+			  R: ローカルからリモートへ行く CR の変換方法
+			  N: ローカルからリモートへ行く NL の変換方法
+			を示します。変換方法は以下の文字で指定します。
+			  x = 受信した文字を捨てる。
+			  r = CR に変換する。
+			  n = NL に変換する。
+			  t = CR NL に変換する。
+			例えばリモートの CR を CR NL に変換するには、
+			"tnrn" を指定します。
+			デフォルトは "rnrn" です。
+
+(3) シリアル-TCP 変換サーバ
+
+jerm -D [-46T] [-P port] [デバイスオプション] デバイス名
+
+TCP のポート port で TCP 接続を待ちます。
+接続されるとオプションに従ってデバイスを開き、
+クライアントとデバイス間の通信ができるようになります。
+
+	-T	hosts_access(3) を有効にします。
+	-4	IPv4 アドレスを使用します。
+	-6	IPv6 アドレスを使用します。
+
+(2) TCP による接続
+
+jerm [-46] [-P port] [クライアントオプション] ホスト名
+jerm -i [-46] [-P port] [クライアントオプション] [デバイスオプション] ホスト名
+
+シリアルポートの代りに、TCP で接続します。
+telnet みたいな感じ。
+jerm -D で動いているサーバに接続すると、
+サーバのシリアルポートと通信できます。
+
+	-i	標準入出力をデバイスオプションに従って初期化します。
+		この時標準入出力をシリアルポートにリダイレクトする
+		ことで、シリアルデータの「中継」が可能になります。
+		(ブリッジモード)
+	-4	IPv4 アドレスを使用します。
+	-6	IPv6 アドレスを使用します。
+
+○使用方 (1)(2)(3) に共通のオプション
+
+	-l file		ログファイル(常に追加なので、空にするには -z 指定)
+	-z		ログを空にします。
+
+
+○終了方法
+Ctrl-M(または Enter) ~(チルダ) .(ピリオド) の順にタイプします。
+
+-D 指定の時は Ctrl-C で止まります。
+-i 指定の時は止まりません。kill -HUP を送ってください。
+
+○メニュー
+Ctrl-M(または Enter)の後に次の文字をタイプしてください。
+
+	~?	ヘルプ表示。
+	~.	終了します。
+	~~	~ を送信します。
+	~#	break 信号を送信します。
+	~x	16進ダンプモードを切り替えます。
+	~>file	ファイルの内容を送信します。
+
+
+・シリアル-TCP 変換サーバ
+
+HOST1 に 232C 機器がつながっている時、
+HOST1 で
+	jerm -D -P 9800 -b 4800 /dev/cuaa0
+と動かしておき、
+HOST2 で
+	jerm -P 9800 HOST1
+とすると HOST2 から、HOST1 につながっている機器と通信できます。
+さらに
+	jerm -i -P 9800 HOST1 -b 4800 < /dev/cuaa0 > /dev/cuaa0
+とすると、HOST2 のシリアルポートに接続することで、
+HOST1 の機器と通信可能になります。
+
+たとえば
+	232C機器===WINDOWS
+のように使っているものを、間に TCP/IP ネットワークを挟んで
+	232C機器===HOST1 --------------- HOST2====WINDOWS
+のように使用することができます。
+
+・Rockwell binary data とは、ジュピター GPS
+<URL:http://www.rakuten.co.jp/gps/387357/387363/>
+のバイナリフォーマットを読む機能です。
+付属の init.sh を使い、
+  $ sh init.sh bin
+でジュピターをバイナリモードに、
+  $ sh init.sh nmea
+で NMEA モードにできます。バイナリモードにして、
+  $ jerm -b 4800 -j /dev/cuaa0
+とすれば、データが読めます。
+
+● tiocdtr (おまけプログラム)
+ER (DTR) 信号を制御します。
+
+○使い方
+  $ tiocdtr -f /dev/cuaa0 [コマンド ...]
+
+コマンド
+	clear		ER をクリアします。
+	set		ER をセットします。
+	get		信号状態を表示します。
+	write "message"	文字列を送信します。
+	pause N		N ミリ秒待ちます。
+
+● バグレポートなどは
+	candy at kgc dot co dot jp まで
+
+● 変更履歴
+
+0.8086
+- Cygwin 対応(!)
+  参考: <URL:http://blogger323.blog83.fc2.com/blog-entry-202.html>
+  getaddrinfo(3) ライブラリは、笠原氏のものを使用させて頂きました。
+  <URL:http://www.sra.co.jp/people/m-kasahr/index-ja.html>
+
+- 通信速度設定で、-b オプションの値をそのまま cfset[io]speed(3) に
+  渡していたのはまずいということで、速度 <==> B??? 変換をちゃんと
+  やるようにした。
+  (今まで Linux では「B115200がヘッダで0010002なのを見て計算して
+  コマンドラインに -b 4098 と入れる」とかやってたらしい。)
+  Spasebo to 吉井様
+
+- -D オプション指定時アドレスファミリデフオルトを AF_UNSPEC から
+  AF_INET に変更。(ほんとは AF_UNSPEC のまま、IPv4 と IPv6 で
+  listen(2) するようにしたいんだが……)
+  Spasebo to 笹沼様
+
+0.8095
+- printf() の引数バグと warning
+
+0.8094
+- OSX Tiger 対応
+
+0.8093
+- マニュアルがついた。
+	Spasebo to kogule at opendarwin dot org.
+
+- 行末変換オプション -r が付いた。
+	Spasebo to hirose31 at t3 dot rim dot or dot jp.
+
+- hosts_access(3) 組み込み。
+	Spasebo to SHIROYAMA Takayuki <URL:http://www.eternal.nest.or.jp/~shiro/>
+
+- BREAK 送信を ~b から ~# に。(tip(1)互換に)
+
+- read_line() がバグってた。
+
+0.8092
+- linux でコンパイル可能にした。
+  Spasebo to:
+	SHIROYAMA Takayuki <URL:http://www.eternal.nest.or.jp/~shiro/>
+	MasaruYokoi <URL:http://www.masaruyokoi.com/>
+
+- jerm.c 約 1500 行のうち 1/3 を占める
+  Rockwell binary モードを分離可能にした。
+
+/*-
+ * Copyright (c) 2000, 2001, 2002, 2003, 2004 KANDA Toshihiro
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ *	$Id: README,v 1.19 2007/08/09 08:51:10 candy Exp $
+ */
