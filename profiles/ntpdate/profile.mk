@@ -1,7 +1,4 @@
-
-
-
-
+#
 
 WORLD_SUBDIRS+= \
 	usr.sbin/ntp/libntp \

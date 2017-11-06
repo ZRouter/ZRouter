@@ -66,8 +66,6 @@ KERNCONF_OPTIONS+=		KDB
 #KERNCONF_OPTIONS+= 	BOOTP_NFSV3
 #KERNCONF_OPTIONS+= 	BOOTP_WIRED_TO=bfe0
 #KERNCONF_OPTIONS+= 	BOOTP_COMPAT
-#KERNCONF_OPTIONS+=		ROOTDEVNAME=\"nfs:192.168.0.90:/usr/home/ray/Projects/MIPS/FreeBSD/rootfs-mips\"
-KERNCONF_OPTIONS+=		ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uncompress\\\"
 
 
 # Board definitions

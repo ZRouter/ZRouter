@@ -30,6 +30,8 @@ WITH_USB=yes
 # Builded modules
 #KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
+KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
+
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=	target/sbin/upgrade
 #WORLD_SUBDIRS_SBIN+=	devctl

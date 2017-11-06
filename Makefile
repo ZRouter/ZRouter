@@ -15,7 +15,7 @@ ZROUTER_ROOT=${.CURDIR}
 # Defaults
 #
 FREEBSD_SRC_TREE?=/usr/src
-OBJ_DIR?=/usr/obj
+ZOBJ_DIR?=/usr/obj
 USE_SYSTEMTOOLS?=yes
 
 #
@@ -35,8 +35,8 @@ FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
 .endif
 
 # ZROUTER_OBJ can be set in environment
-ZROUTER_OBJ?=${OBJ_DIR}/${ZROUTER_ROOT}
-MAKEOBJDIRPREFIX?=${OBJ_DIR}/${ZROUTER_ROOT}/
+ZROUTER_OBJ?=${ZOBJ_DIR}/${ZROUTER_ROOT}
+MAKEOBJDIRPREFIX?=${ZOBJ_DIR}/${ZROUTER_ROOT}/
 KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
 KERNELDESTDIR=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
@@ -523,6 +523,9 @@ world:  build-verify build-info world-toolchain world-build world-install world-
 .ORDER: build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 
 .if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
+.if !exists(/usr/local/bin/perl)
+.error "ports need perl command. Please install to perl command"
+.endif
 .include "share/mk/zrouter.ports.mk"
 .else
 port-build:

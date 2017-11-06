@@ -1,19 +1,11 @@
-
-#WORLD_SUBDIRS_PORTS+=/usr/ports/security/openvpn
-
-
-#WORLD_SUBDIRS+= \
-#secure/lib/libcrypto \
-#secure/lib/libssl
-
-#WORLD_SUBDIRS_LIB+= libwrap
-#WORLD_SUBDIRS_LIB+= libpcap
-#WORLD_SUBDIRS_ZROUTER+=target/usr.sbin/mpd
-
+# ssh
 WORLD_SUBDIRS+= \
 secure/lib/libssh \
 secure/usr.bin/scp \
-secure/usr.bin/ssh \
+secure/usr.bin/ssh
+WORLD_SUBDIRS_LIB+=libldns
+# sshd
+WORLD_SUBDIRS+= \
 secure/usr.bin/ssh-keygen \
 secure/usr.sbin/sshd
-
+WORLD_SUBDIRS_LIB+=libblacklist

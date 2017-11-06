@@ -1,0 +1,4 @@
+
+WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/x11/pixman
+
+

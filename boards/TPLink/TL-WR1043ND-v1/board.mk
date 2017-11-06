@@ -25,6 +25,7 @@ KERNCONF_OPTIONS+=	AR71XX_ENV_UBOOT
 # Force the board memory - 32MB
 KERNCONF_OPTIONS+=	AR71XX_REALMEM=32*1024*1024
 
+KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
