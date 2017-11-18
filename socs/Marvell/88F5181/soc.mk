@@ -132,10 +132,6 @@ KERNCONF_DEVICES+=		ipsec
 KERNCONF_DEVICES+=		crypto
 .endif
 
-WORLD_SUBDIRS+=			\
-	sys/boot/fdt	\
-	sys/boot/ficl	\
-
 
 #	sys/boot/uboot	\
 #	sys/boot/arm/uboot
