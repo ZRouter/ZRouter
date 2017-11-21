@@ -157,6 +157,12 @@ MRuby::CrossBuild.new('zrouter') do |conf|
   conf.git do |git|
     git.command = '/usr/local/bin/git'
   end
+  conf.cc do |cc|
+    cc.include_paths << (ENV['ZWORLDDESTDIR'] + '/usr/local/include')
+  end
+  conf.linker do |linker|
+    linker.library_paths << (ENV['ZWORLDDESTDIR'] + '/usr/local/lib')
+  end
 
   conf.gembox 'default'
 
