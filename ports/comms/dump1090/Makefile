@@ -31,7 +31,7 @@ post-patch:
 pre-build:
 	@${REINPLACE_CMD} -e "s|CenterLat=45.0|CenterLat=35.65|" ${WRKSRC}/gmap.html
 	@${REINPLACE_CMD} -e "s|CenterLon=9.0|CenterLon=139.69|" ${WRKSRC}/gmap.html
-	@${REINPLACE_CMD} -e "s|lrtlsdr|lrtlsdr -L${ZWORKROOT}/target/lib/librtlsdr -lusb|" ${WRKSRC}/Makefile
+	@${REINPLACE_CMD} -e "s|lrtlsdr|lrtlsdr -L${ZPREFIX}/lib -lusb|" ${WRKSRC}/Makefile
 
 #do-install:
 #	${INSTALL_PROGRAM} ${WRKSRC}/${PORTNAME} ${STAGEDIR}${PREFIX}/bin
