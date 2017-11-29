@@ -167,7 +167,7 @@ select_build_profiles() {
 			LDESCR=${profile}
 		fi
 		ENABLED="OFF"
-		for enabled in ${DEF_PROFILES}; do
+		for enabled in ${TARGET_PROFILES}; do
 			if [ "${enabled}" = "${profile}" ]; then
 				ENABLED="ON";
 				break;
