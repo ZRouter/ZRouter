@@ -25,9 +25,6 @@ WITH_USB=yes
 # Builded modules
 KERNCONF_MODULES_OVERRIDE+=	usb/umass usb/uplcom usb/u3g
 
-# Additional utilities
-WORLD_SUBDIRS_ZROUTER+=		target/sbin/upgrade
-
 ###################################################
 #
 #       Limits

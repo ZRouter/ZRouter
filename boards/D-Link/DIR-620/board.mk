@@ -30,9 +30,6 @@ KERNCONF_MODULES_OVERRIDE+=	wlan_xauth wlan_wep wlan_tkip wlan_acl \
 KERNCONF_MODULES_OVERRIDE+=	usb/umass cam
 KERNCONF_MODULES_OVERRIDE+=	usb/uplcom usb/u3g usb/umodem usb/ucom zlib
 
-# Additional utilities
-WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 
 ###################################################
 #

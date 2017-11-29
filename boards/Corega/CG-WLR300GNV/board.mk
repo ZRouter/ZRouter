@@ -34,9 +34,6 @@ KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 #KERNCONF_MODULES_OVERRIDE+=cam zlib
 #KERNCONF_MODULES_OVERRIDE+=usb/run runfw
 
-# Additional utilities
-WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 
 ###################################################
 #

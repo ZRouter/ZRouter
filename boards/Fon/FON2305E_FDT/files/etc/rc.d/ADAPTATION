@@ -20,7 +20,11 @@ adapt_prestart()
         kenv LAN_MAC_ADDR=`od -j 0x0028 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0000050/{print $2":"$3":"$4":"$5":"$6":"$7}'`
         kenv WAN_MAC_ADDR=`od -j 0x1000 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0010000/{print $2":"$3":"$4":"$5":"$6":"$7}'`
 
-	ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+	PREUP=`kenv -q prepareupgrade`
+	if [ -n "${PREUP}" ]; then
+	else
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+	fi
 
 	hostname `kenv HostName`
 

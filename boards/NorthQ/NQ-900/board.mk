@@ -48,9 +48,6 @@ KERNCONF_DEVICES+=	spibus
 KERNCONF_DEVICES+=	gpiospi
 KERNCONF_DEVICES+=	mx25l
 
-# Additional utilities
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 
 # Flash mapping
 # ifndef GEOM_MAP_P0_PARENT then GEOM_MAP_P0_PARENT=cfid0
