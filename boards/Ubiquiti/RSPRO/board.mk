@@ -32,9 +32,6 @@ KERNCONF_KERN_LDSCRIPT_NAME=
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uzip\\\"
 KERNCONF_DEVICES+=	geom_redboot
 
-# Additional utilities
-WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 KERNCONF_DEVICES+=	switch
 KERNCONF_DEVICES+=	switch_ar8x16
 

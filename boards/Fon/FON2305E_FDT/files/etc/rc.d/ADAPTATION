@@ -15,14 +15,19 @@ adapt_prestart()
 {
 	gpioctl -f /dev/gpioc0 -c 10 IN II PU
 
-	# Import MAC addresses from flash
-	kenv WIFI_MAC_ADDR=`od -j 0x0004 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0000004/{print $2":"$3":"$4":"$5":"$6":"$7}'`
-        kenv LAN_MAC_ADDR=`od -j 0x0028 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0000050/{print $2":"$3":"$4":"$5":"$6":"$7}'`
-        kenv WAN_MAC_ADDR=`od -j 0x1000 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0010000/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+	# only first boot time.
+	ADDRENV=`kenv -q WIFI_MAC_ADDR`
+	if [ -n "${ADDRENV}" ]; then
+	else
+		# Import MAC addresses from flash
+		kenv WIFI_MAC_ADDR=`od -j 0x0004 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0000004/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+		kenv LAN_MAC_ADDR=`od -j 0x0028 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0000050/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+		kenv WAN_MAC_ADDR=`od -j 0x1000 -N 6 -t x1 /dev/flash/spi0s.u-boot-env | awk '/0010000/{print $2":"$3":"$4":"$5":"$6":"$7}'`
 
-	ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
 
-	hostname `kenv HostName`
+		hostname `kenv HostName`
+	fi
 
 }
 

@@ -32,8 +32,6 @@ WITH_USB=yes
 
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
 
-# Additional utilities
-WORLD_SUBDIRS_ZROUTER+=	target/sbin/upgrade
 #WORLD_SUBDIRS_SBIN+=	devctl
 
 #KERNCONF_OPTIONS+=	DEVCTL_ATTACH_ENABLED

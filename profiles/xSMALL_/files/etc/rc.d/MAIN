@@ -18,6 +18,11 @@ main_prestart()
 	sysctl kern.coredump=0
 	sysctl net.inet.ip.forwarding=1
 
+	md=`mdconfig -l -n`
+	if [ -n "${md}" ]; then
+		/sbin/mdconfig -d -u ${md}
+	fi
+
 	if [ -z "$zmdsize" ]; then
 		memsize=`sysctl -n hw.physmem`
 		if [ $memsize -le 8388608 ]; then 
@@ -28,6 +33,12 @@ main_prestart()
 			zmdsize="10m"
 		fi
 	fi
+
+	MDENV=`kenv -q resizemd`
+	if [ -n "${MDENV}" ]; then
+		zmdsize=${MDENV}
+	fi
+
 	echo "memory disk size = ${zmdsize}"
 
 	md=`/sbin/mdconfig -a -t malloc -s ${zmdsize}`

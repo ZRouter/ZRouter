@@ -1,0 +1,45 @@
+#!/bin/sh
+
+ZBOARD=`uname -i`
+
+if [ -e "/etc/upgrade.conf" ]; then
+
+. /etc/upgrade.conf
+
+cd /tmp
+rm -rf *
+mkdir bin
+mkdir sbin
+mkdir libexec
+mkdir dev
+mkdir lib
+mkdir etc
+mkdir -p usr/bin
+cp /sbin/init sbin/
+cp /bin/sh bin/
+cp /bin/dd bin/
+cp /bin/kill bin/
+cp /libexec/ld-elf.so.1 libexec/
+cp /etc/login.conf.db etc/
+cp /usr/bin/tftp usr/bin/
+cp /lib/libedit.so.7 lib/
+cp /lib/libncursesw.so.8 lib/
+cp /lib/libc.so.7 lib/
+mkfifo flashpipe
+
+kenv vfs.root.mountfrom="ufs:md0"
+
+#echo ${ZBOARD}.zimage
+
+echo "#!/bin/sh" > etc/rc
+echo "dd if=/flashpipe of=${UPGRADEDEV} obs=${UPGRADEBS} conv=osync &" >> etc/rc
+echo "echo \"bin
+get ${ZBOARD}.zimage /flashpipe
+quit\" | tftp ${UPGRADETFTP} 69" >> etc/rc
+echo "kill -INT 1" >> etc/rc
+chmod a+x etc/rc
+
+reboot -r
+else
+echo "upgrade need /etc/upgrade.conf"
+fi

@@ -39,9 +39,6 @@ KERNCONF_DEVICES+=	geom_uzip
 #KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/cfid0s.rootfs.uzip\\\"
 
-# Additional utilities
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 KERNCONF_OPTIONS+=	ALT_BREAK_TO_DEBUGGER
 KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 

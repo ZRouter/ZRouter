@@ -96,6 +96,7 @@ WORLD_SUBDIRS_SBIN+= \
 	umount
 
 WORLD_SUBDIRS_USR_BIN+= \
+	mkfifo \
 	w \
 	tftp \
 	basename \

@@ -25,9 +25,6 @@ WITHOUT_WIRELESS=yes
 # Builded modules
 #KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
-# Additional utilities
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 
 ###################################################
 #
