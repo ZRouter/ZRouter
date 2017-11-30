@@ -2,6 +2,8 @@
 
 ZBOARD=`uname -i`
 
+if [ -e "/etc/upgrade.conf" ]; then
+
 . /etc/upgrade.conf
 
 cd /tmp
@@ -38,3 +40,6 @@ echo "kill -INT 1" >> etc/rc
 chmod a+x etc/rc
 
 reboot -r
+else
+echo "upgrade need /etc/upgrade.conf"
+fi
