@@ -72,6 +72,7 @@ SRCS+= 			\
 #LDFLAGS+=	-rpath=/usr/lib:/usr/local/lib
 #LDFLAGS+=	-L/usr/lib
 
+LOCAL_LIBRARIES=	lzo2
 
 LIBADD+=	ssl crypto lzo2
 DPADD+=		${LIBSSL} ${LIBCRYPTO} ${LIBLZO2}

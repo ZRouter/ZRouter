@@ -1,5 +1,5 @@
 #
-# $FreeBSD: src/usr.sbin/audit/Makefile,v 1.2.2.1 2009/08/03 08:13:06 kensmith Exp $
+# $FreeBSD$
 #
 
 DHCPDIR=${.CURDIR}/../../../contrib/dhcp
@@ -12,8 +12,9 @@ MK_MAN=	 	no
 
 PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin
-#LIBADD+=	dhcp
-DPADD+=		${LIBDHCP}
+
+LOCAL_LIBRARIES=	dhcp
+LIBADD=			dhcp
 
 ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/dhcrelay//}
 LDFLAGS+=	-L${ZROUTER_OBJDIR}/target/lib/libdhcp/
