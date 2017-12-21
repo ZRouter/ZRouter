@@ -25,8 +25,8 @@ KERNCONF_DEVICES+=	geom_map
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
-WITH_IPSEC=yes
-WITH_WIRELESS=yes
+#WITH_IPSEC=yes
+#WITH_WIRELESS=yes
 # Builded modules
 KERNCONF_MODULES_OVERRIDE+=	usb/uplcom usb/u3g usb/umodem usb/umass \
     usb/ucom cam zlib
@@ -39,8 +39,11 @@ KERNCONF_OPTIONS+=	KDB
 KERNCONF_OPTIONS+=	ALT_BREAK_TO_DEBUGGER
 KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 
-KERNCONF_DEVICES+=	switch
-#KERNCONF_DEVICES+=	switch_rtl8366
+KERNCONF_OPTIONS+=	ARGE_MDIO
+KERNCONF_DEVICES+=	etherswitch
+KERNCONF_DEVICES+=	miiproxy
+KERNCONF_DEVICES+=	arswitch
+WORLD_SUBDIRS_SBIN+=    etherswitchcfg
 
 .if !defined(WITHOUT_WIRELESS)
 KERNCONF_MODULES_OVERRIDE+=	wlan_xauth wlan_wep wlan_tkip wlan_acl \
@@ -87,9 +90,6 @@ FIRMWARE_IMAGE_SIZE_MAX=0x00760000
 #       Firmware Image Options
 #
 ###################################################
-
-TARGET_PROFILES+=SMALL_ mpd ssh ipfw lua_web_ui dhcp mroute ntpdate dnsmasq \
-    racoon openvpn ppp hostap ath nfs_client
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
