@@ -1,21 +1,30 @@
+# TODO: RGMII
+hint.arge.0.phymask=0x0         # Nothing attached here (XXX?)
 hint.arge.0.media=1000
 hint.arge.0.fduplex=1
-hint.arge.1.media=1000
-hint.arge.1.fduplex=1
+hint.arge.0.miimode=3           # RGMII
 
-# No probe at all
-hint.miibus.0.phymask="0x00000000"
-hint.miibus.1.phymask="0x00000000"
+# TODO: RGMII
+hint.arge.1.phymask=0x10
+# hint.arge.1.pll_1000 = 0x1f000000
+# For now, rendezouvs this on the arge0 mdiobus.
+# Later, this will rendezvous via the AR8316 switch.
+hint.arge.1.miimode=3           # RGMII
+hint.arge.1.mdio=mdioproxy1     # off the switch mdiobus
 
-hint.floatphy.0.at="miibus0"
-hint.floatphy.0.phyno=0
-hint.floatphy.0.flags=0x00000000
-hint.floatphy.0.speed=1000
+# arge0 MDIO bus - there's no arge1 MDIO bus for AR71xx
+hint.argemdio.0.at="nexus0"
+hint.argemdio.0.maddr=0x19000000
+hint.argemdio.0.msize=0x1000
+hint.argemdio.0.order=0
 
-hint.floatphy.1.at="miibus1"
-hint.floatphy.1.phyno=0
-hint.floatphy.1.flags=0x00000000
-hint.floatphy.1.speed=1000
+# AR8316 switch on MDIO0
+hint.arswitch.0.at="mdio0"
+hint.arswitch.0.is_7240=0
+hint.arswitch.0.numphys=4
+hint.arswitch.0.phy4cpu=1
+hint.arswitch.0.is_rgmii=1
+hint.arswitch.0.is_gmii=0
 
 # compatible value, device with 4M/8M/16M of flash, may found it on same
 # location, because flash just aliased to upper segments
@@ -64,6 +73,9 @@ hint.gpiobutton.0.flags="0x04a1"
 
 hint.mx25l.0.at="spibus0"
 hint.mx25l.0.cs=0
+
+hint.mx25l.1.at="spibus0"
+hint.mx25l.1.cs=1
 
 hint.map.0.at="flash/spi0"
 hint.map.0.start=0x00000000
