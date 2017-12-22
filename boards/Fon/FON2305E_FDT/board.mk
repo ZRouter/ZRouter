@@ -55,7 +55,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
+#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
