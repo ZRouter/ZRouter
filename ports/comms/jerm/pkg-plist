@@ -1,0 +1,5 @@
+bin/jerm
+bin/tiocdtr
+%%JUPITER%%libexec/jerm/init.sh
+%%JUPITER%%libexec/jerm/rock.pl
+man/man1/jerm.1.gz
