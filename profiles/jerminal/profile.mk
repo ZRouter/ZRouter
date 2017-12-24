@@ -1,3 +1,3 @@
 
-WORLD_SUBDIRS_ZROUTER+=	target/usr.bin/jerminal
+WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/comms/jerm
 
