@@ -8,7 +8,7 @@ hint.argemdio.0.order=0
 
 hint.arge.0.media=1000
 hint.arge.0.fduplex=1
-hint.arge.0.eeprommac=0x1f05120c
+#hint.arge.0.eeprommac=0x1f05120c
 hint.arge.0.mdio=mdioproxy1     # .. off of the switch mdiobus
 hint.arge.0.phymask=0x10
 
@@ -85,10 +85,10 @@ hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
 hint.map.4.end=0x007e0000
 hint.map.4.name="rootfs"
 
-hint.map.5.at="flash/spi0"
-hint.map.5.start=0x007e0000
-hint.map.5.end=0x007f0000
-hint.map.5.name="config"
+#hint.map.5.at="flash/spi0"
+#hint.map.5.start=0x007e0000
+#hint.map.5.end=0x007f0000
+#hint.map.5.name="config"
 
 hint.map.6.at="flash/spi0"
 hint.map.6.start=0x007f0000
