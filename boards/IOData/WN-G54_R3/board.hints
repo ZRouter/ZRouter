@@ -1,0 +1,23 @@
+#
+#
+#
+
+hint.mx25l.0.at="spibus0"       
+hint.mx25l.0.cs=0
+
+# GPIO01  - LED
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.pins="0x02"
+hint.gpioled.1.name="status"
+hint.gpioled.1.flags="0x0001"
+
+# GEOM redboot FIS directory offset
+hint.redboot.0.fisoffset="0x007e0000"
+
+# etherswitch setting
+hint.e6060sw.0.at="mdio0"
+
+hint.aremdio.0.at="nexus0"
+hint.aremdio.0.maddr=0x10500000
+hint.aremdio.0.msize=0x500000
+
