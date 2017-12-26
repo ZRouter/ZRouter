@@ -36,7 +36,14 @@ do-test:
 
 do-install:
 	mkdir -p ${ZPREFIX}/lib
+	mkdir -p ${ZPREFIX}/include
 	${INSTALL_LIB} ${WRKSRC}/.libs/libuv.so.1.0.0 ${ZPREFIX}/lib/libuv.so.1
+	${INSTALL_DATA} ${WRKSRC}/include/uv-bsd.h ${ZPREFIX}/include
+	${INSTALL_DATA} ${WRKSRC}/include/uv-errno.h ${ZPREFIX}/include
+	${INSTALL_DATA} ${WRKSRC}/include/uv-threadpool.h ${ZPREFIX}/include
+	${INSTALL_DATA} ${WRKSRC}/include/uv-unix.h ${ZPREFIX}/include
+	${INSTALL_DATA} ${WRKSRC}/include/uv-version.h ${ZPREFIX}/include
+	${INSTALL_DATA} ${WRKSRC}/include/uv.h ${ZPREFIX}/include
 	cd ${ZPREFIX}/lib;ln -s libuv.so.1 libuv.so
 
 .include <bsd.port.mk>
