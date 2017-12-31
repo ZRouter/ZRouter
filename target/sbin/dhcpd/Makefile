@@ -3,7 +3,7 @@
 #
 
 #DHCPDIR=${.CURDIR}/../../../contrib/dhcp
-DHCPDIR=/home/masked/zrouter/contrib/dhcp
+DHCPDIR=${.CURDIR}/../../../contrib/dhcp
 .PATH: ${DHCPDIR}/server
 
 CFLAGS+=	-I${DHCPDIR} -I${DHCPDIR}/includes
@@ -15,6 +15,8 @@ PREFIX?=	/
 BINDIR?=	${PREFIX}/sbin
 LIBADD+=	dhcp
 DPADD+=		${LIBDHCP}
+
+LOCAL_LIBRARIES=dhcp
 
 ZROUTER_OBJDIR=	${.OBJDIR:C/target\/sbin\/dhcpd//}
 LDFLAGS+=	-L${ZROUTER_OBJDIR}/target/lib/libdhcp/ ##-L/home/masked/zrouter/target/lib/libdhcp
