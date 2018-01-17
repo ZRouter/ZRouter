@@ -1,11 +1,10 @@
 PORTNAME=	mruby
-PORTVERSION=	1.2.0
-#PORTVERSION=	1.3.0
+PORTVERSION=	1.4.0
 CATEGORIES=	lang
 MASTER_SITES=	http://mruby.org/
 #DISTNAME=	mruby-master
 DISTNAME=	${PORTVERSION}
-EXTRACT_SUFX=	.zip
+EXTRACT_SUFX=	.tar.gz
 MASTER_SITES=	https://github.com/mruby/mruby/archive/
 
 WRKSRC=		${WRKDIR}/${PORTNAME}-${PORTVERSION}
