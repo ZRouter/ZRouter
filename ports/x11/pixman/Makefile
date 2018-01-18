@@ -29,7 +29,7 @@ post-configure:
 	@echo "#define WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
 
 do-install:
-	mkdir -p ${ZPREFIX}/lib
+	${MKDIR} ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/pixman/.libs/libpixman-1.so.0.32.8 ${ZPREFIX}/lib/libpixman-1.so.0
 	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0 libpixman-1.so
 
