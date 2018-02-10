@@ -6,14 +6,20 @@
 ###################################################
 
 
-SOC_VENDOR=Ralink
-SOC_CHIP=RT1310A
+SOC_VENDOR=Marvell
+SOC_CHIP=88F5181
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
-KERNCONF_FDT_DTS_FILE?=	"wzr2-g300n.dts"
+KERNCONF_FDT_DTS_FILE?=	"wzr-ampg300nh.dts"
 
-#BUILD_ZROUTER_WITH_GCC=yes
+KERNCONF_OPTIONS+=	LINUX_BOOT_ABI
+
+KERNCONF_DEVICES+=	miiproxy
+KERNCONF_DEVICES+=	mdio
+KERNCONF_DEVICES+=	etherswitch
+KERNCONF_DEVICES+=	e6000sw
+WORLD_SUBDIRS_SBIN+=    etherswitchcfg
 
 ###################################################
 #
@@ -50,13 +56,6 @@ KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 KERNCONF_DEVICES+=	cfi
 KERNCONF_DEVICES+=	cfid
 
-# define FV_MDIO in if_fv.c
-#KERNCONF_DEVICES+=	mdio
-#KERNCONF_DEVICES+=	etherswitch
-#KERNCONF_DEVICES+=	miiproxy
-#KERNCONF_DEVICES+=	ip17x
-#WORLD_SUBDIRS_SBIN+=	etherswitchcfg
-
 ###################################################
 #
 #       Limits
@@ -84,13 +83,14 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #IMAGE_SUFFIX=zimage
 #NEW_IMAGE_TYPE=split_kernel_rootfs
 
-KERNEL_COMPRESSION=oldlzma
-KERNEL_COMPRESSION_TYPE=oldlzma
-UBOOT_KERNEL_COMPRESSION_TYPE=lzma
+KERNEL_COMPRESSION=gz
+KERNEL_COMPRESSION_TYPE=gz
+#UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
 MKULZMA_BLOCKSIZE=131072
 
-PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
+#PACKING_KERNEL_IMAGE?=kernel.kbin.gz.uboot.sync
+PACKING_KERNEL_IMAGE?=kernel.kbin.cramfs
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
