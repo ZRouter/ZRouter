@@ -145,15 +145,8 @@ hint.map.5.end=0x02000000
 hint.map.5.name="ART"
 hint.map.5.readonly=1
 
-#hint.map.5.at="cfid0"
-#hint.map.5.start=0x01fc0000
-#hint.map.5.end=0x01fe0000
-#hint.map.5.name="user_property"
-#hint.map.5.readonly=1
-
-#hint.map.6.at="cfid0"
-#hint.map.6.start=0x00060000
-#hint.map.6.end=0x01fc0000
-#hint.map.6.name="firmware"
-#hint.map.6.readonly=1
+hint.map.6.at="cfid0"
+hint.map.6.start=0x00060000
+hint.map.6.end=0x01fc0000
+hint.map.6.name="upgrade"
 

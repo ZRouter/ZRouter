@@ -143,3 +143,8 @@ hint.map.5.start=0x01fe0000
 hint.map.5.end=0x02000000
 hint.map.5.name="properties"
 hint.map.5.readonly=1
+
+hint.map.6.at="cfid0"
+hint.map.6.start=0x01fb0000
+hint.map.6.end=0x01fd0000
+hint.map.6.name="cfitest"
