@@ -1,0 +1,52 @@
+#!/bin/sh
+
+CONF="/etc/upgrade.conf"
+
+if [ -e "${CONF}" ]; then
+
+. ${CONF}
+
+echo -n "Flash upgrade ? [y/n] "
+
+read ans
+
+case $ans in
+"y" | "Y" )
+
+PIDFILE=`ls /var/run/*pid`
+for p in ${PIDFILE} ; do
+  kill `cat $p`
+done
+
+UNIDIR=`df | awk '/above/{print $6}'`
+for u in ${UNIDIR} ; do
+  umount $u
+  if [ $? != 0 ]; then
+    echo "can't umount $u"
+    exit
+  fi
+done
+
+umount /tmp
+if [ $? == 0 ]; then
+
+dd if=${UPGRADEROOT} of=/dev/md0
+if [ $? == 0 ]; then
+
+# reroot setup
+kenv vfs.root.mountfrom=cd9660:md0.uzip
+
+reboot -r
+else
+echo "can't dd rootfs"
+fi
+else
+echo "can't umount /tmp"
+fi
+;;
+esac
+
+else
+echo "upgrade need ${CONF}"
+fi
+

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# PROVIDE: MYFIERWALL
+# REQUIRE: MAIN
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="MYETHERSWITCH"
+start_cmd="reug_start"
+start_precmd="reug_prestart"
+start_postcmd="reug_poststart"
+stop_cmd="reug_stop"
+
+reug_prestart()
+{
+	reroot=`kenv -q vfs.root.mountfrom`
+	if [ "$reroot" = "cd9660:md0.uzip" ]; then
+		tupgrade
+	fi
+}
+
+reug_start()
+{
+}
+
+reug_poststart()
+{
+}
+
+reug_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
