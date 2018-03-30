@@ -35,7 +35,7 @@ WORLD_SUBDIRS+= \
 secure/lib/libcrypto \
 secure/lib/libssl
 
-#libipx \
+#libipx
 # Compile ping without libipsec and ifconfig without libjail,libipx
 # "libcrypto.so.6" not found, required by "bsdtar"
 # "libssl.so.6" not found, required by "fetch"
@@ -144,7 +144,7 @@ libregex \
 libssp \
 libstdc++
 
-#libreadline \
+#libreadline
 # XXX: libreadline must be replaced with libedit
 
 
@@ -166,7 +166,7 @@ rtld-elf \
 getty \
 telnetd
 
-#ppp \
+#ppp
 WORLD_SUBDIRS_USR_SBIN+= \
 ngctl \
 nghook \

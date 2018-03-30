@@ -14,7 +14,7 @@ CFLAGS+=	-DHAVE_CONFIG_H
 CFLAGS+=	-DADMINPORTDIR=\"/var/db/racoon\"
 CFLAGS+=	-D_GNU_SOURCE
 
-#	isakmp_cfg.c	\
+#	isakmp_cfg.c
 
 SRCS1+= \
 	main.c		\

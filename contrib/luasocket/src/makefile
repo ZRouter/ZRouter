@@ -11,7 +11,7 @@ include ../config
 # Modules belonging to socket-core
 #
 
-#$(COMPAT)/compat-5.1.o \
+#$(COMPAT)/compat-5.1.o
 
 SOCKET_OBJS:= \
 	luasocket.o \
@@ -30,7 +30,7 @@ SOCKET_OBJS:= \
 #------
 # Modules belonging mime-core
 #
-#$(COMPAT)/compat-5.1.o \
+#$(COMPAT)/compat-5.1.o
 
 MIME_OBJS:=\
 	mime.o 

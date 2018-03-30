@@ -124,19 +124,19 @@ KERNCONF_DEVICES+=	\
 	da		\
 	pass
 
-#	ixpiic		\
-#	ds1672		\
-#	ds133x		\
-#	ad7418		\
+#	ixpiic
+#	ds1672
+#	ds133x
+#	ad7418
 
-#	atadisk		\
-#	isa		\
+#	atadisk
+#	isa
 
-#	ata		\
-#	ahci		\
-#	avila_ata	\
-#	cambria_gpio	\
-#	atapicam	\
+#	ata
+#	ahci
+#	avila_ata
+#	cambria_gpio
+#	atapicam
 
 # ATA controllers
 #device		ahci		# AHCI-compatible SATA controllers

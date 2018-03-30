@@ -2,8 +2,8 @@
 #WORLD_SUBDIRS_PORTS+=/usr/ports/security/openvpn
 
 
-#WORLD_SUBDIRS+= \
-#secure/lib/libcrypto \
+#WORLD_SUBDIRS+= \ #
+#secure/lib/libcrypto \ #
 #secure/lib/libssl
 
 #WORLD_SUBDIRS_LIB+= libwrap
