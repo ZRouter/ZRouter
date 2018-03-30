@@ -22,7 +22,7 @@ libthr \
 libufs \
 libutil \
 libz \
-ncurses/ncurses \
+ncurses/ncursesw \
 ncurses/form \
 ncurses/menu \
 ncurses/panel
