@@ -1,27 +1,38 @@
 
 WORLD_SUBDIRS_LIB+= \
 libalias \
+lib80211 \
+libbz2 \
 libbsm \
 libc \
+libcasper \
 libedit \
 libelf \
 libexpat \
 libcrypt \
 libgeom \
+libgpio \
+libjail \
 libipsec \
 libjail \
 libkiconv \
 libkvm \
+liblzma \
 libmd \
 libmemstat \
 msun \
+libmd \
 libpmc \
 libsbuf \
 libtacplus \
 libthr \
 libufs \
 libutil \
+libwrap \
+libxo \
+libwrap \
 libz \
+libnv \
 ncurses/ncursesw \
 ncurses/form \
 ncurses/menu \
@@ -86,6 +97,7 @@ kldunload \
 ldconfig \
 md5 \
 mdconfig \
+mdmfs \
 mount \
 mount_cd9660 \
 mount_msdosfs \
@@ -151,6 +163,7 @@ libmp \
 libnetgraph \
 libpam/libpam \
 libpam/modules/pam_unix \
+libpam/modules/pam_permit \
 librt \
 libbz2 \
 liblzma \
@@ -162,6 +175,7 @@ getty \
 telnetd
 
 #ppp
+
 WORLD_SUBDIRS_USR_SBIN+= \
 chroot \
 cron \
