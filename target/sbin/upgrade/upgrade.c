@@ -165,6 +165,7 @@ int main(int argc, char **argv)
 #ifdef USE_GEOM_GET_SIZE
 	int target_size_check = 1;
 	size_t target_size;
+	size_t file_size;
 #endif
 #ifdef USE_MD5
 	int verify = 1;
@@ -312,7 +313,7 @@ int main(int argc, char **argv)
 			goto just_exit;
 		}
 #ifdef WITH_HTTP_MODE
-		if (args.filesize > target_size) {
+		if (http_mode && args.filesize > target_size) {
 			dprintf(console, "Input file too big to write into "
 			    "%s\n", device);
 			exitcode = 1;
@@ -333,6 +334,20 @@ int main(int argc, char **argv)
 		exitcode = 1;
 		goto just_exit;
 	}
+
+#ifdef USE_GEOM_GET_SIZE
+	fseek(fh, 0L, SEEK_END);
+	file_size = ftell(fh);
+	if (file_size > target_size)
+	{
+		dprintf(console, "Input file too big to write into "
+		    "%s (%i into %i)\n", device, file_size, target_size);
+		exitcode = 1;
+		fclose(fh);
+		goto just_exit;
+	}
+	rewind(fh);
+#endif
 
 	buf = malloc(blocksize);
 	if (!buf)
