@@ -30,7 +30,6 @@ libufs \
 libutil \
 libwrap \
 libxo \
-libwrap \
 libz \
 libnv \
 ncurses/ncursesw \
