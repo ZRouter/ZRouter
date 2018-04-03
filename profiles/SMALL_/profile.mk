@@ -1,28 +1,38 @@
 
 WORLD_SUBDIRS_LIB+= \
 libalias \
+lib80211 \
+libbz2 \
 libbsm \
 libc \
+libcasper \
 libedit \
 libelf \
 libexpat \
 libcrypt \
 libgeom \
+libgpio \
+libjail \
 libipsec \
 libjail \
 libkiconv \
 libkvm \
+liblzma \
 libmd \
 libmemstat \
 msun \
+libmd \
 libpmc \
 libsbuf \
 libtacplus \
 libthr \
 libufs \
 libutil \
+libwrap \
+libxo \
 libz \
-ncurses/ncurses \
+libnv \
+ncurses/ncursesw \
 ncurses/form \
 ncurses/menu \
 ncurses/panel
@@ -31,7 +41,7 @@ WORLD_SUBDIRS+= \
 secure/lib/libcrypto \
 secure/lib/libssl
 
-#libipx \
+#libipx
 # Compile ping without libipsec and ifconfig without libjail,libipx
 # "libcrypto.so.6" not found, required by "bsdtar"
 # "libssl.so.6" not found, required by "fetch"
@@ -86,6 +96,7 @@ kldunload \
 ldconfig \
 md5 \
 mdconfig \
+mdmfs \
 mount \
 mount_cd9660 \
 mount_msdosfs \
@@ -140,7 +151,7 @@ libregex \
 libssp \
 libstdc++
 
-#libreadline \
+#libreadline
 # XXX: libreadline must be replaced with libedit
 
 WORLD_SUBDIRS_LIB+= \
@@ -151,6 +162,7 @@ libmp \
 libnetgraph \
 libpam/libpam \
 libpam/modules/pam_unix \
+libpam/modules/pam_permit \
 librt \
 libbz2 \
 liblzma \
@@ -161,7 +173,8 @@ rtld-elf \
 getty \
 telnetd
 
-#ppp \
+#ppp
+
 WORLD_SUBDIRS_USR_SBIN+= \
 chroot \
 cron \

@@ -32,8 +32,8 @@ GNU_CONFIGURE=	yes
 DOXYGEN_EXTRA_PATCHES_OFF=	${FILESDIR}/extra-patch-Makefile.am
 
 #post-patch:
-#	@${REINPLACE_CMD} 's|^pkgdocdir=.*|pkgdocdir=${DOCSDIR}|' \
-		${WRKSRC}/Makefile.am
+#	@${REINPLACE_CMD} 's|^pkgdocdir=.*|pkgdocdir=${DOCSDIR}|' \ #
+#		${WRKSRC}/Makefile.am
 
 do-install:
 	mkdir -p ${ZPREFIX}/lib

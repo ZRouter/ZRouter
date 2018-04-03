@@ -135,6 +135,6 @@ KERNCONF_DEVICES+=		crypto
 .endif
 
 
-#	sys/boot/uboot	\
+#	sys/boot/uboot
 #	sys/boot/arm/uboot
 

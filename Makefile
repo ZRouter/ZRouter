@@ -490,6 +490,8 @@ VAR_RIGHT=${var:C/.*=//}
 ${VAR_LEFT}:=${VAR_RIGHT}
 .endfor
 
+.warning ${WORLD_SUBDIRS}
+
 #
 # World
 #
@@ -678,8 +680,8 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 .endif
 	rm -rf ${NEW_ROOTFS}/etc/mpd
 	ln -s /tmp/etc/mpd ${NEW_ROOTFS}/etc/mpd
-#	hg --repository "${ZROUTER_ROOT}" tip \
-#	    --template 'revision="{rev}"\ndate="{date|isodate}"\n' > \
+#	hg --repository "${ZROUTER_ROOT}" tip \ #
+#	    --template 'revision="{rev}"\ndate="{date|isodate}"\n' > \ #
 #	    "${NEW_ROOTFS}/etc/zrouter_version"
 	LANG=C date '+build="%Y-%m-%d %H:%M:%S"' >> \
 	    "${NEW_ROOTFS}/etc/zrouter_version"

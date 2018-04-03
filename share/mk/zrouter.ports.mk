@@ -37,7 +37,7 @@ _TARGET_CROSS_DEFS = \
 	CXXFLAGS="-I${WORLDDESTDIR}/include -I${WORLDDESTDIR}/include/json" \
 	ZWORKROOT=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}${ZROUTER_ROOT} \
 	ZWORLDDESTDIR=${WORLDDESTDIR}
-#	LIBTOOL=/usr/local/bin/libtool \
+#	LIBTOOL=/usr/local/bin/libtool \ #
 #	-ELIBTOOL
 
 # ac_cv_func_malloc_0_nonnull=yes avoid "undefined reference to `rpl_malloc'"

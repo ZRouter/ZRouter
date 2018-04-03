@@ -110,9 +110,9 @@ TARGET_PROFILES+= 	\
 	ssh		\
 	watchdogd
 
-#	ng_igmp_fwd	\
-#	net_help	\
-#	nfs_client	\
+#	ng_igmp_fwd
+#	net_help
+#	nfs_client
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma

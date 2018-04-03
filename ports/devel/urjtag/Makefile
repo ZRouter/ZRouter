@@ -58,10 +58,10 @@ CFLAGS+=	-I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include
 post-patch:
 	@printenv
 # Suppress svn(1) binary detection
-#	@${REINPLACE_CMD} -e \
-#		's|^SVN=.*|SVN=''| ; \
-#		 s|-Lwith_libusb |-L$$with_libusb/lib | ; \
-#		 s|-I$$with_libusb"|-I$$with_libusb/include"|' \
+#	@${REINPLACE_CMD} -e \ #
+#		's|^SVN=.*|SVN=''| ; \ #
+#		 s|-Lwith_libusb |-L$$with_libusb/lib | ; \ #
+#		 s|-I$$with_libusb"|-I$$with_libusb/include"|' \ #
 #		${WRKSRC}/configure
 
 do-install:

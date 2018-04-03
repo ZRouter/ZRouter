@@ -586,15 +586,15 @@ include ./$(DEPDIR)/win32.Po
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	source='$<' object='$@' libtool=no \ #
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \ #
 #	$(COMPILE) -c $<
 
 .c.obj:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
 	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	source='$<' object='$@' libtool=no \ #
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \ #
 #	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 install-man8: $(dist_man_MANS)
 	@$(NORMAL_INSTALL)

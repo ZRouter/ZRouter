@@ -286,22 +286,22 @@ include ./$(DEPDIR)/utils.Po
 .c.o:
 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	source='$<' object='$@' libtool=no \ #
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \ #
 #	$(COMPILE) -c $<
 
 .c.obj:
 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	source='$<' object='$@' libtool=no \ #
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \ #
 #	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
 	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	source='$<' object='$@' libtool=yes \ #
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \ #
 #	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:

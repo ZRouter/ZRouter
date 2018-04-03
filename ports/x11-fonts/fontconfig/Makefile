@@ -15,7 +15,7 @@ USES=		tar:bzip2
 
 .if !defined(REFERENCE_PORT)
 
-#LIB_DEPENDS=	libfreetype.so:${PORTSDIR}/print/freetype2 \
+#LIB_DEPENDS=	libfreetype.so:${PORTSDIR}/print/freetype2 \ #
 #		libexpat.so:${PORTSDIR}/textproc/expat2
 
 USES+=		gmake libtool pathfix pkgconfig
@@ -54,16 +54,16 @@ do-install:
 	cd ${ZPREFIX}/lib;ln -s libfontconfig.so.1 libfontconfig.so
 
 #post-install:
-#	${INSTALL_MAN} ${MAN5PAGES:S|^|${WRKSRC}/doc/|} \
+#	${INSTALL_MAN} ${MAN5PAGES:S|^|${WRKSRC}/doc/|} \ #
 #		${STAGEDIR}${PREFIX}/man/man5
 #.for manpage in ${MAN1PAGES}
-#	${INSTALL_MAN} ${FILESDIR}/${manpage} \
+#	${INSTALL_MAN} ${FILESDIR}/${manpage} \ #
 #		${STAGEDIR}${PREFIX}/man/man1
 #.endfor
-#	${INSTALL_DATA} ${WRKSRC}/fonts.conf \
+#	${INSTALL_DATA} ${WRKSRC}/fonts.conf \ #
 #		${STAGEDIR}${PREFIX}/etc/fonts/fonts.conf.sample
-#	@${SED} -e 's|%%PREFIX%%|${PREFIX}| ; \
-#		s|%%LOCALBASE%%|${LOCALBASE}|' < ${FILESDIR}/pkg-install.in \
+#	@${SED} -e 's|%%PREFIX%%|${PREFIX}| ; \ #
+#		s|%%LOCALBASE%%|${LOCALBASE}|' < ${FILESDIR}/pkg-install.in \ #
 #		> ${PKGINSTALL}
 
 #post-install-DOCS-on:
