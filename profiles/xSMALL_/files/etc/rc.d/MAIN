@@ -18,6 +18,11 @@ main_prestart()
 	sysctl kern.coredump=0
 	sysctl net.inet.ip.forwarding=1
 
+	reroot=`kenv -q vfs.root.mountfrom`
+	if [ "$reroot" = "cd9660:md0.uzip" ]; then
+		zmdsize="1m"
+	fi
+
 	if [ -z "$zmdsize" ]; then
 		memsize=`sysctl -n hw.physmem`
 		if [ $memsize -le 8388608 ]; then 
@@ -45,8 +50,6 @@ main_prestart()
 
 	ifconfig lo0 127.0.0.1/8
 
-	syslogd -s
-
 	mount_unionfs /tmp/etc /etc
 
 	if [ -c /dev/map/config ]; then
@@ -61,6 +64,11 @@ main_prestart()
 
 main_start()
 {
+	syslogd -s
+
+	if [ -e "/usr/local/lib" ]; then
+		ldconfig -m /usr/local/lib
+	fi
 }
 
 main_poststart()

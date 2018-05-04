@@ -52,16 +52,16 @@ KERNEL_SIZE_MAX!=sh -c 'echo $$((8 * 1024 * 1024))'
 PREINSTALLDIRS=/lib
 
 ##############################################################################
-# Local vendor changes
-##############################################################################
-.include "vendor/vendor.mk"
-
-##############################################################################
 # Board configuration must define used SoC/CPU
 ##############################################################################
 .ifnmake show-target-pairs
 .include "boards/boards.mk"
 .endif
+
+##############################################################################
+# Local vendor changes
+##############################################################################
+.include "vendor/vendor.mk"
 
 .if !defined(TARGET_BOARDDIR)
 TARGET_PAIRS!=ls -d ${ZROUTER_ROOT}/boards/*/* | sed 's/^.*\/boards\///'

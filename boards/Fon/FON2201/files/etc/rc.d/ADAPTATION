@@ -16,8 +16,8 @@ adapt_prestart()
 	# Import MAC addresses with known names
 	MAGIC=`dd if=/dev/flash/spi0 bs=0x10000 skip=0x7f count=1 2>/dev/null | od -tx4 -N 4 | awk '/0000000/{print $2}'`
 	if [ ${MAGIC} = "35333131" ]; then
-		kenv WIFI_MAC_ADDR=`dd if=/dev/flash/spi0 bs=0x10000 skip=0x7f count=1 2>/dev/null | od -j 0x0060 -N 6 -t x1 | awk '/0000140/{print $2":"$3":"$4":"$5":"$6":"$7}'`
-		kenv LAN_MAC_ADDR=`dd if=/dev/flash/spi0 bs=0x10000 skip=0x7f count=1 2>/dev/null | od -j 0x0066 -N 6 -t x1 | awk '/0000146/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+		kenv WIFI_MAC_ADDR=`dd if=/dev/flash/spi0 bs=0x10000 skip=0x7f count=1 2>/dev/null | od -t x1 | awk '/^0000140/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+		kenv LAN_MAC_ADDR=`dd if=/dev/flash/spi0 bs=0x10000 skip=0x7f count=1 2>/dev/null | od -t x1 | awk '/^0000140/{print $8":"$9":"$10":"$11":"$12":"$13}'`
 
 		ifconfig are0 ether `kenv LAN_MAC_ADDR`
 	fi
