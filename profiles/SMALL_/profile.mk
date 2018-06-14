@@ -22,6 +22,7 @@ libmd \
 libmemstat \
 msun \
 libmd \
+libpmcstat \
 libpmc \
 libsbuf \
 libtacplus \
