@@ -1,0 +1,3 @@
+bin/iperf3
+lib/libiperf.so
+lib/libiperf.so.0
