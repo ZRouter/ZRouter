@@ -33,7 +33,7 @@ post-patch:
 #	(cd ${WRKSRC} && ${INSTALL_DATA} ${PORTDOCS} ${STAGEDIR}${DOCSDIR})A
 
 do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/src/.libs/iperf3 ${ZPREFIX}/sbin/iperf3
+	${INSTALL_PROGRAM} ${WRKSRC}/src/.libs/iperf3 ${ZPREFIX}/bin/iperf3
 	mkdir -p ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/src/.libs/libiperf.so.0.0.0 ${ZPREFIX}/lib/libiperf.so.0
 	cd ${ZPREFIX}/lib;ln -s libiperf.so.0 libiperf.so
