@@ -1,4 +1,6 @@
 
+WORLD_BUILD_ENV_EXTRA+=WITHOUT_OPENSSL=yes
+
 WORLD_SUBDIRS_LIB+= \
 libalias \
 lib80211 \
@@ -139,6 +141,7 @@ tail \
 tar \
 tee \
 telnet \
+tftp \
 touch \
 uname \
 vi \
