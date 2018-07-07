@@ -26,9 +26,6 @@ main_start()
 	# Run syslogd
 	syslogd -s
 
-	# Run empty MPD
-	mpd  --background
-
 	# Run inetd
 	inetd -wW
 }
