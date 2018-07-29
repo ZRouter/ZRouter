@@ -124,7 +124,7 @@ hint.map.1.readonly=1
 
 hint.map.2.at="cfid0"
 hint.map.2.start=0x00060000
-hint.map.2.end=search:"0x00100000:0x10000:.!/bin/sh"
+hint.map.2.end=search:0x00100000:0x10000:.!/bin/sh"
 hint.map.2.name="kernel"
 
 hint.map.3.at="cfid0"
