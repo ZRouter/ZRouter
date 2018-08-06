@@ -107,10 +107,10 @@ hint.map.4.name="kernel"
 
 hint.map.5.at="flash/spi0"
 hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.5.end=0x007c0000
+hint.map.5.end=0x00fc0000
 hint.map.5.name="rootfs"
 
 hint.map.6.start=0x007c0000
-hint.map.6.end=0x007f0000
+hint.map.6.end=0x00ff0000
 hint.map.6.name="config"
 #hint.map.6.readonly=1
