@@ -7,7 +7,9 @@ HOME=/
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export HOME PATH
 
-echo f1 > /dev/led/status
+if [ -e "/dev/led/status" ]; then
+	echo f1 > /dev/led/status
+fi
 
 if [ "$1" = autoboot ]; then
 	autoboot=yes
@@ -48,6 +50,8 @@ echo ''
 
 date
 
-echo f9 > /dev/led/status
+if [ -e "/dev/led/status" ]; then
+	echo f9 > /dev/led/status
+fi
 
 exit 0
