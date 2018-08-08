@@ -1,16 +1,16 @@
 # TODO: RGMII
-hint.arge.0.phymask=0x0         # Nothing attached here (XXX?)
+hint.arge.0.phymask=0x0
 hint.arge.0.media=1000
 hint.arge.0.fduplex=1
-hint.arge.0.miimode=3           # RGMII
+hint.arge.0.miimode=3
 
 # TODO: RGMII
 hint.arge.1.phymask=0x10
 # hint.arge.1.pll_1000 = 0x1f000000
 # For now, rendezouvs this on the arge0 mdiobus.
 # Later, this will rendezvous via the AR8316 switch.
-hint.arge.1.miimode=3           # RGMII
-hint.arge.1.mdio=mdioproxy1     # off the switch mdiobus
+hint.arge.1.miimode=3
+hint.arge.1.mdio=mdioproxy1
 
 # arge0 MDIO bus - there's no arge1 MDIO bus for AR71xx
 hint.argemdio.0.at="nexus0"
@@ -107,10 +107,10 @@ hint.map.4.name="kernel"
 
 hint.map.5.at="flash/spi0"
 hint.map.5.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.5.end=0x007c0000
+hint.map.5.end=0x00fc0000
 hint.map.5.name="rootfs"
 
 hint.map.6.start=0x007c0000
-hint.map.6.end=0x007f0000
+hint.map.6.end=0x00ff0000
 hint.map.6.name="config"
 #hint.map.6.readonly=1
