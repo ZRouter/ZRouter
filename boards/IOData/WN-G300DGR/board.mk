@@ -8,8 +8,10 @@
 SOC_VENDOR=Ralink
 SOC_CHIP=RT3050F_FDT
 # TODO: size suffixes
-BOARD_FLASH_SIZE=8388608
+BOARD_FLASH_SIZE=4194304
 
+# use for mac address in flash
+WORLD_SUBDIRS_USR_BIN+=hexdump awk
 
 ###################################################
 #
@@ -36,7 +38,7 @@ KERNCONF_DEVICES+=      etherswitch
 KERNCONF_DEVICES+=      miiproxy
 KERNCONF_DEVICES+=      rtl8366rb
 WORLD_SUBDIRS_SBIN+=    etherswitchcfg
-KERNCONF_OPTIONS+=	RTL8366_SOFT_RESET
+#KERNCONF_OPTIONS+=	RTL8366_SOFT_RESET
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes

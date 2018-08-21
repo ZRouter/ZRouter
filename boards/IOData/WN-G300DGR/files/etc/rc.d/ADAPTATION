@@ -13,10 +13,19 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+ENVDEV="/dev/cfid0s.factory"
 
+	kenvmac=`kenv -q LAN_MAC_ADDR`
+	if [ -z "$kenvmac" ]; then
 
-	hostname `kenv HostName`
+		# Import MAC addresses from flash
+		kenv LAN_MAC_ADDR=`od -t x1 ${ENVDEV} | awk '/^0000000/{print $6":"$7":"$8":"$9":"$10":"$11}'`
+
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+
+		hostname `kenv HostName`
+
+	fi
 
 }
 
