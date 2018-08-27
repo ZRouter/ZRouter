@@ -13,13 +13,7 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-	# usb phy power on
-	gpioctl 2 1
-
-	gpioctl -f /dev/gpioc0 -c 10 IN II PU INT
-
 	hostname `kenv HostName`
-
 }
 
 adapt_start()

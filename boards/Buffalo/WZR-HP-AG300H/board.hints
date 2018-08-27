@@ -114,3 +114,43 @@ hint.map.6.start=0x007c0000
 hint.map.6.end=0x00ff0000
 hint.map.6.name="config"
 #hint.map.6.readonly=1
+
+#
+# Pin 1  - SCK
+# Pin 2  - SDA
+# Pin 3  - usb 
+# Pin 4  - 
+# Pin 5  - aoss
+# Pin 6  - router auto
+# Pin 7  - router off
+# Pin 8  - movie engine
+# Pin 9  - 
+# Pin 10 - 
+# Pin 11 - reset button
+# Pin 12 - CS0
+# Pin 13 - CS1
+# Pin 14 - 
+# Pin 15 - 
+# Pin 16 - 
+# Pin 17 - 
+
+# Don't flip on anything that isn't already enabled.
+# Force on CS lines for flash devices, apparently this isn't done
+# by uboot in normal booting.  No idea why. 
+hint.gpio.0.function_set=0x00003804
+hint.gpio.0.function_clear=0x00000000
+
+# These are the GPIO LEDs and buttons which can be software controlled.
+# USB powered on
+hint.gpio.0.pinmask=0x0005
+hint.gpio.0.pinon=0x00000804
+
+hint.gpioiic.0.at="gpiobus0"
+#hint.gpioiic.0.pins=0x0003
+hint.gpioiic.0.sda=0
+hint.gpioiic.0.scl=1
+
+# LEDs are configured separately and driven by the LED device
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="red-diag"
+hint.gpioled.0.pins=0x0001
