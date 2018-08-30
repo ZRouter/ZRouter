@@ -13,23 +13,19 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+ENVDEV="/dev/cfid0s.Factory"
 
-	# Import MAC addresses with known names
-#	kenv LAN_MAC_ADDR=`kenv ethaddr`
-#	kenv WAN_MAC_ADDR=`kenv wanmac`
+	kenvmac=`kenv -q LAN_MAC_ADDR`
+	if [ -z "$kenvmac" ]; then
 
-#	ifconfig rt0 ether `kenv LAN_MAC_ADDR`
-#	ifconfig rt0 up
-#	ifconfig vlan1 create vlan 1 vlandev rt0
-#	ifconfig vlan1 name lan0
-#	ifconfig vlan2 create vlan 2 vlandev rt0
-#	ifconfig vlan2 name wan0
+		# Import MAC addresses from flash
+		kenv LAN_MAC_ADDR=`od -t x1 ${ENVDEV} | awk '/^0000000/{print $6":"$7":"$8":"$9":"$10":"$11}'`
 
-#	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
-#	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
 
-	hostname `kenv HostName`
+		hostname `kenv HostName`
+
+	fi
 
 }
 
