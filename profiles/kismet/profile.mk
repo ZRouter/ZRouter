@@ -1,3 +1,5 @@
 
-WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/net-mgmt/kismet
+WORLD_SUBDIRS_GNU_LIB+=libstdc++
+WORLD_SUBDIRS_LIB+=libpcap ncurses/ncurses ncurses/panel
 
+WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/net-mgmt/kismet
