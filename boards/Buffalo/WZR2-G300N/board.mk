@@ -66,7 +66,7 @@ KERNCONF_DEVICES+=	cfid
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x003c0000
 
 
 ###################################################
@@ -88,7 +88,7 @@ KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
 UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
-MKULZMA_BLOCKSIZE=131072
+MKULZMA_BLOCKSIZE=65536
 
 PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
