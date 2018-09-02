@@ -47,8 +47,7 @@ post-configure:
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/kismet_client ${ZPREFIX}/bin/kismet_client
-	${INSTALL_PROGRAM} ${WRKSRC}/kismet_drone ${ZPREFIX}/bin/kismet_drone
 	${INSTALL_PROGRAM} ${WRKSRC}/kismet_server ${ZPREFIX}/bin/kismet_server
-	${INSTALL_PROGRAM} ${WRKSRC}/kismet_capture ${ZPREFIX}/bin/kismet_capture
+	${INSTALL_PROGRAM} ${WRKSRC}/kismet_drone ${ZPREFIX}/bin/kismet_drone
 
 .include <bsd.port.mk>
