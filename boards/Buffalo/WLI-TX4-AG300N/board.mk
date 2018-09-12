@@ -10,8 +10,6 @@ SOC_CHIP=RT2880F_FDT
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
-WITHOUT_WIRELESS=yes
-
 ###################################################
 #
 # Vars for kernel config 
