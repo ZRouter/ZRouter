@@ -8,7 +8,7 @@
 SOC_VENDOR=Ralink
 SOC_CHIP=RT3050F_FDT
 # TODO: size suffixes
-BOARD_FLASH_SIZE=8388608
+BOARD_FLASH_SIZE=4194304
 
 ###################################################
 #
@@ -43,7 +43,7 @@ WITHOUT_WIRELESS=yes
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
 
 ###################################################
