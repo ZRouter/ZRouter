@@ -1,4 +1,4 @@
-##################################################
+###################################################
 #
 # Board used hardware/chip`s
 #
@@ -10,8 +10,6 @@ SOC_CHIP=RT2880F_FDT
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
-WITHOUT_WIRELESS=yes
-
 ###################################################
 #
 # Vars for kernel config 
@@ -21,19 +19,14 @@ WITHOUT_WIRELESS=yes
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?=	"MZK-W300NAG.dts"
+KERNCONF_FDT_DTS_FILE?=	"MZK-W04N-XX.dts"
 
-KERNCONF_DEVICES+=	gpioiic
-KERNCONF_DEVICES+=	iicbb
+KERNCONF_OPTIONS+=	RT_MDIO
 
-KERNCONF_DEVICES+=	iicbus
-KERNCONF_DEVICES+=	iic
-KERNCONF_DEVICES+=	mtk_iic
-
-#KERNCONF_DEVICES+=	mdio
+KERNCONF_DEVICES+=	mdio
 KERNCONF_DEVICES+=	etherswitch
 KERNCONF_DEVICES+=	miiproxy
-KERNCONF_DEVICES+=	rtl8366rb
+KERNCONF_DEVICES+=	ip17x
 WORLD_SUBDIRS_SBIN+=	etherswitchcfg
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\" 
@@ -51,7 +44,7 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x00390000
+FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
 
 ###################################################
@@ -59,8 +52,6 @@ FIRMWARE_IMAGE_SIZE_MAX=0x00390000
 #       Firmware Image Options
 #
 ###################################################
-
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
 
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma

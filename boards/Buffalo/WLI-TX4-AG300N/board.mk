@@ -1,4 +1,4 @@
-##################################################
+###################################################
 #
 # Board used hardware/chip`s
 #
@@ -21,19 +21,14 @@ WITHOUT_WIRELESS=yes
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?=	"MZK-W300NAG.dts"
+KERNCONF_FDT_DTS_FILE?=	"WLI-TX4-AG300N.dts"
 
-KERNCONF_DEVICES+=	gpioiic
-KERNCONF_DEVICES+=	iicbb
+KERNCONF_OPTIONS+=	RT_MDIO
 
-KERNCONF_DEVICES+=	iicbus
-KERNCONF_DEVICES+=	iic
-KERNCONF_DEVICES+=	mtk_iic
-
-#KERNCONF_DEVICES+=	mdio
+KERNCONF_DEVICES+=	mdio
 KERNCONF_DEVICES+=	etherswitch
 KERNCONF_DEVICES+=	miiproxy
-KERNCONF_DEVICES+=	rtl8366rb
+KERNCONF_DEVICES+=	ip17x
 WORLD_SUBDIRS_SBIN+=	etherswitchcfg
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\" 
@@ -51,7 +46,7 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x00390000
+FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
 
 ###################################################
@@ -65,9 +60,6 @@ FIRMWARE_IMAGE_SIZE_MAX=0x00390000
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
 UBOOT_KERNEL_COMPRESSION_TYPE=lzma
-
-# This module always boot from bc450014. Than add space to head.
-UBOOT_HEAD_WHITESPACE=20
 
 MKULZMA_BLOCKSIZE=65536
 

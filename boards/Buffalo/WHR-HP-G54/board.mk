@@ -22,7 +22,7 @@ KERNEL_COMPRESSION_TYPE=gzip
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
-WITH_USB=yes
+#WITH_USB=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt

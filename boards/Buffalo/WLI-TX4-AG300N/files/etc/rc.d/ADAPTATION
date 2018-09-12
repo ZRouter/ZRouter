@@ -13,6 +13,10 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
+	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+
+	hostname `kenv HostName`
+
 }
 
 adapt_start()
