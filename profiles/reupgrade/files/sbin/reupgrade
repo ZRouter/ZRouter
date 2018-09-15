@@ -6,6 +6,10 @@ if [ -e "${CONF}" ]; then
 
 . ${CONF}
 
+ping -c 3 ${UPGRADETFTP} >> /dev/null
+
+if [ $? == 0 ]; then
+
 echo -n "Flash upgrade ? [y/n] "
 
 read ans
@@ -27,6 +31,37 @@ for u in ${UNIDIR} ; do
   fi
 done
 
+if [ -z "${UPGRADEROOT}" ]; then
+rm -rf /tmp/*
+mkdir /tmp/dev
+mkdir /tmp/bin
+mkdir /tmp/sbin
+mkdir /tmp/libexec
+mkdir /tmp/lib
+mkdir /tmp/etc
+mkdir /tmp/usr
+mkdir /tmp/usr/bin
+mkdir /tmp/tmp
+cp /sbin/init /tmp/sbin
+cp /bin/sh /tmp/bin
+cp /libexec/ld-elf.so.1 /tmp/libexec
+cp /lib/libedit.so.7 /tmp/lib
+cp /lib/libc.so.7 /tmp/lib
+cp /lib/libncursesw.so.8 /tmp/lib
+cp /lib/libutil.so.9 /tmp/lib
+cp /bin/kill /tmp/bin
+cp /bin/dd /tmp/bin
+cp /bin/kenv /tmp/bin
+cp /usr/bin/tftp /tmp/usr/bin
+cp /usr/bin/uname /tmp/usr/bin
+cp ${CONF} /tmp/etc
+mkfifo /tmp/tmp/flashpipe
+cp /sbin/bupgrade /tmp/etc/rc
+df /tmp
+kenv vfs.root.mountfrom=ufs:md0
+reboot -r
+
+else
 umount /tmp
 if [ $? == 0 ]; then
 
@@ -41,10 +76,15 @@ else
 echo "can't dd rootfs"
 fi
 else
+fi
 echo "can't umount /tmp"
 fi
 ;;
 esac
+
+else
+echo "${UPGRADETFTP} not alive"
+fi
 
 else
 echo "upgrade need ${CONF}"
