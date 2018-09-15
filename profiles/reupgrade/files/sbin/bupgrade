@@ -1,0 +1,31 @@
+#!/bin/sh
+
+ZBOARD=`uname -i`
+
+CONF="/etc/upgrade.conf"
+
+if [ -e "${CONF}" ]; then
+
+. ${CONF}
+
+kupgradetftp=`kenv -q upgradetftp`
+if [ -n "$kupgradetftp" ]; then
+UPGRADETFTP=$kupgradetftp
+fi
+
+reroot=`kenv -q vfs.root.mountfrom`
+if [ "$reroot" = "ufs:md0" ]; then
+
+dd if=/tmp/flashpipe of=${UPGRADEDEV} obs=${UPGRADEBS} conv=osync &
+echo "bin
+get ${ZBOARD}.zimage /tmp/flashpipe
+quit" | tftp ${UPGRADETFTP} 69
+
+else
+echo "not in md rootfs"
+fi
+else
+echo "upgrade need ${CONF}"
+fi
+
+kill -INT 1
