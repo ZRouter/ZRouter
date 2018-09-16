@@ -1,14 +1,13 @@
 #!/bin/sh
 
-ZBOARD=`uname -i`
-
 CONF="/etc/upgrade.conf"
 
 if [ -e "${CONF}" ]; then
 
 . ${CONF}
 
-kupgradetftp=`kenv -q upgradetftp`
+# over write tftp server by kenv if you want.
+kupgradetftp=`kenv -q zrouter.upgradetftp`
 if [ -n "$kupgradetftp" ]; then
 UPGRADETFTP=$kupgradetftp
 fi
@@ -16,6 +15,7 @@ fi
 reroot=`kenv -q vfs.root.mountfrom`
 if [ "$reroot" = "ufs:md0" ]; then
 
+ZBOARD=`uname -i`
 dd if=/tmp/flashpipe of=${UPGRADEDEV} obs=${UPGRADEBS} conv=osync &
 echo "bin
 get ${ZBOARD}.zimage /tmp/flashpipe
