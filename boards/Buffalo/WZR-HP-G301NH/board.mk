@@ -103,7 +103,7 @@ KERNCONF_DEVICES+=	ath_ar9130
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 # 3538944
-FIRMWARE_IMAGE_SIZE_MAX=0x00360000
+FIRMWARE_IMAGE_SIZE_MAX=0x00f60000
 
 ###################################################
 #
