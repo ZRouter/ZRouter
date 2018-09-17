@@ -25,10 +25,6 @@ KERNCONF_FDT_DTS_FILE?=	"LAN-W300N.dts"
 # Logitec_LAN-W300N_kernel.kbin.oldlzma.uboot -> flash
 # Logitec_LAN-W300N_rootfs_clean.iso -> usb memory
 
-KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\" 
-
-KERNCONF_DEVICES+=umass scbus da
-
 .if defined(WITH_USBROOTFS)
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\" 
 .else
@@ -55,7 +51,7 @@ WITHOUT_WIRELESS=yes
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
 
 
 ###################################################
