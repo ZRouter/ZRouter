@@ -72,7 +72,7 @@ kenv vfs.root.mountfrom=ufs:md0
 reboot -r
 
 else
-umount /${NEXROOTFS}
+umount /tmp
 if [ $? == 0 ]; then
 
 dd if=${UPGRADEROOT} of=/dev/md0
@@ -87,7 +87,7 @@ echo "can't dd rootfs"
 fi
 else
 fi
-echo "can't umount /${NEXROOTFS}"
+echo "can't umount /tmp"
 fi
 ;;
 esac
