@@ -1,31 +1,50 @@
-# New ports collection makefile for:	libmicrohttpd
-# Date created:		12 February 2008
-# Whom:			David Barksdale <amatus@gnu.org>
-#
-# $FreeBSD: ports/www/libmicrohttpd/Makefile,v 1.5 2009/10/17 23:14:46 itetcu Exp $
-#
+# Created by: David Barksdale <amatus@gnu.org>
+# $FreeBSD: head/www/libmicrohttpd/Makefile 432286 2017-01-23 18:52:57Z sunpoet $
 
 PORTNAME=	libmicrohttpd
-PORTVERSION=	0.4.2
+PORTVERSION=	0.9.52
 CATEGORIES=	www
-MASTER_SITES=	http://gnunet.org/libmicrohttpd/download/
+MASTER_SITES=	GNU
 
-MAINTAINER=	amatus@gnu.org
+MAINTAINER=	gaod@hychen.org
 COMMENT=	C library for embedding HTTP server functionality
 
-USE_LDCONFIG=	yes
+LICENSE=	LGPL21
+LICENSE_FILE=	${WRKSRC}/COPYING
+
 GNU_CONFIGURE=	yes
-MAKE_ARGS+=	pkgconfigdir=${PREFIX}/libdata/pkgconfig
-CONFIGURE_ARGS= --without-libgcrypt --without-libcurl --disable-https
+INSTALL_TARGET=	install-strip
+#USES=		cpe libtool pathfix
+USE_LDCONFIG=	yes
 
-PLIST_FILES=	lib/libmicrohttpd.so.6 \
-		lib/libmicrohttpd.la \
-		lib/libmicrohttpd.so \
+CPE_VENDOR=	gnu
+
+#OPTIONS_DEFINE=	GNUTLS
+
+#GNUTLS_LIB_DEPENDS=	libgcrypt.so:security/libgcrypt \
+			libgnutls.so:security/gnutls
+#GNUTLS_CONFIGURE_WITH=	libgcrypt-prefix=${LOCALBASE} gnutls=${LOCALBASE}
+#GNUTLS_CONFIGURE_ENABLE=https
+
+CONFIGURE_ARGS+= --disable-curl
+
+#INFO=		libmicrohttpd libmicrohttpd-tutorial
+
+PLIST_FILES=	include/microhttpd.h \
 		lib/libmicrohttpd.a \
+		lib/libmicrohttpd.so \
+		lib/libmicrohttpd.so.12 \
+		lib/libmicrohttpd.so.12.40.0 \
 		libdata/pkgconfig/libmicrohttpd.pc \
-		include/microhttpd.h \
-		info/microhttpd.info
+		man/man3/libmicrohttpd.3.gz
 
-MAN3=		libmicrohttpd.3
+post-patch:
+	@${REINPLACE_CMD} -e 's|bin_PROGRAMS =|noinst_PROGRAMS +=|' \
+		${WRKSRC}/src/examples/Makefile.in
+
+do-install:
+	${MKDIR} ${ZPREFIX}/lib
+	${INSTALL_LIB} ${WRKSRC}/src/microhttpd/.libs/libmicrohttpd.so.12.40.0 ${ZPREFIX}/lib/libmicrohttpd.so.12
+	cd ${ZPREFIX}/lib;ln -s libmicrohttpd.so.12 libmicrohttpd.so
 
 .include <bsd.port.mk>
