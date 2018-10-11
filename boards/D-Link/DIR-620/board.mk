@@ -50,8 +50,9 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=	SMALL_ mpd ssh lua_web_ui dhcp ng_igmp_fwd ntpdate \
+TARGET_PROFILES+=	SMALL_ ssh lua_web_ui dhcp ng_igmp_fwd ntpdate \
     dnsmasq hostap ipfw net_help ppp
+# mpd
 # nfs_client
 # racoon
  
