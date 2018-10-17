@@ -6,6 +6,7 @@ hint.gpio.0.function_set=0x00000001
 hint.gpio.0.function_clear=0x00000004
 
 # Switch 0 = ECO, 1 = RAKU, 11 = MODE, 12 = RESET
+# USB Power(MIC2009YM6) 18 = EN, 19 = FAULT/
 
 # LED none
 
