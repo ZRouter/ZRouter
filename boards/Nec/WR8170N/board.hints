@@ -1,13 +1,11 @@
 # $FreeBSD$
 
 # GPIO
-hint.gpio.0.at="apb0"
-hint.gpio.0.maddr=0x18040000
-hint.gpio.0.msize=0x1000
-hint.gpio.0.irq=2
-hint.gpio.0.pinmask=0x3ffff
+hint.gpio.0.pinmask=0xc19c3
+hint.gpio.0.function_set=0x00000001
+hint.gpio.0.function_clear=0x00000004
 
-# Switch 0 = ECO, 1 = RAKU, 10 = MODE, 12 = RESET
+# Switch 0 = ECO, 1 = RAKU, 11 = MODE, 12 = RESET
 
 # LED none
 

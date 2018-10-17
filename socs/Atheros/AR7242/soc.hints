@@ -68,8 +68,8 @@ hint.gpio.0.irq=2
 # Don't flip on anything that isn't already enabled.
 # This includes leaving the SPI CS1/CS2 pins as GPIO pins as they're
 # not used here.
-hint.gpio.0.function_set=0x00002000
-hint.gpio.0.function_clear=0x00000000
+#hint.gpio.0.function_set=0x00002000
+#hint.gpio.0.function_clear=0x00000000
 
 # ohci
 hint.ohci.0.at="nexus0"
