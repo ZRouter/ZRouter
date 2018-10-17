@@ -13,6 +13,11 @@ if [ -n "$kupgradetftp" ]; then
 UPGRADETFTP=$kupgradetftp
 fi
 
+if [ -n "${UPGRADEIMG}" ]; then
+IMG=${UPGRADEIMG}
+else
+IMG=${ZBOARD}.zimage
+fi
 
 reroot=`kenv -q vfs.root.mountfrom`
 if [ "$reroot" = "cd9660:md0.uzip" ]; then
@@ -24,7 +29,7 @@ if [ $? == 0 ]; then
 mkfifo /tmp/flashpipe
 dd if=/tmp/flashpipe of=${UPGRADEDEV} obs=${UPGRADEBS} conv=osync &
 echo "bin
-get ${ZBOARD}.zimage /tmp/flashpipe
+get ${IMG} /tmp/flashpipe
 quit" | tftp ${UPGRADETFTP} 69
 kill -INT 1
 
