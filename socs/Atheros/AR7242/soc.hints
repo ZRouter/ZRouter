@@ -83,4 +83,7 @@ hint.ehci.0.maddr=0x1b000100
 hint.ehci.0.msize=0x00ffff00
 hint.ehci.0.irq=1
 
+# pci
+hint.pcib.0.at="nexus0"
+hint.pcib.0.irq=0
 
