@@ -29,8 +29,7 @@ WORLD_SUBDIRS_LIB+= \
 	libufs \
 	libutil \
 	libwrap \
-	libxo \
-	libz \
+	libxo
 
 # so use
 WORLD_SUBDIRS_LIB+= \
@@ -107,7 +106,6 @@ WORLD_SUBDIRS_USR_BIN+= \
 	killall \
 	logger \
 	login \
-	minigzip \
 	passwd \
 	tee \
 	touch \

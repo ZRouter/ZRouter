@@ -333,6 +333,10 @@ _WORLD_TERGET_ENV= \
 	TARGET_CPUARCH=${TARGET_CPUARCH}
 .endif
 
+_LIBC_OPT= \
+	MK_ICONV=no \
+	MK_NIS=no
+
 _WORLD_TCBUILD_ENV= \
 	${_WORLD_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
@@ -350,6 +354,7 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
 	MALLOC_PRODUCTION=yes \
+	$(_LIBC_OPT) \
 	MK_OFED=no \
 	MK_TESTS=no \
 	-DNO_CLEAN
@@ -371,6 +376,7 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
 	MALLOC_PRODUCTION=yes \
+	$(_LIBC_OPT) \
 	MK_OFED=no \
 	MK_TESTS=no \
 	-DNO_CLEAN
@@ -767,9 +773,16 @@ trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
 zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
-	cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
-	IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
-	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX}
+	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
+	@echo "==="
+	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
+.if defined(FIRMWARE_IMAGE_SIZE_MAX) && defined(MKULZMA_BLOCKSIZE)
+	@NEW_IMAGE_SIZE=`ls -l ${NEW_IMAGE} | awk '{print $$5}'` ; \
+	REMAIN_BLOCK=`printf "(%d - %d)/${MKULZMA_BLOCKSIZE}\n" ${FIRMWARE_IMAGE_SIZE_MAX} $${NEW_IMAGE_SIZE} | bc` ; \
+	echo "Firmware remain blocks: "$${REMAIN_BLOCK}
+.endif
+	@IMGMD5=`md5 ${NEW_IMAGE} | cut -f4 -d' '` ; \
+	cp ${NEW_IMAGE} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}-${ZROUTER_VERSION}.$${IMGMD5}.${IMAGE_SUFFIX} ; echo "MD5: " $${IMGMD5}
 
 .if target(ubntimage)
 .if !defined(UBNT_VERSION) || empty(UBNT_VERSION)

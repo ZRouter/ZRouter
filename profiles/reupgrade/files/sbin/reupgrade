@@ -6,6 +6,10 @@ if [ -e "${CONF}" ]; then
 
 . ${CONF}
 
+ping -c 3 ${UPGRADETFTP} >> /dev/null
+
+if [ $? == 0 ]; then
+
 echo -n "Flash upgrade ? [y/n] "
 
 read ans
@@ -27,6 +31,47 @@ for u in ${UNIDIR} ; do
   fi
 done
 
+if [ -z "${UPGRADEROOT}" ]; then
+TMPDIR=`df | awk '$6=="/tmp"{print $1}'`
+if [ "${TMPDIR}" = "tmpfs" ]; then
+/sbin/mdconfig -a -t malloc -s 6m
+newfs /dev/md0
+mount /dev/md0 /mnt
+NEXROOTFS="mnt"
+else
+NEXROOTFS="tmp"
+fi
+rm -rf /${NEXROOTFS}/*
+mkdir /${NEXROOTFS}/dev
+mkdir /${NEXROOTFS}/tmp
+mkdir /${NEXROOTFS}/bin
+mkdir /${NEXROOTFS}/sbin
+mkdir /${NEXROOTFS}/libexec
+mkdir /${NEXROOTFS}/lib
+mkdir /${NEXROOTFS}/etc
+mkdir /${NEXROOTFS}/usr
+mkdir /${NEXROOTFS}/usr/bin
+mkdir /${NEXROOTFS}/${NEXROOTFS}
+cp /sbin/init /${NEXROOTFS}/sbin
+cp /bin/sh /${NEXROOTFS}/bin
+cp /libexec/ld-elf.so.1 /${NEXROOTFS}/libexec
+cp /lib/libedit.so.7 /${NEXROOTFS}/lib
+cp /lib/libc.so.7 /${NEXROOTFS}/lib
+cp /lib/libncursesw.so.8 /${NEXROOTFS}/lib
+cp /lib/libutil.so.9 /${NEXROOTFS}/lib
+cp /bin/kill /${NEXROOTFS}/bin
+cp /bin/dd /${NEXROOTFS}/bin
+cp /bin/kenv /${NEXROOTFS}/bin
+cp /usr/bin/tftp /${NEXROOTFS}/usr/bin
+cp /usr/bin/uname /${NEXROOTFS}/usr/bin
+cp ${CONF} /${NEXROOTFS}/etc
+mkfifo /${NEXROOTFS}/tmp/flashpipe
+cp /sbin/bupgrade /${NEXROOTFS}/etc/rc
+df /${NEXROOTFS}
+kenv vfs.root.mountfrom=ufs:md0
+reboot -r
+
+else
 umount /tmp
 if [ $? == 0 ]; then
 
@@ -41,10 +86,15 @@ else
 echo "can't dd rootfs"
 fi
 else
+fi
 echo "can't umount /tmp"
 fi
 ;;
 esac
+
+else
+echo "${UPGRADETFTP} not alive"
+fi
 
 else
 echo "upgrade need ${CONF}"

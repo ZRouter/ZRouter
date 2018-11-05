@@ -1,0 +1,130 @@
+# $FreeBSD$
+
+hint.cfi.0.at="nexus0"
+hint.cfi.0.maddr=0xbe000000
+hint.cfi.0.msize=0x02000000
+hint.cfi.0.width=2
+hint.cfi.0.shift=2
+
+hint.arge.0.media=1000
+hint.arge.0.fduplex=1
+hint.arge.0.phymask=0x0
+hint.arge.0.eeprommac=0xbfc20000
+
+# This is RTL8366SR revision setting
+hint.arge.0.miimode=3	# RGMII
+hint.arge.1.miimode=3	# RGMII
+#hint.arge.0.pll_1000=0x1e000100
+#hint.arge.1.pll_1000=0x1e000100
+
+# arge0 MDIO bus - there's no arge1 MDIO bus for AR71xx
+hint.argemdio.0.at="nexus0"
+hint.argemdio.0.maddr=0x19000000
+hint.argemdio.0.msize=0x1000
+hint.argemdio.0.order=0
+
+# This module not support mdioproxy
+#hint.arge.1.media=100
+#hint.arge.1.fduplex=1
+#hint.arge.1.phymask=0x0
+hint.arge.1.phymask=0x10
+hint.arge.1.mdio=mdioproxy0
+hint.arge.1.eeprommac=0xbfc20006
+
+# AR8316 switch on MDIO0
+#hint.arswitch.0.at="mdio0"
+#hint.arswitch.0.is_7240=0
+#hint.arswitch.0.numphys=4
+#hint.arswitch.0.phy4cpu=1
+#hint.arswitch.0.is_rgmii=1
+#hint.arswitch.0.is_gmii=0
+
+hint.robosw.0.at="mdio0"
+
+# These are the GPIO LEDs and buttons which can be software controlled.
+# Pin9,11,12,14 connect to 74HC152
+hint.gpio.0.pinmask=0x1E5A40
+
+# Same data but for ATH driver
+#hint.ath.0.eepromdata=0xbfc2000c
+
+hint.ath.0.at="nexus0"
+hint.ath.0.maddr=0x180c0000
+hint.ath.0.msize=0x30000
+hint.ath.0.irq=0
+
+hint.ath.0.eepromaddr=0x1fff1000
+#hint.ath.0.eepromaddr=0x1ffe0000
+
+#hint.arge.0.at="nexus0"
+#hint.arge.0.maddr=0x19000000
+#hint.arge.0.msize=0x1000
+#hint.arge.0.irq=2
+#hint.arge.0.media=1000
+#hint.arge.0.fduplex=1
+#hint.arge.0.phymask=0x0
+#hint.arge.0.phymask=0xffffffff
+# Real value is 0x1f3f0000, but it will by found at address alias, so
+# 4M/8M/16M devices can have same address
+#hint.arge.0.eeprommac=0x1fff0000
+
+#hint.arge.1.at="nexus0"
+#hint.arge.1.maddr=0x1a000000
+#hint.arge.1.msize=0x1000
+#hint.arge.1.irq=3
+#hint.arge.1.media=1000
+#hint.arge.1.fduplex=1
+#hint.arge.1.phymask=0x0
+#hint.arge.1.phymask=0xffffffff
+#hint.arge.1.eeprommac=0x1fff0000
+
+
+# 0	LED1 ???
+
+# 1	LED2 ???
+
+# 6	LED4
+#hint.gpioled.0.at="gpiobus0"
+#hint.gpioled.0.name="led4"
+#hint.gpioled.0.pins=0x0040
+#hint.gpioled.0.flags="0x0102"
+
+# 17	LED10
+#hint.gpioled.1.at="gpiobus0"
+#hint.gpioled.1.name="led10"
+#hint.gpioled.1.pins=0x20000
+#hint.gpioled.1.flags="0x0102"
+
+# 18	LED11
+#hint.gpioled.2.at="gpiobus0"
+#hint.gpioled.2.name="status"
+#hint.gpioled.2.pins=0x40000
+#hint.gpioled.2.flags="0x0102"
+
+# Watchdog
+hint.ar71xx_wdog.0.at="nexus0"
+
+# Flash map
+# cfi upgrade is not work now
+
+hint.map.0.at="cfid0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00020000
+hint.map.0.name="boot"
+hint.map.0.readonly=1
+
+hint.map.1.at="cfid0"
+hint.map.1.start=0x00020000
+hint.map.1.end=0x00040000
+hint.map.1.name="boot-env"
+hint.map.1.readonly=1
+
+hint.map.2.at="cfid0"
+hint.map.2.start=0x00040000
+hint.map.2.end=0x00190000
+hint.map.2.name="Firmware"
+
+hint.map.3.at="cfid0"
+hint.map.3.start=0x001a0000
+hint.map.3.end=0x00400000
+hint.map.3.name="rootfs"

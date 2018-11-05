@@ -1,0 +1,68 @@
+# $FreeBSD$
+
+# GPIO
+hint.gpio.0.pinmask=0xc19c3
+hint.gpio.0.function_set=0x00000001
+hint.gpio.0.function_clear=0x00000004
+
+# Switch 0 = ECO, 1 = RAKU, 11 = MODE, 12 = RESET
+# USB Power(MIC2009YM6) 18 = EN, 19 = FAULT/
+
+# LED none
+
+# SPI flash
+hint.spi.0.at="nexus0"
+hint.spi.0.maddr=0x1f000000
+hint.spi.0.msize=0x01000000
+
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+
+# shares the same bus with mx25l. 
+# CE low for flash, CE high for RTC
+# at the moment it's just stub until SPI bus is ready for such hacks
+# hint.rtc.0.at="spibus0"
+# hint.rtc.0.cs=0
+
+# Watchdog
+hint.ar71xx_wdog.0.at="nexus0"
+
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00040000
+hint.map.0.name="uboot"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00040000
+hint.map.1.end=0x00050000
+hint.map.1.name="uboot_environ"
+hint.map.1.readonly=1
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00050000
+hint.map.2.end=0x007f0000
+hint.map.2.name="upgrade"
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start=0x00050000
+hint.map.3.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.3.name="kernel"
+
+hint.map.4.at="flash/spi0"
+hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.4.end=0x007e0000
+hint.map.4.name="rootfs"
+
+#hint.map.5.at="flash/spi0"
+#hint.map.5.start=0x007e0000
+#hint.map.5.end=0x007f0000
+#hint.map.5.name="config"
+
+hint.map.6.at="flash/spi0"
+hint.map.6.start=0x007f0000
+hint.map.6.end=0x00800000
+hint.map.6.name="ART"
+hint.map.6.readonly=1
+

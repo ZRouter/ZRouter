@@ -1,0 +1,17 @@
+#
+#
+#
+
+hint.mx25l.0.at="spibus0"       
+hint.mx25l.0.cs=0
+
+# GPIO02  - WAN LED
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.pins="0x04"
+hint.gpioled.2.name="status"
+hint.gpioled.2.flags="0x0001"
+
+# GEOM redboot FIS directory offset
+hint.redboot.0.fisoffset="0x007e0000"
+
+hint.ath.0.eepromaddr=0x87f0000
