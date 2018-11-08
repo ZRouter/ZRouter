@@ -18,7 +18,8 @@ USES=		tar:bzip2
 #LIB_DEPENDS=	libfreetype.so:${PORTSDIR}/print/freetype2 \ #
 #		libexpat.so:${PORTSDIR}/textproc/expat2
 
-USES+=		gmake libtool pathfix pkgconfig
+#USES+=		gmake libtool pathfix pkgconfig
+USES+=		gmake libtool pathfix
 USE_LDCONFIG=	yes
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-configdir=${PREFIX}/etc/fonts/conf.d \

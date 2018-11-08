@@ -2,7 +2,7 @@
 # $FreeBSD: head/devel/libuv/Makefile 442116 2017-05-30 19:38:29Z thierry $
 
 PORTNAME=	libuv
-PORTVERSION=	1.14.1
+PORTVERSION=	1.19.2
 DISTVERSIONPREFIX=	v
 CATEGORIES=	devel
 #MASTER_SITES=	http://dist.libuv.org/dist/v${PORTVERSION}/
@@ -20,7 +20,8 @@ TEST_DEPENDS=	gyp:devel/py-gyp \
 
 USE_GITHUB=	yes
 
-USES=		autoreconf libtool pathfix pkgconfig
+#USES=		autoreconf libtool pathfix pkgconfig
+USES=		autoreconf libtool pathfix
 GNU_CONFIGURE=	yes
 USE_LDCONFIG=	yes
 INSTALL_TARGET=	install-strip
