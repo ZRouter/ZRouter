@@ -100,7 +100,6 @@ do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/src/racoon/.libs/racoon ${ZPREFIX}/sbin/racoon
 	${INSTALL_PROGRAM} ${WRKSRC}/src/racoon/.libs/racoonctl ${ZPREFIX}/sbin/racoonctl
 	${INSTALL_PROGRAM} ${WRKSRC}/src/setkey/.libs/setkey ${ZPREFIX}/sbin/setkey
-	${MKDIR} ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/src/racoon/.libs/libracoon.so.0 ${ZPREFIX}/lib/libracoon.so.0
 	${INSTALL_LIB} ${WRKSRC}/src/libipsec/.libs/libipsec.so.0 ${ZPREFIX}/lib/libipsec.so.0
 

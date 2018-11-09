@@ -19,16 +19,16 @@ USES=		cpe gmake libtool tar:bzip2
 MAKE_ENV=	TOP=""
 USE_LDCONFIG=	yes
 GNU_CONFIGURE=	yes
-CONFIGURE_ARGS=	--without-harfbuzz
+CONFIGURE_ARGS=	--without-harfbuzz --without-png CFLAGS=-DFT_CONFIG_OPTION_SUBPIXEL_RENDERING 
 CONFIGURE_WRKSRC=	${WRKSRC}/builds/unix
 
 CPE_PRODUCT=	freetype
 CPE_VENDOR=	freetype
 
-OPTIONS_DEFINE=		LCD_FILTERING PNG
-OPTIONS_DEFAULT=	LCD_FILTERING
-LCD_FILTERING_DESC?=	Sub-pixel rendering (patented)
-PNG_DESC=		Png compressed OpenType embedded bitmaps support
+#OPTIONS_DEFINE=		LCD_FILTERING PNG
+#OPTIONS_DEFAULT=	LCD_FILTERING
+#LCD_FILTERING_DESC?=	Sub-pixel rendering (patented)
+#PNG_DESC=		Png compressed OpenType embedded bitmaps support
 
 LCD_FILTERING_CFLAGS=	-DFT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
@@ -48,10 +48,9 @@ post-configure:
 #post-install:
 #	@${STRIP_CMD} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.*
 
-#do-install:
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.6.14.0 ${ZPREFIX}/lib/libfreetype.so.6
+	cp -r ${STAGEDIR}${PREFIX}/include/freetype2 ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libfreetype.so.6 libfreetype.so
-
 
 .include <bsd.port.mk>

@@ -548,6 +548,9 @@ rootfs-dir!
 	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/ || true
 	mkdir -p ${WORLDDESTDIR}/usr/local/bin/ || true
 	mkdir -p ${WORLDDESTDIR}/usr/local/sbin/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/lib/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/include/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/libdata/pkgconfig/ || true
 	for dir in ${PREINSTALLDIRS}; do mkdir -p ${WORLDDESTDIR}/$${dir}; done
 
 kernel-install-dir:

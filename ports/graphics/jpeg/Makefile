@@ -58,7 +58,6 @@ post-install-DOCS-on:
 	${INSTALL_DATA} ${WRKSRC}/*.txt ${STAGEDIR}${PREFIX}/share/doc/jpeg/
 
 do-install:
-	${MKDIR} ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/.libs/libjpeg.so.12 ${ZPREFIX}/lib/libjpeg.so.12
 	cd ${ZPREFIX}/lib;ln -s libjpeg.so.12 libjpeg.so
 

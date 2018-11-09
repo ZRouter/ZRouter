@@ -36,7 +36,6 @@ DOXYGEN_EXTRA_PATCHES_OFF=	${FILESDIR}/extra-patch-Makefile.am
 #		${WRKSRC}/Makefile.am
 
 do-install:
-	mkdir -p ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/src/.libs/librtlsdr.so.0.0.5 ${ZPREFIX}/lib/librtlsdr.so.0
 	cd ${ZPREFIX}/lib;ln -s librtlsdr.so.0 librtlsdr.so
 

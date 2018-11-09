@@ -43,7 +43,6 @@ post-patch:
 		${WRKSRC}/src/examples/Makefile.in
 
 do-install:
-	${MKDIR} ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/src/microhttpd/.libs/libmicrohttpd.so.12.40.0 ${ZPREFIX}/lib/libmicrohttpd.so.12
 	cd ${ZPREFIX}/lib;ln -s libmicrohttpd.so.12 libmicrohttpd.so
 

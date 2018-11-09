@@ -16,7 +16,7 @@ _TARGET_DEFS = \
 
 _TARGET_CROSS_DEFS = \
 	PATH=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}${FREEBSD_SRC_TREE}/tmp/usr/bin:${PATH}:/usr/local/bin \
-	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
+	PKG_CONFIG_PATH=${WORLDDESTDIR}/usr/local/libdata/pkgconfig \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	PKG_DBDIR=${WORLDDESTDIR}/libdata/var/db/pkg \
 	NO_INSTALL_MANPAGES=yes \

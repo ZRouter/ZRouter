@@ -40,7 +40,6 @@ post-patch:
 	echo "	cc -fPIC -O2 -pipe  -fno-strict-aliasing -O2 -pipe  -fno-strict-aliasing  -shared -Wl,-soname,libftdi.so.1 -o libftdi.so.1.20.0 ftdi.o -lusb" >> ${WRKSRC}/Makefile
 
 do-install:
-	mkdir -p ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/libftdi.so.1.20.0 ${ZPREFIX}/lib/libftdi.so.1
 	cd ${ZPREFIX}/lib;ln -s libftdi.so.1 libftdi.so
 .include <bsd.port.mk>

@@ -18,9 +18,9 @@ ALL_TARGET=	default
 USES=		libtool pathfix tar:bz2
 USE_LDCONFIG=	yes
 
-do-install:
-	${INSTALL_LIB} ${WRKSRC}/.libs/libexpat.so.1.6.2 ${ZPREFIX}/lib/libexpat.so.1
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libexpat.so.1.6.2 ${ZPREFIX}/lib/libexpat.so.1
+	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libexpat.so.1 libexpat.so
-
 
 .include <bsd.port.mk>

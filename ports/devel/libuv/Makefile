@@ -36,8 +36,6 @@ do-test:
 	./out/Debug/run-tests)
 
 do-install:
-	mkdir -p ${ZPREFIX}/lib
-	mkdir -p ${ZPREFIX}/include
 	${INSTALL_LIB} ${WRKSRC}/.libs/libuv.so.1.0.0 ${ZPREFIX}/lib/libuv.so.1
 	${INSTALL_DATA} ${WRKSRC}/include/uv-bsd.h ${ZPREFIX}/include
 	${INSTALL_DATA} ${WRKSRC}/include/uv-errno.h ${ZPREFIX}/include
