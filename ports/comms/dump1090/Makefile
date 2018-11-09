@@ -18,8 +18,8 @@ GH_TAGNAME=	4c53e25
 
 #USES=	gmake
 
-CFLAGS+=	-I${LOCALBASE}/include
-LDFLAGS+=	-L${LOCALBASE}/lib -lrtlsdr -lusb -lpthread -lm
+CFLAGS+=	-I${ZPREFIX}/include
+LDFLAGS+=	-L${ZPREFIX}/lib -lrtlsdr -lusb -lpthread -lm
 
 PLIST_FILES=	bin/dump1090 \
 		${DATADIR}/gmap.html
@@ -33,10 +33,8 @@ pre-build:
 #	${INSTALL_DATA} ${WRKSRC}/gmap.html ${STAGEDIR}${DATADIR}
 
 do-install:
-#       @printenv
 	${INSTALL_PROGRAM} ${WRKSRC}/${PORTNAME} ${ZPREFIX}/bin/${PORTNAME}
-	mkdir ${ZPREFIX}/share
+	mkdir -p ${ZPREFIX}/share
 	${INSTALL_DATA} ${WRKSRC}/gmap.html ${ZPREFIX}/share/gmap.html
-
 
 .include <bsd.port.mk>
