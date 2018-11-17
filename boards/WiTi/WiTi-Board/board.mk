@@ -20,16 +20,19 @@ BOARD_FLASH_SIZE=8388608
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
+
 # Include usb and SoC usb controller drivers
+KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
+# KERNCONF_OPTIONS+=     GEOM_UZIP_DEBUG	# very verbose logging
+
 WITH_USB=yes
-# WITH_IPSEC=yes
+WITHOUT_IPSEC=yes
 WITHOUT_WIRELESS=yes
 # Builded modules
 KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
 
 # Additional utilities
 WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 
 ###################################################
 #
@@ -49,7 +52,8 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 #
 ###################################################
 
-TARGET_PROFILES+=SMALL_ ssh lua_web_ui dhcp ntpdate dnsmasq openvpn 
+TARGET_PROFILES+=SMALL_ ssh lua_web_ui dhcp ntpdate dnsmasq 
+# openvpn 
 # hostap
 # nfs_client
 # racoon
