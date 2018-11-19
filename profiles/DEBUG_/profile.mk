@@ -94,7 +94,6 @@ ping \
 rcorder \
 reboot \
 route \
-switchctl \
 sysctl \
 umount
 
@@ -124,6 +123,7 @@ minigzip \
 netstat \
 passwd \
 sed \
+sort \
 tail \
 tar \
 tee \
@@ -135,7 +135,6 @@ wc \
 xargs
 
 WORLD_SUBDIRS_GNU_USR_BIN+= \
-sort
 
 WORLD_SUBDIRS_GNU_LIB+= \
 csu \
