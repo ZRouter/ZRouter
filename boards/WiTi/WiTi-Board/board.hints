@@ -93,6 +93,13 @@ hint.mx25l.0.cs=0
 #hint.gpioled.5.flags="0x0102"
 
 
+#0x00000000-0x00030000 : "Bootloader"
+#0x00030000-0x00040000 : "Factory"
+#0x00040000-0x00070000 : "Config"
+#0x00070000-0x000b0000 : "Language"
+#0x000b0000-0x001a0000 : "Kernel"
+#0x001a0000-0x01000000 : "RootFS"
+
 hint.map.0.at="flash/spi1s.firmware"
 hint.map.0.start=0x00000000
 hint.map.0.name="kernel"
@@ -107,4 +114,36 @@ hint.map.2.at="flash/spi1s.firmware"
 hint.map.2.start=0x00e80000
 hint.map.2.end=0x01000000
 hint.map.2.name="config"
+
+# PHY
+hint.miibus.0.phymask=0x00000000
+hint.miibus.1.phymask=0x00000000
+hint.miibus.2.phymask=0x00000000
+hint.miibus.3.phymask=0x00000000
+hint.miibus.4.phymask=0x00000000
+
+hint.floatphy.0.at="miibus0"
+hint.floatphy.0.phyno=0
+hint.floatphy.0.flags=0x00000000
+hint.floatphy.0.speed=1000
+
+hint.floatphy.1.at="miibus1"
+hint.floatphy.1.phyno=0
+hint.floatphy.1.flags=0x00000000
+hint.floatphy.1.speed=1000
+
+hint.floatphy.2.at="miibus2"
+hint.floatphy.2.phyno=0
+hint.floatphy.2.flags=0x00000000
+hint.floatphy.2.speed=1000
+
+hint.floatphy.3.at="miibus3"
+hint.floatphy.3.phyno=0
+hint.floatphy.3.flags=0x00000000
+hint.floatphy.3.speed=1000
+
+hint.floatphy.4.at="miibus4"
+hint.floatphy.4.phyno=0
+hint.floatphy.4.flags=0x00000000
+hint.floatphy.4.speed=1000
 
