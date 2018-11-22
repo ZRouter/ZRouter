@@ -47,8 +47,6 @@ PORTDOCS=	fontconfig-user.html fontconfig-user.pdf fontconfig-user.txt
 #OPTIONS_DEFINE=	DOCS
 
 post-configure:
-	@${REINPLACE_CMD} -e 's|SIZEOF_VOID_P 8|SIZEOF_VOID_P 4|' \
-		${WRKSRC}/config.h
 	@${REINPLACE_CMD} -e 's|-L/usr/local/lib|-L${ZPREFIX}/lib|' \
 		${WRKSRC}/Makefile
 	@${REINPLACE_CMD} -e 's|-L/usr/local/lib|-L${ZPREFIX}/lib|' \
