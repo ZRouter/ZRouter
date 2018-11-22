@@ -22,15 +22,13 @@ GNU_CONFIGURE=	yes
 #CONFIGURE_ARGS=	--disable-gtk
 # host option is no effect
 CONFIGURE_ARGS=	--disable-mmx --disable-sse2 --disable-ssse3
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 INSTALL_TARGET=	install-strip
 
 # Build the library exclusively, thus disabling the demos and the tests (which
 # do not get installed anyway).  This is to workaround a problem in powerpc64
 # where the build of the tests crashes ld; see PR bin/202284.
 MAKE_ARGS=      SUBDIRS=pixman
-
-post-configure:
-	@echo "#define WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
 
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpixman-1.so.32 ${ZPREFIX}/lib/

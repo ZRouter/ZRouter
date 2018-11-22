@@ -25,6 +25,7 @@ USES=		autoreconf libtool pathfix
 GNU_CONFIGURE=	yes
 USE_LDCONFIG=	yes
 INSTALL_TARGET=	install-strip
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 pre-configure:
 	${ECHO_CMD} "m4_define([UV_EXTRA_AUTOMAKE_FLAGS], [ serial-tests])" \

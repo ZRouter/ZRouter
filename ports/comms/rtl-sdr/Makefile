@@ -22,6 +22,7 @@ GNU_CONFIGURE=	yes
 #CPPFLAGS+=	-I${LOCALBASE}/include
 #LDFLAGS+=	-L${LOCALBASE}/lib
 #USE_LDCONFIG=	yes
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 #DOCSDIR=	${PREFIX}/share/doc/librtlsdr
 

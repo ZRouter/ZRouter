@@ -20,7 +20,7 @@ CONFIGURE_ARGS+=--exec-prefix="${PREFIX}/share" \
 		--bindir="${PREFIX}/bin" \
 		--datadir="${PREFIX}/share" \
 		--libdir="${PREFIX}/share"
-CONFIGURE_ARGS+=--host=${ARCH}-pc-freebsd
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 LIBS+=		-L${LOCALBASE}/lib
 
 OPTIONS_SUB=	yes

@@ -41,6 +41,7 @@ CONFIGURE_ARGS+=	--enable-gtk-doc-html=no \
 		--enable-ft=yes \
 		CFLAGS=-I${ZPREFIX}/include/ \
 		LDFLAGS=-L${ZPREFIX}/lib/
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 #USES+=		cpe libtool pathfix pkgconfig
 #CPE_VENDOR=	cairographics
 #USE_XORG=	pixman
@@ -76,8 +77,6 @@ post-configure:
 		${WRKSRC}/src/Makefile
 	@${REINPLACE_CMD} -e 's|^CAIRO_LIBS.*|CAIRO_LIBS = -lpixman-1 -L${ZPREFIX}/lib|' \
 		${WRKSRC}/util/*/Makefile
-	@echo "#define WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
-	@echo "#define FLOAT_WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
 
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libcairo.so.11402 ${ZPREFIX}/lib/libcairo.so.11402

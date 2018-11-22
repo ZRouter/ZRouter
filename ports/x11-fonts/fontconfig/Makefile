@@ -33,7 +33,9 @@ CONFIGURE_ARGS=	--with-configdir=${PREFIX}/etc/fonts/conf.d \
 		--with-pkgconfigdir=${PREFIX}/libdata/pkgconfig \
 		--disable-docs \
 		FREETYPE_CFLAGS=-I${ZPREFIX}/include/freetype2 \
-		FREETYPE_LIBS="-L${ZPREFIX}/lib -lfreetype"
+		FREETYPE_LIBS="-L${ZPREFIX}/lib -lfreetype" \
+		CFLAGS=-I${ZPREFIX}/include/ LDFLAGS=-L${ZPREFIX}/lib/
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 MAKE_ENV=	LC_ALL=C
 PKGINSTALL=	${WRKDIR}/pkg-install
 INSTALL_TARGET=install-strip

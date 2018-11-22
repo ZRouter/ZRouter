@@ -23,7 +23,7 @@ GH_TUPLE=	imomaliev:tmux-bash-completion:ef56d3e:bash
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--sysconfdir=${PREFIX}/etc --enable-utempter \
 		CFLAGS=-I${ZPREFIX}/include/ LDFLAGS=-L${ZPREFIX}/lib/
-CONFIGURE_ARGS+=--host=${ARCH}-pc-freebsd
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 #		PKG_CONFIG_PATH=${ZPREFIX}/libdata/pkgconfig/ \
 
