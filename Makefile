@@ -620,7 +620,7 @@ ROOTFS_RMLIST= \
     -name tests -or \
     -name zfs \\) \\)
 
-ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
+ROOTFS_RMFILES+=calendar dict doc examples groff_font me mk nls openssl \
 	pc-sysinstall security sendmail skel syscons tabset tmac vi zoneinfo
 
 # Move kernel out of rootfs
