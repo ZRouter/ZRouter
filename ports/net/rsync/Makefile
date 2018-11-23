@@ -2,7 +2,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/net/rsync/Makefile 404224 2015-12-22 10:09:19Z ehaupt $
 
 PORTNAME=	rsync
-PORTVERSION=	3.1.2
+PORTVERSION=	3.1.3
 CATEGORIES=	net ipv6
 PORTREVISION=	1
 MASTER_SITES=	http://rsync.samba.org/ftp/rsync/ \
@@ -32,13 +32,14 @@ INSTALL_TARGET=	install-strip
 
 CONFIGURE_ARGS=	--disable-debug --enable-ipv6 \
 		--with-rsyncd-conf=${ETCDIR}/rsyncd.conf
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 PORTDOCS=	NEWS README csprotocol.txt tech_report.tex
 
 # define options
-OPTIONS_DEFINE=		DOCS POPT_PORT ZLIB_BASE SSH ICONV
-OPTIONS_RADIO=		PTS
-OPTIONS_RADIO_PTS=	TIMELIMIT RENAMED FLAGS ATIMES ACL
+#OPTIONS_DEFINE=		DOCS POPT_PORT ZLIB_BASE SSH ICONV
+#OPTIONS_RADIO=		PTS
+#OPTIONS_RADIO_PTS=	TIMELIMIT RENAMED FLAGS ATIMES ACL
 
 # options provided upstream
 POPT_PORT_DESC=	Use popt from devel/popt instead of bundled one
@@ -101,8 +102,9 @@ post-patch:
 #	${INSTALL_DATA} ${FILESDIR}/rsyncd.conf.sample ${STAGEDIR}${ETCDIR}/
 #	@${MKDIR} ${STAGEDIR}${DOCSDIR}
 #	${INSTALL_DATA} ${PORTDOCS:S,^,${WRKSRC}/,} ${STAGEDIR}${DOCSDIR}
-do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/rsync ${ZPREFIX}/bin/rsync
+
+post-install:
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/bin/rsync ${ZPREFIX}/bin/rsync
 
 test: build
 	@(cd ${WRKSRC} && ${MAKE_CMD} check)
