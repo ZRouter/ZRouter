@@ -19,7 +19,6 @@ libkvm \
 libmd \
 libmemstat \
 msun \
-libpmc \
 libsbuf \
 libtacplus \
 libthr \
