@@ -18,7 +18,8 @@ USES=		tar:bzip2
 #LIB_DEPENDS=	libfreetype.so:${PORTSDIR}/print/freetype2 \ #
 #		libexpat.so:${PORTSDIR}/textproc/expat2
 
-USES+=		gmake libtool pathfix pkgconfig
+#USES+=		gmake libtool pathfix pkgconfig
+USES+=		gmake libtool pathfix
 USE_LDCONFIG=	yes
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-configdir=${PREFIX}/etc/fonts/conf.d \
@@ -30,7 +31,11 @@ CONFIGURE_ARGS=	--with-configdir=${PREFIX}/etc/fonts/conf.d \
 		--with-add-fonts=${LOCALBASE}/lib/X11/fonts \
 		--with-cache-dir=/var/db/fontconfig \
 		--with-pkgconfigdir=${PREFIX}/libdata/pkgconfig \
-		--disable-docs
+		--disable-docs \
+		FREETYPE_CFLAGS=-I${ZPREFIX}/include/freetype2 \
+		FREETYPE_LIBS="-L${ZPREFIX}/lib -lfreetype" \
+		CFLAGS=-I${ZPREFIX}/include/ LDFLAGS=-L${ZPREFIX}/lib/
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 MAKE_ENV=	LC_ALL=C
 PKGINSTALL=	${WRKDIR}/pkg-install
 INSTALL_TARGET=install-strip
@@ -39,19 +44,13 @@ MAN1PAGES=	fc-cache.1 fc-cat.1 fc-list.1 fc-match.1 fc-query.1 fc-scan.1
 MAN5PAGES=	fonts-conf.5
 PORTDOCS=	fontconfig-user.html fontconfig-user.pdf fontconfig-user.txt
 
-OPTIONS_DEFINE=	DOCS
+#OPTIONS_DEFINE=	DOCS
 
 post-configure:
-	@${REINPLACE_CMD} -e 's|SIZEOF_VOID_P 8|SIZEOF_VOID_P 4|' \
-		${WRKSRC}/config.h
 	@${REINPLACE_CMD} -e 's|-L/usr/local/lib|-L${ZPREFIX}/lib|' \
 		${WRKSRC}/Makefile
 	@${REINPLACE_CMD} -e 's|-L/usr/local/lib|-L${ZPREFIX}/lib|' \
 		${WRKSRC}/src/Makefile
-
-do-install:
-	${INSTALL_LIB} ${WRKSRC}/src/.libs/libfontconfig.so.1.8.0 ${ZPREFIX}/lib/libfontconfig.so.1
-	cd ${ZPREFIX}/lib;ln -s libfontconfig.so.1 libfontconfig.so
 
 #post-install:
 #	${INSTALL_MAN} ${MAN5PAGES:S|^|${WRKSRC}/doc/|} \ #
@@ -65,6 +64,11 @@ do-install:
 #	@${SED} -e 's|%%PREFIX%%|${PREFIX}| ; \ #
 #		s|%%LOCALBASE%%|${LOCALBASE}|' < ${FILESDIR}/pkg-install.in \ #
 #		> ${PKGINSTALL}
+
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfontconfig.so.1.8.0 ${ZPREFIX}/lib/libfontconfig.so.1
+	cp -r ${STAGEDIR}${PREFIX}/include/fontconfig ${ZPREFIX}/include/
+	cd ${ZPREFIX}/lib;ln -s libfontconfig.so.1 libfontconfig.so
 
 #post-install-DOCS-on:
 #	@${MKDIR} ${STAGEDIR}${DOCSDIR}

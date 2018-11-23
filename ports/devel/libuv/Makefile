@@ -2,7 +2,7 @@
 # $FreeBSD: head/devel/libuv/Makefile 442116 2017-05-30 19:38:29Z thierry $
 
 PORTNAME=	libuv
-PORTVERSION=	1.14.1
+PORTVERSION=	1.19.2
 DISTVERSIONPREFIX=	v
 CATEGORIES=	devel
 #MASTER_SITES=	http://dist.libuv.org/dist/v${PORTVERSION}/
@@ -20,10 +20,12 @@ TEST_DEPENDS=	gyp:devel/py-gyp \
 
 USE_GITHUB=	yes
 
-USES=		autoreconf libtool pathfix pkgconfig
+#USES=		autoreconf libtool pathfix pkgconfig
+USES=		autoreconf libtool pathfix
 GNU_CONFIGURE=	yes
 USE_LDCONFIG=	yes
 INSTALL_TARGET=	install-strip
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 pre-configure:
 	${ECHO_CMD} "m4_define([UV_EXTRA_AUTOMAKE_FLAGS], [ serial-tests])" \
@@ -35,8 +37,6 @@ do-test:
 	./out/Debug/run-tests)
 
 do-install:
-	mkdir -p ${ZPREFIX}/lib
-	mkdir -p ${ZPREFIX}/include
 	${INSTALL_LIB} ${WRKSRC}/.libs/libuv.so.1.0.0 ${ZPREFIX}/lib/libuv.so.1
 	${INSTALL_DATA} ${WRKSRC}/include/uv-bsd.h ${ZPREFIX}/include
 	${INSTALL_DATA} ${WRKSRC}/include/uv-errno.h ${ZPREFIX}/include

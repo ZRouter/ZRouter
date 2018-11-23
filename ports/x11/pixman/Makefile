@@ -3,6 +3,8 @@
 PORTNAME=	pixman
 PORTVERSION=	0.32.8
 CATEGORIES=	x11
+EXTRACT_SUFX=	.tar.bz2
+MASTER_SITES=	http://distcache.FreeBSD.org/ports-distfiles/xorg/lib/
 
 MAINTAINER=	x11@FreeBSD.org
 COMMENT=	Low-level pixel manipulation library
@@ -14,10 +16,13 @@ PORTSCOUT=	limitw:1,even
 
 #USES=		cpe perl5
 #USE_PERL5=	build
-XORG_CAT=	lib
+#XORG_CAT=	lib
+GNU_CONFIGURE=	yes
+
 #CONFIGURE_ARGS=	--disable-gtk
 # host option is no effect
 CONFIGURE_ARGS=	--disable-mmx --disable-sse2 --disable-ssse3
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 INSTALL_TARGET=	install-strip
 
 # Build the library exclusively, thus disabling the demos and the tests (which
@@ -25,12 +30,9 @@ INSTALL_TARGET=	install-strip
 # where the build of the tests crashes ld; see PR bin/202284.
 MAKE_ARGS=      SUBDIRS=pixman
 
-post-configure:
-	@echo "#define WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
-
-do-install:
-	${MKDIR} ${ZPREFIX}/lib
-	${INSTALL_LIB} ${WRKSRC}/pixman/.libs/libpixman-1.so.0.32.8 ${ZPREFIX}/lib/libpixman-1.so.0
-	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0 libpixman-1.so
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpixman-1.so.32 ${ZPREFIX}/lib/
+	cp -r ${STAGEDIR}${PREFIX}/include/pixman-1 ${ZPREFIX}/include/
+	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.32 libpixman-1.so
 
 .include <bsd.port.mk>

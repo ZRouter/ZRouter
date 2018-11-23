@@ -34,7 +34,6 @@ post-patch:
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/src/.libs/iperf3 ${ZPREFIX}/bin/iperf3
-	mkdir -p ${ZPREFIX}/lib
 	${INSTALL_LIB} ${WRKSRC}/src/.libs/libiperf.so.0.0.0 ${ZPREFIX}/lib/libiperf.so.0
 	cd ${ZPREFIX}/lib;ln -s libiperf.so.0 libiperf.so
 

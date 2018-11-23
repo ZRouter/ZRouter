@@ -10,8 +10,8 @@ MASTER_SITES=	http://cairographics.org/releases/
 MAINTAINER=	gnome@FreeBSD.org
 COMMENT=	Vector graphics library with cross-device output support
 
-LICENSE=	LGPL21 MPL
-LICENSE_COMB=	multi
+#LICENSE=	LGPL21 MPL
+#LICENSE_COMB=	dual
 
 USES=		tar:xz
 
@@ -37,7 +37,11 @@ CONFIGURE_ARGS+=	--enable-gtk-doc-html=no \
 		--disable-pdf \
 		--enable-script=no \
 		--enable-gobject=no \
-		--enable-tee=no
+		--enable-tee=no \
+		--enable-ft=yes \
+		CFLAGS=-I${ZPREFIX}/include/ \
+		LDFLAGS=-L${ZPREFIX}/lib/
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 #USES+=		cpe libtool pathfix pkgconfig
 #CPE_VENDOR=	cairographics
 #USE_XORG=	pixman
@@ -73,14 +77,11 @@ post-configure:
 		${WRKSRC}/src/Makefile
 	@${REINPLACE_CMD} -e 's|^CAIRO_LIBS.*|CAIRO_LIBS = -lpixman-1 -L${ZPREFIX}/lib|' \
 		${WRKSRC}/util/*/Makefile
-	@echo "#define WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
-	@echo "#define FLOAT_WORDS_BIGENDIAN 1" >> ${WRKSRC}/config.h
 
-do-install:
-	${INSTALL_LIB} ${WRKSRC}/src/.libs/libcairo.so.11402 ${ZPREFIX}/lib
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libcairo.so.11402 ${ZPREFIX}/lib/libcairo.so.11402
+	cp -r ${STAGEDIR}${PREFIX}/include/cairo ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libcairo.so.11402 libcairo.so
-
-
 
 .include <bsd.port.mk>
 

@@ -2,15 +2,12 @@
 # $FreeBSD: tags/RELEASE_10_3_0/devel/urjtag/Makefile 373967 2014-12-04 16:04:40Z amdmi3 $
 
 PORTNAME=	urjtag
-PORTVERSION=	0.10
-PORTREVISION=	5
+PORTVERSION=	2018.09
+PORTREVISION=	1
 CATEGORIES=	devel
 MASTER_SITES=	SF
-#DISTNAME=	urjtag-0.10
-#EXTRACT_SUFX=	.tar.bz2
-DISTNAME=	urjtag
-EXTRACT_SUFX=	.tgz
-MAKE_JOBS_UNSAFE=yes
+
+EXTRACT_SUFX=	.tar.xz
 
 MAINTAINER=	ports@FreeBSD.org
 COMMENT=	Extended utility to work with JTAG-aware boards
@@ -23,7 +20,8 @@ LICENSE=	GPLv2
 #SHEBANG_FILES=	src/bsdl2jtag
 #USE_CSTD=	c99
 GNU_CONFIGURE=	yes
-CONFIGURE_ARGS=	--disable-bsdl --without-libintl-prefix --with-libedit --disable-python --disable-shared --without-libusb --disable-svf
+CONFIGURE_ARGS=	--disable-bsdl --without-libintl-prefix --without-readline --disable-python --disable-shared --without-libusb --disable-svf
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 # for header check
 CFLAGS+=	-I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/ -I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/edit
@@ -64,11 +62,10 @@ post-patch:
 #		 s|-I$$with_libusb"|-I$$with_libusb/include"|' \ #
 #		${WRKSRC}/configure
 
-do-install:
-#       @printenv
-	${INSTALL_PROGRAM} ${WRKSRC}/src/apps/jtag/jtag ${ZPREFIX}/bin/jtag
+post-install:
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/bin/jtag ${ZPREFIX}/bin/jtag
 	${MKDIR} ${ZPREFIX}/share/urjtag
-	(cd ${WRKSRC}/data && ${COPYTREE_SHARE} . ${ZPREFIX}/share/urjtag)
+	(cd ${STAGEDIR}${PREFIX}/share/urjtag && cp -r * ${ZPREFIX}/share/urjtag)
 
 
 #.include <bsd.port.post.mk>

@@ -548,6 +548,9 @@ rootfs-dir!
 	mkdir -p ${WORLDDESTDIR}/usr/lib/lua/ || true
 	mkdir -p ${WORLDDESTDIR}/usr/local/bin/ || true
 	mkdir -p ${WORLDDESTDIR}/usr/local/sbin/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/lib/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/include/ || true
+	mkdir -p ${WORLDDESTDIR}/usr/local/libdata/pkgconfig/ || true
 	for dir in ${PREINSTALLDIRS}; do mkdir -p ${WORLDDESTDIR}/$${dir}; done
 
 kernel-install-dir:
@@ -617,7 +620,7 @@ ROOTFS_RMLIST= \
     -name tests -or \
     -name zfs \\) \\)
 
-ROOTFS_RMFILES+=calendar dict doc examples groff_font locale me mk nls openssl \
+ROOTFS_RMFILES+=calendar dict doc examples groff_font me mk nls openssl \
 	pc-sysinstall security sendmail skel syscons tabset tmac vi zoneinfo
 
 # Move kernel out of rootfs

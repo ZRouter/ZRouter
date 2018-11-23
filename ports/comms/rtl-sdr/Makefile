@@ -22,6 +22,7 @@ GNU_CONFIGURE=	yes
 #CPPFLAGS+=	-I${LOCALBASE}/include
 #LDFLAGS+=	-L${LOCALBASE}/lib
 #USE_LDCONFIG=	yes
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 #DOCSDIR=	${PREFIX}/share/doc/librtlsdr
 
@@ -31,14 +32,9 @@ GNU_CONFIGURE=	yes
 #DOXYGEN_BUILD_DEPENDS=	doxygen:devel/doxygen
 DOXYGEN_EXTRA_PATCHES_OFF=	${FILESDIR}/extra-patch-Makefile.am
 
-#post-patch:
-#	@${REINPLACE_CMD} 's|^pkgdocdir=.*|pkgdocdir=${DOCSDIR}|' \ #
-#		${WRKSRC}/Makefile.am
-
-do-install:
-	mkdir -p ${ZPREFIX}/lib
-	${INSTALL_LIB} ${WRKSRC}/src/.libs/librtlsdr.so.0.0.5 ${ZPREFIX}/lib/librtlsdr.so.0
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/librtlsdr.so.0.0.5 ${ZPREFIX}/lib/librtlsdr.so.0
+	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s librtlsdr.so.0 librtlsdr.so
-
 
 .include <bsd.port.mk>

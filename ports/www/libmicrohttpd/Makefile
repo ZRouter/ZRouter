@@ -2,7 +2,7 @@
 # $FreeBSD: head/www/libmicrohttpd/Makefile 432286 2017-01-23 18:52:57Z sunpoet $
 
 PORTNAME=	libmicrohttpd
-PORTVERSION=	0.9.52
+PORTVERSION=	0.9.58
 CATEGORIES=	www
 MASTER_SITES=	GNU
 
@@ -27,6 +27,7 @@ CPE_VENDOR=	gnu
 #GNUTLS_CONFIGURE_ENABLE=https
 
 CONFIGURE_ARGS+= --disable-curl
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 #INFO=		libmicrohttpd libmicrohttpd-tutorial
 
@@ -42,9 +43,9 @@ post-patch:
 	@${REINPLACE_CMD} -e 's|bin_PROGRAMS =|noinst_PROGRAMS +=|' \
 		${WRKSRC}/src/examples/Makefile.in
 
-do-install:
-	${MKDIR} ${ZPREFIX}/lib
-	${INSTALL_LIB} ${WRKSRC}/src/microhttpd/.libs/libmicrohttpd.so.12.40.0 ${ZPREFIX}/lib/libmicrohttpd.so.12
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libmicrohttpd.so.12.46.0 ${ZPREFIX}/lib/libmicrohttpd.so.12
+	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libmicrohttpd.so.12 libmicrohttpd.so
 
 .include <bsd.port.mk>

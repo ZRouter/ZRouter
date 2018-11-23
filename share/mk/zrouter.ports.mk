@@ -13,10 +13,13 @@ _TARGET_DEFS = \
 	TARGET_PROFILES="${TARGET_PROFILES}"
 
 
+_TARGET_CROSS_ENV = \
+	PATH=${PATH}:/usr/local/bin \
+	PKG_CONFIG_PATH=${WORLDDESTDIR}/usr/local/libdata/pkgconfig
 
 _TARGET_CROSS_DEFS = \
 	PATH=${ZROUTER_OBJ}/tmp/${TARGET}.${TARGET_ARCH}${FREEBSD_SRC_TREE}/tmp/usr/bin:${PATH}:/usr/local/bin \
-	PKG_CONFIG_PATH=${WORLDDESTDIR}/libdata/pkgconfig/ \
+	PKG_CONFIG_PATH=${WORLDDESTDIR}/usr/local/libdata/pkgconfig \
 	DISTDIR=${ZROUTER_OBJ}/distfiles/ \
 	PKG_DBDIR=${WORLDDESTDIR}/libdata/var/db/pkg \
 	NO_INSTALL_MANPAGES=yes \
@@ -25,7 +28,7 @@ _TARGET_CROSS_DEFS = \
 	NO_PKG_REGISTER=yes \
 	NO_DEPENDS=yes \
 	NOPORTDOCS=yes \
-	BINOWN=ray \
+	BINOWN=${USER} \
 	BINGRP=wheel \
 	NOPORTEXAMPLES=yes \
 	INSTALL=${ZROUTER_ROOT}/tools/install.sh \
@@ -106,7 +109,7 @@ port-build-depend-cross:
 		    cd ${dir} ; PATH=${FREEBSD_BUILD_ENV_PATH} ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} install CHROOTED=no DESTDIR=${WORLDDESTDIR} PREFIX=/ || \
 			    ( ${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} clean && \
 			    echo ${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
-			    ${MAKE} ZPREFIX=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs/usr/local ZARCH=${TARGET}.${TARGET_ARCH} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
+			    ${MAKE} ${_TARGET_CROSS_ENV} ZPREFIX=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs/usr/local ZARCH=${TARGET}.${TARGET_ARCH} WRKDIR=${ZROUTER_OBJ}/ports/${dir} configure && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VPATCH_COOKIE` && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VEXTRACT_COOKIE` && \
 			    mv `${MAKE} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` `${MAKE} ${_TARGET_CROSS_DEFS} WRKDIR=${ZROUTER_OBJ}/ports/${dir} -VCONFIGURE_COOKIE` && \

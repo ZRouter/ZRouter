@@ -2,7 +2,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/graphics/png/Makefile 403332 2015-12-08 18:23:29Z antoine $
 
 PORTNAME=	png
-PORTVERSION=	1.6.20
+PORTVERSION=	1.6.35
 CATEGORIES=	graphics
 MASTER_SITES=	SF/lib${PORTNAME}/lib${PORTNAME}16/${PORTVERSION} \
 		ftp://ftp.simplesystems.org/pub/lib${PORTNAME}/${PORTNAME}/src/lib${PORTNAME}16/
@@ -16,13 +16,14 @@ USES=		cpe libtool tar:xz
 CPE_PRODUCT=	libpng
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-pkgconfigdir=${PREFIX}/libdata/pkgconfig
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 INSTALL_TARGET=	install-strip
 USE_LDCONFIG=	yes
 
-OPTIONS_DEFINE=APNG PNGTEST
-OPTIONS_DEFAULT=APNG PNGTEST
-APNG_DESC=Enable Animated PNG support
-PNGTEST_DESC=Enable Regression Test (recommended)
+#OPTIONS_DEFINE=APNG PNGTEST
+#OPTIONS_DEFAULT=APNG PNGTEST
+#APNG_DESC=Enable Animated PNG support
+#PNGTEST_DESC=Enable Regression Test (recommended)
 
 .include <bsd.port.options.mk>
 
@@ -40,9 +41,8 @@ post-build:
 	fi)
 .endif
 
-do-install:
-	${INSTALL_LIB} ${WRKSRC}/.libs/libpng16.so.16 ${ZPREFIX}/lib/libpng16.so.16
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpng16.so.16 ${ZPREFIX}/lib
 	cd ${ZPREFIX}/lib;ln -s libpng16.so.16 libpng.so
-
 
 .include <bsd.port.mk>
