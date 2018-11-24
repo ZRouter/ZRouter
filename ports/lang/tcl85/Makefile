@@ -1,0 +1,74 @@
+# Created by: Martin Matuska <mm@FreeBSD.org>
+# $FreeBSD: head/lang/tcl85/Makefile 469591 2018-05-10 23:05:16Z bdrewery $
+
+PORTNAME=	tcl
+PORTVERSION=	8.5.19
+PORTREVISION=	2
+CATEGORIES=	lang
+MASTER_SITES=	TCLTK/tcl8_5 \
+		SF/tcl/Tcl/${PORTVERSION}
+PKGNAMESUFFIX=	${SHORT_TCL_VER}
+DISTNAME=	${PORTNAME}${PORTVERSION}-src
+
+MAINTAINER=	tcltk@FreeBSD.org
+COMMENT=	Tool Command Language
+
+LICENSE=	TclTk
+LICENSE_NAME=	Tcl/Tk License
+LICENSE_FILE=	${WRKSRC}/../license.terms
+LICENSE_PERMS=	dist-mirror dist-sell pkg-mirror pkg-sell auto-accept
+
+#OPTIONS_DEFINE=	TCLMAN TZDATA THREADS
+#OPTIONS_DEFAULT=THREADS
+#TCLMAN_DESC=	Install Tcl function manpages
+#TZDATA_DESC=	Install Tcl timezone data
+#OPTIONS_SUB=	yes
+
+WRKSRC=		${WRKDIR}/${DISTNAME:S/-src//:S/rc1//}/unix
+ALL_TARGET=	all
+#INSTALL_TARGET=	install-strip install-libraries install-tm
+TEST_TARGET=	do-test
+
+USE_LDCONFIG=	yes
+GNU_CONFIGURE=	yes
+CONFIGURE_ARGS=	--enable-shared \
+		--enable-man-suffix=.${MAN_SUFFIX} \
+		--includedir=${PREFIX}/include/tcl${TCL_VER}
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+CONFIGURE_ENV=	PORTSDIR=${PORTSDIR}
+
+TCL_VER=	8.5
+SHORT_TCL_VER=	${TCL_VER:S/8./8/}
+MAN_SUFFIX=	${PORTNAME}${SHORT_TCL_VER}
+
+MAKE_ENV=	SHORT_TCL_VER=${SHORT_TCL_VER} \
+		MAN_SUFFIX=.${MAN_SUFFIX}
+
+PLIST_SUB=	TCL_VER=${TCL_VER} \
+		SHORT_TCL_VER=${SHORT_TCL_VER}
+
+TCLMAN_VARS=	INSTALL_TARGET+=install-doc
+THREADS_CONFIGURE_ENABLE=	threads
+TZDATA_CONFIGURE_WITH=		tzdata
+
+post-patch:
+	${REINPLACE_CMD} -e \
+	    's|@TCL_BUILD_LIB_SPEC@|@TCL_LIB_SPEC@|; \
+	     s|@TCL_BUILD_STUB_LIB_SPEC@|@TCL_STUB_LIB_SPEC@|; \
+	     s|@TCL_BUILD_STUB_LIB_PATH@|@TCL_STUB_LIB_PATH@|; \
+	     s|@TCL_SRC_DIR@|${PREFIX}/include/tcl${TCL_VER}|' \
+	     ${WRKSRC}/tclConfig.sh.in
+
+post-configure:
+	${REINPLACE_CMD} \
+		-e 's,-DNO_MEMMOVE=1,,' -e 's,-DNO_STRING_H=1,,' \
+		-e 's,^COMPAT_OBJS.*,,' ${WRKSRC}/Makefile
+post-install:
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libtcl85.so.1 ${ZPREFIX}/lib/libtcl85.so.1
+	cp -r ${STAGEDIR}${PREFIX}/include/tcl8.5 ${ZPREFIX}/include/
+	cd ${ZPREFIX}/lib;ln -s libtcl85.so.1 libtcl.so
+
+do-test:
+	${SETENV} ${MAKE_ENV} ${MAKE} -C ${WRKSRC} test
+
+.include <bsd.port.mk>
