@@ -3,7 +3,8 @@
 Can be set many profiles, they add some SUBDIRS to build.
 
 Profiles suffixed with '_' is base profiles with minimal set of builded targets.
-SMALL_	- base profile for device with small flash (4M,8M or maybe 2M)
+SMALL_	- base profile for device with small flash (8M or over)
+xSMALL_	- base profile for device with more small flash (4M)
 ...
 
 Board (boards/vendor/device) can set default profile set.
