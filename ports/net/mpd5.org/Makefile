@@ -1,47 +1,43 @@
 # Created by: Archie Cobbs
-# $FreeBSD: head/net/mpd5/Makefile 485853 2018-11-25 12:09:27Z eugen $
+# $FreeBSD: tags/RELEASE_10_3_0/net/mpd5/Makefile 394223 2015-08-14 15:03:30Z garga $
 
 PORTNAME=	mpd
-DISTVERSION=	5.8
-PORTREVISION=	10
+DISTVERSION=	5.7
+PORTREVISION=	3
 CATEGORIES=	net
 MASTER_SITES=	SF/${PORTNAME}/Mpd5/Mpd-${PORTVERSION}
 PKGNAMESUFFIX=	5
 DIST_SUBDIR=	mpd5
 
-MAINTAINER=	eugen@FreeBSD.org
+MAINTAINER=	mav@FreeBSD.org
 COMMENT=	Multi-link PPP daemon based on netgraph(4)
 
-LICENSE=	BSD3CLAUSE
-
-#OPTIONS_DEFINE=	DOCS NG_IPACCT
+#OPTIONS_DEFINE=	NG_IPACCT
 NG_IPACCT_DESC=	Use ng_ipacct kernel module from port
 
 HAS_CONFIGURE=	YES
 CONFIGURE_WRKSRC=	"${WRKSRC}/src"
 
-USES=		ssl
+USE_OPENSSL=	yes
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 .include <bsd.port.options.mk>
 
-MAKE_ARGS+=	OSVERSION=${OSVERSION}
-
 .if ${PORT_OPTIONS:MNG_IPACCT}
-BUILD_DEPENDS+=	${LOCALBASE}/include/netgraph/ng_ipacct.h:net-mgmt/ng_ipacct
+BUILD_DEPENDS+=	${LOCALBASE}/include/netgraph/ng_ipacct.h:${PORTSDIR}/net-mgmt/ng_ipacct
 .if exists(${KMODDIR}/ng_ipacct.ko)
-RUN_DEPENDS+=	${KMODDIR}/ng_ipacct.ko:net-mgmt/ng_ipacct
+RUN_DEPENDS+=	${KMODDIR}/ng_ipacct.ko:${PORTSDIR}/net-mgmt/ng_ipacct
 .else
-RUN_DEPENDS+=	/boot/modules/ng_ipacct.ko:net-mgmt/ng_ipacct
+RUN_DEPENDS+=	/boot/modules/ng_ipacct.ko:${PORTSDIR}/net-mgmt/ng_ipacct
 .endif
-.else
-CONFIGURE_ENV+=	USE_NG_IPACCT=no
-EXTRA_PATCHES+=	${FILESDIR}/extra-patch-no-ng_ipacct
 .endif
 
 USE_RC_SUBR=	mpd5
+HTMLNUM!=	jot 70 1
 CONFSUF=	conf secret script
 DOCSDIR=	${PREFIX}/share/doc/mpd5
-PORTDOCS=	README mpd*
+PORTDOCS=	${HTMLNUM:S/^/mpd/:S/$/.html/} mpd.html mpd.ps README	\
+		mpd_toc.html
 PLIST_FILES=	${CONFSUF:S/^/etc\/mpd5\/mpd./:S/$/.sample/} sbin/mpd5
 
 .if !defined(WITHOUT_MAN)
@@ -51,7 +47,8 @@ PLIST_FILES+=	man/man8/mpd5.8.gz
 post-configure:
 	@${REINPLACE_CMD} -e 's|-L/usr/lib||g' ${WRKSRC}/src/Makefile
 
-post-install:
-	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/sbin/mpd5 ${ZPREFIX}/sbin/mpd5
+do-install:
+	@printenv
+	${INSTALL_PROGRAM} ${WRKSRC}/src/mpd5 ${ZPREFIX}/sbin/mpd5
 
 .include <bsd.port.mk>

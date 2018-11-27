@@ -16,6 +16,7 @@ LICENSE_COMB=	multi
 GNU_CONFIGURE=	yes
 USES=		libtool
 USE_LDCONFIG=	yes
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 PORTDOCS=	README.md RELEASE_NOTES
 

@@ -1,5 +1,5 @@
 # Created by: vanhu
-# $FreeBSD: tags/RELEASE_10_3_0/security/ipsec-tools/Makefile 399091 2015-10-11 15:13:52Z amdmi3 $
+# $FreeBSD: head/security/ipsec-tools/Makefile 485900 2018-11-25 20:35:22Z olivier $
 
 # TODO: - libipsec issue ?
 #       - cleanup...
@@ -8,45 +8,41 @@
 
 PORTNAME=	ipsec-tools
 PORTVERSION=	0.8.2
-PORTREVISION=	1
+PORTREVISION=	7
 CATEGORIES=	security
 MASTER_SITES=	SF
-EXTRACT_SUFX=   .tar.bz2
+EXTRACT_SUFX=	.tar.bz2
 
-MAINTAINER=	vanhu@FreeBSD.org
+MAINTAINER=	ports@FreeBSD.org
 COMMENT=	KAME racoon IKE daemon, ipsec-tools version
+
+#LICENSE=	BSD3CLAUSE
 
 CONFLICTS=	racoon-[0-9]*
 
-USE_RC_SUBR=	racoon
-USE_OPENSSL=	yes
-
 INSTALL_TARGET=	install-strip
 
-#CFLAGS+=    -I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/ -I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/edit
-
-CFLAGS+=	-I/usr/include/edit
-
-
-#USES=		libtool tar:bzip2
+#USES=		libtool tar:bzip2 ssl
+USE_RC_SUBR=	racoon
 GNU_CONFIGURE=	yes
 USE_LDCONFIG=	yes
 CONFIGURE_ARGS=	--enable-shared --sysconfdir=${PREFIX}/etc/racoon \
 		--localstatedir=${STATEDIR:S/\/racoon//} \
 		--with-pkgversion=freebsd-${PORTVERSION}
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 STATEDIR=	/var/db/racoon
 SUB_LIST+=	STATEDIR=${STATEDIR}
 PLIST_SUB+=	STATEDIR=${STATEDIR}
 
-OPTIONS_DEFINE=	DEBUG IPV6 ADMINPORT STATS DPD NATT NATTF FRAG HYBRID PAM \
-		RADIUS LDAP GSSAPI SAUNSPEC RC5 IDEA DOCS EXAMPLES WCPSKEY
-OPTIONS_DEFAULT=	DEBUG DPD NATT FRAG HYBRID
+#OPTIONS_DEFINE=	DEBUG IPV6 ADMINPORT STATS DPD NATT NATTF FRAG HYBRID PAM \
+#		RADIUS LDAP GSSAPI SAUNSPEC RC5 IDEA DOCS EXAMPLES WCPSKEY
+#OPTIONS_DEFAULT=	ADMINPORT DEBUG DPD NATT FRAG HYBRID WCPSKEY
 
 ADMINPORT_DESC=	Enable Admin port
 STATS_DESC=	Statistics logging function
 DPD_DESC=	Dead Peer Detection
-NATT_DESC=	NAT-Traversal (kernel-patch required)
+NATT_DESC=	NAT-Traversal (kernel-patch required before 11.1)
 NATTF_DESC=	require NAT-Traversal (fail without kernel-patch)
 FRAG_DESC=	IKE fragmentation payload support
 HYBRID_DESC=	Hybrid, Xauth and Mode-cfg support
@@ -68,7 +64,7 @@ STATS_CONFIGURE_ENABLE=	stats
 DPD_CONFIGURE_ENABLE=	dpd
 NATTF_VARS=		NATT=yes
 NATTF_VARS_OFF=		NATT=kernel
-NATT_CONFIGURE_ON=	--enable-natt=${NATT}
+NATT_CONFIGURE_ON=	--enable-natt=${NATT} --enable-natt-versions=rfc
 NATT_CONFIGURE_OFF=	--disable-natt
 FRAG_CONFIGURE_ENABLE=	frag
 HYBRID_CONFIGURE_ENABLE=hybrid
@@ -85,22 +81,62 @@ SAUNSPEC_CONFIGURE_ENABLE=	samode-unspec
 RC5_CONFIGURE_ENABLE=		rc5
 IDEA_CONFIGURE_ENABLE=		idea
 WCPSKEY_EXTRA_PATCHES=		${FILESDIR}/wildcard-psk.diff
+NATT_EXTRA_PATCHES=		${FILESDIR}/natt.diff
+
+#.include <bsd.port.pre.mk>
+
+# Need to be patched for openssl-1.1.1 (default after 1200080)
+#.if ${OPSYS} == FreeBSD
+#.  if ${OSVERSION} >= 1200085 && ${SSL_DEFAULT} == base
+BUILD_DEPENDS=	automake>=0:devel/automake
+#.  endif
+#.endif
 
 post-patch:
 	@${REINPLACE_CMD} -e "s/-Werror//g ; s/-R$$libdir/-Wl,-rpath=$$libdir/g" ${WRKSRC}/configure
 
+# Need to be patched for openssl-1.1.1 (default after 1200080)
+#.if ${OPSYS} == FreeBSD
+#.  if ${OSVERSION} >= 1200085 && ${SSL_DEFAULT} == base
 post-configure:
-	@${REINPLACE_CMD} -e 's|-lreadline|-ledit|g' ${WRKSRC}/src/Makefile
-	@${REINPLACE_CMD} -e 's|-lreadline|-ledit|g' ${WRKSRC}/src/libipsec/Makefile
-	@${REINPLACE_CMD} -e 's|-lreadline|-ledit|g' ${WRKSRC}/src/racoon/Makefile
-	@${REINPLACE_CMD} -e 's|-lreadline|-ledit|g' ${WRKSRC}/src/include-glibc/Makefile
-	@${REINPLACE_CMD} -e 's|-lreadline|-ledit|g' ${WRKSRC}/src/setkey/Makefile
+	@${REINPLACE_CMD} -e "s/automake-1.14/automake-1.16/g" ${WRKSRC}/Makefile ${WRKSRC}/*/Makefile \
+				${WRKSRC}/*/*/Makefile
+	@${REINPLACE_CMD} -e "s/aclocal-1.14/aclocal-1.16/g" ${WRKSRC}/Makefile ${WRKSRC}/*/Makefile \
+				${WRKSRC}/*/*/Makefile
+#.  endif
+#.endif
 
-do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/src/racoon/.libs/racoon ${ZPREFIX}/sbin/racoon
-	${INSTALL_PROGRAM} ${WRKSRC}/src/racoon/.libs/racoonctl ${ZPREFIX}/sbin/racoonctl
-	${INSTALL_PROGRAM} ${WRKSRC}/src/setkey/.libs/setkey ${ZPREFIX}/sbin/setkey
-	${INSTALL_LIB} ${WRKSRC}/src/racoon/.libs/libracoon.so.0 ${ZPREFIX}/lib/libracoon.so.0
-	${INSTALL_LIB} ${WRKSRC}/src/libipsec/.libs/libipsec.so.0 ${ZPREFIX}/lib/libipsec.so.0
+#post-install:
+#	@${MKDIR} ${STAGEDIR}/${PREFIX}/etc/racoon
+#	@if [ -z `/sbin/sysctl -a | ${GREP} -q ipsec && ${ECHO_CMD} ipsec` ]; then \
+#	    ${ECHO_MSG} "WARNING: IPsec feature is disabled on this host"; \
+#	    ${ECHO_MSG} "         You must build the kernel if you want to run racoon on the host"; \
+#	fi ;
+
+post-install:
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/sbin/racoon ${ZPREFIX}/sbin/racoon
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/sbin/racoonctl ${ZPREFIX}/sbin/racoonctl
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/sbin/setkey ${ZPREFIX}/sbin/setkey
+	${INSTALL_LIB} ${STAGEDIR}/${PREFIX}/lib/libracoon.so.0 ${ZPREFIX}/lib/libracoon.so.0
+	${INSTALL_LIB} ${STAGEDIR}/${PREFIX}/lib/libipsec.so.0 ${ZPREFIX}/lib/libipsec.so.0
+	cd ${ZPREFIX}/lib;ln -s libracoon.so.0 libracoon.so;ln -s libipsec.so.0 libipsec.so
 
 .include <bsd.port.mk>
+post-install-EXAMPLES-on:
+	@${MKDIR} ${STAGEDIR}/${EXAMPLESDIR}
+	@${RM} ${WRKSRC}/src/racoon/samples/*.in
+	@${CP} -r ${WRKSRC}/src/racoon/samples/* ${STAGEDIR}/${EXAMPLESDIR}
+
+post-install-DOCS-on:
+	@${MKDIR} ${STAGEDIR}/${DOCSDIR}
+	${INSTALL_DATA} ${WRKSRC}/src/racoon/doc/* ${STAGEDIR}/${DOCSDIR}
+
+#.if ${OPSYS} == FreeBSD
+#.  if ${OSVERSION} >= 1200085 && ${SSL_DEFAULT} == base
+EXTRA_PATCHES+=	${FILESDIR}/extra-patch-aclocal.m4
+EXTRA_PATCHES+=	${FILESDIR}/extra-patch-ipsec-tools
+PLIST_FILES+=	include/racoon/openssl_compat.h
+#.  endif
+#.endif
+
+#.include <bsd.port.post.mk>
