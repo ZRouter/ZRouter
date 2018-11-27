@@ -82,6 +82,10 @@ RC5_CONFIGURE_ENABLE=		rc5
 IDEA_CONFIGURE_ENABLE=		idea
 WCPSKEY_EXTRA_PATCHES=		${FILESDIR}/wildcard-psk.diff
 NATT_EXTRA_PATCHES=		${FILESDIR}/natt.diff
+EXTRA_PATCHES+=		${FILESDIR}/wildcard-psk.diff
+EXTRA_PATCHES+=		${FILESDIR}/natt.diff
+
+CONFIGURE_ARGS+=--enable-adminport --enable-dpd --enable-natt=yes --enable-natt-versions=rfc --enable-frag  --enable-hybrid
 
 #.include <bsd.port.pre.mk>
 
