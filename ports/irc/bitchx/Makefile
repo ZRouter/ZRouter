@@ -20,7 +20,8 @@ CONFIGURE_ARGS+=--exec-prefix="${PREFIX}/share" \
 		--bindir="${PREFIX}/bin" \
 		--datadir="${PREFIX}/share" \
 		--libdir="${PREFIX}/share"
-CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd --with-tcl \
+		CFLAGS=-I${ZPREFIX}/include/tcl8.5 LDFLAGS=-L${ZPREFIX}/lib/
 LIBS+=		-L${LOCALBASE}/lib
 
 OPTIONS_SUB=	yes

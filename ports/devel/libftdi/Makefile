@@ -41,5 +41,6 @@ post-patch:
 
 do-install:
 	${INSTALL_LIB} ${WRKSRC}/libftdi.so.1.20.0 ${ZPREFIX}/lib/libftdi.so.1
+	cp ${WRKSRC}/src/ftdi.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libftdi.so.1 libftdi.so
 .include <bsd.port.mk>

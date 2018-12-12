@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# $FreeBSD: tags/RELEASE_10_3_0/net/mpd5/files/mpd5.in 356932 2014-06-07 17:32:04Z olgeni $
+# $FreeBSD: head/net/mpd5/files/mpd5.in 481990 2018-10-13 14:59:41Z eugen $
 #
 # PROVIDE: mpd5
-# REQUIRE: SERVERS
-# BEFORE: DAEMON
+# REQUIRE: netif
+# BEFORE: routing
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf to enable mpd5:

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $FreeBSD: tags/RELEASE_10_3_0/security/ipsec-tools/files/racoon.in 340872 2014-01-24 00:14:07Z mat $
+# $FreeBSD: head/security/ipsec-tools/files/racoon.in 340872 2014-01-24 00:14:07Z mat $
 #
 # PROVIDE: racoon
 # REQUIRE: LOGIN

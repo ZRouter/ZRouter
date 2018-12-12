@@ -8,7 +8,7 @@
 
 #WORLD_SUBDIRS_LIB+= libwrap
 WORLD_SUBDIRS_LIB+= libpcap
-WORLD_SUBDIRS_LIB+= libradius libfetch
+WORLD_SUBDIRS_LIB+= libradius libfetch libexecinfo
 #WORLD_SUBDIRS_ZROUTER+=target/usr.sbin/mpd
 WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/net/mpd5
 WORLD_SUBDIRS_USR_SBIN+=ngctl
