@@ -1,5 +1,5 @@
 PORTNAME=	mruby
-PORTVERSION=	1.4.1
+PORTVERSION=	2.0.0
 CATEGORIES=	lang
 MASTER_SITES=	http://mruby.org/
 #DISTNAME=	mruby-master
