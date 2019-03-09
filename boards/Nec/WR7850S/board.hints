@@ -23,3 +23,6 @@ hint.aremdio.0.at="nexus0"
 hint.aremdio.0.maddr=0x18100000
 hint.aremdio.0.msize=0x100000
 
+# LED
+
+hint.gpio.0.atermled=0xff
