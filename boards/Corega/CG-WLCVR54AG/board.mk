@@ -10,7 +10,7 @@
 SOC_VENDOR=Atheros
 SOC_CHIP=AR5312
 # TODO: size suffixes
-BOARD_FLASH_SIZE=8388608
+BOARD_FLASH_SIZE=4194304
 
 
 ###################################################
@@ -21,9 +21,9 @@ BOARD_FLASH_SIZE=8388608
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
-KERNCONF_KERNLOADADDR?=0x80010000
-# Define empty LDSCRIPT_NAME, FreeBSD kernel make process will use his default
-KERNCONF_KERN_LDSCRIPT_NAME=
+KERNCONF_KERNLOADADDR?=0x80004000
+KERNCONF_KERN_LDSCRIPT_NAME=   ldscript.mips.bin
+
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uzip\\\"
 KERNCONF_DEVICES+=	geom_redboot
 
@@ -40,8 +40,6 @@ WITHOUT_WIRELESS=yes
 #KERNCONF_DEVICES+=	rlphy
 
 KERNCONF_OPTIONS+=	ARE_MII
-
-KERNCONF_OPTIONS+=	FFS
 
 ###################################################
 #
@@ -64,7 +62,7 @@ KERNEL_COMPRESSION_TYPE=oldlzma
 MKULZMA_BLOCKSIZE=65536
 
 UBNT_KERNEL_LOAD_ADDRESS?=0x80050000
-PACKING_KERNEL_IMAGE?=kernel.gz.sync
+PACKING_KERNEL_IMAGE?=kernel.kbin.gz.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
