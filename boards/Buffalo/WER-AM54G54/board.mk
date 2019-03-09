@@ -20,13 +20,14 @@ BOARD_FLASH_SIZE=4194304
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
-KERNCONF_KERNLOADADDR?=0x80010000
-# Define empty LDSCRIPT_NAME, FreeBSD kernel make process will use his default
-KERNCONF_KERN_LDSCRIPT_NAME=
+KERNCONF_KERNLOADADDR?=		0x80004000
+KERNCONF_KERN_LDSCRIPT_NAME=	ldscript.mips.bin
+
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uzip\\\"
 KERNCONF_DEVICES+=	geom_redboot
 
-KERNCONF_OPTIONS+=     AR531X_REALMEM=(16*1024*1024)
+# HY57V281620HCT-H * 2
+KERNCONF_OPTIONS+=     AR531X_REALMEM=(32*1024*1024)
 
 KERNCONF_OPTIONS+=	CFI_HARDWAREBYTESWAP
 
@@ -34,16 +35,13 @@ KERNCONF_OPTIONS+=	CFI_HARDWAREBYTESWAP
 
 WITHOUT_WIRELESS=yes
 
-# disable etherswitch because of crash on boot.
-# But I don't know why effect is setting.
-#KERNCONF_OPTIONS+=	ARE_MDIO
-#KERNCONF_DEVICES+=	miiproxy
-#KERNCONF_DEVICES+=	mdio
-#KERNCONF_DEVICES+=	etherswitch
-#KERNCONF_DEVICES+=	ukswitch
-#WORLD_SUBDIRS_SBIN+=	etherswitchcfg
-
-KERNCONF_OPTIONS+=	FFS
+# This module have KS8995XA. But no contole connect from cpu.
+KERNCONF_OPTIONS+=	ARE_MDIO
+KERNCONF_DEVICES+=	miiproxy
+KERNCONF_DEVICES+=	mdio
+KERNCONF_DEVICES+=	etherswitch
+KERNCONF_DEVICES+=	ukswitch
+WORLD_SUBDIRS_SBIN+=	etherswitchcfg
 
 ###################################################
 #
@@ -66,7 +64,7 @@ KERNEL_COMPRESSION_TYPE=oldlzma
 MKULZMA_BLOCKSIZE=65536
 
 UBNT_KERNEL_LOAD_ADDRESS?=0x80050000
-PACKING_KERNEL_IMAGE?=kernel.gz.sync
+PACKING_KERNEL_IMAGE?=kernel.kbin.gz.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
 IMAGE_SUFFIX=zimage
