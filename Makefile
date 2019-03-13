@@ -779,6 +779,8 @@ zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
 	@echo "==="
 	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
+	@echo -n "/etc/zrouter_version : "
+	@cat ${NEW_ROOTFS}/etc/zrouter_version
 .if defined(FIRMWARE_IMAGE_SIZE_MAX) && defined(MKULZMA_BLOCKSIZE)
 	@NEW_IMAGE_SIZE=`ls -l ${NEW_IMAGE} | awk '{print $$5}'` ; \
 	REMAIN_BLOCK=`printf "(%d - %d)/${MKULZMA_BLOCKSIZE}\n" ${FIRMWARE_IMAGE_SIZE_MAX} $${NEW_IMAGE_SIZE} | bc` ; \

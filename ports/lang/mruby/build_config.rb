@@ -5,7 +5,7 @@ MRuby::Build.new do |conf|
   if ENV['VisualStudioVersion'] || ENV['VSINSTALLDIR']
     toolchain :visualcpp
   else
-    toolchain :gcc
+    toolchain :clang
   end
 
   enable_debug
@@ -93,7 +93,7 @@ MRuby::Build.new('host-debug') do |conf|
   if ENV['VisualStudioVersion'] || ENV['VSINSTALLDIR']
     toolchain :visualcpp
   else
-    toolchain :gcc
+    toolchain :clang
   end
 
   conf.yacc do |yacc|
@@ -120,7 +120,7 @@ MRuby::Build.new('test') do |conf|
   if ENV['VisualStudioVersion'] || ENV['VSINSTALLDIR']
     toolchain :visualcpp
   else
-    toolchain :gcc
+    toolchain :clang
   end
 
   conf.yacc do |yacc|
@@ -150,7 +150,11 @@ end
 # end
 
 MRuby::CrossBuild.new('zrouter') do |conf|
-  toolchain :gcc
+  if ENV['ZTARGET'] == 'mips'
+    toolchain :gcc
+  else
+    toolchain :clang
+  end
   conf.yacc do |yacc|
     yacc.command = '/usr/local/bin/bison'
   end
