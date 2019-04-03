@@ -1,9 +1,3 @@
-[submodule "contrib/rtl-sdr"]
-	path = contrib/rtl-sdr
-	url = https://git.osmocom.org/rtl-sdr
-[submodule "contrib/libuv"]
-	path = contrib/libuv
-	url = https://github.com/libuv/libuv.git
 [submodule "contrib/miruo"]
 	path = contrib/miruo
 	url = https://github.com/KLab/miruo.git
