@@ -54,8 +54,8 @@ post-configure-LIBEVENT_STATIC-on:
 		${WRKSRC}/${MAKEFILE}
 
 post-configure:
-	${REINPLACE_CMD} -e 's|LIBS =|LIBS = compat/fdforkpty.o compat/freezero.o compat/getdtablecount.o compat/imsg-buffer.o compat/imsg.o compat/recallocarray.o compat/unvis.o compat/vis.o |' \
-		${WRKSRC}/${MAKEFILE}
+#	${REINPLACE_CMD} -e 's|LIBS =|LIBS = compat/fdforkpty.o compat/freezero.o compat/getdtablecount.o compat/imsg-buffer.o compat/imsg.o compat/recallocarray.o compat/unvis.o compat/vis.o |' \
+#		${WRKSRC}/${MAKEFILE}
 
 # for ZRouter
 post-install:
