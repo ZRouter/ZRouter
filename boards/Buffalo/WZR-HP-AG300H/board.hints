@@ -142,7 +142,7 @@ hint.gpio.0.function_clear=0x00000000
 
 # These are the GPIO LEDs and buttons which can be software controlled.
 # USB powered on
-hint.gpio.0.pinmask=0x0005
+hint.gpio.0.pinmask=0x0fff
 hint.gpio.0.pinon=0x00000804
 
 hint.gpioiic.0.at="gpiobus0"
