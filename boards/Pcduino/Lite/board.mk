@@ -11,9 +11,12 @@ SOC_CHIP=A10
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
-KERNCONF_FDT_DTS_FILE?=	"sun4i-a10-cubieboard.dts"
+#KERNCONF_FDT_DTS_FILE?=	"sun4i-a10-cubieboard.dts"
+KERNCONF_FDT_DTS_FILE?=	"pcduino.dts"
+KERNCONF_DEVICES+=umass scbus da
 
 #BUILD_ZROUTER_WITH_GCC=yes
+CONVERTER_KBIN=/usr/local/arm-elf/bin/objcopy
 
 ###################################################
 #
@@ -34,10 +37,11 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 #I2C_KERNEL_MODULES=i2c/iictest i2c/ds133x
 #kERNCONF_MODULES_OVERRIDE+=${USB_KERNEL_MODULES} ${ATA_KERNEL_MODULES} ${I2C_KERNEL_MODULES} ${NFS_KERNEL_MODULES} zlib libiconv ext2fs
 
-KERNCONF_DEVICES+=	geom_map
-KERNCONF_DEVICES+=	geom_uzip
-#KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
-KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/cfid0s.rootfs.uzip\\\"
+#KERNCONF_DEVICES+=	geom_map
+#KERNCONF_DEVICES+=	xz
+#KERNCONF_DEVICES+=	geom_uzip
+KERNCONF_DEVICES+=	geom_mbr
+KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/mmcsd0s2\\\"
 
 # Additional utilities
 #WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
