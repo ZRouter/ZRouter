@@ -16,6 +16,10 @@ USES=		cpe libtool tar:xz
 CPE_PRODUCT=	libpng
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-pkgconfigdir=${PREFIX}/libdata/pkgconfig
+
+.if "${ZARCH}" == "arm.armv7"
+CONFIGURE_ARGS+=--enable-arm-neon
+.endif
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 INSTALL_TARGET=	install-strip
 USE_LDCONFIG=	yes
