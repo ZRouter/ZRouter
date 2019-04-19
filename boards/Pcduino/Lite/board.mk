@@ -81,23 +81,12 @@ FIRMWARE_IMAGE_SIZE_MAX=0x003c0000
 #
 ###################################################
 
-#128M!=sh -c 'echo $$((128 * 1024 * 1024))'
-#ROOTFS_WITH_KERNEL=yes
-#ROOTFS_MEDIA_SIZE?=${128M}
-#PACKING_KERNEL_IMAGE?=kernel
-#PACKING_ROOTFS_IMAGE?=rootfs
-
-#IMAGE_SUFFIX=zimage
-#NEW_IMAGE_TYPE=split_kernel_rootfs
-
-KERNEL_COMPRESSION=gz
-KERNEL_COMPRESSION_TYPE=gz
-#UBOOT_KERNEL_COMPRESSION_TYPE=gzip
+UBOOT_KERNEL_COMPRESSION_TYPE=none
 
 MKULZMA_BLOCKSIZE=65536
 
-PACKING_KERNEL_IMAGE?=kernel.kbin.gz.uboot.sync
-PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
+PACKING_KERNEL_IMAGE?=kernel.kbin.uboot
+PACKING_ROOTFS_IMAGE?=rootfs_clean.iso
 
 IMAGE_SUFFIX=zimage
 NEW_IMAGE_TYPE=zimage
