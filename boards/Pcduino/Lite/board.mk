@@ -14,6 +14,8 @@ BOARD_FLASH_SIZE=4194304
 #KERNCONF_FDT_DTS_FILE?=	"sun4i-a10-cubieboard.dts"
 KERNCONF_FDT_DTS_FILE?=	"pcduino.dts"
 KERNCONF_DEVICES+=umass scbus da
+# board has axp209 but hang up on boot
+#KERNCONF_DEVICES+=axp209
 
 #BUILD_ZROUTER_WITH_GCC=yes
 CONVERTER_KBIN=/usr/local/arm-elf/bin/objcopy
