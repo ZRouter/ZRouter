@@ -20,9 +20,13 @@ PORTSCOUT=	limitw:1,even
 GNU_CONFIGURE=	yes
 
 #CONFIGURE_ARGS=	--disable-gtk
-# host option is no effect
-CONFIGURE_ARGS=	--disable-mmx --disable-sse2 --disable-ssse3
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+
+.if "${ZARCH}" == "arm.armv7"
+CONFIGURE_ENV+= CCASFLAGS="${CFLAGS} -B${LOCALBASE}/bin -no-integrated-as"
+LLD_UNSAFE=     yes
+.endif
+
 INSTALL_TARGET=	install-strip
 
 # Build the library exclusively, thus disabling the demos and the tests (which
