@@ -22,7 +22,7 @@ WORLD_SUBDIRS_USR_BIN+=hexdump awk
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?=  "FON2412J.dts"
+ZKERNCONF_FDT_DTS_FILE?=	"dts/mips/FON2412J.dts"
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/flash/spi0s.rootfs.uzip\\\" 
 
