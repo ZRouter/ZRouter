@@ -20,6 +20,7 @@ GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--disable-harden
 USE_RC_SUBR=	${PORTNAME}
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+MAKE_ARGS+=PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
 
 
 #OPTIONS_DEFINE=		SMALL_CODE STATIC
@@ -65,6 +66,8 @@ post-patch:
 	@${REINPLACE_CMD} -e "s,sys/dir.h,dirent.h," ${WRKSRC}/*.[ch]
 	@${REINPLACE_CMD} -e "s,make clean,\$${MAKE} clean," \
 				${WRKSRC}/libtomcrypt/Makefile.in
+	@${REINPLACE_CMD} -e "/#define DROPBEAR_SMALL_CODE/d" \
+		${WRKSRC}/default_options.h
 
 post-patch-SMALL_CODE-off:
 	@${REINPLACE_CMD} -e "/#define DROPBEAR_SMALL_CODE/d" \
@@ -156,6 +159,7 @@ post-patch-SHA2_256-off:
 
 do-install:
 	@${MKDIR} ${STAGEDIR}${PREFIX}/etc/dropbear
+	${INSTALL_PROGRAM} ${WRKSRC}/scp ${STAGEDIR}${PREFIX}/bin
 	${INSTALL_PROGRAM} ${WRKSRC}/dbclient ${STAGEDIR}${PREFIX}/bin
 	${INSTALL_PROGRAM} ${WRKSRC}/dropbearconvert ${STAGEDIR}${PREFIX}/bin
 	${INSTALL_PROGRAM} ${WRKSRC}/dropbearkey ${STAGEDIR}${PREFIX}/bin
@@ -166,6 +170,10 @@ do-install:
 	${INSTALL_MAN} ${WRKSRC}/dropbear.8 ${STAGEDIR}${MAN8PREFIX}/man/man8
 
 post-install:
-	cp ${STAGEDIR}${PREFIX}/sbin/dropbear ${ZPREFIX}/sbin/
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/bin/scp ${ZPREFIX}/bin
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/bin/dbclient ${ZPREFIX}/bin
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/bin/dropbearkey ${ZPREFIX}/bin
+	${INSTALL_PROGRAM} ${STAGEDIR}${PREFIX}/sbin/dropbear ${ZPREFIX}/sbin
+
 
 .include <bsd.port.mk>
