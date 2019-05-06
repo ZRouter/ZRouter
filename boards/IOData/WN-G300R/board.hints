@@ -18,37 +18,44 @@ hint.arge.1.fduplex=1
 hint.gpio.0.function_set=0x00000000
 hint.gpio.0.function_clear=0x00000000
 
-hint.gpio.0.pinmask=0x7db000
+hint.gpio.0.pinmask=0x7da000
 
 hint.gpio.0.func.18.gpiofunc=0
 #hint.gpio.0.func.18.gpiomode=1  # output, default low
 
-# (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<13) | (1<<14) | (1<<15) | (1<<16)
+# (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<14) | (1<<15) | (1<<16)
 #  000011 11100000 11000011
-# Output: 0,1,6,7,13,14,15,16,17
+# Output: 0,1,6,7,14,15,16,17
 
-# 0	LED	Power
+# LED8	Power
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.name="power"
 hint.gpioled.0.pins=0x8000
 #hint.gpioled.0.flags="0x0102"
 #hint.gpioled.0.invert=1
 
-# 1	LED	WiFi
+# LED1	WiFi
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.name="status"
 hint.gpioled.1.pins=0x2000
 #hint.gpioled.1.flags="0x0102"
 hint.gpioled.1.invert=1
 
-# 11	LED	WPS
+# LED9	WPS (NOT mounting)
+#hint.gpioled.2.at="gpiobus0"
+#hint.gpioled.2.name="wps"
+#hint.gpioled.2.pins=0x1000
+##hint.gpioled.2.flags="0x0102"
+#hint.gpioled.2.invert=1
+
+# LED7	WAN
 hint.gpioled.2.at="gpiobus0"
 hint.gpioled.2.name="wps"
-hint.gpioled.2.pins=0x1000
+hint.gpioled.2.pins=0x40000
 #hint.gpioled.2.flags="0x0102"
 hint.gpioled.2.invert=1
 
-# ? 	BUTTON	OPS
+# SW3	OPS
 #hint.gpioreset.0.at="gpiobus0"
 #hint.gpioreset.0.pins=0x10000
 #hint.gpioreset.0.name="ops"
