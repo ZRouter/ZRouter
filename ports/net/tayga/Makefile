@@ -13,6 +13,8 @@ LICENSE=	GPLv2
 USES=		gmake tar:bzip2
 GNU_CONFIGURE=	yes
 
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/tayga ${ZPREFIX}/sbin/tayga
 
