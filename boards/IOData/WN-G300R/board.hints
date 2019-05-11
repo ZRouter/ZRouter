@@ -1,10 +1,6 @@
 # $FreeBSD$
 
 hint.arge.0.phymask=0x1
-hint.arge.0.media=1000
-hint.arge.0.fduplex=1
-hint.arge.0.eeprommac=0x1f05120c
-hint.arge.0.mdio=mdioproxy1     # .. off of the switch mdiobus
 
 # arge1: connected to the LAN switch MAC, at 1000BaseTX / GMII.
 
@@ -12,6 +8,10 @@ hint.arge.1.phymask=0x0
 # hint.arge.1.miimode=1         # GMII
 hint.arge.1.media=1000          # Force to 1000BaseTX/full
 hint.arge.1.fduplex=1
+
+# GMAC configuration
+# + AR934X_ETH_CFG_SW_ONLY_MODE             (1 << 6)
+hint.ar934x_gmac.0.gmac_cfg=0x1C0
 
 # GPIO
 
