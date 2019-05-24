@@ -12,13 +12,19 @@ if [ -n "$kupgradetftp" ]; then
 UPGRADETFTP=$kupgradetftp
 fi
 
+ZBOARD=`uname -i`
+if [ -n "${UPGRADEIMG}" ]; then
+IMG=${UPGRADEIMG}
+else
+IMG=${ZBOARD}.zimage
+fi
+
 reroot=`kenv -q vfs.root.mountfrom`
 if [ "$reroot" = "ufs:md0" ]; then
 
-ZBOARD=`uname -i`
 dd if=/tmp/flashpipe of=${UPGRADEDEV} obs=${UPGRADEBS} conv=osync &
 echo "bin
-get ${ZBOARD}.zimage /tmp/flashpipe
+get ${IMG} /tmp/flashpipe
 quit" | tftp ${UPGRADETFTP} 69
 
 else
