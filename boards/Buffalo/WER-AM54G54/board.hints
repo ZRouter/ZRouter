@@ -4,7 +4,7 @@ hint.cfi.0.maddr=0xbfc00000
 hint.cfi.0.msize=0x400000
 
 # GEOM redboot FIS directory offset
-hint.redboot.0.fisoffset="0x003d0000"
+hint.redboot.0.fisoffset="0x003f0000"
 
 hint.are.0.at="nexus0" 
 hint.are.0.maddr=0x18100000
