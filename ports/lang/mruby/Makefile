@@ -11,6 +11,7 @@ WRKSRC=		${WRKDIR}/${PORTNAME}-${PORTVERSION}
 
 MAINTAINER=	yamori813@yahoo.cp.jp
 COMMENT=	lightweight implementation of the Ruby language
+DISABLE_VULNERABILITIES=yes
 
 # not effect ?
 #MAKE_ENV+=  YACC='/usr/local/bin/bison'
