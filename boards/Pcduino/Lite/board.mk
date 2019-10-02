@@ -42,7 +42,7 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 #KERNCONF_DEVICES+=	geom_map
 #KERNCONF_DEVICES+=	xz
 #KERNCONF_DEVICES+=	geom_uzip
-KERNCONF_DEVICES+=	geom_mbr
+KERNCONF_DEVICES+=	geom_part_mbr
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/mmcsd0s2\\\"
 
 # Additional utilities
