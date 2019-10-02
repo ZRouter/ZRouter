@@ -170,6 +170,14 @@ CLANG_VARS?=			\
 	WITH_GCC_BOOTSTRAP=yes	\
 	WITH_GNUCXX=yes	
 .else
+.if defined(BUILD_ZROUTER_WITH_LLD)
+CLANG_TC_VARS?=			\
+	WITH_LLD_BOOTSTRAP=yes \
+	WITH_LLD_IS_LD=yes
+CLANG_VARS?=			\
+	WITH_LLD_BOOTSTRAP=yes \
+	WITH_LLD_IS_LD=yes
+.endif
 # use src.opts.mk default
 .endif
 .endif
