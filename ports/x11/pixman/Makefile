@@ -1,7 +1,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/x11/pixman/Makefile 399873 2015-10-20 18:49:47Z jmmv $
 
 PORTNAME=	pixman
-PORTVERSION=	0.32.8
+PORTVERSION=	0.34.0
 CATEGORIES=	x11
 EXTRACT_SUFX=	.tar.bz2
 MASTER_SITES=	http://distcache.FreeBSD.org/ports-distfiles/xorg/lib/
@@ -23,8 +23,7 @@ GNU_CONFIGURE=	yes
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 .if "${ZARCH}" == "arm.armv7"
-CONFIGURE_ENV+= CCASFLAGS="${CFLAGS} -B${LOCALBASE}/bin -no-integrated-as"
-LLD_UNSAFE=     yes
+CONFIGURE_ENV+= CCASFLAGS="${CFLAGS} -no-integrated-as"
 .endif
 
 INSTALL_TARGET=	install-strip
@@ -35,8 +34,9 @@ INSTALL_TARGET=	install-strip
 MAKE_ARGS=      SUBDIRS=pixman
 
 post-install:
-	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpixman-1.so.32 ${ZPREFIX}/lib/
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpixman-1.so.0.34.0 ${ZPREFIX}/lib/
 	cp -r ${STAGEDIR}${PREFIX}/include/pixman-1 ${ZPREFIX}/include/
-	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.32 libpixman-1.so
+	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0.34.0 libpixman-1.so.0
+	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0.34.0 libpixman-1.so
 
 .include <bsd.port.mk>
