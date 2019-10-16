@@ -8,6 +8,7 @@ EXTRACT_SUFX=	.tar.gz
 MASTER_SITES=	https://github.com/mruby/mruby/archive/
 
 WRKSRC=		${WRKDIR}/${PORTNAME}-${PORTVERSION}
+#WRKSRC=		${WRKDIR}/${DISTNAME}
 
 MAINTAINER=	yamori813@yahoo.cp.jp
 COMMENT=	lightweight implementation of the Ruby language
