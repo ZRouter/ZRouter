@@ -108,6 +108,10 @@ KERNCONF_MAKEOPTIONS+=	"LDSCRIPT_NAME=${KERNCONF_KERN_LDSCRIPT_NAME}"
 KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${KERNCONF_FDT_DTS_FILE}"
 .endif
 
+.if defined(ZKERNCONF_FDT_DTS_FILE)
+KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${ZROUTER_ROOT}/${ZKERNCONF_FDT_DTS_FILE}"
+.endif
+
 # resolve board flash size with trailing M or K
 .if defined(BOARD_FLASH_SIZE)
 BOARD_FLASH_SIZE!=echo "${BOARD_FLASH_SIZE}" | \
@@ -166,6 +170,14 @@ CLANG_VARS?=			\
 	WITH_GCC_BOOTSTRAP=yes	\
 	WITH_GNUCXX=yes	
 .else
+.if defined(BUILD_ZROUTER_WITH_LLD)
+CLANG_TC_VARS?=			\
+	WITH_LLD_BOOTSTRAP=yes \
+	WITH_LLD_IS_LD=yes
+CLANG_VARS?=			\
+	WITH_LLD_BOOTSTRAP=yes \
+	WITH_LLD_IS_LD=yes
+.endif
 # use src.opts.mk default
 .endif
 .endif
@@ -628,6 +640,9 @@ ROOTFS_RMFILES+=calendar dict doc examples groff_font me mk nls openssl \
 rootfs:		${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 
 ROOTFS_CLEAN_MTREE_FILE=    ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean.mtree
+.if defined(SEPARATE_LOCALFS)
+LOCALFS_CLEAN_MTREE_FILE=    ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_localfs.mtree
+.endif
 
 ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}/boot/kernel/kernel ${ROOTFS_DEPTEST} ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs
 	for d in ${ROOTFS_COPY_DIRS} ; do \
@@ -648,6 +663,11 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	cp ${KERNELDESTDIR}/boot/kernel/kernel ${NEW_KERNEL}
 	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean
 	cp -R ${WORLDDESTDIR} ${NEW_ROOTFS}
+.if defined(SEPARATE_LOCALFS)
+	rm -rf ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_localfs
+	cp -R ${WORLDDESTDIR}/usr/local ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_localfs
+	rm -rf ${NEW_ROOTFS}/usr/local
+.endif
 	rm -rf `find ${NEW_ROOTFS} ${ROOTFS_RMLIST}`
 	for file in ${ROOTFS_RMFILES} ; do rm -rf ${NEW_ROOTFS}/usr/share/$${file} ; done
 	rm -rf ${NEW_ROOTFS}/var
@@ -698,6 +718,10 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 	    "${NEW_ROOTFS}/etc/zrouter_version"
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
 	    find ./usr/ -type d -empty -delete
+.if defined(SEPARATE_LOCALFS)
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
+	    mkdir ./usr/local
+.endif
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
 	    mtree -c -i -n -k uname,gname,mode,nochange | \
 		sed -E 's/uname=[[:alnum:]]+/uname=root/' | \
@@ -705,6 +729,15 @@ ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean:		${KERNELDESTDIR}
 		    ${ROOTFS_CLEAN_MTREE_FILE}
 	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_rootfs_clean ; \
 	    rm -rf usr/lib/debug boot/kernel/kernel*
+.if defined(SEPARATE_LOCALFS)
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_localfs ; \
+	    find . -type d -empty -delete
+	cd ${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_localfs ; \
+	    mtree -c -i -n -k uname,gname,mode,nochange | \
+		sed -E 's/uname=[[:alnum:]]+/uname=root/' | \
+		sed -E 's/gname=[[:alnum:]]+/gname=wheel/' > \
+		    ${LOCALFS_CLEAN_MTREE_FILE}
+.endif
 
 ${ROOTFS_DEPTEST}:		world	ports
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
@@ -765,10 +798,20 @@ TPLINK_IMG_VERSION?=	${ZROUTER_VERSION}
 
 KERNEL_PACKED_NAME=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_KERNEL_IMAGE}
 ROOTFS_PACKED_NAME=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_ROOTFS_IMAGE}
+.if defined(SEPARATE_LOCALFS)
+LOCALFS_PACKED_NAME=${ZROUTER_OBJ}/${TARGET_VENDOR}_${TARGET_DEVICE}_${PACKING_LOCALFS_IMAGE}
+.endif
 
+.if ${.TARGETS} == "localfs"
+PACKING_TARGET_LIST:=${LOCALFS_PACKED_NAME}
+.else
 PACKING_TARGET_LIST:=${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
+.endif
+
 .warning "PACKING_KERNEL_IMAGE=${PACKING_TARGET_LIST}"
 .include "share/mk/zrouter.packing.mk"
+
+localfs:	${LOCALFS_PACKED_NAME}
 
 #
 # TODO: comment here
@@ -776,6 +819,7 @@ PACKING_TARGET_LIST:=${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH}/asustrx
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
+
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )

@@ -20,9 +20,6 @@ BOARD_FLASH_SIZE=8388608
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
-#KERNCONF_KERNLOADADDR?=0x80004000
-KERNCONF_KERNLOADADDR?=0x80050000
-KERNCONF_KERN_LDSCRIPT_NAME=   ldscript.mips.bin
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/redboot/rootfs.uzip\\\"
 KERNCONF_DEVICES+=	geom_redboot
 
@@ -35,11 +32,11 @@ KERNCONF_OPTIONS+=	CFI_HARDWAREBYTESWAP
 WITHOUT_WIRELESS=yes
 
 # Todo rtl830x support
-KERNCONF_OPTIONS+=	ARE_MDIO
-KERNCONF_DEVICES+=	miiproxy                                               
-KERNCONF_DEVICES+=	mdio
-KERNCONF_DEVICES+=	etherswitch
-WORLD_SUBDIRS_SBIN+=	etherswitchcfg
+#KERNCONF_OPTIONS+=	ARE_MDIO
+#KERNCONF_DEVICES+=	miiproxy
+#KERNCONF_DEVICES+=	mdio
+#KERNCONF_DEVICES+=	etherswitch
+#WORLD_SUBDIRS_SBIN+=	etherswitchcfg
 
 
 ###################################################

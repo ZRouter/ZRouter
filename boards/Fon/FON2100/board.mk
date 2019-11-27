@@ -30,8 +30,6 @@ KERNCONF_DEVICES+=	geom_redboot
 
 WITHOUT_WIRELESS=yes
 
-#KERNCONF_DEVICES+=	miibus
-KERNCONF_DEVICES+=	mii
 KERNCONF_DEVICES+=	acphy
 
 # use normal ether phy chip

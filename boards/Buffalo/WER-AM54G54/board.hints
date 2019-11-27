@@ -4,7 +4,7 @@ hint.cfi.0.maddr=0xbfc00000
 hint.cfi.0.msize=0x400000
 
 # GEOM redboot FIS directory offset
-hint.redboot.0.fisoffset="0x003d0000"
+hint.redboot.0.fisoffset="0x003f0000"
 
 hint.are.0.at="nexus0" 
 hint.are.0.maddr=0x18100000
@@ -27,3 +27,10 @@ hint.ukswitch.0.cpuport=6
 hint.aremdio.0.at="nexus0"
 hint.aremdio.0.maddr=0x18100000
 hint.aremdio.0.msize=0x100000
+
+# GREEN 4
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.pins="0x10"
+hint.gpioled.0.name="status"
+hint.gpioled.0.flags="0x0001"
+

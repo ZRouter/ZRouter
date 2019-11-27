@@ -1,5 +1,0 @@
-bin/jerm
-bin/tiocdtr
-@comment libexec/jerm/init.sh
-@comment libexec/jerm/rock.pl
-man/man1/jerm.1.gz

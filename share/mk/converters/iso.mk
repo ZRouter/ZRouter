@@ -3,7 +3,7 @@ CONVERT_TO_ISO:=${CURRENT_PACKING_FILE_NAME}
 
 # Let user to override
 CONVERTER_ISO?=makefs
-CONVERTER_ISO_FLAGS?=-d 255 -t cd9660 -F ${ROOTFS_CLEAN_MTREE_FILE} -o "rockridge"
+CONVERTER_ISO_FLAGS?=-d 255 -t cd9660 -F ${CONVERT_FROM_ISO}.mtree -o "rockridge"
 
 .if ${USE_SYSTEMTOOLS} == "yes"
 _CONV_DEPEND=${CONVERT_FROM_ISO}

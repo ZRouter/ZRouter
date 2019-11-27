@@ -2,7 +2,7 @@
 # $FreeBSD: head/devel/libuv/Makefile 442116 2017-05-30 19:38:29Z thierry $
 
 PORTNAME=	libuv
-PORTVERSION=	1.19.2
+PORTVERSION=	1.23.2
 DISTVERSIONPREFIX=	v
 CATEGORIES=	devel
 #MASTER_SITES=	http://dist.libuv.org/dist/v${PORTVERSION}/
@@ -38,12 +38,13 @@ do-test:
 
 do-install:
 	${INSTALL_LIB} ${WRKSRC}/.libs/libuv.so.1.0.0 ${ZPREFIX}/lib/libuv.so.1
-	${INSTALL_DATA} ${WRKSRC}/include/uv-bsd.h ${ZPREFIX}/include
-	${INSTALL_DATA} ${WRKSRC}/include/uv-errno.h ${ZPREFIX}/include
-	${INSTALL_DATA} ${WRKSRC}/include/uv-threadpool.h ${ZPREFIX}/include
-	${INSTALL_DATA} ${WRKSRC}/include/uv-unix.h ${ZPREFIX}/include
-	${INSTALL_DATA} ${WRKSRC}/include/uv-version.h ${ZPREFIX}/include
 	${INSTALL_DATA} ${WRKSRC}/include/uv.h ${ZPREFIX}/include
+	${MKDIR} ${ZPREFIX}/include/uv
+	${INSTALL_DATA} ${WRKSRC}/include/uv/bsd.h ${ZPREFIX}/include/uv
+	${INSTALL_DATA} ${WRKSRC}/include/uv/errno.h ${ZPREFIX}/include/uv
+	${INSTALL_DATA} ${WRKSRC}/include/uv/threadpool.h ${ZPREFIX}/include/uv
+	${INSTALL_DATA} ${WRKSRC}/include/uv/unix.h ${ZPREFIX}/include/uv
+	${INSTALL_DATA} ${WRKSRC}/include/uv/version.h ${ZPREFIX}/include/uv
 	cd ${ZPREFIX}/lib;ln -s libuv.so.1 libuv.so
 
 .include <bsd.port.mk>

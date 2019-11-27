@@ -2,10 +2,11 @@
 # $FreeBSD: head/textproc/expat2/Makefile 428144 2016-12-08 17:40:41Z tijl $
 
 PORTNAME=	expat
-PORTVERSION=	2.2.6
+PORTVERSION=	2.2.8
 PORTREVISION=	1
 CATEGORIES=	textproc
-MASTER_SITES=	SF
+#MASTER_SITES=	SF
+MASTER_SITES=   https://github.com/libexpat/libexpat/releases/download/R_${PORTVERSION:S|.|_|g}/
 
 MAINTAINER=	kuriyama@FreeBSD.org
 COMMENT=	XML 1.0 parser written in C
@@ -22,7 +23,7 @@ CONFIGURE_ARGS=--without-docbook
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 post-install:
-	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libexpat.so.1.6.8 ${ZPREFIX}/lib/libexpat.so.1
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libexpat.so.1.6.10 ${ZPREFIX}/lib/libexpat.so.1
 	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libexpat.so.1 libexpat.so
 
