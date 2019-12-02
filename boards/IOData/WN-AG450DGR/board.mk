@@ -24,9 +24,9 @@ KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
 KERNCONF_FDT_DTS_FILE?= "WN-AG450DGR.dts"
 
-#KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:spi0s.rootfs.uzip\\\" 
-KERNCONF_OPTIONS+=     CAM_BOOT_DELAY=10000
-KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\" 
+KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/flash/spi0s.rootfs.uzip\\\" 
+#KERNCONF_OPTIONS+=     CAM_BOOT_DELAY=10000
+#KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\" 
 
 KERNCONF_DEVICES+=      gpioiic
 KERNCONF_DEVICES+=      iicbb
@@ -34,6 +34,8 @@ KERNCONF_DEVICES+=      iicbb
 KERNCONF_DEVICES+=      iicbus
 KERNCONF_DEVICES+=      iic
 #KERNCONF_DEVICES+=      mtk_iic
+
+WITH_USB=yes
 
 # AR8327
 KERNCONF_OPTIONS+=	RT_MDIO
@@ -44,8 +46,6 @@ KERNCONF_DEVICES+=      arswitch
 WORLD_SUBDIRS_SBIN+=    etherswitchcfg
 
 KERNCONF_DEVICES+=	mx25l
-
-KERNCONF_DEVICES+=	umass scbus da
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes

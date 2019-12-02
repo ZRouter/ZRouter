@@ -13,7 +13,7 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-ENVDEV="/dev/cfid0s.factory"
+ENVDEV="/dev/flash/spi0s.factory"
 
 	kenvmac=`kenv -q LAN_MAC_ADDR`
 	if [ -z "$kenvmac" ]; then
