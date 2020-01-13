@@ -1,0 +1,3 @@
+flashing
+
+CFE> flash -noheader 10.10.10.3:D-Link_DIR-524.trx flash1.trx
