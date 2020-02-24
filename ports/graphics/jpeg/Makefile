@@ -33,6 +33,8 @@ CONFIGURE_ARGS+=	--enable-maxmem=${J_MAXMEM}
 
 #OPTIONS_DEFINE=	DOCS
 
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+
 post-extract:
 	@${CP} ${DISTDIR}/${DIST_SUBDIR}/jpegexiforient.c ${WRKSRC}/
 	@${CP} ${DISTDIR}/${DIST_SUBDIR}/exifautotran.txt ${WRKSRC}/exifautotran
@@ -60,6 +62,12 @@ post-install-DOCS-on:
 do-install:
 	${INSTALL_LIB} ${WRKSRC}/.libs/libjpeg.so.12 ${ZPREFIX}/lib/libjpeg.so.12
 	cd ${ZPREFIX}/lib;ln -s libjpeg.so.12 libjpeg.so
+	cp ${WRKSRC}/jconfig.h ${ZPREFIX}/include/
+	cp ${WRKSRC}/jerror.h ${ZPREFIX}/include/
+	cp ${WRKSRC}/jinclude.h ${ZPREFIX}/include/
+	cp ${WRKSRC}/jmorecfg.h ${ZPREFIX}/include/
+	cp ${WRKSRC}/jpegint.h ${ZPREFIX}/include/
+	cp ${WRKSRC}/jpeglib.h ${ZPREFIX}/include/
 
 
 .include <bsd.port.mk>
