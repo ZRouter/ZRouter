@@ -35,7 +35,9 @@ MAKE_ARGS=      SUBDIRS=pixman
 
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpixman-1.so.0.34.0 ${ZPREFIX}/lib/
-	cp -r ${STAGEDIR}${PREFIX}/include/pixman-1 ${ZPREFIX}/include/
+	cp ${STAGEDIR}${PREFIX}/include/pixman-1/* ${ZPREFIX}/include/
+	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
+	cp ${STAGEDIR}${PREFIX}/libdata/pkgconfig/pixman-1.pc ${ZPREFIX}/libdata/pkgconfig/
 	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0.34.0 libpixman-1.so.0
 	cd ${ZPREFIX}/lib;ln -s libpixman-1.so.0.34.0 libpixman-1.so
 

@@ -48,5 +48,10 @@ post-build:
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpng16.so.16 ${ZPREFIX}/lib
 	cd ${ZPREFIX}/lib;ln -s libpng16.so.16 libpng.so
+	cp ${STAGEDIR}${PREFIX}/include/png.h ${ZPREFIX}/include
+	cp ${STAGEDIR}${PREFIX}/include/pngconf.h ${ZPREFIX}/include
+	cp ${STAGEDIR}${PREFIX}/include/pnglibconf.h ${ZPREFIX}/include
+	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
+	cp ${STAGEDIR}${PREFIX}/libdata/pkgconfig/libpng.pc ${ZPREFIX}/libdata/pkgconfig
 
 .include <bsd.port.mk>
