@@ -67,8 +67,10 @@ post-configure:
 
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfontconfig.so.1.8.0 ${ZPREFIX}/lib/libfontconfig.so.1
-	cp -r ${STAGEDIR}${PREFIX}/include/fontconfig ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libfontconfig.so.1 libfontconfig.so
+	cp ${STAGEDIR}${PREFIX}/include/fontconfig/* ${ZPREFIX}/include/
+	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
+	cp ${STAGEDIR}${PREFIX}/libdata/pkgconfig/fontconfig.pc ${ZPREFIX}/libdata/pkgconfig
 
 #post-install-DOCS-on:
 #	@${MKDIR} ${STAGEDIR}${DOCSDIR}
