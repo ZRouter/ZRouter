@@ -9,15 +9,15 @@ MASTER_SITES=	http://www.bsddiary.net/jerm/
 MAINTAINER=	smatsui@karashi.org
 COMMENT=	Communication terminal through serial and TCP/IP interfaces
 
-#OPTIONS_DEFINE=	DOCS JUPITER
+OPTIONS_DEFINE=	DOCS JUPITER
 
-#JUPITER_DESC=	With Jupiter support
+JUPITER_DESC=	With Jupiter support
 
-#OPTIONS_SUB=	yes
+OPTIONS_SUB=	yes
 
-#PORTDOCS=	README
+PORTDOCS=	README
 
-#JUPITER_MAKE_ARGS_OFF=	JUPITER_FLAGS=
+JUPITER_MAKE_ARGS_OFF=	JUPITER_FLAGS=
 
 post-patch:
 	@${REINPLACE_CMD} -e 's|^CFLAGS=|CFLAGS?=|' \
