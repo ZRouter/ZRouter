@@ -29,7 +29,7 @@ CONVERTER_KBIN=/usr/local/arm-elf/bin/objcopy
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
-#WITH_USB=yes
+WITH_USB=yes
 #WITH_IPSEC=yes
 #WITH_WIRELESS=yes
 # Builded modules

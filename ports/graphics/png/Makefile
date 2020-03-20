@@ -2,7 +2,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/graphics/png/Makefile 403332 2015-12-08 18:23:29Z antoine $
 
 PORTNAME=	png
-PORTVERSION=	1.6.35
+PORTVERSION=	1.6.37
 CATEGORIES=	graphics
 MASTER_SITES=	SF/lib${PORTNAME}/lib${PORTNAME}16/${PORTVERSION} \
 		ftp://ftp.simplesystems.org/pub/lib${PORTNAME}/${PORTNAME}/src/lib${PORTNAME}16/
@@ -24,10 +24,9 @@ CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 INSTALL_TARGET=	install-strip
 USE_LDCONFIG=	yes
 
-#OPTIONS_DEFINE=APNG PNGTEST
-#OPTIONS_DEFAULT=APNG PNGTEST
+#OPTIONS_DEFINE=APNG
+#OPTIONS_DEFAULT=APNG
 #APNG_DESC=Enable Animated PNG support
-#PNGTEST_DESC=Enable Regression Test (recommended)
 
 .include <bsd.port.options.mk>
 
@@ -35,18 +34,13 @@ USE_LDCONFIG=	yes
 PATCHFILES=	${DISTNAME}-apng.patch.gz
 .endif
 
-# Do not fail until https://sourceforge.net/p/libpng/bugs/243/ is fixed
-.if ${PORT_OPTIONS:MPNGTEST}
-post-build:
-	(cd ${BUILD_WRKSRC}; if ! ${SETENV} ${MAKE_ENV} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} ${MAKE_ARGS} test; then \
-	if [ -f ${WRKSRC}/test-suite.log ]; then \
-	${CAT} ${WRKSRC}/test-suite.log ; \
-	fi; \
-	fi)
-.endif
-
 post-install:
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libpng16.so.16 ${ZPREFIX}/lib
 	cd ${ZPREFIX}/lib;ln -s libpng16.so.16 libpng.so
+	cp ${STAGEDIR}${PREFIX}/include/png.h ${ZPREFIX}/include
+	cp ${STAGEDIR}${PREFIX}/include/pngconf.h ${ZPREFIX}/include
+	cp ${STAGEDIR}${PREFIX}/include/pnglibconf.h ${ZPREFIX}/include
+	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
+	cp ${STAGEDIR}${PREFIX}/libdata/pkgconfig/libpng.pc ${ZPREFIX}/libdata/pkgconfig
 
 .include <bsd.port.mk>

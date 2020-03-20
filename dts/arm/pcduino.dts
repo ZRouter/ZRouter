@@ -65,6 +65,25 @@
 		stdout-path = "serial0:115200n8";
 	};
 
+	fb: fb@01e60000 {
+		compatible = "allwinner,sun4i-a10-fb";
+		reg = <0x01e60000 0x10000>,	/* DEBE0 */
+		<0x01c0c000 0x1000>,	/* LCD0(TCON0) */
+		<0x01e00000 0x20000>;	/* DEFE0 */
+		reset-names = "de_be", "lcd", "de_fe";
+		resets = <&ccu RST_DE_BE0>, <&ccu RST_TCON0>, <&ccu RST_DE_FE0>;
+		clocks = <&ccu CLK_AHB_DE_BE0>, <&ccu CLK_AHB_DE_FE0>, 
+			<&ccu CLK_AHB_LCD0>,
+			<&ccu CLK_DRAM_DE_BE0>, <&ccu CLK_DRAM_DE_FE0>, 
+			<&ccu CLK_DE_BE0>, <&ccu CLK_DE_FE0>,
+			<&ccu CLK_LCD0_CH1>, <&ccu CLK_PLL3>, <&ccu CLK_PLL5>;
+		clock-names = "ahb_de_be", "ahb_de_fe",
+			"ahb_lcd",
+			"dram_de_be", "dram_de_fe",
+			"de_be", "de_fe",
+			"lcd_lcd0_ch1", "pll3", "pll5";
+	};
+
 	leds {
 		compatible = "gpio-leds";
 
@@ -209,6 +228,14 @@
 
 &usb_otg {
 	dr_mode = "otg";
+	status = "okay";
+};
+
+&hdmi {
+	status = "okay";
+};
+
+&hdmiaudio {
 	status = "okay";
 };
 

@@ -1,0 +1,7 @@
+flashing used by ldscript.mips.bin
+
+CFE> flash -noheader 10.10.10.3:D-Link_DIR-524.trx flash1.trx
+
+try to kernel used by ldscript.mips.cfe
+
+CFE> boot -elf 10.10.10.3:D-Link_DIR-524_kernel

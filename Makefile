@@ -546,7 +546,10 @@ world:  build-verify build-info world-toolchain world-build world-install world-
 
 .if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
 .if !exists(/usr/local/bin/perl)
-.error "ports need perl command. Please install to perl command"
+.error "ports need perl command. Please install that package."
+.endif
+.if !exists(/usr/local/bin/dialog4ports)
+.error "ports need dialog4ports command. Please install that package."
 .endif
 .include "share/mk/zrouter.ports.mk"
 .else

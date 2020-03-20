@@ -52,7 +52,9 @@ post-configure:
 post-install:
 	@${STRIP_CMD} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.*
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.6.14.0 ${ZPREFIX}/lib/libfreetype.so.6
-	cp -r ${STAGEDIR}${PREFIX}/include/freetype2 ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libfreetype.so.6 libfreetype.so
+	cp -r ${STAGEDIR}${PREFIX}/include/freetype2/* ${ZPREFIX}/include/
+	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
+	cp ${STAGEDIR}${PREFIX}/libdata/pkgconfig/freetype2.pc ${ZPREFIX}/libdata/pkgconfig
 
 .include <bsd.port.mk>

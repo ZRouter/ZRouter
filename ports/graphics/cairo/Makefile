@@ -2,7 +2,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/graphics/cairo/Makefile 403473 2015-12-10 21:50:14Z kwm $
 
 PORTNAME=	cairo
-PORTVERSION=	1.14.6
+PORTVERSION=	1.16.0
 PORTEPOCH=	2
 CATEGORIES=	graphics
 MASTER_SITES=	http://cairographics.org/releases/
@@ -79,9 +79,10 @@ post-configure:
 		${WRKSRC}/util/*/Makefile
 
 post-install:
-	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libcairo.so.11402 ${ZPREFIX}/lib/libcairo.so.11402
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libcairo.so.2.11600.0 ${ZPREFIX}/lib/libcairo.so.2.11600.0
 	cp -r ${STAGEDIR}${PREFIX}/include/cairo ${ZPREFIX}/include/
-	cd ${ZPREFIX}/lib;ln -s libcairo.so.11402 libcairo.so
+	cd ${ZPREFIX}/lib;ln -s libcairo.so.2.11600.0 libcairo.so.2
+	cd ${ZPREFIX}/lib;ln -s libcairo.so.2.11600.0 libcairo.so
 
 .include <bsd.port.mk>
 

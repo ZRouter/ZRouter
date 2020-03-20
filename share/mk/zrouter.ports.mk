@@ -5,6 +5,7 @@
 CFLAGS="-std=c99 -I${WORLDDESTDIR}/include"
 
 _TARGET_DEFS = \
+	PORT_DBDIR=${ZROUTER_OBJ}/db/ports \
 	WITHOUT_CHECK=yes \
 	WITHOUT_SSP=yes \
 	TARGET_VENDOR=${TARGET_VENDOR} \
@@ -47,6 +48,7 @@ _TARGET_CROSS_DEFS = \
 # ac_cv_func_realloc_0_nonnull=yes avoid "undefined reference to `rpl_realloc'"
 
 port-build:
+	mkdir -p ${ZROUTER_OBJ}/db/ports
 	mkdir -p ${WORLDDESTDIR}
 	@echo "----> Start building ports dependencies ..."
 .for dir in ${WORLD_SUBDIRS_PORTS}

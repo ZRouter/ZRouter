@@ -2,8 +2,8 @@
 # $FreeBSD: head/benchmarks/iperf3/Makefile 435558 2017-03-06 17:31:09Z bmah $
 
 PORTNAME=	iperf
-PORTVERSION=	3.1.7
-CATEGORIES=	benchmarks ipv6
+PORTVERSION=	3.7
+CATEGORIES=	benchmarks
 MASTER_SITES=	http://downloads.es.net/pub/iperf/
 PKGNAMESUFFIX=	3
 
@@ -28,6 +28,14 @@ post-patch:
 # things this means we're not going to try to build profiled objects
 # and/or executables.
 	@${REINPLACE_CMD} -e '/^PROGRAMS /s/\$$(noinst_PROGRAMS)//' ${WRKSRC}/src/Makefile.in
+
+post-configure:
+	@${REINPLACE_CMD} -e 's|-I\/usr\/include||' ${WRKSRC}/Makefile
+	@${REINPLACE_CMD} -e 's|-L\/usr\/lib||' ${WRKSRC}/Makefile
+	@${REINPLACE_CMD} -e 's|-I\/usr\/include||' ${WRKSRC}/src/Makefile
+	@${REINPLACE_CMD} -e 's|-L\/usr\/lib||' ${WRKSRC}/src/Makefile
+	@${REINPLACE_CMD} -e 's|-I\/usr\/include||' ${WRKSRC}/examples/Makefile
+	@${REINPLACE_CMD} -e 's|-L\/usr\/lib||' ${WRKSRC}/examples/Makefile
 
 #post-install:
 #	@${MKDIR} ${STAGEDIR}${DOCSDIR}

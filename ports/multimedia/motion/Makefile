@@ -20,6 +20,10 @@ LICENSE=	GPLv2+
 USES=		gmake
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--without-v4l2 --without-bktr  --without-ffmpeg --without-sqlite3
+CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+
+CONFIGURE_ARGS+=CFLAGS=-I${ZPREFIX}/include/ LDFLAGS=-L${ZPREFIX}/lib/
+
 
 PLIST_FILES=	bin/motion \
 		man/man1/motion.1.gz \
