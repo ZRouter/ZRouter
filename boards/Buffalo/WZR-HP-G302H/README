@@ -1,0 +1,7 @@
+
+This module not enable serial for u-boot.
+You must enable serial for hidden web interface.
+
+AR7242 + AR8316
+Memory: 64M
+Flash: 16M(SPI) x 2
