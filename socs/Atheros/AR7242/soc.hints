@@ -13,8 +13,7 @@ hint.argemdio.1.msize=0x1000
 
 # Embedded Atheros Switch
 hint.arswitch.0.at="mdio1"
-hint.arswitch.0.is_7240=0
-hint.arswitch.0.is_9340=1                                                      
+hint.arswitch.0.is_7240=1
 hint.arswitch.0.numphys=4
 hint.arswitch.0.phy4cpu=1	# phy 4 is a "CPU" separate PHY
 hint.arswitch.0.is_rgmii=0
@@ -29,8 +28,8 @@ hint.arge.0.maddr=0x19000000
 hint.arge.0.msize=0x1000
 hint.arge.0.irq=2
 
-hint.arge.0.phymask=0x10
-hint.arge.0.mdio=mdioproxy2     # .. off of the switch mdiobus
+#hint.arge.0.phymask=0x10
+#hint.arge.0.mdio=mdioproxy2     # .. off of the switch mdiobus
 
 hint.arge.1.at="nexus0"
 hint.arge.1.maddr=0x1a000000
@@ -39,7 +38,7 @@ hint.arge.1.irq=3
 
 hint.arge.1.media=1000
 hint.arge.1.fduplex=1
-hint.arge.1.miimode=1
+hint.arge.1.miimode=1		# GMII
 hint.arge.1.phymask=0x0
 
 # uart0

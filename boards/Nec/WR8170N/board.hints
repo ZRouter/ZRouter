@@ -1,5 +1,8 @@
 # $FreeBSD$
 
+hint.arge.0.phymask=0x10
+hint.arge.0.mdio=mdioproxy2     # .. off of the switch mdiobus
+
 # GPIO
 hint.gpio.0.pinmask=0xc19c3
 hint.gpio.0.function_set=0x00000001
