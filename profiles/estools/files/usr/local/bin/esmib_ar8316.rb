@@ -50,7 +50,7 @@ elsif mib < 31
   offset = mib * 4 + 2 * 4
   width = 32
 elsif mib == 31
-  offset = 31 * 4 + 3 * 4
+  offset = 31 * 4 + 2 * 4
   width = 64
 else
   offset = mib * 4 + 3 * 4
