@@ -36,7 +36,7 @@
 # 32 TxCollision
 # 33 TxAbortCol
 
-lastfile = "/tmp/esmib_ar8316.last"
+lastfile = "/var/run/esmib_ar8316.last"
 
 mib = ARGV[0].to_i
 
