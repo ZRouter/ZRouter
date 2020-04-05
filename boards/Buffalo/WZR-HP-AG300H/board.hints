@@ -41,35 +41,25 @@ hint.pcib.0.bus.0.18.0.ath_fixup_size=4096
 hint.ath.0.eeprom_firmware="pcib.0.bus.0.17.0.eeprom_firmware"
 hint.ath.1.eeprom_firmware="pcib.0.bus.0.18.0.eeprom_firmware"
 
-# 0	LED	WPS
-hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="wps"
-hint.gpioled.0.pins=0x0001
-hint.gpioled.0.flags="0x0102"
+# These are the GPIO LEDs and buttons which can be software controlled.
+# USB powered on(gpio 2)
+hint.gpio.0.pinmask=0x0fff
+hint.gpio.0.pinon=0x00000004
 
 # 1	LED	STATUS Yellow
-hint.gpioled.1.at="gpiobus0"
-hint.gpioled.1.name="status"
-hint.gpioled.1.pins=0x0002
-hint.gpioled.1.flags="0x0102"
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="diag"
+hint.gpioled.0.pins=0x0002
 
-# 11	LED	USB
-hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.name="usb"
-hint.gpioled.2.pins=0x0800
-hint.gpioled.2.flags="0x0102"
+# 2g,usb,5g,router,movie_engine is wifi chip gpio
 
-# ? 	BUTTON	RESET
-#hint.gpioreset.0.at="gpiobus0"
-#hint.gpioreset.0.pins="0x0400"
-#hint.gpioreset.0.name="reset"
-#hint.gpioreset.0.flags="0x04a1"
-
-# 12 	BUTTON	WPS
-hint.gpiobutton.0.at="gpiobus0"
-hint.gpiobutton.0.pins="0x1000"
-hint.gpiobutton.0.name="wps"
-hint.gpiobutton.0.flags="0x04a1"
+# keys
+# reset 11
+# usb 3
+# aoss 5
+# router_auto 6
+# router_off 5
+# movie_engine 8
 
 hint.mx25l.0.at="spibus0"
 hint.mx25l.0.cs=0
@@ -115,42 +105,3 @@ hint.map.6.end=0x00ff0000
 hint.map.6.name="config"
 #hint.map.6.readonly=1
 
-#
-# Pin 1  - SCK
-# Pin 2  - SDA
-# Pin 3  - usb 
-# Pin 4  - 
-# Pin 5  - aoss
-# Pin 6  - router auto
-# Pin 7  - router off
-# Pin 8  - movie engine
-# Pin 9  - 
-# Pin 10 - 
-# Pin 11 - reset button
-# Pin 12 - CS0
-# Pin 13 - CS1
-# Pin 14 - 
-# Pin 15 - 
-# Pin 16 - 
-# Pin 17 - 
-
-# Don't flip on anything that isn't already enabled.
-# Force on CS lines for flash devices, apparently this isn't done
-# by uboot in normal booting.  No idea why. 
-hint.gpio.0.function_set=0x00003804
-hint.gpio.0.function_clear=0x00000000
-
-# These are the GPIO LEDs and buttons which can be software controlled.
-# USB powered on
-hint.gpio.0.pinmask=0x0fff
-hint.gpio.0.pinon=0x00000804
-
-hint.gpioiic.0.at="gpiobus0"
-#hint.gpioiic.0.pins=0x0003
-hint.gpioiic.0.sda=0
-hint.gpioiic.0.scl=1
-
-# LEDs are configured separately and driven by the LED device
-hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="red-diag"
-hint.gpioled.0.pins=0x0001
