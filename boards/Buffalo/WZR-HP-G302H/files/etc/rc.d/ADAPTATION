@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	hostname `kenv HostName`
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
