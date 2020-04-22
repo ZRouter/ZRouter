@@ -33,6 +33,9 @@ CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 DOXYGEN_EXTRA_PATCHES_OFF=	${FILESDIR}/extra-patch-Makefile.am
 
 post-install:
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/bin/rtl_sdr ${ZPREFIX}/bin/rtl_sdr
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/bin/rtl_fm ${ZPREFIX}/bin/rtl_fm
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/bin/rtl_tcp ${ZPREFIX}/bin/rtl_tcp
 	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/librtlsdr.so.0.0.5 ${ZPREFIX}/lib/librtlsdr.so.0
 	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s librtlsdr.so.0 librtlsdr.so
