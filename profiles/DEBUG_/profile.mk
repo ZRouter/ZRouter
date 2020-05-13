@@ -139,7 +139,6 @@ WORLD_SUBDIRS_GNU_LIB+= \
 csu \
 libgcc \
 libregex \
-libssp \
 libstdc++
 
 #libreadline
