@@ -115,8 +115,7 @@ WORLD_SUBDIRS_USR_BIN+= \
 WORLD_SUBDIRS_GNU_LIB+= \
 	csu \
 	libgcc \
-	libregex \
-	libssp
+	libregex
 
 WORLD_SUBDIRS_LIBEXEC+= \
 	rtld-elf \
