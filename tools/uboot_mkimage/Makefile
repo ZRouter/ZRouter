@@ -8,7 +8,7 @@ CDIR=${.CURDIR}/../../contrib/uboot_mkimage
 PROG=		uboot_mkimage
 CFLAGS+=	-D__MACH__=__FreeBSD__
 CFLAGS+=	-I${CDIR}/tools -I${CDIR}/include -DUSE_HOSTCC
-NO_MAN=
+MK_MAN=no
 
 SRCS=			\
 	mkimage.c	\

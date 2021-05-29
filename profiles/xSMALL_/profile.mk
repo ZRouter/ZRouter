@@ -21,7 +21,6 @@ WORLD_SUBDIRS_LIB+= \
 	liblzma \
 	msun \
 	libmd \
-	ncurses/ncursesw \
 	libpam/libpam \
 	libpam/modules/pam_unix \
 	libpam/modules/pam_permit \
@@ -111,11 +110,6 @@ WORLD_SUBDIRS_USR_BIN+= \
 	touch \
 	uname \
 	xargs
-
-WORLD_SUBDIRS_GNU_LIB+= \
-	csu \
-	libgcc \
-	libregex
 
 WORLD_SUBDIRS_LIBEXEC+= \
 	rtld-elf \

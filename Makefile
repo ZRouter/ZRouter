@@ -294,32 +294,32 @@ _KERNEL_TC_BUILD_ENV= \
 	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
-	${CLANG_TC_VARS} \
-	-DNO_CLEAN
+	WITHOUT_CLEAN=yes \
+	${CLANG_TC_VARS}
 
 _KERNEL_BUILD_ENV= \
 	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
+	WITHOUT_CLEAN=yes \
 	KERNCONFDIR=${KERNCONFDIR} \
-	${CLANG_VARS} \
-	-DNO_CLEAN
+	${CLANG_VARS}
 
 upgrade_checks:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} upgrade_checks
 
 kernel-toolchain:	upgrade_checks
 .if !defined(SKIP_TOOLCHAIN)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 .endif
 
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if defined(WITH_KERNFAST)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
 .else
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
 .endif
 
 #XXX_BEGIN Only for testing
@@ -365,11 +365,11 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_CRYPTO=yes \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
+	WITHOUT_CLEAN=yes \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
-	MK_TESTS=no \
-	-DNO_CLEAN
+	MK_TESTS=no
 
 _WORLD_BUILD_ENV= \
 	SSHDIR=${FREEBSD_SRC_TREE}/crypto/openssh \
@@ -387,11 +387,11 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_NLS=yes \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
+	WITHOUT_CLEAN=yes \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
-	MK_TESTS=no \
-	-DNO_CLEAN
+	MK_TESTS=no
 
 .if !defined(DTRACE_ENABLE)
 _WORLD_BUILD_ENV+= WITHOUT_CDDL=yes
@@ -497,7 +497,7 @@ WORLD_SUBDIRS+=cddl/usr.sbin/${dir}
 # Project local tools
 .for dir in ${WORLD_SUBDIRS_ZROUTER}
 # Prepend reverse path, then buildworld can go out of source tree
-WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
+#WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} \
@@ -517,7 +517,7 @@ ${VAR_LEFT}:=${VAR_RIGHT}
 #
 world-toolchain:	upgrade_checks
 .if !defined(SKIP_WORLD_INSTALL)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_WORLD_TCBUILD_ENV} \
 	    -C ${FREEBSD_SRC_TREE} toolchain
 .endif
 
@@ -525,7 +525,7 @@ world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if !defined(SKIP_WORLD_INSTALL)
 	@echo "XXX: need to find a way to install required includes correctly"
 	mkdir -p ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/include/lzo
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_WORLD_BUILD_ENV} \
 	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
 	    buildworld
 .endif
