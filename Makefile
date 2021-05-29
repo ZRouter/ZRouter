@@ -310,16 +310,16 @@ upgrade_checks:
 
 kernel-toolchain:	upgrade_checks
 .if !defined(SKIP_TOOLCHAIN)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 .endif
 
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if defined(WITH_KERNFAST)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
 .else
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
 .endif
 
 #XXX_BEGIN Only for testing
@@ -517,7 +517,7 @@ ${VAR_LEFT}:=${VAR_RIGHT}
 #
 world-toolchain:	upgrade_checks
 .if !defined(SKIP_WORLD_INSTALL)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_WORLD_TCBUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_WORLD_TCBUILD_ENV} \
 	    -C ${FREEBSD_SRC_TREE} toolchain
 .endif
 
@@ -525,7 +525,7 @@ world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if !defined(SKIP_WORLD_INSTALL)
 	@echo "XXX: need to find a way to install required includes correctly"
 	mkdir -p ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/include/lzo
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} -j8 ${_WORLD_BUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_WORLD_BUILD_ENV} \
 	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
 	    buildworld
 .endif
