@@ -31,6 +31,12 @@ WORLD_SUBDIRS_LIB+= \
 	libwrap \
 	libxo
 
+.if defined(ZROUTER_COMPAT12)
+WORLD_SUBDIRS_LIB+=ncurses/ncursesw
+.else
+WORLD_SUBDIRS_LIB+=ncurses/ncurses
+.endif
+
 # so use
 WORLD_SUBDIRS_LIB+= \
 	libexpat \
@@ -111,6 +117,13 @@ WORLD_SUBDIRS_USR_BIN+= \
 	touch \
 	uname \
 	xargs
+
+.if defined(ZROUTER_COMPAT12)
+WORLD_SUBDIRS_GNU_LIB+= \
+	csu \
+	libgcc \
+	libregex
+.endif
 
 WORLD_SUBDIRS_LIBEXEC+= \
 	rtld-elf \
