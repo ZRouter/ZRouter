@@ -34,6 +34,10 @@ FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
 .error "missing FreeBSD source tree: FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}"
 .endif
 
+.if ${FREEBSD_REVISION:M12*} != ""
+ZROUTER_COMPAT12=yes
+.endif
+
 # ZROUTER_OBJ can be set in environment
 ZROUTER_OBJ?=${ZOBJ_DIR}/${ZROUTER_ROOT}
 MAKEOBJDIRPREFIX?=${ZOBJ_DIR}/${ZROUTER_ROOT}/
@@ -256,6 +260,10 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 .for nodevice in ${KERNCONF_NODEVICES}
 	echo "nodevice	${nodevice}" >> ${KERNEL_CONFIG_FILE}
 .endfor
+
+.if ZROUTER_COMPAT12
+	echo "device	random" >> ${KERNEL_CONFIG_FILE}
+.endif
 
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
