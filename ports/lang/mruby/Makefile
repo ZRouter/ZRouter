@@ -1,5 +1,5 @@
 PORTNAME=	mruby
-PORTVERSION=	2.1.1
+PORTVERSION=	3.0.0
 CATEGORIES=	lang
 MASTER_SITES=	http://mruby.org/
 DISTNAME=	${PORTVERSION}
@@ -17,7 +17,12 @@ DISABLE_VULNERABILITIES=yes
 MRB_ENV=	YACC="/usr/local/bin/bison" CC="/usr/bin/cc" LD="/usr/bin/cc" AR="/usr/bin/ar"
 
 do-build:
-	@(cd ${WRKSRC} && ${SETENV} ${MRB_ENV} /usr/local/bin/ruby ./minirake)
+.if defined(MRUBY_CONFIG)
+	@(cd ${WRKSRC} && ${SETENV} ${MRB_ENV} /usr/local/bin/rake)
+.else
+	${CP} ${FILESDIR}/zrouter.rb ${WRKSRC}/build_config/
+	@(cd ${WRKSRC} && ${SETENV} ${MRB_ENV} /usr/local/bin/rake MRUBY_CONFIG=zrouter)
+.endif
 
 do-install:
 #	@printenv
