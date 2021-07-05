@@ -5,7 +5,7 @@ CDIR=${.CURDIR}/../../contrib/mktplinkfw
 PROG=mktplinkfw
 LDADD=-lz -lmd
 DPADD=${LIBZ} ${LIBMD}
-NO_MAN=
+MK_MAN=no
 CSTD=gnu89
 
 SRCS=mktplinkfw.c

@@ -3,7 +3,7 @@ PROG=packimage
 DPADD=	${LIBMD}
 LDADD=	-lmd
 BINDIR?=/usr/bin/
-NO_MAN=MAN
+MK_MAN=no
 
 .include <bsd.prog.mk>
 

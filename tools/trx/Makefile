@@ -1,6 +1,6 @@
 
 PROG=trx
-NO_MAN=
+MK_MAN=no
 LDADD=-lz
 DPADD=${LIBZ}
 

@@ -2,7 +2,7 @@
 # $FreeBSD: tags/RELEASE_10_3_0/print/freetype2/Makefile 403474 2015-12-10 22:13:58Z kwm $
 
 PORTNAME=	freetype2
-PORTVERSION=	2.8
+PORTVERSION=	2.10.4
 CATEGORIES=	print
 MASTER_SITES=	http://savannah.nongnu.org/download/freetype/ \
 		SF/freetype/${PORTNAME}/${PORTVERSION:C/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/}/ \
@@ -15,7 +15,7 @@ DISTNAME=	${PORTNAME:S/2//}-${PORTVERSION}
 MAINTAINER=	gnome@FreeBSD.org
 COMMENT=	Free and portable TrueType font rendering engine
 
-USES=		cpe gmake libtool tar:bzip2
+USES=		cpe gmake libtool tar:xz
 MAKE_ENV=	TOP=""
 USE_LDCONFIG=	yes
 GNU_CONFIGURE=	yes
@@ -51,7 +51,7 @@ post-configure:
 
 post-install:
 	@${STRIP_CMD} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.*
-	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.6.14.0 ${ZPREFIX}/lib/libfreetype.so.6
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libfreetype.so.6.17.4 ${ZPREFIX}/lib/libfreetype.so.6
 	cd ${ZPREFIX}/lib;ln -s libfreetype.so.6 libfreetype.so
 	cp -r ${STAGEDIR}${PREFIX}/include/freetype2/* ${ZPREFIX}/include/
 	${MKDIR} ${ZPREFIX}/libdata/pkgconfig
