@@ -21,7 +21,6 @@ WORLD_SUBDIRS_LIB+= \
 	liblzma \
 	msun \
 	libmd \
-	ncurses/ncurses \
 	libpam/libpam \
 	libpam/modules/pam_unix \
 	libpam/modules/pam_permit \

@@ -261,7 +261,7 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "nodevice	${nodevice}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
-.if ZROUTER_COMPAT12
+.if defined(ZROUTER_COMPAT12)
 	echo "device	random" >> ${KERNEL_CONFIG_FILE}
 .endif
 
@@ -517,7 +517,7 @@ WORLD_SUBDIRS+=cddl/usr.sbin/${dir}
 # Project local tools
 .for dir in ${WORLD_SUBDIRS_ZROUTER}
 # Prepend reverse path, then buildworld can go out of source tree
-#WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
+WORLD_SUBDIRS+=${SRCROOTUP}/${ZROUTER_ROOT}/${dir}
 .endfor
 
 FREEBSD_BUILD_ENV_VARS!=(MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} \
