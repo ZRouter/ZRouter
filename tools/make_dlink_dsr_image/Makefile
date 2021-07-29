@@ -3,6 +3,6 @@
 PROG=make_dlink_dsr_image
 CFLAGS=
 LDFLAGS= -lutil
-NO_MAN=
+MK_MAN=no
 
 .include <bsd.prog.mk>

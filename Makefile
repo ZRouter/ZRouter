@@ -34,6 +34,10 @@ FREEBSD_RELEASE=${FREEBSD_TYPE}-${FREEBSD_REVISION}-${FREEBSD_BRANCH}
 .error "missing FreeBSD source tree: FREEBSD_SRC_TREE=${FREEBSD_SRC_TREE}"
 .endif
 
+.if ${FREEBSD_REVISION:M12*} != ""
+ZROUTER_COMPAT12=yes
+.endif
+
 # ZROUTER_OBJ can be set in environment
 ZROUTER_OBJ?=${ZOBJ_DIR}/${ZROUTER_ROOT}
 MAKEOBJDIRPREFIX?=${ZOBJ_DIR}/${ZROUTER_ROOT}/
@@ -257,6 +261,10 @@ kernelconfig:	${TARGET_SOCDIR}/${SOC_KERNCONF} ${KERNELCONFDIR}
 	echo "nodevice	${nodevice}" >> ${KERNEL_CONFIG_FILE}
 .endfor
 
+.if defined(ZROUTER_COMPAT12)
+	echo "device	random" >> ${KERNEL_CONFIG_FILE}
+.endif
+
 # Generate .hints file
 # TODO: generate hints on MAP partiotion list, GPIO usege list 
 .if exists(${TARGET_SOCDIR}/soc.hints)
@@ -294,32 +302,38 @@ _KERNEL_TC_BUILD_ENV= \
 	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
-	${CLANG_TC_VARS} \
-	-DNO_CLEAN
+	${CLANG_TC_VARS}
 
 _KERNEL_BUILD_ENV= \
 	${_KERNEL_TERGET_ENV} \
 	ZROUTER_ROOT=${ZROUTER_ROOT} \
 	WITHOUT_RESCUE=yes \
 	KERNCONFDIR=${KERNCONFDIR} \
-	${CLANG_VARS} \
-	-DNO_CLEAN
+	${CLANG_VARS}
+
+.if defined(ZROUTER_COMPAT12)
+_KERNEL_TC_BUILD_ENV+=-DNO_CLEAN
+_KERNEL_BUILD_ENV+=-DNO_CLEAN
+.else
+_KERNEL_TC_BUILD_ENV+=WITHOUT_CLEAN=yes
+_KERNEL_BUILD_ENV+=WITHOUT_CLEAN=yes
+.endif
 
 upgrade_checks:
 	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} upgrade_checks
 
 kernel-toolchain:	upgrade_checks
 .if !defined(SKIP_TOOLCHAIN)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_TC_BUILD_ENV} -C ${FREEBSD_SRC_TREE} kernel-toolchain
 .endif
 
 ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc:	kernel-toolchain
 
 kernel-build:	kernelconfig kernelhints ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if defined(WITH_KERNFAST)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNFAST=${KERNEL_CONFIG_FILENAME} buildkernel
 .else
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_KERNEL_BUILD_ENV} -C ${FREEBSD_SRC_TREE} KERNCONF=${KERNEL_CONFIG_FILENAME} buildkernel
 .endif
 
 #XXX_BEGIN Only for testing
@@ -368,8 +382,7 @@ _WORLD_TCBUILD_ENV= \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
-	MK_TESTS=no \
-	-DNO_CLEAN
+	MK_TESTS=no
 
 _WORLD_BUILD_ENV= \
 	SSHDIR=${FREEBSD_SRC_TREE}/crypto/openssh \
@@ -390,8 +403,15 @@ _WORLD_BUILD_ENV= \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
-	MK_TESTS=no \
-	-DNO_CLEAN
+	MK_TESTS=no
+
+.if defined(ZROUTER_COMPAT12)
+_WORLD_TCBUILD_ENV+=-DNO_CLEAN
+_WORLD_BUILD_ENV+=-DNO_CLEAN
+.else
+_WORLD_TCBUILD_ENV+=WITHOUT_CLEAN=yes
+_WORLD_BUILD_ENV+=WITHOUT_CLEAN=yes
+.endif
 
 .if !defined(DTRACE_ENABLE)
 _WORLD_BUILD_ENV+= WITHOUT_CDDL=yes
@@ -517,7 +537,7 @@ ${VAR_LEFT}:=${VAR_RIGHT}
 #
 world-toolchain:	upgrade_checks
 .if !defined(SKIP_WORLD_INSTALL)
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_TCBUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_WORLD_TCBUILD_ENV} \
 	    -C ${FREEBSD_SRC_TREE} toolchain
 .endif
 
@@ -525,7 +545,7 @@ world-build:	${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/bin/cc
 .if !defined(SKIP_WORLD_INSTALL)
 	@echo "XXX: need to find a way to install required includes correctly"
 	mkdir -p ${ZROUTER_FREEBSD_OBJDIR}/tmp/usr/include/lzo
-	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${_WORLD_BUILD_ENV} \
+	MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/tmp/ ${MAKE} ${PARA_OPTION} ${_WORLD_BUILD_ENV} \
 	    SUBDIR_OVERRIDE="${WORLD_SUBDIRS}" -C ${FREEBSD_SRC_TREE} \
 	    buildworld
 .endif

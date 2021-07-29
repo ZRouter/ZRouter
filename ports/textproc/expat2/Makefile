@@ -2,7 +2,7 @@
 # $FreeBSD: head/textproc/expat2/Makefile 428144 2016-12-08 17:40:41Z tijl $
 
 PORTNAME=	expat
-PORTVERSION=	2.2.8
+PORTVERSION=	2.4.1
 PORTREVISION=	1
 CATEGORIES=	textproc
 #MASTER_SITES=	SF
@@ -16,14 +16,14 @@ LICENSE_FILE=	${WRKSRC}/COPYING
 
 GNU_CONFIGURE=	yes
 #ALL_TARGET=	default
-USES=		libtool pathfix tar:bz2
+USES=		libtool pathfix tar:xz
 USE_LDCONFIG=	yes
 
 CONFIGURE_ARGS=--without-docbook
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 post-install:
-	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libexpat.so.1.6.10 ${ZPREFIX}/lib/libexpat.so.1
+	${INSTALL_LIB} ${STAGEDIR}${PREFIX}/lib/libexpat.so.1.8.1 ${ZPREFIX}/lib/libexpat.so.1
 	cp ${STAGEDIR}${PREFIX}/include/*.h ${ZPREFIX}/include/
 	cd ${ZPREFIX}/lib;ln -s libexpat.so.1 libexpat.so
 

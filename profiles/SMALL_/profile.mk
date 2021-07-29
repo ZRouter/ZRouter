@@ -33,10 +33,15 @@ libwrap \
 libxo \
 libz \
 libnv \
-ncurses/ncursesw \
 ncurses/form \
 ncurses/menu \
 ncurses/panel
+
+.if defined(ZROUTER_COMPAT12)
+WORLD_SUBDIRS_LIB+=ncurses/ncursesw
+.else
+WORLD_SUBDIRS_LIB+=ncurses/ncurses
+.endif
 
 WORLD_SUBDIRS+= \
 secure/lib/libcrypto \
@@ -146,11 +151,13 @@ vi \
 wc \
 xargs
 
+.if defined(ZROUTER_COMPAT12)
 WORLD_SUBDIRS_GNU_LIB+= \
 csu \
 libgcc \
 libregex \
 libstdc++
+.endif
 
 #libreadline
 # XXX: libreadline must be replaced with libedit

@@ -2,7 +2,7 @@ BINDIR?=/usr/bin/
 
 CFLAGS+= -I${.CURDIR}/SRC
 CXXFLAGS+= -I${.CURDIR}/SRC
-NO_MAN=
+MK_MAN=no
 PROG_CXX=oldlzma
 
 .PATH: ${.CURDIR}/SRC/7zip/Compress/LZMA_Alone

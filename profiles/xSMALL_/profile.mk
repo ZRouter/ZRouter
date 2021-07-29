@@ -21,7 +21,6 @@ WORLD_SUBDIRS_LIB+= \
 	liblzma \
 	msun \
 	libmd \
-	ncurses/ncursesw \
 	libpam/libpam \
 	libpam/modules/pam_unix \
 	libpam/modules/pam_permit \
@@ -30,6 +29,12 @@ WORLD_SUBDIRS_LIB+= \
 	libutil \
 	libwrap \
 	libxo
+
+.if defined(ZROUTER_COMPAT12)
+WORLD_SUBDIRS_LIB+=ncurses/ncursesw
+.else
+WORLD_SUBDIRS_LIB+=ncurses/ncurses
+.endif
 
 # so use
 WORLD_SUBDIRS_LIB+= \
@@ -112,10 +117,12 @@ WORLD_SUBDIRS_USR_BIN+= \
 	uname \
 	xargs
 
+.if defined(ZROUTER_COMPAT12)
 WORLD_SUBDIRS_GNU_LIB+= \
 	csu \
 	libgcc \
 	libregex
+.endif
 
 WORLD_SUBDIRS_LIBEXEC+= \
 	rtld-elf \

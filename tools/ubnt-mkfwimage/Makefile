@@ -8,7 +8,7 @@ CDIR=${.CURDIR}/../../contrib/ubnt-mkfwimage
 PROG=	ubnt-mkfwimage
 LDADD=-lz
 DPADD=${LIBZ}
-NO_MAN=
+MK_MAN=no
 
 SRCS=	mkfwimage.c
 
