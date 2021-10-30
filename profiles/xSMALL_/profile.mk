@@ -33,7 +33,7 @@ WORLD_SUBDIRS_LIB+= \
 .if defined(ZROUTER_COMPAT12)
 WORLD_SUBDIRS_LIB+=ncurses/ncursesw
 .else
-WORLD_SUBDIRS_LIB+=ncurses/ncurses
+WORLD_SUBDIRS_LIB+=ncurses/ncurses ncurses/tinfo
 .endif
 
 # so use
