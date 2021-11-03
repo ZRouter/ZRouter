@@ -1,7 +1,8 @@
 # Created by: Carey Jones <mcj@acquiesce.org>
 
 PORTNAME=	mpg123
-PORTVERSION=	1.28.2
+#PORTVERSION=	1.28.2
+PORTVERSION=	1.29.2
 CATEGORIES=	audio
 MASTER_SITES=	SF \
 		https://www.mpg123.de/download/
@@ -15,8 +16,10 @@ USES=		tar:bzip2 libtool localbase pathfix
 USE_LDCONFIG=	yes
 
 GNU_CONFIGURE=	yes
-CONFIGURE_ARGS=	--with-optimization=0
-CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
+#CONFIGURE_ARGS=	--with-optimization=0
+CONFIGURE_ARGS=	--with-optimization=3
+CONFIGURE_ARGS+= --host=${ARCH}-portbld-freebsd
+CONFIGURE_ARGS+= --with-cpu=generic_nofpu
 INSTALL_TARGET=	install-strip
 
 OPTIONS_DEFINE=		SNDIO
