@@ -1,0 +1,30 @@
+sin.o sin.o: sin.c \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/fcntl.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/cdefs.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_types.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/machine/_types.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/limits.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/limits.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/machine/_limits.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/syslimits.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/soundcard.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/types.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/machine/endian.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_pthreadtypes.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_stdint.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/select.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_sigset.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_timeval.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/timespec.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_timespec.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/ioccom.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/math.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/stdio.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_null.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/ioctl.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/filio.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/sockio.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/ttycom.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/_winsize.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/unistd.h \
+  /usr/home/hiroki/obj/usr/home/hiroki/ZRouter/tmp/usr/home/hiroki/src/mips.mips/tmp/usr/include/sys/unistd.h
