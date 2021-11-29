@@ -1,0 +1,5 @@
+#
+#
+#
+
+WORLD_SUBDIRS_USR_SBIN+=ntp
