@@ -1,0 +1,111 @@
+/dts-v1/;
+
+#include <dt-bindings/gpio/tegra-gpio.h>
+#include "rt3050.dtsi"
+
+/ {
+	compatible = "FON2405E", "ralink,rt3050-soc";
+	model = "FON FON2405E";
+
+        aliases {
+//		serial0 = &uart;
+		serial0 = &uartlite;
+        };
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status {
+			label = "status";
+			gpios = <&gpio0 14 0>;
+		};
+
+		led1 {
+			label = "led1";
+			gpios = <&gpio0 11 0>;
+		};
+	};
+	pps {
+		compatible = "pps-gpio";
+		gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+};
+
+&spi0 {
+	status = "okay";
+
+	m25p80@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		linux,modalias = "m25p80", "mx25l3205d";
+		spi-max-frequency = <10000000>;
+
+		partition@0 {
+			label = "u-boot";
+			reg = <0x0 0x10000>;
+			read-only;
+		};
+
+		factory: partition@10000 {
+			label = "u-boot-env";
+			reg = <0x10000 0x10000>;
+			read-only;
+		};
+/*
+		factory: partition@20000 {
+			label = "firmware";
+			reg = <0x20000 0x7e0000>;
+		};
+*/
+		partition@20000 {
+			label = "kernel";
+			reg = <0x20000 0x100000>;
+		};
+
+		partition@120000 {
+			label = "rootfs";
+			reg = <0x120000 0x6e0000>;
+		};
+		partition@800000 {
+			label = "upgrade";
+			reg = <0x20000 0x7e0000>;
+		};
+	};
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "i2c", "jtag", "rgmii", "mdio";
+			ralink,function = "gpio";
+		};
+		uartf {
+			ralink,group = "uartf";
+			ralink,function = "gpio uartf";
+		};
+
+	};
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x28>;
+};
+
+&esw {
+	mediatek,portmap = <0x2f>;
+};
+
+&wmac {
+	ralink,mtd-eeprom = <&factory 0>;
+};
+
+&otg {
+	status = "okay";
+};
+
+&uart {
+        status = "okay";
+};
