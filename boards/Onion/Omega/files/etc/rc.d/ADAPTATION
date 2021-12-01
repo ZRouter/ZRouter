@@ -25,6 +25,14 @@ adapt_prestart()
 #	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
 #	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
 
+# Blue off
+	gpioctl 15 1
+# Green off
+	gpioctl 16 1
+# Red off
+	gpioctl 17 1
+
+
 	hostname `kenv HostName`
 
 }
