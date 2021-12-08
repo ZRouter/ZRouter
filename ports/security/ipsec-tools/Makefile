@@ -137,7 +137,6 @@ post-install-DOCS-on:
 
 #.if ${OPSYS} == FreeBSD
 #.  if ${OSVERSION} >= 1200085 && ${SSL_DEFAULT} == base
-EXTRA_PATCHES+=	${FILESDIR}/extra-patch-aclocal.m4
 EXTRA_PATCHES+=	${FILESDIR}/extra-patch-ipsec-tools
 PLIST_FILES+=	include/racoon/openssl_compat.h
 #.  endif
