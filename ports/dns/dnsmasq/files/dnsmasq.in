@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# $FreeBSD: head/dns/dnsmasq/files/dnsmasq.in 363645 2014-07-31 17:56:45Z mandree $
-#
 # PROVIDE: dnsmasq
 # REQUIRE: SERVERS ldconfig
 # BEFORE:  DAEMON named
