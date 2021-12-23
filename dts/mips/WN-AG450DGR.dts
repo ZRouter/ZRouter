@@ -6,6 +6,11 @@
 	compatible = "WN-AG450DGR", "ralink,rt3883-soc";
 	model = "IOData WN-AG450DGR";
 
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x4000000>;
+	};
+
 	gpio-keys-polled {
 		compatible = "gpio-keys-polled";
 		#address-cells = <1>;
@@ -55,7 +60,7 @@
 		#size-cells = <1>;
 		compatible = "jedec,spi-nor";
 		reg = <0>;
-		linux,modalias = "m25p80", "mx25l3205d";
+		linux,modalias = "m25p80", "mx25l6405d";
 		spi-max-frequency = <10000000>;
 
 		partition@0 {
