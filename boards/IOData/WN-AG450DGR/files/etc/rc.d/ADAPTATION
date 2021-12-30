@@ -13,13 +13,13 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-ENVDEV="/dev/flash/spi0s.factory"
+ENVPAT="/dev/flash/spi0s.u-boot-env"
 
 	kenvmac=`kenv -q LAN_MAC_ADDR`
 	if [ -z "$kenvmac" ]; then
 
 		# Import MAC addresses from flash
-		kenv LAN_MAC_ADDR=`od -t x1 ${ENVDEV} | awk '/^0000000/{print $6":"$7":"$8":"$9":"$10":"$11}'`
+		kenv LAN_MAC_ADDR=`strings ${ENVPAT} | awk -F"=" '{if ($1=="wanaddr")print $2}'`
 
 		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
 

@@ -11,7 +11,7 @@ SOC_CHIP=RT3883F_FDT
 BOARD_FLASH_SIZE=4194304
 
 # use for mac address in flash
-WORLD_SUBDIRS_USR_BIN+=hexdump awk
+WORLD_SUBDIRS_USR_BIN+=hexdump awk strings
 
 ###################################################
 #
