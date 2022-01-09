@@ -7,6 +7,7 @@ KERNCONF_OPTIONS+=SX_NOINLINE
 WORLD_BUILD_ENV_EXTRA+=WITHOUT_OPENSSL=yes
 
 WORLD_SUBDIRS_LIB+= \
+	libregex \
 	lib80211 \
 	libbz2 \
 	libc \
@@ -33,7 +34,7 @@ WORLD_SUBDIRS_LIB+= \
 .if defined(ZROUTER_COMPAT12)
 WORLD_SUBDIRS_LIB+=ncurses/ncursesw
 .else
-WORLD_SUBDIRS_LIB+=ncurses/ncurses
+WORLD_SUBDIRS_LIB+=ncurses/ncurses ncurses/tinfo
 .endif
 
 # so use

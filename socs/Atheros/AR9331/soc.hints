@@ -44,6 +44,12 @@ hint.spi.0.msize=0x10
 # Watchdog
 hint.ar71xx_wdog.0.at="nexus0"
 
+# I2S controller
+hint.pcm.0.at="apb0"
+hint.pcm.0.maddr=0x180b0000
+hint.pcm.0.msize=0x20
+hint.pcm.0.irq=7
+
 # GPIO controller
 hint.gpio.0.at="apb0"
 hint.gpio.0.maddr=0x18040000

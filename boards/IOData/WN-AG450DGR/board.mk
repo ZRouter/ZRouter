@@ -11,7 +11,7 @@ SOC_CHIP=RT3883F_FDT
 BOARD_FLASH_SIZE=4194304
 
 # use for mac address in flash
-WORLD_SUBDIRS_USR_BIN+=hexdump awk
+WORLD_SUBDIRS_USR_BIN+=hexdump awk strings
 
 ###################################################
 #
@@ -22,7 +22,7 @@ WORLD_SUBDIRS_USR_BIN+=hexdump awk
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?= "WN-AG450DGR.dts"
+ZKERNCONF_FDT_DTS_FILE?=	"dts/mips/WN-AG450DGR.dts"
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/flash/spi0s.rootfs.uzip\\\" 
 #KERNCONF_OPTIONS+=     CAM_BOOT_DELAY=10000
