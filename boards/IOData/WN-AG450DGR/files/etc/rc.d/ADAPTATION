@@ -27,6 +27,9 @@ ENVPAT="/dev/flash/spi0s.u-boot-env"
 
 	fi
 
+	etherswitchcfg reg 0x7c=0x10ce
+	etherswitchcfg reg 0x94=0x10ce
+
 }
 
 adapt_start()
