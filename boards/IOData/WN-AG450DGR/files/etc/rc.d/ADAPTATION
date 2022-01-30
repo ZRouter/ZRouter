@@ -19,9 +19,12 @@ ENVPAT="/dev/flash/spi0s.u-boot-env"
 	if [ -z "$kenvmac" ]; then
 
 		# Import MAC addresses from flash
-		kenv LAN_MAC_ADDR=`strings ${ENVPAT} | awk -F"=" '{if ($1=="ethaddr")print substr($2,2,17)}'`
+		ETHADDR=`strings ${ENVPAT} | grep "^ethaddr="`
+		if [ -n "$ETHADDR" ]; then
+			kenv LAN_MAC_ADDR=`echo ${ETHADDR} | awk -F"=" '{gsub("\"","",$2);print $2}'`
 
-		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+			ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+		fi
 
 		hostname `kenv HostName`
 
