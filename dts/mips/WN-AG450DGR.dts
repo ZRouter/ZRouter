@@ -1,5 +1,7 @@
 /dts-v1/;
 
+/* This module like Sitecom WLR-6000. But WLR-6000 use PCI chip for 2.4G WiFi. */
+
 #include "rt3883.dtsi"
 
 / {
@@ -113,7 +115,6 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-//			ralink,group = "spi", "i2c", "jtag", "uartf";
 			ralink,group = "i2c", "jtag", "uartf";
 			ralink,function = "gpio";
 		};
