@@ -34,6 +34,9 @@ ENVPAT="/dev/flash/spi0s.u-boot-env"
 # Not enable RT3050
 #	etherswitchcfg reg 0x94=0x10ce
 
+	gpioctl -f /dev/gpioc1 -c 11 OUT
+	gpioctl -f /dev/gpioc1 -n 11 "usb power"
+
 }
 
 adapt_start()
