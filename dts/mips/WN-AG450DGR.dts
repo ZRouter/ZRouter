@@ -69,7 +69,7 @@
 		usb {
 			gpio-export,name = "usb power";
 			gpio-export,output = <1>;
-			gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio1 11 1>;
 		};
 	};
 
