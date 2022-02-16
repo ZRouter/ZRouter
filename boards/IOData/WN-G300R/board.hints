@@ -22,49 +22,44 @@ hint.ar934x_gmac.0.gmac_cfg=0x1C0
 hint.gpio.0.function_set=0x00000000
 hint.gpio.0.function_clear=0x00000000
 
-hint.gpio.0.pinmask=0x7da000
+# GPIO11, GPIO13 - GPIO22
+hint.gpio.0.pinmask=0x7fe800
+hint.gpio.0.pinon=0x0
 
-hint.gpio.0.func.18.gpiofunc=0
-#hint.gpio.0.func.18.gpiomode=1  # output, default low
+# SPI_CS_1 assine GPIO12
+#hint.gpio.0.func.12.gpiofunc=7
+#hint.gpio.0.func.12.gpiomode=1
 
-# (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<14) | (1<<15) | (1<<16)
-#  000011 11100000 11000011
-# Output: 0,1,6,7,14,15,16,17
+# LED8	Power ???
 
-# LED8	Power
-hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="power"
-hint.gpioled.0.pins=0x8000
-#hint.gpioled.0.flags="0x0102"
-#hint.gpioled.0.invert=1
-
-# LED1	WiFi
+# LED1	WPS GPIO13
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.name="status"
 hint.gpioled.1.pins=0x2000
 #hint.gpioled.1.flags="0x0102"
 hint.gpioled.1.invert=1
 
-# LED9	WPS (NOT mounting)
-#hint.gpioled.2.at="gpiobus0"
-#hint.gpioled.2.name="wps"
-#hint.gpioled.2.pins=0x1000
-##hint.gpioled.2.flags="0x0102"
-#hint.gpioled.2.invert=1
+# LED9	(NOT mounting) GPIO12
 
-# LED7	WAN
+# LED7	INTERNET GPIO18
 hint.gpioled.2.at="gpiobus0"
 hint.gpioled.2.name="wps"
 hint.gpioled.2.pins=0x40000
 #hint.gpioled.2.flags="0x0102"
 hint.gpioled.2.invert=1
 
-# SW3	OPS
+# LED3 GPIO19
+# LED4 GPIO20
+# LED5 GPIO21
+# LED6 GPIO22
+
+# SW3	WPS GPIO16
 #hint.gpioreset.0.at="gpiobus0"
 #hint.gpioreset.0.pins=0x10000
-#hint.gpioreset.0.name="ops"
+#hint.gpioreset.0.name="wps"
 #hint.gpioreset.0.flags="0x04a1"
 
+# SW4	Reset GPIO17
 
 # shares the same bus with mx25l. 
 # CE low for flash, CE high for RTC
