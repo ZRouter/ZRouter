@@ -30,7 +30,12 @@ hint.gpio.0.pinon=0x0
 #hint.gpio.0.func.12.gpiofunc=7
 #hint.gpio.0.func.12.gpiomode=1
 
-# LED8	Power ???
+# LED8	Power GPIO15
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="power"
+hint.gpioled.0.pins=0x8000
+#hint.gpioled.0.flags="0x0102"
+hint.gpioled.0.invert=1
 
 # LED1	WPS GPIO13
 hint.gpioled.1.at="gpiobus0"
