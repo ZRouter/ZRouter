@@ -1,3 +1,7 @@
+/*
+  http://rio.la.coocan.jp/lab/oss/000prologue.htm
+*/
+
 #include <fcntl.h>
 #include <limits.h>
 #include <sys/soundcard.h>
@@ -5,7 +9,6 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-
 
 /*
  * 量子化ビット数 : 16 bits
@@ -20,10 +23,10 @@
  */
 #define BUFSIZE 480000
 
-static int setup_dsp( int fd );
+static int setup_dsp( int fd, int be );
 
 int 
-main( void )
+main(int argc, char ** argv)
 {
 	/* 再生時間 5 秒 */
 	double total = 5.0, t; 
@@ -33,7 +36,21 @@ main( void )
 
 	short  buf[ BUFSIZE / sizeof(short) ];
 	int    fd, i;
+	char   ch;
+	int    silence = 0;
+	int    bigendian = 0;
 
+	while ((ch = getopt(argc, argv, "skb")) != -1) {
+		if(ch == 's') {
+			silence = 1;
+		}
+		if(ch == 'k') {
+			freq = 1000.0;
+		}
+		if(ch == 'b') {
+			bigendian = 1;
+		}
+	}
 
 	if ( ( fd = open( "/dev/dsp", O_WRONLY ) ) == -1 ) {
 		perror( "open()" );
@@ -42,7 +59,7 @@ main( void )
 
 
 	/* /dev/dsp の設定 */
-	if ( setup_dsp( fd ) != 0 ) {
+	if ( setup_dsp( fd, bigendian ) != 0 ) {
 		fprintf( stderr, "Setup /dev/dsp failed.\n" );
 		close( fd );
 		return 1;
@@ -52,7 +69,10 @@ main( void )
 	/* 再生用の正弦波データ作成 */
 	for ( i = 0; i < BUFSIZE / sizeof(short); i ++ ) {
 		t = ( total / (BUFSIZE / sizeof(short)) ) * i;
-		buf[i] = SHRT_MAX * sin( 2.0 * 3.14159 * freq * t );
+		if (silence == 1)
+			buf[i] = 0;
+		else
+			buf[i] = SHRT_MAX * sin( 2.0 * 3.14159 * freq * t );
 	}
     
 
@@ -78,13 +98,16 @@ main( void )
  *
  */
 static int
-setup_dsp( int fd )
+setup_dsp( int fd, int be )
 {
 	int fmt     = AFMT_S16_LE;
 	int freq    = 48000;
 	int channel = 1;
 
 	/* サウンドフォーマットの設定 */
+	if ( be )
+		fmt = AFMT_S16_BE;
+
 	if ( ioctl( fd, SOUND_PCM_SETFMT, &fmt ) == -1 ) {
 		perror( "ioctl( SOUND_PCM_SETFMT )" );
 		return -1;
