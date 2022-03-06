@@ -46,3 +46,7 @@ replace ${FREEBSD_SRC_TREE} with path to ZRouter.org copy of FreeBSD tree.
 replace D-Link/DIR-615-E4 with device for which you want to build FirmWare.
 List of devices you can get by:
  make show-target-pairs
+
+If you want build ports program you do install to as follow pkg to host.
+
+autoconf automake bison cmake dialog4ports gettext gmake libtool pkg pkgconf ruby rubygem-rake
