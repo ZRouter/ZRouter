@@ -24,9 +24,12 @@ SHEBANG_FILES=		sample/sample-scripts/verify-cn \
 GNU_CONFIGURE=		yes
 CONFIGURE_ARGS+=	--enable-strict
 CONFIGURE_ARGS+=	--host=${ARCH}-portbld-freebsd
-CONFIGURE_ARGS+=	 --disable-lz4 --disable-lzo
+CONFIGURE_ARGS+=	 --disable-lz4 \
+			CFLAGS=-I${ZPREFIX}/include/ \
+			LDFLAGS=-L${ZPREFIX}/lib/
 # set PLUGIN_LIBDIR so that unqualified plugin paths are found:
 CONFIGURE_ENV+=		PLUGINDIR="${PREFIX}/lib/openvpn/plugins"
+
 
 CONFLICTS_INSTALL?=	openvpn-2.[!5].* openvpn-[!2].* openvpn-beta-[0-9]* openvpn-devel-[0-9]* openvpn-mbedtls-[0-9]*
 
