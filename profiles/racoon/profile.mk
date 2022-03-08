@@ -1,8 +1,7 @@
 
-#WORLD_SUBDIRS_LIB+=	../secure/lib/libcrypto ../secure/lib/libssl
-#WORLD_SUBDIRS_SBIN+=	setkey
-#WORLD_SUBDIRS_ZROUTER+=	target/sbin/racoon
-WORLD_SUBDIRS+=secure/lib/libssl
-WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/security/ipsec-tools
+KERNCONF_OPTIONS+=IPSEC
+KERNCONF_DEVICES+=enc crypto
 
+WORLD_SUBDIRS_LIB+=../secure/lib/libssl ../secure/lib/libcrypto
+WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/security/ipsec-tools
 
