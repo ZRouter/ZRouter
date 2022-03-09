@@ -36,6 +36,8 @@ CONFIGURE_ARGS=	--disable-gmp \
 		--with-group=wheel \
 		--with-lib-prefix=${PREFIX}
 
+CONFIGURE_ARGS+=	--enable-xauth-generic
+
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 INSTALL_TARGET=	install-strip
