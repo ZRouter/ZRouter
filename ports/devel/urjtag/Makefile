@@ -24,7 +24,6 @@ CONFIGURE_ARGS=	--disable-bsdl --without-libintl-prefix --without-readline --dis
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 # for header check
-CFLAGS+=	-I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/ -I${OBJ_DIR}/${OLDPWD}/tmp/${ZARCH}/${FREEBSD_SRC_TREE}/tmp/usr/include/edit
 #CFLAGS+=	-I${LOCALBASE}/include
 #LDFLAGS+=	-L${LOCALBASE}/lib
 #LDFLAGS+=	-L${LOCALBASE}/lib

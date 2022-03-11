@@ -23,7 +23,7 @@ SHEBANG_FILES=		sample/sample-scripts/verify-cn \
 
 GNU_CONFIGURE=		yes
 CONFIGURE_ARGS+=	--enable-strict
-CONFIGURE_ARGS+=	--host=${ARCH}-portbld-freebsd
+CONFIGURE_ARGS+=	--host=${ZARCH}-portbld-freebsd
 CONFIGURE_ARGS+=	 --disable-lz4 \
 			CFLAGS=-I${ZPREFIX}/include/ \
 			LDFLAGS=-L${ZPREFIX}/lib/
