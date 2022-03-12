@@ -18,10 +18,13 @@ adapt_prestart()
 
 adapt_start()
 {
+	gpioctl -n 13 "usb power"
 }
 
 adapt_poststart()
 {
+	# diag led off
+	gpioctl 16 1
 }
 
 adapt_stop()

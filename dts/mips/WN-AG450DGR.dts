@@ -61,6 +61,18 @@
 
 	};
 
+	// no effect at FreeBSD
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		usb {
+			gpio-export,name = "usb power";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 11 1>;
+		};
+	};
+
 	mdio-bus {
 		compatible = "ralink,rt2880-mdio";
 		reg = <0x10100000 0x10000>;
@@ -115,7 +127,7 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "jtag", "uartf";
+			ralink,group = "i2c", "jtag", "uartf", "lna a", "lna g";
 			ralink,function = "gpio";
 		};
 	};

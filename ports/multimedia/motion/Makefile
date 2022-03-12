@@ -2,9 +2,9 @@
 # $FreeBSD: head/multimedia/motion/Makefile 439367 2017-04-25 08:20:30Z riggs $
 
 PORTNAME=	motion
-PORTVERSION=	4.1.1
-DISTFILES=	motion.tgz
-#DISTVERSIONPREFIX=	release-
+PORTVERSION=	4.3.2
+PORTREVISION=	1
+DISTVERSIONPREFIX=	release-
 CATEGORIES=	multimedia
 
 MAINTAINER=	ports@FreeBSD.org
@@ -13,16 +13,19 @@ COMMENT=	Motion detection application
 LICENSE=	GPLv2+
 #LICENSE_FILE=	${WRKSRC}/COPYING
 
-#USE_GITHUB=	yes
-#GH_ACCOUNT=	Motion-Project
+USE_GITHUB=	yes
+GH_ACCOUNT=	Motion-Project
+USE_RC_SUBR=	${PORTNAME}
 
-#USES=		autoreconf gmake jpeg localbase pkgconfig
-USES=		gmake
+NLS=		off
+
+#USES=		autoreconf gmake jpeg localbase pkgconfig gettext
+USES=		autoreconf gmake
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--without-v4l2 --without-bktr  --without-ffmpeg --without-sqlite3
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
-CONFIGURE_ARGS+=CFLAGS=-I${ZPREFIX}/include/ LDFLAGS=-L${ZPREFIX}/lib/
+CONFIGURE_ARGS+=CFLAGS=-I${ZPREFIX}/include/ LDFLAGS="-L${ZPREFIX}/lib/ -lmicrohttpd"
 
 
 PLIST_FILES=	bin/motion \
@@ -46,7 +49,7 @@ post-configure:
 		's|#define HAVE_INTL 1||g' ${WRKSRC}/config.h
 
 do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/${PORTNAME} ${ZPREFIX}/bin/${PORTNAME}
+	${INSTALL_PROGRAM} ${WRKSRC}/src/${PORTNAME} ${ZPREFIX}/bin/${PORTNAME}
 
 
 .include <bsd.port.post.mk>
