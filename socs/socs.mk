@@ -14,8 +14,6 @@ SOC_PAIRS!=ls -d ${ZROUTER_ROOT}/socs/*/* | sed 's/^.*\/socs\///'
 .endif
 
 .if defined(TARGET_ARCH)
-#.if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
-#.if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
 .if ${NEW_IMAGE_TYPE} == "trximage"
 KERNCONF_KERN_LDSCRIPT_NAME?=	ldscript.mips.bin
 .else
@@ -23,3 +21,8 @@ KERNCONF_KERN_LDSCRIPT_NAME?=	ldscript.${TARGET}
 .endif
 .endif
 
+.if !defined(TARGET_CPUTYPE)
+.if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
+TARGET_CPUTYPE=mips32
+.endif
+.endif
