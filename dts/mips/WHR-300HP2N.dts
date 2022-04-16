@@ -120,12 +120,12 @@
 
 		partition@50000 {
 			label = "kernel";
-			reg = <0x50000 0xf0000>;
+			reg = <0x50000 0x100000>;
 		};
 
 		partition@110000 {
 			label = "rootfs";
-			reg = <0x140000 0x6c0000>;
+			reg = <0x150000 0x6b0000>;
 		};
 
 		partition@800000 {
