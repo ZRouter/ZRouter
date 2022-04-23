@@ -1,0 +1,142 @@
+# TODO: RGMII
+hint.arge.0.phymask=0x0
+hint.arge.0.media=1000
+hint.arge.0.fduplex=1
+hint.arge.0.miimode=3
+
+# TODO: RGMII
+hint.arge.1.phymask=0x10
+# hint.arge.1.pll_1000 = 0x1f000000
+# For now, rendezouvs this on the arge0 mdiobus.
+# Later, this will rendezvous via the AR8316 switch.
+hint.arge.1.miimode=3
+hint.arge.1.mdio=mdioproxy1
+
+# arge0 MDIO bus - there's no arge1 MDIO bus for AR71xx
+hint.argemdio.0.at="nexus0"
+hint.argemdio.0.maddr=0x19000000
+hint.argemdio.0.msize=0x1000
+hint.argemdio.0.order=0
+
+# AR8316 switch on MDIO0
+hint.arswitch.0.at="mdio0"
+hint.arswitch.0.is_7240=0
+hint.arswitch.0.numphys=4
+hint.arswitch.0.phy4cpu=1
+hint.arswitch.0.is_rgmii=1
+hint.arswitch.0.is_gmii=0
+
+# compatible value, device with 4M/8M/16M of flash, may found it on same
+# location, because flash just aliased to upper segments
+hint.ath.0.eepromdata=0x1fff1000
+
+# ath0 - slot 17
+hint.pcib.0.bus.0.17.0.ath_fixup_addr=0x1f051000
+hint.pcib.0.bus.0.17.0.ath_fixup_size=4096
+# ath1 - slot 18
+hint.pcib.0.bus.0.18.0.ath_fixup_addr=0x1f055000
+hint.pcib.0.bus.0.18.0.ath_fixup_size=4096
+# .. and now, telling each ath(4) NIC where to find the firmware
+# image.
+hint.ath.0.eeprom_firmware="pcib.0.bus.0.17.0.eeprom_firmware"
+hint.ath.1.eeprom_firmware="pcib.0.bus.0.18.0.eeprom_firmware"
+
+# 0	LED	WPS
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="wps"
+hint.gpioled.0.pins=0x0001
+hint.gpioled.0.flags="0x0102"
+
+# 1	LED	STATUS Yellow
+hint.gpioled.1.at="gpiobus0"
+hint.gpioled.1.name="status"
+hint.gpioled.1.pins=0x0002
+hint.gpioled.1.flags="0x0102"
+
+# 11	LED	USB
+hint.gpioled.2.at="gpiobus0"
+hint.gpioled.2.name="usb"
+hint.gpioled.2.pins=0x0800
+hint.gpioled.2.flags="0x0102"
+
+# ? 	BUTTON	RESET
+#hint.gpioreset.0.at="gpiobus0"
+#hint.gpioreset.0.pins="0x0400"
+#hint.gpioreset.0.name="reset"
+#hint.gpioreset.0.flags="0x04a1"
+
+# 12 	BUTTON	WPS
+hint.gpiobutton.0.at="gpiobus0"
+hint.gpiobutton.0.pins="0x1000"
+hint.gpiobutton.0.name="wps"
+hint.gpiobutton.0.flags="0x04a1"
+
+hint.mx25l.0.at="spibus0"
+hint.mx25l.0.cs=0
+
+hint.map.0.at="flash/spi0"
+hint.map.0.start=0x00000000
+hint.map.0.end=0x00030000
+hint.map.0.name="bootloader"
+hint.map.0.readonly=1
+
+hint.map.1.at="flash/spi0"
+hint.map.1.start=0x00030000
+hint.map.1.end=0x00040000
+hint.map.1.name="bootloader-env"
+hint.map.1.readonly=1
+
+hint.map.2.at="flash/spi0"
+hint.map.2.start=0x00040000
+hint.map.2.end=0x007c0000
+hint.map.2.name="upgrade"
+
+hint.map.3.at="flash/spi0"
+hint.map.3.start=0x00060000
+hint.map.3.end="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.3.name="kernel"
+
+hint.map.4.at="flash/spi0"
+hint.map.4.start="search:0x00100000:0x10000:.!/bin/sh"
+hint.map.4.end=0x00fc0000
+hint.map.4.name="rootfs"
+
+#
+# Pin 1  - SCK
+# Pin 2  - SDA
+# Pin 3  - usb 
+# Pin 4  - 
+# Pin 5  - aoss
+# Pin 6  - router auto
+# Pin 7  - router off
+# Pin 8  - movie engine
+# Pin 9  - 
+# Pin 10 - 
+# Pin 11 - reset button
+# Pin 12 - CS0
+# Pin 13 - CS1
+# Pin 14 - 
+# Pin 15 - 
+# Pin 16 - 
+# Pin 17 - 
+
+# Don't flip on anything that isn't already enabled.
+# Force on CS lines for flash devices, apparently this isn't done
+# by uboot in normal booting.  No idea why. 
+hint.gpio.0.function_set=0x00003804
+hint.gpio.0.function_clear=0x00000000
+
+# These are the GPIO LEDs and buttons which can be software controlled.
+# USB powered on
+hint.gpio.0.pinmask=0x0fff
+hint.gpio.0.pinon=0x00000804
+
+hint.gpioiic.0.at="gpiobus0"
+#hint.gpioiic.0.pins=0x0003
+hint.gpioiic.0.sda=0
+hint.gpioiic.0.scl=1
+
+# LEDs are configured separately and driven by the LED device
+hint.gpioled.0.at="gpiobus0"
+hint.gpioled.0.name="red-diag"
+hint.gpioled.0.pins=0x0001
