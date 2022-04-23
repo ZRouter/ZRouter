@@ -25,6 +25,9 @@ adapt_prestart()
 #	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
 #	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
 
+# USB Power
+	gpioctl -c 12 OUT
+
 	etherswitchcfg reg 0x7c=0x10ce
 
 	hostname `kenv HostName`

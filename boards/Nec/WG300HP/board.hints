@@ -43,35 +43,25 @@ hint.gpio.0.func.18.gpiofunc=0
 #  000011 11100000 11000011
 # Output: 0,1,6,7,14,15,16,17
 
-# LED8	Power
-hint.gpioled.0.at="gpiobus0"
+#  D3 POWER(3)
 hint.gpioled.0.name="power"
-hint.gpioled.0.pins=0x8000
+hint.gpioled.0.pins=0x0008
 #hint.gpioled.0.flags="0x0102"
 #hint.gpioled.0.invert=1
 
-# LED1	WiFi
+# D2 AIR(13)
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.name="status"
 hint.gpioled.1.pins=0x2000
 #hint.gpioled.1.flags="0x0102"
 hint.gpioled.1.invert=1
 
-# LED9	WPS (NOT mounting)
-#hint.gpioled.2.at="gpiobus0"
-#hint.gpioled.2.name="wps"
-#hint.gpioled.2.pins=0x1000
-##hint.gpioled.2.flags="0x0102"
-#hint.gpioled.2.invert=1
+# D1 ACTIVE
 
-# LED7	WAN
-hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.name="wps"
-hint.gpioled.2.pins=0x40000
-#hint.gpioled.2.flags="0x0102"
-hint.gpioled.2.invert=1
+# SW6(0) SW2(2) SW3(1)
 
-# SW3	OPS
+# USB Power(12)
+
 #hint.gpioreset.0.at="gpiobus0"
 #hint.gpioreset.0.pins=0x10000
 #hint.gpioreset.0.name="ops"
