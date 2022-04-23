@@ -12,7 +12,7 @@ hint.argemdio.1.msize=0x1000
 #hint.argemdio.1.order=0
 
 # Embedded Atheros Switch
-hint.arswitch.0.at="mdio2"
+hint.arswitch.0.at="mdio1"
 hint.arswitch.0.is_7240=0
 hint.arswitch.0.is_9340=1                                                      
 hint.arswitch.0.numphys=4
