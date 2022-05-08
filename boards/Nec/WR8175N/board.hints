@@ -15,45 +15,54 @@ hint.ar934x_gmac.0.gmac_cfg=0x1C0
 
 # GPIO
 
-hint.gpio.0.function_set=0x00000000
+# Disable JTAG
+hint.gpio.0.function_set=0x00000002
 hint.gpio.0.function_clear=0x00000000
 
-hint.gpio.0.pinmask=0x7da000
+#hint.gpio.0.pinmask=0x7ff81f
+hint.gpio.0.pinmask=0x7ff81e
 
-hint.gpio.0.func.18.gpiofunc=0
-#hint.gpio.0.func.18.gpiomode=1  # output, default low
+# GPIO4
+hint.gpio.0.func.4.gpiofunc=0
+hint.gpio.0.func.4.gpiomode=1  # output, default low
 
-# (1 | (1<<1) | (1<<6) | (1<<7) | (1<<17) | (1<<14) | (1<<15) | (1<<16)
-#  000011 11100000 11000011
-# Output: 0,1,6,7,14,15,16,17
-
-# LED8	Power
+# D2-Red GPIO15
 hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="power"
+hint.gpioled.0.name="active"
 hint.gpioled.0.pins=0x8000
 #hint.gpioled.0.flags="0x0102"
-#hint.gpioled.0.invert=1
+hint.gpioled.0.invert=1
 
-# LED1	WiFi
+# D2-Green GPIO14
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.name="status"
-hint.gpioled.1.pins=0x2000
+hint.gpioled.1.pins=0x4000
 #hint.gpioled.1.flags="0x0102"
 hint.gpioled.1.invert=1
 
-# LED9	WPS (NOT mounting)
-#hint.gpioled.2.at="gpiobus0"
-#hint.gpioled.2.name="wps"
-#hint.gpioled.2.pins=0x1000
-##hint.gpioled.2.flags="0x0102"
-#hint.gpioled.2.invert=1
-
-# LED7	WAN
+# D1-Green GPIO21
 hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.name="wps"
-hint.gpioled.2.pins=0x40000
+hint.gpioled.2.name="air"
+hint.gpioled.2.pins=0x200000
 #hint.gpioled.2.flags="0x0102"
 hint.gpioled.2.invert=1
+
+# D3-Green GPIO12
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.name="power-g"
+hint.gpioled.3.pins=0x1000
+#hint.gpioled.3.flags="0x0102"
+hint.gpioled.3.invert=1
+
+# D3-Red GPIO13
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.name="power-r"
+hint.gpioled.4.pins=0x2000
+#hint.gpioled.4.flags="0x0102"
+hint.gpioled.4.invert=1
+
+# WAN LED is GPIO22
+# LAN LED is GPIO1 to GPIO4
 
 # SW3	OPS
 #hint.gpioreset.0.at="gpiobus0"
