@@ -1,2 +1,4 @@
 
+WORLD_SUBDIRS_LIB+=libmagic
+WORLD_SUBDIRS_GNU_LIB+=libgomp
 WORLD_SUBDIRS_PORTS+=${ZROUTER_ROOT}/ports/audio/sox
