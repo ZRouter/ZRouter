@@ -1,9 +1,7 @@
 PORTNAME=	mruby
-PORTVERSION=	3.0.0
+PORTVERSION=	3.1.0
 CATEGORIES=	lang
-MASTER_SITES=	http://mruby.org/
 DISTNAME=	${PORTVERSION}
-#DISTNAME=	mruby-master
 EXTRACT_SUFX=	.tar.gz
 MASTER_SITES=	https://github.com/mruby/mruby/archive/
 
