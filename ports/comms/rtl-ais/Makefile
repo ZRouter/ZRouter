@@ -28,6 +28,6 @@ pre-build:
 	@${REINPLACE_CMD} -e "s|lusb-1.0|lusb|" ${WRKSRC}/Makefile
 
 post-install:
-	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/bin/${PORTNAME} ${ZPREFIX}/bin/
+	${INSTALL_PROGRAM} ${STAGEDIR}/${PREFIX}/bin/rtl_ais ${ZPREFIX}/bin/
 
 .include <bsd.port.mk>
