@@ -82,7 +82,7 @@ show-target-pairs:
 ##############################################################################
 .include "socs/socs.mk"
 
-.if ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
+.if defined(TARGET_ARCH) && ${MACHINE} == ${TARGET} && ${MACHINE_ARCH} == ${TARGET_ARCH} && !defined(CROSS_BUILD_TESTING)
 TARGET_ARCH_SUBDIR=	""
 .else
 TARGET_ARCH_SUBDIR=	${TARGET}.${TARGET_ARCH}
@@ -793,7 +793,7 @@ KERNCONF_KERNENTRYPOINT?=	${KERNCONF_KERNLOADADDR}
 
 .warning	Load address: ${KERNCONF_KERNLOADADDR} Entry point: ${KERNCONF_KERNENTRYPOINT}
 
-.if !defined(PHYSADDR)
+.if defined(TARGET_ARCH) && !defined(PHYSADDR)
 .if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
 PHYSADDR=0x80000000
 .else 

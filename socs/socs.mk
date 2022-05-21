@@ -21,7 +21,7 @@ KERNCONF_KERN_LDSCRIPT_NAME?=	ldscript.${TARGET}
 .endif
 .endif
 
-.if !defined(TARGET_CPUTYPE)
+.if defined(TARGET_ARCH) && !defined(TARGET_CPUTYPE)
 .if ${TARGET_ARCH} == "mipsel" || ${TARGET_ARCH} == "mips"
 TARGET_CPUTYPE=mips32
 .endif
