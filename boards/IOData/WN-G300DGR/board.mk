@@ -22,7 +22,7 @@ WORLD_SUBDIRS_USR_BIN+=hexdump awk
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?= "WN-G300DGR.dts"
+ZKERNCONF_FDT_DTS_FILE?="dts/mips/WN-G300DGR.dts"
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\" 
 
@@ -41,7 +41,8 @@ WORLD_SUBDIRS_SBIN+=    etherswitchcfg
 #KERNCONF_OPTIONS+=	RTL8366_SOFT_RESET
 
 # Include usb and SoC usb controller drivers
-WITH_USB=yes
+# This module have usb but not no space in flash
+#WITH_USB=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
@@ -63,7 +64,7 @@ KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
 
 
 ###################################################

@@ -1,0 +1,154 @@
+/dts-v1/;
+
+#include "rt3050.dtsi"
+
+/ {
+	compatible = "WN-G300DGR", "ralink,rt3052-soc";
+	model = "IOData WN-G300DGR";
+
+	cfi@1f000000 {
+		compatible = "cfi-flash";
+		reg = <0x1f000000 0x400000>;
+		bank-width = <2>;
+		device-width = <2>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		partition@0 {
+			label = "u-boot";
+			reg = <0x0 0x50000>;
+			read-only;
+		};
+
+		partition@30000 {
+			label = "u-boot-env";
+			reg = <0x30000 0x10000>;
+			read-only;
+		};
+
+		factory: partition@40000 {
+			label = "factory";
+			reg = <0x40000 0x10000>;
+			read-only;
+		};
+/*
+		partition@50000 {
+			label = "firmware";
+			reg = <0x00050000 0x003b0000>;
+			read-only;
+		};
+*/
+		partition@50000 {
+			label = "kernel";
+			reg = <0x00050000 0x00100000>;
+			read-only;
+		};
+
+		partition@160000 {
+			label = "rootfs";
+			reg = <0x00150000 0x00290000>;
+			read-only;
+		};
+
+		partition@800000 {
+			label = "upgrade";
+			reg = <0x00050000 0x003b0000>;
+		};
+
+	};
+
+	/* gpio 7 connect reset */
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status {
+			label = "status";
+			gpios = <&gpio0 12 0>;
+		};
+
+		led1 {
+			label = "led1";
+			gpios = <&gpio0 13 1>;
+		};
+
+		led2 {
+			label = "led2";
+			gpios = <&gpio0 8 1>;
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <&gpio0 11 1>;
+		};
+
+	};
+
+	gpio-keys-polled {
+		compatible = "gpio-keys-polled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		poll-interval = <20>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio0 10 1>;
+			linux,code = <0x198>;
+		};
+
+	};
+
+        gpioiic {
+                compatible = "gpioiic";
+                gpios = <&gpio0 2 0
+                        &gpio0 1 0>;
+                gpio-names = "scl", "sda";
+        };
+
+        rtl8366rb {
+                compatible = "realtek,rtl8366rb";
+        };
+
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "i2c", "jtag", "uartf";
+			ralink,function = "gpio";
+		};
+
+		rgmii {
+			ralink,group = "rgmii";
+			ralink,function = "rgmii";
+		};
+
+		mdio {
+			ralink,group = "mdio";
+			ralink,function = "mdio";
+		};
+	};
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x28>;
+};
+
+&esw {
+	ralink,noreset = <1>;
+
+	mediatek,portmap = <0x2f>;
+
+	/* same as WL-351.dts */
+	ralink,fct2 = <0x0002500c>;
+	ralink,fpa2 = <0x1f003fff>;
+};
+
+&wmac {
+	ralink,mtd-eeprom = <&factory 0>;
+};
+
+&otg {
+	status = "okay";
+};
+

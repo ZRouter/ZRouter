@@ -1,0 +1,8 @@
+rewrite bootloader by u-boot_mod
+
+  BOARD: YunCore CPE870
+    SOC: AR9341 rev. 1
+    CPU: MIPS 74Kc
+    RAM: 64 MB DDR2 16-bit CL3-4-4-10
+  FLASH: 4 MB Macronix MX25L320
+

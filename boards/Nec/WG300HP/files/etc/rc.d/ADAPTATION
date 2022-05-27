@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+
+	# Import MAC addresses with known names
+#	kenv LAN_MAC_ADDR=`kenv ethaddr`
+#	kenv WAN_MAC_ADDR=`kenv wanmac`
+
+#	ifconfig arge0 name wan0
+#	ifconfig arge1 name lan0
+
+#	ifconfig lan0 ether `kenv LAN_MAC_ADDR`
+#	ifconfig wan0 ether `kenv WAN_MAC_ADDR`
+
+# USB Power
+	gpioctl -c 12 OUT
+
+	etherswitchcfg reg 0x7c=0x10ce
+
+	hostname `kenv HostName`
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
