@@ -82,8 +82,10 @@ if portoff != 0 then
       if mib <= 1 then
         c = 0
         while c < 4 do
-          if c < 3 then   # only 48 bit
-            val = (t.readreg(off + c) << (16 * c)) | val
+          if c == 0 then   # only use 30 bit
+            val = t.readreg(off + c)
+          elsif c == 1 then
+            val = ((t.readreg(off + c) & 0x3fff) << 16) | val
           else
             dmy = t.readreg(off + c)
           end
@@ -92,8 +94,12 @@ if portoff != 0 then
       else
         c = 0
         while c < 2 do
-           val = (t.readreg(off + c) << (16 * c)) | val
-           c = c + 1
+          if c == 0 then   # only use 30 bit
+            val = t.readreg(off + c)
+          else
+            val = ((t.readreg(off + c) & 0x3fff) << 16) | val
+          end
+          c = c + 1
         end
       end
     else

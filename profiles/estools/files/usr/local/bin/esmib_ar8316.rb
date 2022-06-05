@@ -83,7 +83,11 @@ if File.exist?(lastfile)
     if port != 0
       mibstr = mibstr + ","
     end
-    mibstr = mibstr + (lastval[port].to_i + val[port]).to_s
+    if lastval[port].to_i > 1073741824 then
+      mibstr = mibstr + val[port].to_s
+    else
+      mibstr = mibstr + (lastval[port].to_i + val[port]).to_s
+    end
     port = port + 1
   end
 else

@@ -14,6 +14,7 @@ LIBS+=		-lpthread
 BUILD_WRKSRC=	${WRKSRC}/src
 
 PLIST_FILES=	bin/shttpd man/man1/shttpd.1.gz
+#MAKE_ARGS=	CFLAGS="-D_DEBUG"
 
 do-install:
 	${INSTALL_PROGRAM} ${WRKSRC}/src/shttpd ${ZPREFIX}/bin
