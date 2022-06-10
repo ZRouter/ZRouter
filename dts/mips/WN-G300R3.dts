@@ -1,6 +1,6 @@
 /dts-v1/;
 
-#include "mt7620a.dtsi"
+#include "mt7620n.dtsi"
 
 / {
 	compatible = "ralink,mt7620a-soc";
@@ -138,25 +138,16 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "uartf", "rgmii1", "rgmii2", "wled", "nd_sd";
+			ralink,group = "ephy", "wled", "pa", "i2c", "wdt", "uartf";
 			ralink,function = "gpio";
 		};
 
-		pa {
-			ralink,group = "pa";
-			ralink,function = "pa";
-		};
 	};
 };
 
 &ethernet {
-	pinctrl-names = "default";
-	pinctrl-0 = <&ephy_pins>;
-	mediatek,portmap = "llllw";
-};
-
-&gsw {
-	mediatek,port4 = "ephy";
+	mtd-mac-address = <&factory 0x4>;
+	mediatek,portmap = "wllll";
 };
 
 &wmac {
