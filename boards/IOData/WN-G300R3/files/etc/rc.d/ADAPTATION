@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+ENVPAT="/dev/flash/spi0s.u-boot-env"
+
+# LED Power
+	gpioctl 9 0
+
+	kenvmac=`kenv -q LAN_MAC_ADDR`
+	if [ -z "$kenvmac" ]; then
+
+		# Import MAC addresses from flash
+		ETHADDR=`strings ${ENVPAT} | grep "^ethaddr="`
+		if [ -n "$ETHADDR" ]; then
+			kenv LAN_MAC_ADDR=`echo ${ETHADDR} | awk -F"=" '{gsub("\"","",$2);print $2}'`
+
+			ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+		fi
+
+		hostname `kenv HostName`
+	fi
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
