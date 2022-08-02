@@ -1,7 +1,7 @@
 # Created by: Carey Jones <mcj@acquiesce.org>
 
 PORTNAME=	mpg123
-PORTVERSION=	1.29.3
+PORTVERSION=	1.30.2
 CATEGORIES=	audio
 MASTER_SITES=	SF \
 		https://www.mpg123.de/download/
@@ -19,6 +19,7 @@ GNU_CONFIGURE=	yes
 CONFIGURE_ARGS=	--with-optimization=3
 CONFIGURE_ARGS+= --host=${ARCH}-portbld-freebsd
 CONFIGURE_ARGS+= --with-cpu=generic_nofpu
+CONFIGURE_ARGS+= --with-network=internal
 INSTALL_TARGET=	install-strip
 
 OPTIONS_DEFINE=		SNDIO
