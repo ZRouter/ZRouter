@@ -1,0 +1,22 @@
+--- configure.ac.org	2023-02-07 12:52:35.884960000 +0900
++++ configure.ac	2023-02-07 16:19:34.805494000 +0900
+@@ -16,10 +16,19 @@
+ dnl Automake conditionals to set
+ AM_CONDITIONAL(EXAMPLE, test x$example = xyes)
+ 
++dnl Because recent automake complains about AS, set it here.
++CCAS="$CC"
++AC_SUBST(CCAS)
++
++dnl Because recent automake complains about CCASFLAGS, set it here.
++CCASFLAGS='$(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)'
++AC_SUBST(CCASFLAGS)
++
+ dnl Checks for programs.
+ AC_PROG_CC
+ AC_PROG_CXX
+ LT_INIT
++AM_PROG_AS
+ 
+ AC_SEARCH_LIBS([sin], [m])
+ 
