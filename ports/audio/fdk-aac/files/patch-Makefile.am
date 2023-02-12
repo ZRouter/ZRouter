@@ -1,0 +1,12 @@
+--- Makefile.am.org	2023-02-07 12:28:46.834195000 +0900
++++ Makefile.am	2023-02-07 12:47:41.734812000 +0900
+@@ -146,7 +146,8 @@
+     libFDK/src/mdct.cpp \
+     libFDK/src/nlc_dec.cpp \
+     libFDK/src/qmf.cpp \
+-    libFDK/src/scale.cpp
++    libFDK/src/scale.cpp \
++    libFDK/src/mips/fft32.S
+ 
+ MPEGTPDEC_SRC = \
+     libMpegTPDec/src/tpdec_adif.cpp \
