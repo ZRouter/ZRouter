@@ -29,8 +29,7 @@ CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 #.if "${ZARCH}" == "mips.mips" || "${ZARCH}" == "mips.mipsel"
 CONFIGURE_ARGS+=CPPFLAGS="-O3 -DMIPS_DSP_LIB"
-# this option use buildin function. but gcc 4.2.1 not support it.
-#CONFIGURE_ARGS+=CPPFLAGS="-D__mips_dsp"
+CONFIGURE_ARGS+=CPPFLAGS="-mdsp -D__mips_dsp"
 #.endif
 
 pre-configure:
