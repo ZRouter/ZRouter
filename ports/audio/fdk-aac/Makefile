@@ -27,10 +27,10 @@ PLIST_SUB=	VER=${PORTVERSION}
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
-#.if "${ZARCH}" == "mips.mips" || "${ZARCH}" == "mips.mipsel"
+.if "${ZARCH}" == "mips" || "${ZARCH}" == "mipsel"
 CONFIGURE_ARGS+=CPPFLAGS="-O3 -DMIPS_DSP_LIB"
 CONFIGURE_ARGS+=CPPFLAGS="-mdsp -D__mips_dsp"
-#.endif
+.endif
 
 pre-configure:
 	cd ${WRKSRC};./autogen.sh
