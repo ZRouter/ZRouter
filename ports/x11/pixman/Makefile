@@ -1,13 +1,14 @@
 # $FreeBSD: tags/RELEASE_10_3_0/x11/pixman/Makefile 399873 2015-10-20 18:49:47Z jmmv $
 
 PORTNAME=	pixman
-PORTVERSION=	0.38.4
+PORTVERSION=	0.42.2
 CATEGORIES=	x11
-EXTRACT_SUFX=	.tar.bz2
+EXTRACT_SUFX=	.tar.xz
 MASTER_SITES=	http://distcache.FreeBSD.org/ports-distfiles/xorg/lib/
 
 MAINTAINER=	x11@FreeBSD.org
 COMMENT=	Low-level pixel manipulation library
+WWW=		http://pixman.org
 
 LICENSE=	MIT
 LICENSE_FILE=	${WRKSRC}/COPYING
