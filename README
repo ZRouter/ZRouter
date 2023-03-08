@@ -49,4 +49,4 @@ List of devices you can get by:
 
 If you want to build program from ports you have to install following packages to the host:
 
-autoconf automake bison cmake dialog4ports gettext gmake libtool pkg pkgconf ruby rubygem-rake
+autoconf automake cmake dialog4ports gettext gmake libtool pkg pkgconf ruby rubygem-rake

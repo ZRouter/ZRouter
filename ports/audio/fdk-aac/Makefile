@@ -27,11 +27,9 @@ PLIST_SUB=	VER=${PORTVERSION}
 GNU_CONFIGURE=	yes
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
-#.if "${ZARCH}" == "mips.mips" || "${ZARCH}" == "mips.mipsel"
-CONFIGURE_ARGS+=CPPFLAGS="-O3 -DMIPS_DSP_LIB"
-# this option use buildin function. but gcc 4.2.1 not support it.
-#CONFIGURE_ARGS+=CPPFLAGS="-D__mips_dsp"
-#.endif
+.if "${ZARCH}" == "mips" || "${ZARCH}" == "mipsel"
+CONFIGURE_ARGS+=CPPFLAGS="-O3 -DMIPS_DSP_LIB -mdsp -D__mips_dsp"
+.endif
 
 pre-configure:
 	cd ${WRKSRC};./autogen.sh
