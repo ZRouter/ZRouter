@@ -3,15 +3,15 @@
 #include "mt7620n.dtsi"
 
 / {
-	compatible = "ralink,mt7620a-soc";
-	model = "Buffalo WHR-300HP2";
+	compatible = "ralink,mt7620n-soc";
+	model = "IO Data WN-G300R3";
 
 	gpio-leds {
 		compatible = "gpio-leds";
 
-		power {
-			label = "whr-300hp2:red:power";
-			gpios = <&gpio0 7 1>;
+		status {
+			label = "status";
+			gpios = <&gpio1 15 1>;
 		};
 
 		wifi {
@@ -79,6 +79,10 @@
 	};
 };
 
+&gpio1 {
+	status = "okay";
+};
+
 &gpio2 {
 	status = "okay";
 };
@@ -120,12 +124,12 @@
 
 		partition@50000 {
 			label = "kernel";
-			reg = <0x50000 0x110000>;
+			reg = <0x50000 0x100000>;
 		};
 
 		partition@110000 {
 			label = "rootfs";
-			reg = <0x160000 0x2a0000>;
+			reg = <0x150000 0x2b0000>;
 		};
 
 		partition@800000 {
