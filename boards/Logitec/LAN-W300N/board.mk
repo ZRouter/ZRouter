@@ -19,7 +19,8 @@ BOARD_FLASH_SIZE=8388608
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?=	"LAN-W300N.dts"
+#KERNCONF_FDT_DTS_FILE?=	"LAN-W300N.dts"
+ZKERNCONF_FDT_DTS_FILE?=  "dts/mips/LAN-W300N_DR.dts"
 
 # This target use usb rootfs because of flash is 4 MByte
 # Logitec_LAN-W300N_kernel.kbin.oldlzma.uboot -> flash
