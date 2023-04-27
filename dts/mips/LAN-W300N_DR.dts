@@ -4,8 +4,8 @@
 #include "rt3050.dtsi"
 
 / {
-	compatible = "LAN-W300N", "ralink,rt3050-soc";
-	model = "Logitec LAN-W300N";
+	compatible = "LAN-W300N_DR", "ralink,rt3050-soc";
+	model = "Logitec LAN-W300N_DR";
 
 	cfi@1f000000 {
 		compatible = "cfi-flash";
