@@ -101,8 +101,8 @@
 
         gpioiic {
                 compatible = "gpioiic";
-                gpios = <&gpio0 2 0
-                        &gpio0 1 0>;
+                gpios = <&gpio0 23 0
+                        &gpio0 22 0>;
                 gpio-names = "scl", "sda";
         };
 
@@ -137,10 +137,11 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "jtag", "uartf";
+			ralink,group = "mdio", "spi", "uartf";
 			ralink,function = "gpio";
 		};
 
+/*
 		rgmii {
 			ralink,group = "rgmii";
 			ralink,function = "rgmii";
@@ -151,7 +152,6 @@
 			ralink,function = "mdio";
 		};
 
-/*
 		i2c {
 			ralink,group = "i2c";
 			ralink,function = "i2c";
