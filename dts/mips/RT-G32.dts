@@ -109,8 +109,27 @@
 	status = "okay";
 };
 
-/*
+/* This module have spi patern back side */
+&spi0 {
+	status = "okay";
 
+	m25p80@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		linux,modalias = "mx25l6405d";
+		spi-max-frequency = <80000000>;
+
+		partition@0 {
+			label = "local";
+			reg = <0x0 0x10000>;
+			read-only;
+		};
+	};
+};
+
+/*
 &spi1 {
 	status = "okay";
 	cs-gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
