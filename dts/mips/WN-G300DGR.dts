@@ -40,13 +40,13 @@
 */
 		partition@50000 {
 			label = "kernel";
-			reg = <0x00050000 0x00100000>;
+			reg = <0x00050000 0x00110000>;
 			read-only;
 		};
 
 		partition@160000 {
 			label = "rootfs";
-			reg = <0x00150000 0x00290000>;
+			reg = <0x00160000 0x002a0000>;
 			read-only;
 		};
 

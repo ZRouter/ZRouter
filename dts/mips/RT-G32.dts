@@ -1,0 +1,142 @@
+/dts-v1/;
+
+#include <dt-bindings/gpio/tegra-gpio.h>
+#include "rt3050.dtsi"
+
+/ {
+	compatible = "RT-G32", "ralink,rt3050-soc";
+	model = "Asus RT-G32";
+
+	cfi@1f000000 {
+		compatible = "cfi-flash";
+		reg = <0x1f000000 0x800000>;
+		bank-width = <2>;
+		device-width = <2>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		partition@0 {
+			label = "u-boot";
+			reg = <0x0 0x30000>;
+			read-only;
+		};
+
+		partition@30000 {
+			label = "u-boot-env";
+			reg = <0x30000 0x10000>;
+			read-only;
+		};
+
+		factory: partition@40000 {
+			label = "factory";
+			reg = <0x40000 0x10000>;
+			read-only;
+		};
+
+		partition@50000 {
+			label = "kernel";
+			reg = <0x50000 0x100000>;
+		};
+
+		partition@160000 {
+			label = "rootfs";
+			reg = <0x150000 0x2b0000>;
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status {
+			label = "status";
+			gpios = <&gpio0 14 0>;
+		};
+
+		led1 {
+			label = "led1";
+			gpios = <&gpio0 11 0>;
+		};
+
+		led2 {
+			label = "led2";
+			gpios = <&gpio0 9 1>;
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <&gpio0 12 1>;
+		};
+
+	};
+	gpio-keys-polled {
+		compatible = "gpio-keys-polled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		poll-interval = <20>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio0 10 1>;
+			linux,code = <0x198>;
+		};
+
+	};
+
+	/* This module have spi patern back side */
+	spi1: spi@gpio0 {
+		compatible = "spi-gpio";
+		pinctrl-names = "default";
+//		pinctrl-0 = <&spi2_pins_cfa10049>;
+		status = "okay";
+		gpio-sck = <&gpio0 4 0>;
+		gpio-mosi = <&gpio0 5 0>;
+		gpio-miso = <&gpio0 6 0>;
+		cs-gpios = <&gpio0 3 0>;
+		num-chipselects = <1>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		m25p80@0 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "jedec,spi-nor";
+			reg = <0>;
+			linux,modalias = "m25p80", "mx25l3205d";
+			spi-max-frequency = <80000000>;
+
+			partition@0 {
+				label = "local";
+				reg = <0x0 0x800000>;
+				read-only;
+			};
+		};
+	};
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "i2c", "spi", "jtag", "uartf", "rgmii", "mdio";
+			ralink,function = "gpio";
+		};
+
+	};
+};
+
+&ethernet {
+//	mtd-mac-address = <&factory 0x28>;
+};
+
+&esw {
+	mediatek,portmap = <0x2f>;
+};
+
+&wmac {
+//	ralink,mtd-eeprom = <&factory 0>;
+};
+/*
+&otg {
+	status = "okay";
+};
+*/
+

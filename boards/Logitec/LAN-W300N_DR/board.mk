@@ -1,4 +1,4 @@
-##################################################
+###################################################
 #
 # Board used hardware/chip`s
 #
@@ -6,11 +6,9 @@
 
 
 SOC_VENDOR=Ralink
-SOC_CHIP=RT2880F_FDT
+SOC_CHIP=RT3050F_FDT
 # TODO: size suffixes
-BOARD_FLASH_SIZE=4194304
-
-WITHOUT_WIRELESS=yes
+BOARD_FLASH_SIZE=8388608
 
 ###################################################
 #
@@ -21,28 +19,29 @@ WITHOUT_WIRELESS=yes
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-#KERNCONF_FDT_DTS_FILE?=	"MZK-W300NAG.dts"
-ZKERNCONF_FDT_DTS_FILE?=	"dts/mips/MZK-W300NAG.dts"
+#KERNCONF_FDT_DTS_FILE?=	"LAN-W300N.dts"
+ZKERNCONF_FDT_DTS_FILE?=  "dts/mips/LAN-W300N_DR.dts"
 
-KERNCONF_DEVICES+=	gpioiic
-KERNCONF_DEVICES+=	iicbb
+# This target use usb rootfs because of flash is 4 MByte
+# Logitec_LAN-W300N_kernel.kbin.oldlzma.uboot -> flash
+# Logitec_LAN-W300N_rootfs_clean.iso -> usb memory
 
-KERNCONF_DEVICES+=	iicbus
-KERNCONF_DEVICES+=	iic
-#KERNCONF_DEVICES+=	mtk_iic
-
-#KERNCONF_DEVICES+=	mdio
-KERNCONF_DEVICES+=	etherswitch
-KERNCONF_DEVICES+=	miiproxy
-KERNCONF_DEVICES+=	rtl8366rb
-WORLD_SUBDIRS_SBIN+=	etherswitchcfg
-WORLD_SUBDIRS_USR_SBIN+=	i2c
-
+.if defined(WITH_USBROOTFS)
+KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\" 
+.else
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\" 
+.endif
 
+# Include usb and SoC usb controller drivers
+WITH_USB=yes
+WITHOUT_WIRELESS=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
+#KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
+#KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
+#KERNCONF_MODULES_OVERRIDE+=cam zlib
+#KERNCONF_MODULES_OVERRIDE+=usb/run runfw
 
 ###################################################
 #
@@ -53,7 +52,7 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x00390000
+FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
 
 
 ###################################################
@@ -62,21 +61,18 @@ FIRMWARE_IMAGE_SIZE_MAX=0x00390000
 #
 ###################################################
 
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
-
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
 UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
-# This module always boot from bc450014. Than add space to head.
-UBOOT_HEAD_WHITESPACE=20
-
 MKULZMA_BLOCKSIZE=65536
 
+.if defined(WITH_USBROOTFS)
+PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot
+PACKING_ROOTFS_IMAGE?=rootfs_clean.iso
+.else
 PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
-
+.endif
 IMAGE_SUFFIX=zimage
 NEW_IMAGE_TYPE=zimage
-
-

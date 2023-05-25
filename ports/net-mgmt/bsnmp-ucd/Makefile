@@ -2,7 +2,7 @@
 # $FreeBSD: head/net-mgmt/bsnmp-ucd/Makefile 508246 2019-08-06 10:44:28Z trociny $
 
 PORTNAME=	bsnmp-ucd
-PORTVERSION=	0.4.4
+PORTVERSION=	0.4.5
 CATEGORIES=	net-mgmt
 
 MAINTAINER=	trociny@FreeBSD.org

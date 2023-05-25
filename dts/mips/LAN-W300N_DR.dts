@@ -4,8 +4,8 @@
 #include "rt3050.dtsi"
 
 / {
-	compatible = "FON2405E", "ralink,rt3050-soc";
-	model = "FON FON2405E";
+	compatible = "LAN-W300N_DR", "ralink,rt3050-soc";
+	model = "Logitec LAN-W300N_DR";
 
 	cfi@1f000000 {
 		compatible = "cfi-flash";
@@ -15,6 +15,33 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
+		partition@0 {
+			label = "u-boot";
+			reg = <0x0 0x30000>;
+			read-only;
+		};
+
+		partition@30000 {
+			label = "u-boot-env";
+			reg = <0x30000 0x10000>;
+			read-only;
+		};
+
+		factory: partition@40000 {
+			label = "factory";
+			reg = <0x40000 0x10000>;
+			read-only;
+		};
+
+		partition@50000 {
+			label = "kernel";
+			reg = <0x50000 0x120000>;
+		};
+
+		partition@160000 {
+			label = "rootfs";
+			reg = <0x170000 0x290000>;
+		};
 	};
 
 	gpio-leds {
@@ -53,51 +80,6 @@
 			linux,code = <0x198>;
 		};
 
-	};
-};
-
-&spi0 {
-	status = "okay";
-
-	m25p80@0 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "jedec,spi-nor";
-		reg = <0>;
-		linux,modalias = "m25p80", "mx25l3205d";
-		spi-max-frequency = <80000000>;
-
-		partition@0 {
-			label = "u-boot";
-			reg = <0x0 0x10000>;
-			read-only;
-		};
-
-		partition@10000 {
-			label = "u-boot-env";
-			reg = <0x10000 0x10000>;
-			read-only;
-		};
-
-		kernel: partition@20000 {
-			label = "kernel";
-			reg = <0x20000 0x120000>;
-		};
-		rootfs: partition@100000 {
-			label = "rootfs";
-			reg = <0x00140000 0x006c0000>;
-		};
-/*
-		partition@1300000 {
-			compatible = "denx,uimage";
-			label = "firmware";
-			reg = <0x20000 0x7e0000>;
-		};
-*/
-		partition@800000 {
-			label = "upgrade";
-			reg = <0x20000 0x7e0000>;
-		};
 	};
 };
 

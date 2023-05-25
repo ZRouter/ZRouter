@@ -8,7 +8,7 @@
 SOC_VENDOR=Ralink
 SOC_CHIP=RT3050F_FDT
 # TODO: size suffixes
-BOARD_FLASH_SIZE=8388608
+BOARD_FLASH_SIZE=4194304
 
 ###################################################
 #
@@ -19,7 +19,7 @@ BOARD_FLASH_SIZE=8388608
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-KERNCONF_FDT_DTS_FILE?=	"LAN-W300N.dts"
+ZKERNCONF_FDT_DTS_FILE?=  "dts/mips/RT-G32.dts"
 
 # This target use usb rootfs because of flash is 4 MByte
 # Logitec_LAN-W300N_kernel.kbin.oldlzma.uboot -> flash
@@ -32,7 +32,7 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 .endif
 
 # Include usb and SoC usb controller drivers
-WITH_USB=yes
+#WITH_USB=yes
 WITHOUT_WIRELESS=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules

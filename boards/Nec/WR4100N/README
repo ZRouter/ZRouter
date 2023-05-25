@@ -1,1 +1,9 @@
-This model is NEC original boot loader. You need change to u-boot.
+This model is NEC original boot loader.
+
+You need replace to u-boot on flash.
+
+Sirial connector is half pitch.
+
+LED is not recognize. May be that on wifi chip.
+
+This module like AP91.
