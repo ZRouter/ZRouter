@@ -108,18 +108,3 @@
 &otg {
 	status = "okay";
 };
-
-/*
-
-&spi1 {
-	status = "okay";
-	cs-gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
-	non-flash;
-	spigen@0 {
-		compatible = "freebsd,spigen";
-		spi-max-frequency = <10000000>;
-		status = "okay";
-	};
-};
-
-*/

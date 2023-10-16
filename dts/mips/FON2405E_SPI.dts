@@ -1,21 +1,12 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/tegra-gpio.h>
-#include "rt3050.dtsi"
+//#include "rt3050.dtsi"
+#include "fbsd-rt3050.dtsi"
 
 / {
 	compatible = "FON2405E", "ralink,rt3050-soc";
 	model = "FON FON2405E";
-
-	cfi@1f000000 {
-		compatible = "cfi-flash";
-		reg = <0x1f000000 0x800000>;
-		bank-width = <2>;
-		device-width = <2>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-
-	};
 
 	gpio-leds {
 		compatible = "gpio-leds";
@@ -81,11 +72,11 @@
 
 		kernel: partition@20000 {
 			label = "kernel";
-			reg = <0x20000 0x120000>;
+			reg = <0x20000 0x100000>;
 		};
 		rootfs: partition@100000 {
 			label = "rootfs";
-			reg = <0x00140000 0x006c0000>;
+			reg = <0x00120000 0x006e0000>;
 		};
 /*
 		partition@1300000 {
@@ -123,7 +114,31 @@
 //	ralink,mtd-eeprom = <&factory 0>;
 };
 
+/*
 &otg {
 	status = "okay";
 };
+*/
 
+&spi1 {
+	status = "okay";
+	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
+	non-flash;
+	spigen@0 {
+		compatible = "freebsd,spigen";
+		reg = <0>;
+//		spi-max-frequency = <500000>;
+		spi-max-frequency = <10000000>;
+		status = "okay";
+	};
+/*
+	m25p80@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		linux,modalias = "m25p80", "mx25l3205d";
+		spi-max-frequency = <80000000>;
+	};
+*/
+};
