@@ -127,8 +127,7 @@
 	spigen@0 {
 		compatible = "freebsd,spigen";
 		reg = <0>;
-//		spi-max-frequency = <500000>;
-		spi-max-frequency = <10000000>;
+		spi-max-frequency = <80000000>;	// SPICLK = 1
 		status = "okay";
 	};
 /*
