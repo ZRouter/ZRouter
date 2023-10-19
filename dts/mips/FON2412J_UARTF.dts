@@ -90,6 +90,10 @@
 
 &pinctrl {
 	state_default: pinctrl0 {
+		uartf {
+			ralink,group = "uartf";
+			ralink,function = "gpio uartf";
+		};
 		jtag {
 			ralink,group = "jtag";
 			ralink,function = "gpio";
