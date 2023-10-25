@@ -67,7 +67,7 @@ hint.map.5.readonly=1
 hint.gpio.0.function_set=0x00000000
 hint.gpio.0.function_clear=0x00000000
 
-hint.gpio.0.pinmask=0x0c8ff1c3
+hint.gpio.0.pinmask=0x0cbff1c3
 
 hint.gpioled.0.at="gpiobus0"
 hint.gpioled.0.pins=0x08000000
@@ -101,4 +101,11 @@ hint.gpiospi.0.sclk=1
 hint.gpiospi.0.mosi=3
 hint.gpiospi.0.miso=0
 hint.gpiospi.0.freq=100000000
+
+# https://github.com/OnionIoT/wiki/blob/master/Documentation/Hardware/Omega-Hardware.md
+# GPIO pin 20,21
+hint.gpioiic.0.at="gpiobus0"
+hint.gpioiic.0.pins=0x300000
+hint.gpioiic.0.scl=0
+hint.gpioiic.0.sda=1
 

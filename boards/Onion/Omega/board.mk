@@ -23,6 +23,12 @@ WITH_USB=yes
 KERNCONF_DEVICES+=spigen
 KERNCONF_DEVICES+=gpiospi
 
+KERNCONF_DEVICES+=gpioiic
+KERNCONF_DEVICES+=iicbb
+KERNCONF_DEVICES+=iicbus
+KERNCONF_DEVICES+=iic
+WORLD_SUBDIRS_USR_SBIN+=i2c
+
 ###################################################
 #
 # Vars for kernel config 
