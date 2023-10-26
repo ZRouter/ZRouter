@@ -1,6 +1,6 @@
 /dts-v1/;
 
-#include "rt3050.dtsi"
+#include "fbsd-rt3050.dtsi"
 
 / {
 	compatible = "WN-G300DGR", "ralink,rt3052-soc";
@@ -105,10 +105,10 @@
                 gpio-names = "scl", "sda";
         };
 
-        rtl8366rb {
-                compatible = "realtek,rtl8366rb";
-        };
-
+	rtl8366rb {
+		compatible = "realtek,rtl8366rb";
+		status = "okay";
+	};
 };
 
 &pinctrl {
@@ -151,4 +151,9 @@
 &otg {
 	status = "okay";
 };
+/*
+&i2c {
+        status = "okay";
+};
+*/
 

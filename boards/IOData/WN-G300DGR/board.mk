@@ -28,12 +28,15 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 KERNCONF_DEVICES+=      gpioiic
 KERNCONF_DEVICES+=      iicbb
+#KERNCONF_DEVICES+=      mtk_iic
 
 KERNCONF_DEVICES+=      iicbus
 KERNCONF_DEVICES+=      iic
-#KERNCONF_DEVICES+=      mtk_iic
+WORLD_SUBDIRS_USR_SBIN+=        i2c
 
-#KERNCONF_DEVICES+=     mdio
+
+WITHOUT_INTERNAL_SWITCH=yes
+KERNCONF_DEVICES+=     mdio
 KERNCONF_DEVICES+=      etherswitch
 KERNCONF_DEVICES+=      miiproxy
 KERNCONF_DEVICES+=      rtl8366rb
