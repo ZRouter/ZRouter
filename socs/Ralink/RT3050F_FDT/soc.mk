@@ -87,10 +87,12 @@ KERNCONF_DEVICES+=	uart_dev_mtk
 KERNCONF_DEVICES+=	tuntap
 KERNCONF_NODEVICES+=	uart_ns8250
 
+.if !defined(WITHOUT_SPI)
 KERNCONF_DEVICES+=	spibus
 KERNCONF_DEVICES+=	mx25l
-KERNCONF_DEVICES+=	mtk_intr_v1
 KERNCONF_DEVICES+=	mtk_spi_v1
+.endif
+KERNCONF_DEVICES+=	mtk_intr_v1
 KERNCONF_DEVICES+=	fdt_clock
 KERNCONF_DEVICES+=	fdt_pinctrl
 
