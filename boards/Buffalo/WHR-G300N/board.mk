@@ -27,6 +27,8 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:da0\\\"
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\" 
 .endif
 
+#KERNCONF_DEVICES+=	gpioiic
+#KERNCONF_DEVICES+=	iicbb
 KERNCONF_DEVICES+=	mtk_iic
 KERNCONF_DEVICES+=	iicbus
 KERNCONF_DEVICES+=	iic
