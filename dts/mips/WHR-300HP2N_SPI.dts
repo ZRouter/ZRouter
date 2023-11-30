@@ -140,7 +140,7 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "jtag", "uartf", "rgmii1", "rgmii2", "wled", "nd_sd";
+			ralink,group = "ephy", "uartf", "rgmii1", "rgmii2", "wled", "nd_sd";
 			ralink,function = "gpio";
 		};
 
@@ -152,8 +152,9 @@
 };
 
 &ethernet {
-	pinctrl-names = "default";
-	pinctrl-0 = <&ephy_pins>;
+// use jtag pin is gpio
+//	pinctrl-names = "default";
+//	pinctrl-0 = <&ephy_pins>;
 	mediatek,portmap = "llllw";
 };
 
