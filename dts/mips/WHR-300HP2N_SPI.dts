@@ -93,8 +93,8 @@
 		#size-cells = <1>;
 		compatible = "jedec,spi-nor";
 		reg = <0>;
-		linux,modalias = "m25p80", "s25fl064k";
-		spi-max-frequency = <10000000>;
+		linux,modalias = "w25q64", "s25fl064k";
+		spi-max-frequency = <133000000>;   // SPICLK = 1 (580/4)
 
 		partition@0 {
 			label = "u-boot";
@@ -168,8 +168,7 @@
 
 &spi1 {
 	status = "okay";
-//	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
-	cs-gpios = <&gpio0 17 1>;	// JTAG_TDO
+	cs-gpios = <&gpio2 0 1>;	// JTAG_TDO
 	non-flash;
 	spigen@0 {
 		compatible = "freebsd,spigen";
@@ -190,6 +189,10 @@
 };
 
 &i2c {
+	status = "okay";
+};
+
+&gdma {
 	status = "okay";
 };
 
