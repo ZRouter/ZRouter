@@ -2,7 +2,7 @@
 
 /* This module like Sitecom WLR-6000. But WLR-6000 use PCI chip for 2.4G WiFi. */
 
-#include "rt3883.dtsi"
+#include "zbsd-rt3883.dtsi"
 
 / {
 	compatible = "WN-AG450DGR", "ralink,rt3883-soc";
