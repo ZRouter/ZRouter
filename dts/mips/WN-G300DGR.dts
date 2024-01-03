@@ -1,6 +1,6 @@
 /dts-v1/;
 
-#include "fbsd-rt3050.dtsi"
+#include "zbsd-rt3050.dtsi"
 
 / {
 	compatible = "WN-G300DGR", "ralink,rt3052-soc";

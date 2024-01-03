@@ -1,7 +1,7 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/tegra-gpio.h>
-#include "fbsd-rt3050.dtsi"
+#include "zbsd-rt3050.dtsi"
 
 / {
 	compatible = "WHR-G300N", "ralink,rt3050-soc";

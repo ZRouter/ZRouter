@@ -2,7 +2,7 @@
 
 #include <dt-bindings/gpio/tegra-gpio.h>
 //#include "rt3050.dtsi"
-#include "fbsd-rt3050.dtsi"
+#include "zbsd-rt3050.dtsi"
 
 / {
 	compatible = "FON2405E", "ralink,rt3050-soc";
