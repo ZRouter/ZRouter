@@ -36,7 +36,6 @@ WORLD_SUBDIRS_USR_SBIN+=        i2c
 
 WITHOUT_SPI=yes
 
-WITHOUT_INTERNAL_SWITCH=yes
 KERNCONF_DEVICES+=     mdio
 KERNCONF_DEVICES+=      etherswitch
 KERNCONF_DEVICES+=      miiproxy
