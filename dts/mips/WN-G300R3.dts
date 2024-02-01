@@ -22,22 +22,27 @@
 			gpios = <&gpio1 14 1>;
 		};
 
+		/* GPIO#40 */
 		led3 {
 			label = "led3";
 			gpios = <&gpio2 0 1>;
 		};
+		/* GPIO#41 */
 		led4 {
 			label = "led4";
 			gpios = <&gpio2 1 1>;
 		};
+		/* GPIO#42 */
 		led5 {
 			label = "led5";
 			gpios = <&gpio2 2 1>;
 		};
+		/* GPIO#43 */
 		led6 {
 			label = "led6";
 			gpios = <&gpio2 3 1>;
 		};
+		/* GPIO#44 */
 		led7 {
 			label = "led7";
 			gpios = <&gpio2 4 1>;
@@ -71,6 +76,11 @@
 };
 
 &gpio2 {
+	status = "okay";
+};
+
+/* LED1 is WLED(GPIO#32) */
+&gpio3 {
 	status = "okay";
 };
 
