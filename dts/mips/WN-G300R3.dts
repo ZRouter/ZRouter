@@ -79,7 +79,7 @@
 	status = "okay";
 };
 
-/* LED1 is WLED(GPIO#32) */
+/* LED1 is WLED(GPIO#72) */
 &gpio3 {
 	status = "okay";
 };
