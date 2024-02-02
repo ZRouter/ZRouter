@@ -12,7 +12,7 @@ SOC_CHIP=MT7620A
 BOARD_FLASH_SIZE=4194304
 
 # use for mac address in flash
-WORLD_SUBDIRS_USR_BIN+=hexdump awk strings
+WORLD_SUBDIRS_USR_BIN+=awk strings
 
 ###################################################
 #
