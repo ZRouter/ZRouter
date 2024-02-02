@@ -16,12 +16,17 @@ adapt_prestart()
 # LED Power
 	gpioctl 9 0
 
-	kenv LAN_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0000440/{print $2":"$3":"$4":"$5":"$6":"$7}'`
-	kenv WIFI_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0000440/{print $8":"$9":"$10":"$11":"$12":"$13}'`
+	kenvmac=`kenv -q LAN_MAC_ADDR`
+	if [ -z "$kenvmac" ]; then
 
-	ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+		kenv LAN_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0000440/{print $2":"$3":"$4":"$5":"$6":"$7}'`
+		kenv WIFI_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0000440/{print $8":"$9":"$10":"$11":"$12":"$13}'`
 
-	hostname `kenv HostName`
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+
+		hostname `kenv HostName`
+
+	fi
 
 }
 
