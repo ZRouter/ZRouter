@@ -42,6 +42,11 @@
 			label = "rootfs";
 			reg = <0x170000 0x690000>;
 		};
+
+		partition@800000 {
+			label = "upgrade";
+			reg = <0x50000 0x7b0000>;
+		};
 	};
 
 	gpio-leds {
