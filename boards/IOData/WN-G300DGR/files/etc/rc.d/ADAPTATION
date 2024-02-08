@@ -23,6 +23,9 @@ ENVDEV="/dev/cfid0s.factory"
 
 		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
 
+		etherswitchcfg -f /dev/etherswitch1 port0 pvid 1
+		etherswitchcfg -f /dev/etherswitch1 vlangroup0 members 0,1,2,3,4,5
+
 		hostname `kenv HostName`
 
 	fi
