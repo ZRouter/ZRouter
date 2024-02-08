@@ -46,13 +46,19 @@
 
 		partition@160000 {
 			label = "rootfs";
-			reg = <0x00160000 0x002a0000>;
+			reg = <0x00160000 0x00290000>;
 			read-only;
 		};
 
-		partition@800000 {
+		partition@3f0000 {
 			label = "upgrade";
-			reg = <0x00050000 0x003b0000>;
+			reg = <0x00050000 0x003a0000>;
+		};
+
+		/* 8K sectors */
+		partition@800000 {
+			label = "config";
+			reg = <0x003f0000 0x00010000>;
 		};
 
 	};
