@@ -11,7 +11,6 @@ WORLD_SUBDIRS_LIB+= \
 	lib80211 \
 	libbz2 \
 	libc \
-	libcasper \
 	libedit \
 	libgeom \
 	libgpio \
