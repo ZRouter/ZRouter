@@ -59,5 +59,9 @@ post-install:
 	${INSTALL_LIB} ${STAGEDIR}/${PREFIX}/lib/libsyn123.so.0 ${ZPREFIX}/lib/
 	cd ${ZPREFIX}/lib;ln -s libsyn123.so.0 libsyn123.so
 	@${CP} -r ${STAGEDIR}/${PREFIX}/lib/mpg123 ${ZPREFIX}/lib/
+	${INSTALL_DATA} ${STAGEDIR}/${PREFIX}/include/fmt123.h ${ZPREFIX}/include/
+	${INSTALL_DATA} ${STAGEDIR}/${PREFIX}/include/mpg123.h ${ZPREFIX}/include/
+	${INSTALL_DATA} ${STAGEDIR}/${PREFIX}/include/out123.h ${ZPREFIX}/include/
+	${INSTALL_DATA} ${STAGEDIR}/${PREFIX}/include/syn123.h ${ZPREFIX}/include/
 
 .include <bsd.port.post.mk>
