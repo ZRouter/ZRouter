@@ -568,6 +568,13 @@ world-fix-lib-links:
 world:  build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 .ORDER: build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 
+.if defined(ZROUTER_TARGET) && !empty(ZROUTER_TARGET)
+.include "share/mk/zrouter.target.mk"
+.else
+target-build:
+	@echo "No ports defined in WORLD_SUBDIRS_PORTS"
+.endif
+
 .if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
 .if !exists(/usr/local/bin/perl)
 .error "ports need perl command. Please install that package."
@@ -594,6 +601,8 @@ rootfs-dir!
 
 kernel-install-dir:
 	mkdir -p ${KERNELDESTDIR}
+
+target: target-build
 
 ports: port-build
 
@@ -930,7 +939,7 @@ split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
 ${NEW_IMAGE}:	${NEW_IMAGE_TYPE}
 
-all:	world kernel ports ${NEW_IMAGE}
+all:	world kernel ports target ${NEW_IMAGE}
 
 .include <bsd.obj.mk>
 
