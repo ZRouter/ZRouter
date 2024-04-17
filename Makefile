@@ -856,15 +856,14 @@ trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
-
+# for BCM338X
 psimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
-	PATH=${IMAGE_BUILD_PATHS} ProgramStore -s 0x3383 -v 8271.8486 -a 0x80040120 -c 1 -o ${NEW_IMAGE} -f ${KERNEL_PACKED_NAME}
+	cd ${ZROUTER_OBJ};PATH=${IMAGE_BUILD_PATHS} ProgramStore ${IMAGE_OPTION} -a ${UBOOT_KERNEL_ENTRY_POINT} -c 1 -o ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX} -f ${KERNEL_PACKED_NAME}
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
 zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
 	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
-#	PATH=${IMAGE_BUILD_PATHS} ProgramStore
 	@echo "==="
 	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
 	@echo -n "/etc/zrouter_version : "
