@@ -40,3 +40,9 @@ ${ZTOOLS_PATH}/mktplinkfw:	${ZTOOLS_PATH}_dir
 	cd ${ZROUTER_ROOT}/tools/mktplinkfw; mkdir -p ${ZROUTER_OBJ}/`pwd`;  \
 	    MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
 
+${ZTOOLS_PATH}/ProgramStore:	${ZTOOLS_PATH}_dir
+	cd ${ZROUTER_ROOT}/tools/ProgramStore; mkdir -p ${ZROUTER_OBJ}/`pwd`;  \
+	    mkdir -p ${ZROUTER_OBJ}/`pwd`/7znew; \
+	    mkdir -p ${ZROUTER_OBJ}/`pwd`/decompress; \
+	    MAKEOBJDIRPREFIX=${ZROUTER_OBJ}/ ${MAKE} ${ZTOOLS_INSTALL_VAR} all install
+
