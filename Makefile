@@ -858,7 +858,7 @@ trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH
 
 # for BCM338X
 psimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
-	cd ${ZROUTER_OBJ};PATH=${IMAGE_BUILD_PATHS} ProgramStore ${IMAGE_OPTION} -a ${UBOOT_KERNEL_ENTRY_POINT} -c 1 -o ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX} -f ${KERNEL_PACKED_NAME}
+	cd ${ZROUTER_OBJ};PATH=${IMAGE_BUILD_PATHS} ProgramStore ${IMAGE_OPTION} -a ${UBOOT_KERNEL_ENTRY_POINT} -c 1 -o ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX} -f ${KERNEL_PACKED_NAME} -f2 ${ROOTFS_PACKED_NAME} -p 0x10000 -n
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )

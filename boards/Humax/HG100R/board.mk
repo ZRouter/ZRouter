@@ -24,7 +24,7 @@ KERNCONF_KERNLOADADDR?=0x80040000
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 # Include usb and SoC usb controller drivers
-#WITH_USB=yes
+WITH_USB=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
@@ -51,6 +51,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007c0000
 
 PACKING_KERNEL_IMAGE?=kernel.kbin
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
+#PACKING_ROOTFS_IMAGE?=rootfs_clean.iso
 
 IMAGE_OPTION=-s 0x3383 -v 8271.8486
 IMAGE_SUFFIX=psimage

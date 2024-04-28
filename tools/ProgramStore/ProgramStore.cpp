@@ -55,6 +55,7 @@
 #define CLI_ARG_COMPRESSION     'c'
 #define CLI_ARG_DEBUG           'd'
 #define CLI_ARG_FILENAME        'f'
+#define CLI_ARG_NOCOMP2         'n'
 #define CLI_ARG_OUTPUT_FILENAME 'o'
 #define CLI_ARG_PAD             'p'
 #define CLI_ARG_REVISION        'r'
@@ -137,6 +138,7 @@ int main(int argc, char* argv[])
     int              padLength;
     bool             debug_on = false;
     bool             dual_file = false;
+    bool             noComp2 = false;
     BcmProgramHeader proghead;
     FILE            *outfile;
     unsigned int     crc_word;
@@ -172,6 +174,11 @@ int main(int argc, char* argv[])
             {
                 switch ((argv[ i ])[ 1 ])
                 {
+                    case CLI_ARG_NOCOMP2 :
+                        noComp2 = true;
+
+                        break;
+
                     case CLI_ARG_DEBUG :
                         // debug on to dump header contents ...
                         debug_on = true;
@@ -487,7 +494,7 @@ int main(int argc, char* argv[])
         compdatasize -= (complength1 + padLength);
         if (dual_file)
         {
-            complength2 = CompressFile( infile2, indata, filelength2, compdata + complength1 + padLength, compdatasize, proghead.usControl );
+            complength2 = CompressFile( infile2, indata, filelength2, compdata + complength1 + padLength, compdatasize, noComp2 ? NoCompression : proghead.usControl );
         }
 
         totalLength                      = complength1 + padLength + complength2;
