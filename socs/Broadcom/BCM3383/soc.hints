@@ -22,3 +22,7 @@ hint.uart.0.msize="0x20"
 hint.spi.0.at="obio0"
 hint.spi.0.maddr=0x14e01000
 hint.spi.0.msize=0x1000
+
+hint.gpio.0.at="obio0"
+hint.gpio.0.maddr=0x14e00100
+hint.gpio.0.msize=0x400
