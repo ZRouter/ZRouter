@@ -22,6 +22,32 @@
 			gpios = <&gpio1 14 1>;
 		};
 
+		/* GPIO#40 */
+		led3 {
+			label = "led3";
+			gpios = <&gpio2 0 1>;
+		};
+		/* GPIO#41 */
+		led4 {
+			label = "led4";
+			gpios = <&gpio2 1 1>;
+		};
+		/* GPIO#42 */
+		led5 {
+			label = "led5";
+			gpios = <&gpio2 2 1>;
+		};
+		/* GPIO#43 */
+		led6 {
+			label = "led6";
+			gpios = <&gpio2 3 1>;
+		};
+		/* GPIO#44 */
+		led7 {
+			label = "led7";
+			gpios = <&gpio2 4 1>;
+		};
+
 	};
 
 	gpio-keys-polled {
@@ -53,6 +79,11 @@
 	status = "okay";
 };
 
+/* LED1 is WLED(GPIO#72) */
+&gpio3 {
+	status = "okay";
+};
+
 &spi0 {
 	status = "okay";
 
@@ -62,7 +93,7 @@
 		compatible = "jedec,spi-nor";
 		reg = <0>;
 		linux,modalias = "m25p80", "s25fl064k";
-		spi-max-frequency = <10000000>;
+		spi-max-frequency = <104000000>;   // en25q32
 
 		partition@0 {
 			label = "u-boot";

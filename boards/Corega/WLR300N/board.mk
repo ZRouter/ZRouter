@@ -29,6 +29,7 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 # Include usb and SoC usb controller drivers
 WITH_USB=yes
+WITHOUT_SPI=yes
 # Builded modules
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt

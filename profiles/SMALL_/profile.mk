@@ -7,7 +7,6 @@ lib80211 \
 libbz2 \
 libbsm \
 libc \
-libcasper \
 libedit \
 libelf \
 libexpat \

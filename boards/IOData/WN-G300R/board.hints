@@ -1,8 +1,10 @@
 # $FreeBSD$
 
-hint.arge.0.phymask=0x1
+# WAN and LAN 0-2 is arge1. LAN 3 is arge0 phy
 
-# arge1: connected to the LAN switch MAC, at 1000BaseTX / GMII.
+hint.arge.0.phymask=0x10
+
+# arge1: connected to the switch MAC, at 1000BaseTX / GMII.
 
 hint.arge.1.phymask=0x0
 # hint.arge.1.miimode=1         # GMII

@@ -28,12 +28,15 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:cfid0s.rootfs.uzip\\\"
 
 KERNCONF_DEVICES+=      gpioiic
 KERNCONF_DEVICES+=      iicbb
+#KERNCONF_DEVICES+=      mtk_iic
 
 KERNCONF_DEVICES+=      iicbus
 KERNCONF_DEVICES+=      iic
-#KERNCONF_DEVICES+=      mtk_iic
+WORLD_SUBDIRS_USR_SBIN+=        i2c
 
-#KERNCONF_DEVICES+=     mdio
+WITHOUT_SPI=yes
+
+KERNCONF_DEVICES+=     mdio
 KERNCONF_DEVICES+=      etherswitch
 KERNCONF_DEVICES+=      miiproxy
 KERNCONF_DEVICES+=      rtl8366rb
@@ -47,7 +50,7 @@ WORLD_SUBDIRS_SBIN+=    etherswitchcfg
 # device wlan in kernel alredy enable this modules
 #KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 #KERNCONF_MODULES_OVERRIDE+=usb/uplcom usb/u3g usb/umodem usb/umass usb/ucom cam zlib
-KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
+#KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 #KERNCONF_MODULES_OVERRIDE+=cam zlib
 #KERNCONF_MODULES_OVERRIDE+=usb/run runfw
 
@@ -64,7 +67,8 @@ KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
+# This model is last block can't update because of it is 8k sectors.
+FIRMWARE_IMAGE_SIZE_MAX=0x003a0000
 
 
 ###################################################

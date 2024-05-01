@@ -35,6 +35,11 @@ KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/flash/spi0s.rootfs.uzip\\\"
 #KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 #KERNCONF_MODULES_OVERRIDE+=cam zlib
 #KERNCONF_MODULES_OVERRIDE+=usb/run runfw
+KERNCONF_DEVICES+=	mtk_iic
+KERNCONF_DEVICES+=	iicbus
+KERNCONF_DEVICES+=	iic
+WORLD_SUBDIRS_USR_SBIN+=	i2c
+
 
 ###################################################
 #

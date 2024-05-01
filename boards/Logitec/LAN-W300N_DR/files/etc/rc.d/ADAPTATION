@@ -13,7 +13,8 @@ stop_cmd="adapt_stop"
 
 adapt_prestart()
 {
-	gpioctl -f /dev/gpioc0 -c 10 IN II PU
+	gpioctl -f /dev/gpioc0 -c 11 OUT
+	gpioctl -f /dev/gpioc0 11 1
 
 	# Import MAC addresses with known names
 #	kenv LAN_MAC_ADDR=`kenv ethaddr`

@@ -1,5 +1,5 @@
 PORTNAME=	mruby
-PORTVERSION=	3.2.0
+PORTVERSION=	3.3.0
 CATEGORIES=	lang
 DISTNAME=	${PORTVERSION}
 EXTRACT_SUFX=	.tar.gz
@@ -25,6 +25,6 @@ do-build:
 do-install:
 #	@printenv
 	${INSTALL_PROGRAM} ${WRKSRC}/build/zrouter/bin/mruby ${ZPREFIX}/bin/mruby
-	${INSTALL_PROGRAM} ${WRKSRC}/build/zrouter/bin/mirb ${ZPREFIX}/bin/mirb
+#	${INSTALL_PROGRAM} ${WRKSRC}/build/zrouter/bin/mirb ${ZPREFIX}/bin/mirb
 
 .include <bsd.port.mk>

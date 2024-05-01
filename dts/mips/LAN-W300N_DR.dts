@@ -42,6 +42,11 @@
 			label = "rootfs";
 			reg = <0x170000 0x290000>;
 		};
+
+		partition@400000 {
+			label = "upgrade";
+			reg = <0x50000 0x3b0000>;
+		};
 	};
 
 	gpio-leds {
@@ -109,17 +114,3 @@
 	status = "okay";
 };
 
-/*
-
-&spi1 {
-	status = "okay";
-	cs-gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
-	non-flash;
-	spigen@0 {
-		compatible = "freebsd,spigen";
-		spi-max-frequency = <10000000>;
-		status = "okay";
-	};
-};
-
-*/

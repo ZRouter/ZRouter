@@ -82,41 +82,27 @@
 
 	};
 
-	/* This module have spi patern back side */
-	spi1: spi@gpio0 {
-		compatible = "spi-gpio";
-		pinctrl-names = "default";
-//		pinctrl-0 = <&spi2_pins_cfa10049>;
-		status = "okay";
-		gpio-sck = <&gpio0 4 0>;
-		gpio-mosi = <&gpio0 5 0>;
-		gpio-miso = <&gpio0 6 0>;
-		cs-gpios = <&gpio0 3 0>;
-		num-chipselects = <1>;
+};
+
+/* This module have spi patern back side */
+&spi0 {
+	status = "okay";
+
+	m25p80@0 {
 		#address-cells = <1>;
-		#size-cells = <0>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		linux,modalias = "m25p80", "mx25l3205d";
+		spi-max-frequency = <80000000>;
 
-		m25p80@0 {
-			#address-cells = <1>;
-			#size-cells = <1>;
-			compatible = "jedec,spi-nor";
-			reg = <0>;
-			linux,modalias = "m25p80", "mx25l3205d";
-			spi-max-frequency = <80000000>;
-
-			partition@0 {
-				label = "local";
-				reg = <0x0 0x800000>;
-				read-only;
-			};
-		};
 	};
 };
 
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "spi", "jtag", "uartf", "rgmii", "mdio";
+			ralink,group = "i2c", "jtag", "uartf", "rgmii", "mdio";
 			ralink,function = "gpio";
 		};
 

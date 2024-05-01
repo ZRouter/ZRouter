@@ -380,6 +380,8 @@ _WORLD_TCBUILD_ENV= \
 	WITHOUT_CRYPTO=yes \
 	WITHOUT_NIS=yes \
 	WITHOUT_KERBEROS=yes \
+	WITHOUT_CAPSICUM=yes \
+	WITHOUT_CASPER=yes \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
@@ -401,6 +403,8 @@ _WORLD_BUILD_ENV= \
 	WITHOUT_NLS=yes \
 	WITHOUT_PROFILE=yes \
 	WITHOUT_RESCUE=yes \
+	WITHOUT_CAPSICUM=yes \
+	WITHOUT_CASPER=yes \
 	MALLOC_PRODUCTION=yes \
 	$(_LIBC_OPT) \
 	MK_OFED=no \
@@ -564,6 +568,13 @@ world-fix-lib-links:
 world:  build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 .ORDER: build-verify build-info world-toolchain world-build world-install world-fix-lib-links
 
+.if defined(ZROUTER_TARGET) && !empty(ZROUTER_TARGET)
+.include "share/mk/zrouter.target.mk"
+.else
+target-build:
+	@echo "No ports defined in WORLD_SUBDIRS_PORTS"
+.endif
+
 .if defined(WORLD_SUBDIRS_PORTS) && !empty(WORLD_SUBDIRS_PORTS)
 .if !exists(/usr/local/bin/perl)
 .error "ports need perl command. Please install that package."
@@ -590,6 +601,8 @@ rootfs-dir!
 
 kernel-install-dir:
 	mkdir -p ${KERNELDESTDIR}
+
+target: target-build
 
 ports: port-build
 
@@ -843,10 +856,13 @@ trximage ${NEW_MAGE}:  ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}	${ZTOOLS_PATH
 	@echo "++++++++++++++ Making $@ ++++++++++++++"
 	PATH=${IMAGE_BUILD_PATHS} asustrx -o ${NEW_IMAGE} ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
+# for BCM338X
+psimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
+	cd ${ZROUTER_OBJ};PATH=${IMAGE_BUILD_PATHS} ProgramStore ${IMAGE_OPTION} -a ${UBOOT_KERNEL_ENTRY_POINT} -c 1 -o ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX} -f ${KERNEL_PACKED_NAME} -f2 ${ROOTFS_PACKED_NAME} -p 0x10000 -n
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
-zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
+zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
 	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
 	@echo "==="
 	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
@@ -926,7 +942,7 @@ split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 
 ${NEW_IMAGE}:	${NEW_IMAGE_TYPE}
 
-all:	world kernel ports ${NEW_IMAGE}
+all:	world kernel ports target ${NEW_IMAGE}
 
 .include <bsd.obj.mk>
 
