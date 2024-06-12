@@ -3,9 +3,15 @@
 hint.obio.0.at="nexus0"
 
 hint.uart.0.at="obio0"
+hint.uart.0.maddr=0x14e00200
+hint.uart.0.msize=0x20
+#hint.uart.0.irq=3
+#hint.uart.0.flags="0x30"
+
+hint.uart.0.at="obio0"
 hint.uart.0.maddr="0x14e00500"
 hint.uart.0.msize="0x20"
-hint.uart.0.irq=2
+#hint.uart.0.irq=10
 
 #ehci
 #hint.ehci.0.at="obio0"

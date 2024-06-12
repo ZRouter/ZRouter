@@ -6,7 +6,7 @@
 ###################################################
 
 SOC_VENDOR=Broadcom
-SOC_CHIP=BCM3383
+SOC_CHIP=BCM3380
 # TODO: size suffixes
 BOARD_FLASH_SIZE=4194304
 
@@ -15,7 +15,8 @@ KERNEL_COMPRESSION_TYPE=gzip
 
 KERNCONF_KERNLOADADDR?=0x80040000
 
-KERNCONF_OPTIONS+=	BCM338X_REALMEM=(128*1024*1024)
+#  W9751G6NB (512M bits DDR2 SDRAM)
+KERNCONF_OPTIONS+=	BCM338X_REALMEM=(64*1024*1024)
 
 ###################################################
 #
