@@ -1,6 +1,7 @@
 #
 
 hint.obio.0.at="nexus0"
+hint.obio.0.irq=2
 
 hint.uart.0.at="obio0"
 hint.uart.0.maddr="0x14e00500"
@@ -8,16 +9,22 @@ hint.uart.0.msize="0x20"
 hint.uart.0.irq=2
 
 #ehci
-#hint.ehci.0.at="obio0"
-#hint.ehci.0.maddr=0x12e00000
-#hint.ehci.0.msize=0x100
-#hint.ehci.0.irq=6
+hint.ehci.0.at="obio0"
+hint.ehci.0.maddr=0x12e00000
+hint.ehci.0.msize=0x100
+hint.ehci.0.irq=24
 
 #ohci
 #hint.ohci.0.at="obio0"
 #hint.ohci.0.maddr=0x12e00100
 #hint.ohci.0.msize=0x100
-#hint.ehci.0.irq=6
+#hint.ohci.0.irq=23
+
+#hint.unimac.0.at="obio0"
+#hint.unimac.0.maddr=0x12c00000
+#hint.unimac.0.msize=0x4600
+#hint.unimac.0.irq=13
+#hint.unimac.0.irq=5
 
 hint.spi.0.at="obio0"
 hint.spi.0.maddr=0x14e01000
@@ -26,3 +33,4 @@ hint.spi.0.msize=0x1000
 hint.gpio.0.at="obio0"
 hint.gpio.0.maddr=0x14e00100
 hint.gpio.0.msize=0x400
+
