@@ -1,6 +1,7 @@
 #
 
 hint.obio.0.at="nexus0"
+hint.obio.0.irq=2
 
 hint.uart.0.at="obio0"
 hint.uart.0.maddr=0x14e00200
