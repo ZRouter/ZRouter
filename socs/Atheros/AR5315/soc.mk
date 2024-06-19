@@ -8,8 +8,6 @@ KERNCONF_IDENT?=	AR5315
 KERNCONF_CPU=		CPU_MIPS4KC
 KERNCONF_FILES+=	"../atheros/ar531x/files.ar5315"
 
-KERNCONF_OPTIONS+=	INTRNG
-
 # XXX Maybe project definitions, maybe only board
 
 KERNCONF_MAKEOPTIONS+=	"INLINE_LIMIT=768"
