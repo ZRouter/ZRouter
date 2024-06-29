@@ -51,14 +51,26 @@
 		};
 
 		partition@2 {
+			label = "u-boot-env";
+			reg = <0xf0000 0x10000>;
+			read-only;
+		};
+
+		partition@3 {
 			label = "kernel";
 			reg = <0x300000 0x110000>;
 			read-only;
 		};
 
-		partition@3 {
+
+		partition@4 {
 			label = "rootfs";
 			reg = <0x410000 0x3f0000>;
+		};
+
+		partition@5 {
+			label = "upgrade";
+			reg = <0x300000 0x500000>;
 		};
 	};
 };
