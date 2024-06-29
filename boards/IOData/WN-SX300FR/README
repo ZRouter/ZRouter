@@ -1,0 +1,6 @@
+This module use Z-LOADER.
+
+This command is flash.
+
+ZLB> ATNR 1,IOData_WN-SX300FR.zimage
+
