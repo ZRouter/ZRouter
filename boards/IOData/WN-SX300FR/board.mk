@@ -26,6 +26,8 @@ ZKERNCONF_FDT_DTS_FILE?= "dts/mips/WN-SX300FR.dts"
 
 KERNCONF_OPTIONS+=     ROOTDEVNAME=\\\"cd9660:/dev/flash/spi0s.rootfs.uzip\\\" 
 
+WITHOUT_WIRELESS=yes
+
 # Include usb and SoC usb controller drivers
 #WITH_USB=yes
 # Builded modules

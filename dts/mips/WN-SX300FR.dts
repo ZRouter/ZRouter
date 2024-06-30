@@ -58,14 +58,14 @@
 
 		partition@3 {
 			label = "kernel";
-			reg = <0x300000 0x110000>;
+			reg = <0x300000 0x100000>;
 			read-only;
 		};
 
 
 		partition@4 {
 			label = "rootfs";
-			reg = <0x410000 0x3f0000>;
+			reg = <0x400000 0x400000>;
 		};
 
 		partition@5 {
