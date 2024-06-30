@@ -47,7 +47,8 @@ WITHOUT_WIRELESS=yes
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
+# 8M(MX25L6405D) - Z-LOADER(3M)
+FIRMWARE_IMAGE_SIZE_MAX=0x00500000
 
 
 ###################################################
