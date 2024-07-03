@@ -54,7 +54,7 @@
 
 		status {
 			label = "status";
-			gpios = <&gpio0 14 0>;
+			gpios = <&gpio0 13 0>;
 		};
 
 		led1 {
