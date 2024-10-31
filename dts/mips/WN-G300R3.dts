@@ -80,9 +80,11 @@
 };
 
 /* LED1 is WLED(GPIO#72) */
+/* disable because of crash by sysctl dev.gpioc.3
 &gpio3 {
 	status = "okay";
 };
+*/
 
 &spi0 {
 	status = "okay";
