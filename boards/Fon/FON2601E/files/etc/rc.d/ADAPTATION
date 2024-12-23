@@ -14,7 +14,7 @@ stop_cmd="adapt_stop"
 adapt_prestart()
 {
 # LED Power
-	gpioctl 9 0
+	gpioctl 9 1
 
 	kenvmac=`kenv -q LAN_MAC_ADDR`
 	if [ -z "$kenvmac" ]; then
