@@ -69,7 +69,7 @@ KERNCONF_DEVICES+=	ath_rate_sample
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
 # 3538944
-FIRMWARE_IMAGE_SIZE_MAX=0x00360000
+FIRMWARE_IMAGE_SIZE_MAX=0x003b0000
 
 ###################################################
 #
