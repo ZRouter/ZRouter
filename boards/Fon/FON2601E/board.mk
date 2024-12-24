@@ -10,8 +10,6 @@ SOC_CHIP=MT7620A
 # TODO: size suffixes
 BOARD_FLASH_SIZE=16777216
 
-UBOOT_FOXCONPAD=yes
-
 # use for mac address in flash
 WORLD_SUBDIRS_USR_BIN+=hexdump awk
 
@@ -37,10 +35,6 @@ WITH_USB=yes
 #KERNCONF_MODULES_OVERRIDE+=usb/umass cam zlib
 #KERNCONF_MODULES_OVERRIDE+=cam zlib
 #KERNCONF_MODULES_OVERRIDE+=usb/run runfw
-KERNCONF_DEVICES+=	mtk_iic
-KERNCONF_DEVICES+=	iicbus
-KERNCONF_DEVICES+=	iic
-WORLD_SUBDIRS_USR_SBIN+=	i2c
 
 
 ###################################################
@@ -52,7 +46,7 @@ WORLD_SUBDIRS_USR_SBIN+=	i2c
 
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
+FIRMWARE_IMAGE_SIZE_MAX=0x00f90000
 
 
 ###################################################
@@ -64,6 +58,7 @@ FIRMWARE_IMAGE_SIZE_MAX=0x007a0000
 KERNEL_COMPRESSION=oldlzma
 KERNEL_COMPRESSION_TYPE=oldlzma
 UBOOT_KERNEL_COMPRESSION_TYPE=lzma
+UBOOT_FOXCONPAD=yes
 
 MKULZMA_BLOCKSIZE=65536
 
