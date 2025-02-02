@@ -17,7 +17,7 @@ KERNCONF_HINTS=		"BCM3383.hints"
 
 #KERNCONF_KERN_LDSCRIPT_NAME=	ldscript.mips.cfe
 
-KERNCONF_OPTIONS+=	SMP
+#KERNCONF_OPTIONS+=	SMP
 KERNCONF_OPTIONS+=	MIPS_NIRQ=256
 
 # XXX Maybe project definitions, maybe only board
