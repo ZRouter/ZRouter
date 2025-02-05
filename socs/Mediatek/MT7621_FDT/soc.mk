@@ -73,6 +73,7 @@ KERNCONF_OPTIONS+=	_KPOSIX_PRIORITY_SCHEDULING
 KERNCONF_DEVICES+=	uart_ns8250
 
 KERNCONF_DEVICES+=	nvram2env
+KERNCONF_DEVICES+=	xz
 KERNCONF_DEVICES+=	geom_uzip
 KERNCONF_DEVICES+=	geom_map
 KERNCONF_OPTIONS+=      CD9660
@@ -108,6 +109,7 @@ KERNCONF_DEVICES+=      xhci
 KERNCONF_DEVICES+=	dwcotg
 .endif
 
+.if defined(WITH_USB)
 # USB umass(4) storage and da(4) support
 KERNCONF_DEVICES+=      umass
 KERNCONF_DEVICES+=      da
@@ -115,6 +117,7 @@ KERNCONF_DEVICES+=      da
 # CAM support, required if umass(4) is enabled above
 KERNCONF_DEVICES+=      pass
 KERNCONF_DEVICES+=      scbus
+.endif
 
 # Ethernet, BPF and bridge support
 KERNCONF_DEVICES+=	miibus
