@@ -106,9 +106,7 @@ KERNCONF_DEVICES+=	usb			# USB Bus (required)
 KERNCONF_DEVICES+=	mtk_usb_phy
 KERNCONF_DEVICES+=      xhci
 KERNCONF_DEVICES+=	dwcotg
-.endif
 
-.if defined(WITH_USB)
 # USB umass(4) storage and da(4) support
 KERNCONF_DEVICES+=      umass
 KERNCONF_DEVICES+=      da
