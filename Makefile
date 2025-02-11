@@ -862,7 +862,7 @@ psimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStor
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
-zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
+zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
 	@echo "==="
 	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
