@@ -116,6 +116,10 @@ KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${KERNCONF_FDT_DTS_FILE}"
 KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${ZROUTER_ROOT}/${ZKERNCONF_FDT_DTS_FILE}"
 .endif
 
+.if ${.TARGETS} == "mfskernel"
+KERNCONF_MAKEOPTIONS+=  "MFS_IMAGE=${ZROUTER_OBJ}/${KERNCONF_IDENT}_${PACKING_ROOTFS_IMAGE}"
+.endif
+
 # resolve board flash size with trailing M or K
 .if defined(BOARD_FLASH_SIZE)
 BOARD_FLASH_SIZE!=echo "${BOARD_FLASH_SIZE}" | \
@@ -943,6 +947,8 @@ split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 ${NEW_IMAGE}:	${NEW_IMAGE_TYPE}
 
 all:	world kernel ports target ${NEW_IMAGE}
+
+mfskernel:	kernel-build ${KERNEL_PACKED_NAME}
 
 .include <bsd.obj.mk>
 

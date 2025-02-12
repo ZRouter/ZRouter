@@ -1,0 +1,10 @@
+console	"/usr/libexec/getty std.57600"	xterm	off  secure
+ttyu0	"/usr/libexec/getty 3wire.57600"	vt100	on secure
+#ttyu1	"/usr/libexec/getty 3wire.57600"	vt100	on secure
+pts/0   none                    network secure
+pts/1   none                    network secure
+pts/2   none                    network secure
+pts/3   none                    network secure
+pts/4   none                    network secure
+pts/5   none                    network secure
+
