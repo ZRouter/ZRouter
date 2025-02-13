@@ -17,6 +17,8 @@ adapt_prestart()
 
 adapt_start()
 {
+	# LED OFF
+	gpioctl 8 1
 }
 
 adapt_poststart()
