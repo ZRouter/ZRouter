@@ -169,6 +169,7 @@
 
 #define IH_MAGIC	0x27051956	/* Image Magic Number		*/
 #define IH_NMLEN		32	/* Image Name Length		*/
+#define IH_FOXCONPAD		32	/* Image Foxcon Pad		*/
 
 /*
  * Legacy format image header,
@@ -187,6 +188,7 @@ typedef struct image_header {
 	uint8_t		ih_type;	/* Image Type			*/
 	uint8_t		ih_comp;	/* Compression Type		*/
 	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
+	uint8_t		ih_pad[IH_FOXCONPAD];	/* Foxcon Pad		*/
 } image_header_t;
 
 typedef struct image_info {

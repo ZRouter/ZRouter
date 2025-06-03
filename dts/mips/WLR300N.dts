@@ -52,24 +52,37 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 
+		/* D37 */
 		status {
 			label = "status";
-			gpios = <&gpio0 14 0>;
+			gpios = <&gpio0 8 0>;
 		};
 
-		led1 {
-			label = "led1";
-			gpios = <&gpio0 11 0>;
-		};
-
-		led2 {
-			label = "led2";
-			gpios = <&gpio0 9 1>;
-		};
-
-		led3 {
-			label = "led3";
+		led30 {
+			label = "led30";
 			gpios = <&gpio0 12 1>;
+		};
+
+		led31 {
+			label = "led31";
+			gpios = <&gpio0 4 0>;
+		};
+
+		/* led32? */
+
+		led33 {
+			label = "led33";
+			gpios = <&gpio0 5 1>;
+		};
+
+		led35 {
+			label = "led35";
+			gpios = <&gpio0 6 1>;
+		};
+
+		fd1 {
+			label = "fd1";
+			gpios = <&gpio0 13 1>;
 		};
 
 	};
@@ -91,7 +104,7 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "jtag", "uartf", "rgmii", "mdio";
+			ralink,group = "i2c", "spi", "jtag", "uartf", "rgmii", "mdio";
 			ralink,function = "gpio";
 		};
 

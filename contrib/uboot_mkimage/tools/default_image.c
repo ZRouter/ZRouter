@@ -32,6 +32,9 @@
 #include <u-boot/crc.h>
 
 static image_header_t header;
+static int foxconpad = 0;
+
+#define IM_HEADERSIZE (sizeof(image_header_t) - (foxconpad ? 0 : IH_FOXCONPAD))
 
 static int image_check_image_types (uint8_t type)
 {
@@ -62,7 +65,7 @@ static int image_verify_header (unsigned char *ptr, int image_size,
 	 * checksum field for checking - this can't be done
 	 * on the PROT_READ mapped data.
 	 */
-	memcpy (hdr, ptr, sizeof(image_header_t));
+	memcpy (hdr, ptr, IM_HEADERSIZE);
 
 	if (be32_to_cpu(hdr->ih_magic) != IH_MAGIC) {
 		fprintf (stderr,
@@ -72,7 +75,7 @@ static int image_verify_header (unsigned char *ptr, int image_size,
 	}
 
 	data = (const unsigned char *)hdr;
-	len  = sizeof(image_header_t);
+	len  = IM_HEADERSIZE;
 
 	checksum = be32_to_cpu(hdr->ih_hcrc);
 	hdr->ih_hcrc = cpu_to_be32(0);	/* clear for re-calculation */
@@ -84,8 +87,8 @@ static int image_verify_header (unsigned char *ptr, int image_size,
 		return -FDT_ERR_BADSTATE;
 	}
 
-	data = (const unsigned char *)ptr + sizeof(image_header_t);
-	len  = image_size - sizeof(image_header_t) ;
+	data = (const unsigned char *)ptr + IM_HEADERSIZE;
+	len  = image_size - IM_HEADERSIZE ;
 
 	checksum = be32_to_cpu(hdr->ih_dcrc);
 	if (crc32 (0, data, len) != checksum) {
@@ -106,13 +109,13 @@ static void image_set_header (void *ptr, struct stat *sbuf, int ifd,
 
 	checksum = crc32 (0,
 			(const unsigned char *)(ptr +
-				sizeof(image_header_t)),
-			sbuf->st_size - sizeof(image_header_t));
+				IM_HEADERSIZE),
+			sbuf->st_size - IM_HEADERSIZE);
 
 	/* Build new header */
 	image_set_magic (hdr, IH_MAGIC);
 	image_set_time (hdr, sbuf->st_mtime);
-	image_set_size (hdr, sbuf->st_size - sizeof(image_header_t));
+	image_set_size (hdr, sbuf->st_size - IM_HEADERSIZE);
 	image_set_load (hdr, params->addr);
 	image_set_ep (hdr, params->ep);
 	image_set_dcrc (hdr, checksum);
@@ -124,7 +127,7 @@ static void image_set_header (void *ptr, struct stat *sbuf, int ifd,
 	image_set_name (hdr, params->imagename);
 
 	checksum = crc32 (0, (const unsigned char *)hdr,
-				sizeof(image_header_t));
+				IM_HEADERSIZE);
 
 	image_set_hcrc (hdr, checksum);
 }
@@ -134,7 +137,7 @@ static void image_set_header (void *ptr, struct stat *sbuf, int ifd,
  */
 static struct image_type_params defimage_params = {
 	.name = "Default Image support",
-	.header_size = sizeof(image_header_t),
+//	.header_size = sizeof(image_header_t),
 	.hdr = (void*)&header,
 	.check_image_type = image_check_image_types,
 	.verify_header = image_verify_header,
@@ -143,7 +146,9 @@ static struct image_type_params defimage_params = {
 	.check_params = image_check_params,
 };
 
-void init_default_image_type (void)
+void init_default_image_type (int fcpad)
 {
+	foxconpad = fcpad;
+	defimage_params.header_size = IM_HEADERSIZE;
 	mkimage_register (&defimage_params);
 }

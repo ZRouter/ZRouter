@@ -148,6 +148,7 @@ main (int argc, char **argv)
 	char *ptr;
 	int retval = 0;
 	struct image_type_params *tparams = NULL;
+	int foxconpad = 0;
 
 	/* Init Kirkwood Boot image generation/list support */
 	init_kwb_image_type ();
@@ -155,8 +156,6 @@ main (int argc, char **argv)
 	init_imx_image_type ();
 	/* Init FIT image generation/list support */
 	init_fit_image_type ();
-	/* Init Default image generation/list support */
-	init_default_image_type ();
 
 	params.cmdname = *argv;
 	params.addr = params.ep = 0;
@@ -243,6 +242,9 @@ main (int argc, char **argv)
 					usage ();
 				params.imagename = *++argv;
 				goto NXTARG;
+			case 'p':
+				foxconpad = 1;
+				break;
 			case 'v':
 				params.vflag++;
 				break;
@@ -258,6 +260,9 @@ NXTARG:		;
 
 	if (argc != 1)
 		usage ();
+
+	/* Init Default image generation/list support */
+	init_default_image_type (foxconpad);
 
 	/* set tparams as per input type_id */
 	tparams = mkimage_get_type(params.type);

@@ -4,7 +4,11 @@
 PORTNAME=	jerm
 PORTVERSION=	8096
 CATEGORIES=	comms
-MASTER_SITES=	http://www.bsddiary.net/jerm/
+#MASTER_SITES=	http://www.bsddiary.net/jerm/
+
+USE_GITHUB=	yes
+GH_ACCOUNT=	yamori813
+GH_TAGNAME=	ff38b35
 
 MAINTAINER=	smatsui@karashi.org
 COMMENT=	Communication terminal through serial and TCP/IP interfaces

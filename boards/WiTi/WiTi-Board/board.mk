@@ -7,7 +7,7 @@
 
 
 SOC_VENDOR=Mediatek
-SOC_CHIP=MT7621_FDT
+SOC_CHIP=MT7621
 # TODO: size suffixes
 BOARD_FLASH_SIZE=8388608
 
@@ -20,6 +20,8 @@ BOARD_FLASH_SIZE=8388608
 
 # ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
+
+KERNCONF_FDT_DTS_FILE=  "WITI.dts"
 
 # Include usb and SoC usb controller drivers
 KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"

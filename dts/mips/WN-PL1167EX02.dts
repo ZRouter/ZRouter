@@ -1,0 +1,112 @@
+/dts-v1/;
+
+#include "zbsd-mt7621.dtsi"
+
+/ {
+	compatible = "mediatek,mt7621-eval-board", "mediatek,mt7621-soc";
+	model = "IOData WN-PL1167EX02";
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x8000000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,57600";
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		wps {
+//			function = LED_FUNCTION_WPS;
+//			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio0 8 0>;
+		};
+
+		led_power: power {
+			label = "status";
+//			function = LED_FUNCTION_POWER;
+//			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio0 9 1>;
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			gpios = <&gpio0 6 0>;
+//			linux,code = <KEY_RESTART>;
+		};
+
+		repeater {
+			label = "repeater";
+			gpios = <&gpio0 7 0>;
+//			linux,code = <BTN_0>;
+//			linux,input-type = <EV_SW>;
+		};
+
+		wps {
+			label = "wps";
+			gpios = <&gpio0 18 0>;
+//			linux,code = <KEY_WPS_BUTTON>;
+		};
+	};
+
+};
+
+&spi0 {
+	status = "disabled";
+};
+
+&pcie {
+	status = "okay";
+
+	pcie0 {
+		mt76@0,0 {
+			reg = <0x0000 0 0 0 0>;
+			device_type = "pci";
+//			mediatek,mtd-eeprom = <&factory 0x8000>;
+			mediatek,2ghz = <0>;
+//			mtd-mac-address = <&factory 0xe000>;
+		};
+	};
+
+	pcie1 {
+		mt76@1,0 {
+			reg = <0x0000 0 0 0 0>;
+			device_type = "pci";
+//			mediatek,mtd-eeprom = <&factory 0x0000>;
+			mediatek,5ghz = <0>;
+//			mtd-mac-address = <&factory 0xe000>;
+		};
+	};
+};
+
+&ethernet {
+//	mtd-mac-address = <&factory 0xe000>;
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "wdt", "rgmii2", "jtag";
+			ralink,function = "gpio";
+		};
+		/* MT7621 ethernet switch control by mdio */
+		mdio {
+			ralink,group = "mdio";
+			ralink,function = "mdio";
+		};
+	};
+};
+
+&sdhci {
+	status = "disabled";
+};
+
+&xhci {
+	status = "disabled";
+};

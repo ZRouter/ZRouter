@@ -37,6 +37,10 @@ CONVERTER_UBOOT_FLAGS?= 			\
 	-e ${UBOOT_KERNEL_ENTRY_POINT}		\
 	-n 'FreeBSD Kernel Image'
 
+.if defined(UBOOT_FOXCONPAD)
+CONVERTER_UBOOT_FLAGS+= -p
+.endif
+
 # Failback to /usr/local/bin if not found
 CONVERTER_UBOOT_BUILD_PATHS=${IMAGE_BUILD_PATHS}:/usr/local/bin
 

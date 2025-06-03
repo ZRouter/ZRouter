@@ -39,7 +39,7 @@ ZROUTER_COMPAT12=yes
 .endif
 
 # ZROUTER_OBJ can be set in environment
-ZROUTER_OBJ?=${ZOBJ_DIR}/${ZROUTER_ROOT}
+ZROUTER_OBJ?=${ZOBJ_DIR}${ZROUTER_ROOT}
 MAKEOBJDIRPREFIX?=${ZOBJ_DIR}/${ZROUTER_ROOT}/
 KERNELBUILDDIR?=${ZROUTER_OBJ}/kernel
 KERNELCONFDIR?=${ZROUTER_OBJ}/conf
@@ -114,6 +114,10 @@ KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${KERNCONF_FDT_DTS_FILE}"
 
 .if defined(ZKERNCONF_FDT_DTS_FILE)
 KERNCONF_MAKEOPTIONS+=	"FDT_DTS_FILE=${ZROUTER_ROOT}/${ZKERNCONF_FDT_DTS_FILE}"
+.endif
+
+.if ${.TARGETS} == "mfskernel"
+KERNCONF_MAKEOPTIONS+=  "MFS_IMAGE=${ZROUTER_OBJ}/${KERNCONF_IDENT}_${PACKING_ROOTFS_IMAGE}"
 .endif
 
 # resolve board flash size with trailing M or K
@@ -862,7 +866,7 @@ psimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStor
 
 # zimage used when it possible to use any formats (CFI devices must use trx 
 # format, but U-Boot devices must use only kernel in U-Boot format )
-zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${ZTOOLS_PATH}/ProgramStore
+zimage:		${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 	@cat ${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME} ${BOARD_FIRMWARE_SIGNATURE_FILE} > ${NEW_IMAGE}
 	@echo "==="
 	@echo "New image: " ${TARGET_VENDOR}_${TARGET_DEVICE}.${IMAGE_SUFFIX}
@@ -943,6 +947,8 @@ split_kernel_rootfs:	${KERNEL_PACKED_NAME} ${ROOTFS_PACKED_NAME}
 ${NEW_IMAGE}:	${NEW_IMAGE_TYPE}
 
 all:	world kernel ports target ${NEW_IMAGE}
+
+mfskernel:	kernel-build ${KERNEL_PACKED_NAME}
 
 .include <bsd.obj.mk>
 

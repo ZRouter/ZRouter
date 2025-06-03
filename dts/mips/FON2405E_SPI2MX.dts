@@ -8,6 +8,11 @@
 	compatible = "FON2405E", "ralink,rt3050-soc";
 	model = "FON FON2405E";
 
+        aliases {
+//		serial0 = &uart;
+		serial0 = &uartlite;
+        };
+
 	gpio-leds {
 		compatible = "gpio-leds";
 
@@ -20,30 +25,6 @@
 			label = "led1";
 			gpios = <&gpio0 11 0>;
 		};
-
-		led2 {
-			label = "led2";
-			gpios = <&gpio0 9 1>;
-		};
-
-		led3 {
-			label = "led3";
-			gpios = <&gpio0 12 1>;
-		};
-
-	};
-	gpio-keys-polled {
-		compatible = "gpio-keys-polled";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		poll-interval = <20>;
-
-		reset {
-			label = "reset";
-			gpios = <&gpio0 10 1>;
-			linux,code = <0x198>;
-		};
-
 	};
 };
 
@@ -64,27 +45,26 @@
 			read-only;
 		};
 
-		partition@10000 {
+		factory: partition@10000 {
 			label = "u-boot-env";
 			reg = <0x10000 0x10000>;
 			read-only;
 		};
-
-		kernel: partition@20000 {
-			label = "kernel";
-			reg = <0x20000 0x100000>;
-		};
-		rootfs: partition@100000 {
-			label = "rootfs";
-			reg = <0x00120000 0x006e0000>;
-		};
 /*
-		partition@1300000 {
-			compatible = "denx,uimage";
+		factory: partition@20000 {
 			label = "firmware";
 			reg = <0x20000 0x7e0000>;
 		};
 */
+		partition@20000 {
+			label = "kernel";
+			reg = <0x20000 0x100000>;
+		};
+
+		partition@120000 {
+			label = "rootfs";
+			reg = <0x120000 0x6e0000>;
+		};
 		partition@800000 {
 			label = "upgrade";
 			reg = <0x20000 0x7e0000>;
@@ -95,15 +75,19 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "jtag", "uartf", "rgmii", "mdio";
+			ralink,group = "i2c", "jtag", "rgmii", "mdio";
 			ralink,function = "gpio";
+		};
+		uartf {
+			ralink,group = "uartf";
+			ralink,function = "gpio uartf";
 		};
 
 	};
 };
 
 &ethernet {
-//	mtd-mac-address = <&factory 0x28>;
+	mtd-mac-address = <&factory 0x28>;
 };
 
 &esw {
@@ -111,18 +95,21 @@
 };
 
 &wmac {
-//	ralink,mtd-eeprom = <&factory 0>;
+	ralink,mtd-eeprom = <&factory 0>;
 };
 
-/*
 &otg {
 	status = "okay";
 };
-*/
+
+&uart {
+        status = "okay";
+};
 
 &spi1 {
 	status = "okay";
-	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
+	cs-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+/*
 	non-flash;
 	spigen@0 {
 		compatible = "freebsd,spigen";
@@ -130,7 +117,7 @@
 		spi-max-frequency = <80000000>;	// SPICLK = 1
 		status = "okay";
 	};
-/*
+*/
 	m25p80@0 {
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -139,5 +126,4 @@
 		linux,modalias = "m25p80", "mx25l3205d";
 		spi-max-frequency = <80000000>;
 	};
-*/
 };

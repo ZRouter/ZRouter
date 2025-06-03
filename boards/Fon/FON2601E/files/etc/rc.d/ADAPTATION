@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# PROVIDE: ADAPTATION
+
+. /etc/rc.subr
+. /etc/network.subr
+
+name="ADAPTATION"
+start_cmd="adapt_start"
+start_precmd="adapt_prestart"
+start_postcmd="adapt_poststart"
+stop_cmd="adapt_stop"
+
+adapt_prestart()
+{
+# LED Power
+	gpioctl 9 1
+
+	kenvmac=`kenv -q LAN_MAC_ADDR`
+	if [ -z "$kenvmac" ]; then
+
+		kenv LAN_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0000000/{print $6":"$7":"$8":"$9":"$10":"$11}'`
+		kenv WIFI_MAC_ADDR=`od -t x1 /dev/flash/spi0s.factory | awk '/0100000/{print $6":"$7":"$8":"$9":"$10":"$11}'`
+
+		ifconfig rt0 ether `kenv LAN_MAC_ADDR`
+
+		hostname `kenv HostName`
+
+	fi
+
+}
+
+adapt_start()
+{
+}
+
+adapt_poststart()
+{
+}
+
+adapt_stop()
+{
+}
+
+load_rc_config $name
+
+run_rc_command $*
