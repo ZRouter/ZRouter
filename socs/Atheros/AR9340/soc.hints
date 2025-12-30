@@ -49,6 +49,12 @@ hint.uart.0.maddr=0x18020003
 hint.uart.0.msize=0x18
 hint.uart.0.irq=3
 
+# uart1 (High-Speed)
+hint.uart_hs.1.at="apb0"
+hint.uart_hs.1.maddr=0x18500000
+hint.uart_hs.1.msize=0x14
+hint.uart_hs.1.irq=6
+
 # SPI flash
 hint.spi.0.at="nexus0"
 hint.spi.0.maddr=0x1f000000
