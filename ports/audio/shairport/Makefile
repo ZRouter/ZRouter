@@ -11,7 +11,7 @@ USES=		gmake
 USE_GITHUB=	yes
 
 GH_ACCOUNT=	yamori813
-GH_TAGNAME=	b8fb226
+GH_TAGNAME=	b018e00
 
 do-build:
 	cd ${BUILD_WRKSRC}; ${MAKE_CMD}
