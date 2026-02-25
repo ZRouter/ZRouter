@@ -26,8 +26,8 @@ main_start()
 	# Run syslogd
 	syslogd -s
 
-	# If you want use inet. Please run on vendor/files rc.d.
-#	inetd -wW
+	# Run inetd
+	inetd -wW
 }
 
 load_rc_config $name
