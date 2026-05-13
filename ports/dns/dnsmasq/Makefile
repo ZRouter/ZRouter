@@ -2,8 +2,8 @@
 # $FreeBSD: head/dns/dnsmasq/Makefile 514404 2019-10-13 15:25:55Z mandree $
 
 PORTNAME=	dnsmasq
-DISTVERSION=	2.86
-PORTREVISION=	4	# leave this in even if 0 to avoid PORTEPOCH bumps
+DISTVERSION=	2.92rel2
+PORTREVISION=	0
 PORTEPOCH=	1
 CATEGORIES=	dns
 MASTER_SITES=	http://www.thekelleys.org.uk/dnsmasq/ \
