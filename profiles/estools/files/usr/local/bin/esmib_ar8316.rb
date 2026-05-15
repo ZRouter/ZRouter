@@ -78,16 +78,17 @@ if File.exist?(lastfile)
   lastval = last.to_s.chop.split(",")
   fd.close
   port = 0
+  mib = 0
   mibstr = ""
   while port < 6 do
     if port != 0
       mibstr = mibstr + ","
     end
-    if lastval[port].to_i > 1073741824 then
-      mibstr = mibstr + val[port].to_s
-    else
-      mibstr = mibstr + (lastval[port].to_i + val[port]).to_s
+    mib = lastval[port].to_i + val[port]
+    if mib > 1073741824 then
+      mib = mib - 1073741824
     end
+    mibstr = mibstr + mib.to_s
     port = port + 1
   end
 else
@@ -104,5 +105,6 @@ end
 
 fd = File.open(lastfile, "w")
 fd.puts mibstr
+fd.close
 print mibstr
 

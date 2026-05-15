@@ -1,10 +1,8 @@
 # $FreeBSD$
 
-# WAN and LAN 0-2 is arge1. LAN 3 is arge0 phy
+hint.arge.0.phymask=0x1
 
-hint.arge.0.phymask=0x10
-
-# arge1: connected to the switch MAC, at 1000BaseTX / GMII.
+# arge1: connected to the LAN switch MAC, at 1000BaseTX / GMII.
 
 hint.arge.1.phymask=0x0
 # hint.arge.1.miimode=1         # GMII
@@ -12,60 +10,67 @@ hint.arge.1.media=1000          # Force to 1000BaseTX/full
 hint.arge.1.fduplex=1
 
 # GMAC configuration
-# + AR934X_ETH_CFG_SW_ONLY_MODE             (1 << 6)
-# + AR934X_ETH_CFG_SW_PHY_ADDR_SWAP         (1 << 8)
+# + AR934X_ETH_CFG_SW_ONLY_MODE		(1 << 6)
+# + AR934X_ETH_CFG_SW_PHY_ADDR_SWAP	(1 << 8)
 hint.ar934x_gmac.0.gmac_cfg=0x140
 
 # GPIO
 
-hint.gpio.0.function_set=0x00000000
+# Disable JTAG
+hint.gpio.0.function_set=0x00000002
 hint.gpio.0.function_clear=0x00000000
 
-# GPIO11, GPIO13 - GPIO22
-hint.gpio.0.pinmask=0x7fe800
-# without GPIO17
-#hint.gpio.0.pinmask=0x7de800
-hint.gpio.0.pinon=0x0
+#hint.gpio.0.pinmask=0x7ff81f
+hint.gpio.0.pinmask=0x7ff81e
 
-# SPI_CS_1 assine GPIO12
-#hint.gpio.0.func.12.gpiofunc=7
-#hint.gpio.0.func.12.gpiomode=1
+# GPIO4
+hint.gpio.0.func.4.gpiofunc=0
+hint.gpio.0.func.4.gpiomode=1  # output, default low
 
-# LED8	Power GPIO15
+# D2-Red GPIO15
 hint.gpioled.0.at="gpiobus0"
-hint.gpioled.0.name="power"
+hint.gpioled.0.name="active"
 hint.gpioled.0.pins=0x8000
 #hint.gpioled.0.flags="0x0102"
 hint.gpioled.0.invert=1
 
-# LED1	WPS GPIO13
+# D2-Green GPIO14
 hint.gpioled.1.at="gpiobus0"
 hint.gpioled.1.name="status"
-hint.gpioled.1.pins=0x2000
+hint.gpioled.1.pins=0x4000
 #hint.gpioled.1.flags="0x0102"
 hint.gpioled.1.invert=1
 
-# LED9	(NOT mounting) GPIO12
-
-# LED7	INTERNET GPIO18
+# D1-Green GPIO21
 hint.gpioled.2.at="gpiobus0"
-hint.gpioled.2.name="wps"
-hint.gpioled.2.pins=0x40000
+hint.gpioled.2.name="air"
+hint.gpioled.2.pins=0x200000
 #hint.gpioled.2.flags="0x0102"
 hint.gpioled.2.invert=1
 
-# LED3 GPIO19
-# LED4 GPIO20
-# LED5 GPIO21
-# LED6 GPIO22
+# D3-Green GPIO12
+hint.gpioled.3.at="gpiobus0"
+hint.gpioled.3.name="power-g"
+hint.gpioled.3.pins=0x1000
+#hint.gpioled.3.flags="0x0102"
+hint.gpioled.3.invert=1
 
-# SW3	WPS GPIO16
+# D3-Red GPIO13
+hint.gpioled.4.at="gpiobus0"
+hint.gpioled.4.name="power-r"
+hint.gpioled.4.pins=0x2000
+#hint.gpioled.4.flags="0x0102"
+hint.gpioled.4.invert=1
+
+# WAN LED is GPIO22
+# LAN LED is GPIO1 to GPIO4
+
+# SW3	OPS
 #hint.gpioreset.0.at="gpiobus0"
 #hint.gpioreset.0.pins=0x10000
-#hint.gpioreset.0.name="wps"
+#hint.gpioreset.0.name="ops"
 #hint.gpioreset.0.flags="0x04a1"
 
-# SW4	Reset GPIO17
 
 # shares the same bus with mx25l. 
 # CE low for flash, CE high for RTC
@@ -79,28 +84,28 @@ hint.ar71xx_wdog.0.at="nexus0"
 
 hint.map.0.at="flash/spi0"
 hint.map.0.start=0x00000000
-hint.map.0.end=0x00040000
+hint.map.0.end=0x00030000
 hint.map.0.name="bootloader"
 hint.map.0.readonly=1
 
 hint.map.1.at="flash/spi0"
-hint.map.1.start=0x00040000
-hint.map.1.end=0x003e0000
+hint.map.1.start=0x00030000
+hint.map.1.end=0x00fe0000
 hint.map.1.name="upgrade"
 
 hint.map.2.at="flash/spi0"
-hint.map.2.start=0x00040000
+hint.map.2.start=0x00030000
 hint.map.2.end="search:0x00100000:0x10000:.!/bin/sh"
 hint.map.2.name="kernel"
 
 hint.map.3.at="flash/spi0"
 hint.map.3.start="search:0x00100000:0x10000:.!/bin/sh"
-hint.map.3.end=0x003e0000
+hint.map.3.end=0x00fe0000
 hint.map.3.name="rootfs"
 
 hint.map.4.at="flash/spi0"
-hint.map.4.start=0x003f0000
-hint.map.4.end=0x00400000
+hint.map.4.start=0x00ff0000
+hint.map.4.end=0x01000000
 hint.map.4.name="ART"
 hint.map.4.readonly=1
 

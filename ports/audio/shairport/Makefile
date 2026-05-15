@@ -11,7 +11,11 @@ USES=		gmake
 USE_GITHUB=	yes
 
 GH_ACCOUNT=	yamori813
-GH_TAGNAME=	b8fb226
+GH_TAGNAME=	07d82a7
+
+pre-build:
+	@${REINPLACE_CMD} -e 's|-dirty|${GH_TAGNAME}|g' \
+                ${WRKSRC}/Makefile
 
 do-build:
 	cd ${BUILD_WRKSRC}; ${MAKE_CMD}

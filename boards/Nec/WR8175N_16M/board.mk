@@ -1,54 +1,49 @@
+
 ###################################################
 #
 # Board used hardware/chip`s
 #
 ###################################################
 
+
 SOC_VENDOR=Atheros
-SOC_CHIP=AR7161
-BOARD_FLASH_SIZE=32M
+SOC_CHIP=AR9340
+# TODO: size suffixes
+BOARD_FLASH_SIZE=4M
+#4194304
+
+KERNCONF_KERNLOADADDR?=0x80050000
+
+KERNCONF_OPTIONS+=AR71XX_REALMEM=(64*1024*1024)
+
 
 ###################################################
 #
-# Vars for kernel config
+# Vars for kernel config 
 #
 ###################################################
 
-# ident
+# ident 
 KERNCONF_IDENT=${TARGET_VENDOR}_${TARGET_DEVICE}
 
-# Board have 128M of RAM
-KERNCONF_OPTIONS+=	AR71XX_REALMEM=128*1024*1024
+WITHOUT_WIRELESS=yes
 
-KERNCONF_OPTIONS+=	ROOTDEVNAME=\\\"cd9660:/dev/map/rootfs.uzip\\\"
-
-# Include usb and SoC usb controller drivers
 WITH_USB=yes
-#WITH_IPSEC=yes
-#WITH_WIRELESS=yes
-# Builded modules
-KERNCONF_MODULES_OVERRIDE+=	usb/uplcom usb/u3g usb/umodem usb/umass \
-    usb/ucom cam zlib
 
 # Additional utilities
-#WORLD_SUBDIRS_ZROUTER+=target/sbin/upgrade
+#WORLD_SUBDIRS_ZROUTER+=	target/sbin/upgrade
+#WORLD_SUBDIRS_SBIN+=	devctl
 
-KERNCONF_OPTIONS+=	AR71XX_ENV_UBOOT
-
-KERNCONF_OPTIONS+=	DDB
-KERNCONF_OPTIONS+=	KDB
+#KERNCONF_OPTIONS+=	DEVCTL_ATTACH_ENABLED
 KERNCONF_OPTIONS+=	ALT_BREAK_TO_DEBUGGER
 KERNCONF_OPTIONS+=	BREAK_TO_DEBUGGER
 
-KERNCONF_OPTIONS+=	ARGE_MDIO
-KERNCONF_DEVICES+=	etherswitch
-KERNCONF_DEVICES+=	miiproxy
-KERNCONF_DEVICES+=	arswitch
-WORLD_SUBDIRS_SBIN+=    etherswitchcfg
+KERNCONF_OPTIONS+=	NBUF=1024
+
+KERNCONF_OPTIONS+=	AR71XX_ENV_UBOOT
 
 .if !defined(WITHOUT_WIRELESS)
-KERNCONF_MODULES_OVERRIDE+=	wlan_xauth wlan_wep wlan_tkip wlan_acl \
-    wlan_amrr wlan_ccmp wlan_rssadapt
+KERNCONF_MODULES_OVERRIDE+=wlan_xauth wlan_wep wlan_tkip wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt
 KERNCONF_OPTIONS+=	IEEE80211_DEBUG
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_MESH
 KERNCONF_OPTIONS+=	IEEE80211_SUPPORT_TDMA
@@ -57,10 +52,6 @@ KERNCONF_DEVICES+=	wlan_amrr
 KERNCONF_DEVICES+=	wlan_wep
 KERNCONF_DEVICES+=	wlan_ccmp
 KERNCONF_DEVICES+=	wlan_tkip
-
-KERNCONF_OPTIONS+=	AR71XX_ATH_EEPROM
-KERNCONF_OPTIONS+=	ATH_EEPROM_FIRMWARE
-KERNCONF_DEVICES+=	firmware
 
 KERNCONF_OPTIONS+=	AH_DEBUG
 KERNCONF_OPTIONS+=	ATH_DEBUG
@@ -83,7 +74,8 @@ KERNCONF_DEVICES+=	ath_rate_sample
 ###################################################
 
 # Image must not be biggest than GEOM_MAP_P2 (upgrade part.)
-FIRMWARE_IMAGE_SIZE_MAX=0x00fa0000
+# 3538944
+FIRMWARE_IMAGE_SIZE_MAX=0x00f60000
 
 ###################################################
 #
@@ -97,8 +89,22 @@ UBOOT_KERNEL_COMPRESSION_TYPE=lzma
 
 MKULZMA_BLOCKSIZE=65536
 
-PACKING_KERNEL_IMAGE?=kernel.kbin.oldlzma.uboot.sync
+#PACKING_KERNEL_IMAGE?=kernel.kbin.lzma.uboot.sync
+PACKING_KERNEL_IMAGE=kernel.kbin.oldlzma
 PACKING_ROOTFS_IMAGE?=rootfs_clean.iso.ulzma
 
-IMAGE_SUFFIX=zimage
-NEW_IMAGE_TYPE=zimage
+IMAGE_SUFFIX=bin
+NEW_IMAGE_TYPE=tplink_new_image
+
+TPLINK_CONFIG_STYLE=NEW
+
+TPLINK_ROOTFS_START="0x00180000"
+
+# New-style board config
+TPLINK_HARDWARE_ID=0x04700001
+TPLINK_HARDWARE_VER=1
+TPLINK_HARDWARE_FLASHID=16M
+TPLINK_FIRMWARE_RESERV=0x20000
+
+KERNEL_MAP_START=0x00020000
+
