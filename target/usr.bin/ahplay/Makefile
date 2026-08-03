@@ -4,7 +4,7 @@ DEBUG?=-g -DDEBUG=1
 PROG=ahplay
 MK_MAN=no
 #CFLAGS+= ${DEBUG} -Wall -I${LOCALBASE}/include -I${LOCALBASE}/include/fdk-aac
-CFLAGS+= ${DEBUG} -Wall -I${ZPREFIX}/include -I${ZPREFIX}/include/fdk-aac
+CFLAGS+= ${DEBUG} -Wall -I${ZPREFIX}/include
 LDFLAGS+= ${DEBUG} -L${ZPREFIX}/lib -lm -lout123 -lfdk-aac
 BINDIR?=/usr/local/bin/
 #LIBADD+=json

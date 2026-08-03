@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include <aacdecoder_lib.h>
+#include <fdk-aac/aacdecoder_lib.h>
 #include <out123.h>
 
 CStreamInfo *getinfo(HANDLE_AACDECODER decoder)
