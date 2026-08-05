@@ -1,4 +1,4 @@
-PORTNAME=	shairport
+PORTNAME=	shairport-lp
 DISTVERSION=	0.0.1
 CATEGORIES=	audio
 
