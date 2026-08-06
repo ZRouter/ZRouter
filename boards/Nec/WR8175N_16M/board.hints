@@ -64,6 +64,7 @@ hint.gpioled.4.invert=1
 
 # WAN LED is GPIO22
 # LAN LED is GPIO1 to GPIO4
+# USB Power CTL GPIO20
 
 # SW3	OPS
 #hint.gpioreset.0.at="gpiobus0"
