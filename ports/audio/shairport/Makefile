@@ -1,4 +1,4 @@
-PORTNAME=	shairport
+PORTNAME=	shairport-lp
 DISTVERSION=	0.0.1
 CATEGORIES=	audio
 
@@ -11,7 +11,7 @@ USES=		gmake
 USE_GITHUB=	yes
 
 GH_ACCOUNT=	yamori813
-GH_TAGNAME=	07d82a7
+GH_TAGNAME=	c654018
 
 pre-build:
 	@${REINPLACE_CMD} -e 's|-dirty|${GH_TAGNAME}|g' \

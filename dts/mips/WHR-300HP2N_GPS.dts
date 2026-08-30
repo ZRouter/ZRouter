@@ -8,7 +8,7 @@
 
 	gpio-leds {
 		compatible = "gpio-leds";
-
+/*
 		power {
 			label = "whr-300hp2:red:power";
 			gpios = <&gpio0 7 1>;		// D14
@@ -28,7 +28,7 @@
 			label = "whr-300hp2:orange:wifi";
 			gpios = <&gpio0 10 1>;		// D19
 		};
-
+*/
 		internet {
 			label = "whr-300hp2:green:internet";
 			gpios = <&gpio2 17 1>;		// D20
@@ -77,6 +77,12 @@
 			linux,code = <0x100>;
 			linux,input-type = <5>; /* EV_SW */
 		};
+	};
+
+	pps {
+		compatible = "pps-gpio";
+		gpios = <&gpio0 1 0>;
+		status = "okay";
 	};
 };
 
@@ -139,7 +145,7 @@
 &pinctrl {
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "i2c", "uartf", "rgmii1", "rgmii2", "wled", "nd_sd";
+			ralink,group = "i2c", "rgmii1", "rgmii2", "wled", "nd_sd";
 			ralink,function = "gpio";
 		};
 
@@ -147,6 +153,12 @@
 			ralink,group = "pa";
 			ralink,function = "pa";
 		};
+
+		uartf {
+			ralink,group = "uartf";
+			ralink,function = "gpio uartf";
+		};
+
 	};
 };
 
@@ -164,3 +176,6 @@
 	ralink,mtd-eeprom = <&factory 0>;
 };
 
+&uart {
+	status = "okay";
+};

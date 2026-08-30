@@ -2,7 +2,7 @@
 
 PORTNAME=	fdk-aac
 DISTVERSIONPREFIX=	v
-DISTVERSION=	2.0.2
+DISTVERSION=	2.0.3
 CATEGORIES=	audio
 
 MAINTAINER=	bofh@FreeBSD.org
@@ -28,7 +28,7 @@ GNU_CONFIGURE=	yes
 CONFIGURE_ARGS+=--host=${ARCH}-portbld-freebsd
 
 .if "${ZARCH}" == "mips" || "${ZARCH}" == "mipsel"
-CONFIGURE_ARGS+=CPPFLAGS="-O3 -DMIPS_DSP_LIB -mdsp -D__mips_dsp"
+CONFIGURE_ARGS+=CPPFLAGS="-O -DMIPS_DSP_LIB -mdsp -D__mips_dsp"
 .endif
 
 pre-configure:
@@ -41,8 +41,8 @@ install:
 post-install:
 	${MKDIR} ${ZPREFIX}/include/fdk-aac
 	${INSTALL_DATA} ${STAGEDIR}/${PREFIX}/include/fdk-aac/* ${ZPREFIX}/include/fdk-aac/
-	${INSTALL_LIB} ${STAGEDIR}/${PREFIX}/lib/libfdk-aac.so.2.0.2 ${ZPREFIX}/lib/
-	cd ${ZPREFIX}/lib;ln -s libfdk-aac.so.2.0.2 libfdk-aac.so.2
-	cd ${ZPREFIX}/lib;ln -s libfdk-aac.so.2.0.2 libfdk-aac.so
+	${INSTALL_LIB} ${STAGEDIR}/${PREFIX}/lib/libfdk-aac.so.${DISTVERSION} ${ZPREFIX}/lib/
+	cd ${ZPREFIX}/lib;ln -s libfdk-aac.so.${DISTVERSION} libfdk-aac.so.2
+	cd ${ZPREFIX}/lib;ln -s libfdk-aac.so.${DISTVERSION} libfdk-aac.so
 
 .include <bsd.port.mk>

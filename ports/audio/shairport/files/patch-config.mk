@@ -3,4 +3,4 @@
 @@ -0,0 +1,3 @@
 +CONFIG_OUT123=yes
 +CFLAGS+= -I${ZPREFIX}/include 
-+LDFLAGS+= -lm -lpthread -L${ZPREFIX}/lib -lout123
++LDFLAGS+= -lm -lpthread -L${ZPREFIX}/lib -lout123 -lfdk-aac
