@@ -11,7 +11,7 @@ USES=		gmake
 USE_GITHUB=	yes
 
 GH_ACCOUNT=	yamori813
-GH_TAGNAME=	c654018
+GH_TAGNAME=	90ed708
 
 pre-build:
 	@${REINPLACE_CMD} -e 's|-dirty|${GH_TAGNAME}|g' \
