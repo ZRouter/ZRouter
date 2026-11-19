@@ -6,8 +6,7 @@ KERNEL_PATH=/usr/obj/kernel
 TARGET=			mips
 TARGET_ARCH=		mipsel
 
-# RT3050 is 24k. But mips32r2 is unstable.
-TARGET_CPUTYPE=		mips32
+TARGET_CPUTYPE=		mips32r2
 
 KERNCONF_MACHINE=	${TARGET} ${TARGET_ARCH}
 KERNCONF_IDENT?=	RT3050F_FDT
